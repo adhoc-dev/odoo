@@ -17,6 +17,8 @@ Plan contable argentino e impuestos de acuerdo a disposiciones vigentes
     'category': 'Localization',
     'depends': ['base', 'account'],
     'data':[
+        'wizards/res_partner_update_from_padron_wizard_view.xml',
+        'wizards/res_config_settings_view.xml',
         'data/l10n_ar_chart_data.xml',
         'data/account.account.template.csv',
         'data/l10n_ar_chart_post_data.xml',
