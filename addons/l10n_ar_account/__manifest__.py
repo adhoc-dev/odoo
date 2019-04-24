@@ -24,13 +24,6 @@
         'python': ['pyafipws', 'pysimplesoap.client'],
     },
     'data': [
-        'data/menuitem.xml',
-        'data/product_data.xml',
-        'data/base_validator_data.xml',
-        # los cargamos con csv pero los hacemos no actualizables con un hook
-        'data/account.document.type.csv',
-        'data/afip_incoterm.xml',
-        'data/product_uom.xml',
         # TODO analizar y migrar
         # 'data/account_financial_report_data.xml',
         # 'data/account_payment_term.xml',
