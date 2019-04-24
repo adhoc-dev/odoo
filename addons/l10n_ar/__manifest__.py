@@ -52,5 +52,7 @@ Plan contable argentino e impuestos de acuerdo a disposiciones vigentes
         'views/afip_tax_view.xml',
         'security/ir.model.access.csv',
         'security/security.xml',
+        'report/account_ar_vat_line_view.xml',
+        'report/invoice_analysis.xml',
     ],
 }
