@@ -3,3 +3,4 @@
 # directory
 ##############################################################################
 from . import res_country
+from . import afip_responsability_type

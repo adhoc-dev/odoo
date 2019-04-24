@@ -3,6 +3,7 @@ from odoo import fields, models
 
 
 class AfipresponsabilityType(models.Model):
+
     _name = 'afip.responsability.type'
     _description = 'AFIP Responsability Type'
     _order = 'sequence'
