@@ -28,5 +28,7 @@ Plan contable argentino e impuestos de acuerdo a disposiciones vigentes
         'data/res_partner_data.xml',
         'data/res_currency_data.xml',
         'data/afip_vat_f2002_category_data.xml',
+        'security/ir.model.access.csv',
+        'security/security.xml',
     ],
 }
