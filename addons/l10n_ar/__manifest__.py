@@ -38,6 +38,9 @@ Plan contable argentino e impuestos de acuerdo a disposiciones vigentes
         'data/res_country_afip_code.xml',
         'data/res_country_cuit.xml',
         'data/res_country_group_data.xml',
+        # los cargamos con csv pero los hacemos no actualizables con un hook
+        'data/account.document.type.csv',
+
         'views/account_move_line_view.xml',
         'views/account_move_view.xml',
         'views/res_partner_view.xml',
