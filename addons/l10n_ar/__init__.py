@@ -1,4 +1,6 @@
-# -*- coding: utf-8 -*-
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
-# Copyright (c) 2011 Cubic ERP - Teradata SAC. (http://cubicerp.com)
+##############################################################################
+# For copyright and license notices, see __manifest__.py file in module root
+# directory
+##############################################################################
+from . import models
+from . import wizards
