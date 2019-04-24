@@ -28,10 +28,6 @@
         # 'data/account_financial_report_data.xml',
         # 'data/account_payment_term.xml',
     ],
-    'demo': [
-        'demo/partner_demo.xml',
-        'demo/company_demo.xml',
-    ],
     'images': [
     ],
     'installable': True,

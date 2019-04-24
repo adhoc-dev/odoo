@@ -70,4 +70,8 @@ Plan contable argentino e impuestos de acuerdo a disposiciones vigentes
         'report/account_ar_vat_line_view.xml',
         'report/invoice_analysis.xml',
     ],
+    'demo': [
+        'demo/partner_demo.xml',
+        'demo/company_demo.xml',
+    ],
 }
