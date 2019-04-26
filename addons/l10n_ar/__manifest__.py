@@ -20,7 +20,6 @@ Plan contable argentino e impuestos de acuerdo a disposiciones vigentes
         'l10n_ar_base',
         ],
     'data':[
-        'data/l10n_ar_chart_data.xml',
         'data/account.account.template.csv',
         'data/l10n_ar_chart_post_data.xml',
         'data/account_tax_group.xml',
