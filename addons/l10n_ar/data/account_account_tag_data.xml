@@ -26,54 +26,6 @@
         <field name="applicability">accounts</field>
     </record>
 
-    <!-- tags de cuentas contables que se usan en liquidaciones, por ahora solo para llevar la cuenta -->
-
-    <record id="tag_liquidacion_de_iva" model="account.account.tag">
-        <field name="name">Liquidación de IVA</field>
-        <field name="applicability">accounts</field>
-    </record>
-
-    <record id="tag_liquidacion_de_iibb" model="account.account.tag">
-        <field name="name">Liquidación de IIBB</field>
-        <field name="applicability">accounts</field>
-    </record>
-
-    <record id="tag_liquidacion_de_ganancias" model="account.account.tag">
-        <field name="name">Liquidación de Ganancias</field>
-        <field name="applicability">accounts</field>
-    </record>
-
-    <record id="tag_liquidacion_sicore_aplicado" model="account.account.tag">
-        <field name="name">Liquidación SICORE Aplicado</field>
-        <field name="applicability">accounts</field>
-    </record>
-
-    <record id="tag_liquidacion_sicore_aplicado" model="account.account.tag">
-        <field name="name">Liquidación IIBB Aplicado</field>
-        <field name="applicability">accounts</field>
-    </record>
-
-    <record id="no_monetaria_tag" model="account.account.tag">
-        <field name="name">No Monetaria</field>
-        <field name="applicability">accounts</field>
-    </record>
-
-    <!-- por ahora estamos usando el de taxes -->
-<!--     <record id="tag_a_cuenta_iibb" model="account.account.tag">
-        <field name="name">Pagos a Cuenta IIBB</field>
-        <field name="applicability">accounts</field>
-    </record> -->
-
-    <!-- por ahora estamos usando el de taxes -->
-<!--     <record id="tag_a_cuenta_suss" model="account.account.tag">
-        <field name="name">Pagos a Cuenta SUSS</field>
-        <field name="applicability">accounts</field>
-    </record> -->
-
-    <!-- Estos si quedaron aplicados a impuestos porque no hicimos que se excluya el diario actual -->
-
-    <!-- para todo lo sufrido dejamos como estandar de nombre el pago a cuenta, falta ver si estandariamozamos applicability de accounts/taxes -->
-
     <record id="tax_tag_a_cuenta_suss" model="account.account.tag">
         <field name="name">Pagos a Cuenta SUSS</field>
         <field name="applicability">taxes</field>
@@ -84,7 +36,6 @@
         <field name="applicability">taxes</field>
     </record>
 
-    <!-- por si queremos liquidar uno a uno -->
     <record id="tax_tag_a_cuenta_ganancias" model="account.account.tag">
         <field name="name">Pagos a Cuenta Ganancias</field>
         <field name="applicability">taxes</field>
@@ -100,20 +51,10 @@
         <field name="applicability">taxes</field>
     </record>
 
-    <!-- TODO ver si borramos, unificamos porque se liquidarian juntas -->
     <record id="tag_ret_perc_sicore_aplicada" model="account.account.tag">
         <field name="name">Ret/Perc SICORE Aplicada</field>
         <field name="applicability">taxes</field>
     </record>
-
-    <!-- <record id="tag_ret_perc_iva_aplicada" model="account.account.tag">
-        <field name="name">Ret/Perc IVA Aplicada</field>
-        <field name="applicability">taxes</field>
-    </record>
-    <record id="tag_ret_perc_ganancias_aplicada" model="account.account.tag">
-        <field name="name">Ret/Perc Ganancias Aplicada</field>
-        <field name="applicability">taxes</field>
-    </record> -->
 
     <!-- jurisdicciones iibb -->
 
