@@ -16,8 +16,6 @@ Plan contable argentino e impuestos de acuerdo a disposiciones vigentes
     'author': ['ADHOC SA'],
     'category': 'Localization',
     'depends': [
-        'base',
-        'account',
         'account_document',
         'l10n_ar_base',
         ],
