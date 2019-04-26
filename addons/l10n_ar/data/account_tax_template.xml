@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <!-- TODO dejar el archivo como lo teniamos nosotros sin los del l10n_ar de odoo (es decir, usamos nuestros ids y nuestros tax.template) -->
+
     <record id="ITAX_21" model="account.tax.template">
       <field name="chart_template_id" ref="ar_chart_template"/>
       <field name="name">IVA 21% Venta</field>
