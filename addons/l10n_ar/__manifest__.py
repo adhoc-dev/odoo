@@ -13,7 +13,7 @@ Argentinian accounting chart and tax localization.
 Plan contable argentino e impuestos de acuerdo a disposiciones vigentes
 
     """,
-    'author': ['Cubic ERP', 'ADHOC'],
+    'author': ['ADHOC SA'],
     'category': 'Localization',
     'depends': [
         'base',
