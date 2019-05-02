@@ -7,11 +7,9 @@ from odoo.addons.account_document.models.res_company import ResCompany
 
 
 class ResCompany(models.Model):
+
     _inherit = "res.company"
 
-    localization = fields.Selection(
-        selection_add=[('argentina', 'Argentina')],
-    )
     gross_income_number = fields.Char(
         related='partner_id.gross_income_number',
         string='Gross Income'
@@ -19,9 +17,6 @@ class ResCompany(models.Model):
     gross_income_type = fields.Selection(
         related='partner_id.gross_income_type',
         string='Gross Income'
-    )
-    gross_income_jurisdiction_ids = fields.Many2many(
-        related='partner_id.gross_income_jurisdiction_ids',
     )
     start_date = fields.Date(
         related='partner_id.start_date',
@@ -35,21 +30,7 @@ class ResCompany(models.Model):
     )
     # use globally as default so that if child companies are created they
     # also use this as default
+    # TODO cambiar a un onchange en vez de modificar default
     tax_calculation_rounding_method = fields.Selection(
         default='round_globally',
     )
-    arba_cit = fields.Char(
-        'CIT ARBA',
-        help='Clave de Identificación Tributaria de ARBA',
-    )
-
-    @api.onchange('localization')
-    def change_localization(self):
-        if self.localization == 'argentina' and not self.country_id:
-            self.country_id = self.env.ref('base.ar')
-    # TODO ver si lo movemos a account_document
-    # journal_ids = fields.One2many(
-    #     'account.journal',
-    #     'company_id',
-    #     'Journals'
-    #     )

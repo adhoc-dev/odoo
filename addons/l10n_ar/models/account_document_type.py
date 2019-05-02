@@ -1,5 +1,4 @@
 from odoo import models, api, fields
-# from odoo.exceptions import UserError
 
 
 class AccountDocmentType(models.Model):
@@ -38,17 +37,11 @@ class AccountDocmentType(models.Model):
         In argentina we include taxes depending on document letter
         """
         self.ensure_one()
-        if self.localization == 'argentina':
+        if self.country_id.code == 'AR':
             if self.document_letter_id.taxes_included:
                 # solo incluir el IVA, el resto se debe discriminar
-                # return self.env['account.tax'].search([])
                 return self.env['account.tax'].search(
                     [('tax_group_id.tax', '=', 'vat'),
                      ('tax_group_id.type', '=', 'tax')])
-            # included_tax_groups = (
-            #     self.document_letter_id.included_tax_group_ids)
-            # if included_tax_groups:
-            #     return self.env['account.tax'].search(
-            #         [('tax_group_id', 'in', included_tax_groups.ids)])
         else:
             return super(AccountDocmentType, self).get_taxes_included()

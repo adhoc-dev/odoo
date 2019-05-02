@@ -51,12 +51,6 @@ class WizardMultiChartsAccounts(models.TransientModel):
 class AccountChartTemplate(models.Model):
     _inherit = 'account.chart.template'
 
-    opening_clousure_account_id = fields.Many2one(
-        'account.account.template',
-        string='Opening / Closure Account',
-        domain=[('internal_type', '=', 'other'), ('deprecated', '=', False)],
-    )
-
     @api.multi
     def generate_fiscal_position(
             self, tax_template_ref, acc_template_ref, company):
@@ -105,13 +99,10 @@ class AccountChartTemplate(models.Model):
         # add more journals commonly used in argentina localization
         # TODO we should move this to another module beacuse not only
         # argentina use this
-        opening_clousure_account_id = acc_template_ref.get(
-            self.opening_clousure_account_id.id)
         journals = [
             ('Liquidación de Impuestos', 'LIMP', 'general', False),
             ('Sueldos y Jornales', 'SYJ', 'general', False),
-            ('Asientos de Apertura / Cierre', 'A/C', 'general',
-                opening_clousure_account_id),
+            ('Asientos de Apertura / Cierre', 'A/C', 'general', False),
         ]
         for name, code, type, default_account_id in journals:
             journal_data.append({

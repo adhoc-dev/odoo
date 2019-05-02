@@ -35,12 +35,10 @@ class AccountDocumentLetter(models.Model):
         'Active',
         default=True
     )
+    # TODO renombrar a vat_included o algo por el estilo
     taxes_included = fields.Boolean(
         'Taxes Included?',
         help='Documents related to this letter will include taxes on reports',
     )
-    # taxes_discriminated = fields.Boolean(
-    #     'Taxes Discriminated on Invoices?',
-    #     help="If True, the taxes will be discriminated on invoice report.")
 
     _sql_constraints = [('name', 'unique(name)', 'Name must be unique!'), ]

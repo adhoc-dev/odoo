@@ -12,7 +12,3 @@ class AccountAccountTag(models.Model):
     jurisdiction_code = fields.Char(
         size=3,
     )
-    # por si queremos vincular los tags con las provincias
-    # state_id = fields.Many2one(
-    #     '',
-    # )

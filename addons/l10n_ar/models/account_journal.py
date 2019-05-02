@@ -7,116 +7,22 @@ from odoo.exceptions import UserError
 
 
 class AccountJournal(models.Model):
+
     _inherit = "account.journal"
 
-    # @api.model
-    # def _get_point_of_sale_types(self):
-    #     return [
-    #         ('manual', 'Manual'),
-    #         ('preprinted', 'Preprinted'),
-    #         ('online', 'Online'),
-    #         # Agregados por otro modulo
-    #         ('electronic', 'Electronic'),
-    #         # ('fiscal_printer', 'Fiscal Printer'),
-    #     ]
-
-    # _point_of_sale_types_selection = (
-    #     lambda self, *args, **kwargs: self._get_point_of_sale_types(
-    #         *args, **kwargs))
     _point_of_sale_types_selection = [
         ('manual', 'Manual'),
         ('preprinted', 'Preprinted'),
         ('online', 'Online'),
-        # Agregados por otro modulo
-        # para evitar errores con migracion, luego vemos
-        # ('electronic', 'Electronic'),
-        # ('fiscal_printer', 'Fiscal Printer'),
     ]
 
     point_of_sale_type = fields.Selection(
         _point_of_sale_types_selection,
         'Point Of Sale Type',
-        # default='manual',
     )
     point_of_sale_number = fields.Integer(
         'Point Of Sale Number',
     )
-
-    # to make bank account creation easier
-    bank_cbu = fields.Char(
-        related='bank_account_id.cbu'
-    )
-
-    def set_bank_account(self, acc_number, bank_id=None):
-        return super(AccountJournal, self.with_context(
-            default_cbu=self.bank_cbu)).set_bank_account(
-            acc_number, bank_id=bank_id)
-
-    # TODO revisar esta constraint porque nos da error al migrar, sobre todo
-    # porque los refund journals pasaron a ser journals comunes
-    # @api.one
-    # @api.constrains('point_of_sale_number', 'company_id', 'type')
-    # def check_point_of_sale_number(self):
-    #     """
-    #     We can not use sql constraint because integer is loaded as 0
-    #     """
-    #     if not self.point_of_sale_number or self.point_of_sale_number == 0:
-    #         return True
-    #     if self.type != 'sale':
-    #         raise UserError(_(
-    #             'You can only set point of sale number on sales journals'))
-    #     journal = self.search([
-    #         ('point_of_sale_number', '=', self.point_of_sale_number),
-    #         ('id', '!=', self.id),
-    #         ('company_id', '=', self.company_id.id)], limit=1)
-    #     if journal:
-    #         raise UserError(_(
-    #             'Point Of Sale Number must be unique per Company!'))
-
-    @api.onchange(
-        'type', 'localization', 'use_documents', 'point_of_sale_number',
-        'point_of_sale_type', 'sequence_id')
-    def change_to_set_name_and_code(self):
-        """
-        We only set name and code if not sequence_id
-        """
-        if not self._context.get('set_point_of_sale_name'):
-            return {}
-        if (
-                self.type == 'sale' and
-                # self.localization == 'argentina' and
-                # self.use_documents and
-                not self.sequence_id
-        ):
-            (self.name, self.code) = self.get_name_and_code()
-
-    @api.multi
-    def get_name_and_code_suffix(self):
-        self.ensure_one()
-        point_of_sale_type = self.point_of_sale_type
-        name = ""
-        if point_of_sale_type == 'manual':
-            name = 'Manual'
-        elif point_of_sale_type == 'preprinted':
-            name = 'Preimpresa'
-        elif point_of_sale_type == 'online':
-            name = 'Online'
-        elif point_of_sale_type == 'electronic':
-            name = 'Electronica'
-        return name
-
-    @api.multi
-    def get_name_and_code(self):
-        self.ensure_one()
-        point_of_sale_number = self.point_of_sale_number
-        name = 'Ventas'
-        sufix = self.get_name_and_code_suffix()
-        if sufix:
-            name += ' ' + sufix
-        if point_of_sale_number:
-            name += ' %04d' % (point_of_sale_number)
-        code = 'V%04d' % (point_of_sale_number)
-        return (name, code)
 
     @api.multi
     def get_journal_letter(self, counterpart_partner=False):
@@ -130,6 +36,13 @@ class AccountJournal(models.Model):
     @api.model
     def _get_journal_letter(
             self, journal_type, company, counterpart_partner=False):
+        """ Regarding the AFIP responsability of the company and the type of
+        journal (sale/purchase), get the allowed letters.
+        Optionally, receive the counterpart partner (customer/supplier) and
+        get the allowed letters to work with him.
+        This method is used to populate document types on journals and also
+        to filter document types on specific invoices to/from customer/supplier
+        """
         responsability = company.afip_responsability_type_id
         if journal_type == 'sale':
             resp_field = 'issuer_ids'
@@ -164,7 +77,7 @@ class AccountJournal(models.Model):
         TODO complete here
         """
         self.ensure_one()
-        if self.localization != 'argentina':
+        if self.company_id.country_id.code != 'AR':
             return super(
                 AccountJournal, self)._update_journal_document_types()
 

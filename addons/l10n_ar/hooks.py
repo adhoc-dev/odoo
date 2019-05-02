@@ -13,21 +13,6 @@ def update_tax_calculation_rounding_method(cr, registry):
     })
 
 
-def sync_padron_afip(cr, registry):
-    """
-    Try to sync data from padron
-    """
-    _logger.info('Syncking afip padron data')
-    env = Environment(cr, SUPERUSER_ID, {})
-    try:
-        account_config = env['res.config.settings']
-        account_config.refresh_from_padron("impuestos")
-        account_config.refresh_from_padron("conceptos")
-        account_config.refresh_from_padron("actividades")
-    except Exception:
-        pass
-
-
 def document_types_not_updatable(cr, registry):
     _logger.info('Update account.document.type to noupdate=True')
     env = Environment(cr, SUPERUSER_ID, {})
@@ -48,5 +33,4 @@ def post_init_hook(cr, registry):
     """
     _logger.info('Post init hook initialized')
     update_tax_calculation_rounding_method(cr, registry)
-    sync_padron_afip(cr, registry)
     document_types_not_updatable(cr, registry)

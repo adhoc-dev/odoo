@@ -31,7 +31,6 @@ class AccountTaxGroup(models.Model):
         ('perception', 'Perception'),
         ('withholding', 'Withholding'),
         ('other', 'Other'),
-        # ('view', 'View'),
     ],
         index=True,
     )

@@ -66,4 +66,6 @@ Plan contable argentino e impuestos de acuerdo a disposiciones vigentes
         'demo/partner_demo.xml',
         'demo/company_demo.xml',
     ],
+    'application': True,
+    'post_init_hook': 'post_init_hook',
 }

@@ -1,5 +1,4 @@
 from odoo import fields, models
-# from odoo.exceptions import UserError
 
 
 class AfipresponsabilityType(models.Model):
@@ -10,12 +9,10 @@ class AfipresponsabilityType(models.Model):
 
     name = fields.Char(
         'Name',
-        size=64,
         required=True,
         index=True,
     )
     sequence = fields.Integer(
-        'Sequence',
     )
     code = fields.Char(
         'Code',

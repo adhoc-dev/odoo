@@ -60,10 +60,6 @@ class AccountInvoice(models.Model):
         related='document_letter_id.name',
         readonly=True,
     )
-    taxes_included = fields.Boolean(
-        related='document_letter_id.taxes_included',
-        readonly=True,
-    )
     # mostly used on reports
     afip_responsability_type_id = fields.Many2one(
         'afip.responsability.type',
