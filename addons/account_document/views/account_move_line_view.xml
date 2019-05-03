@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
     <record id="view_account_move_line_filter" model="ir.ui.view">
         <field name="name">account.move.line.form</field>
         <field name="model">account.move.line</field>
@@ -9,8 +10,9 @@
                 <field name="l10n_latam_document_type_id"/>
             </separator>
             <group>
-                <filter string="Document Type" domain="[]" context="{'group_by':'l10n_latam_document_type_id'}"/>
+                <filter string="Document Type" name="l10n_latam_document_type" domain="" context="{'group_by':'l10n_latam_document_type_id'}"/>
             </group>
         </field>
     </record>
+
 </odoo>
