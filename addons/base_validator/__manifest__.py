@@ -19,17 +19,12 @@
 ##############################################################################
 {
     'name': 'Base Validator',
-    'version': '11.0.1.0.0',
+    'version': '12.0.1.0.0',
     'category': 'Tools',
-    'sequence': 14,
     'summary': '',
     'author': 'ADHOC SA',
     'website': 'www.adhoc.com.ar',
-    'license': 'AGPL-3',
-    'images': [
-    ],
     'depends': [
-        'base',
     ],
     'data': [
         'views/base_validator_view.xml',
@@ -37,8 +32,6 @@
     ],
     'demo': [
         'demo/base_validator.xml',
-    ],
-    'test': [
     ],
     'installable': True,
     'auto_install': False,
