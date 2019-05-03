@@ -1,5 +1,4 @@
-# Copyright © 2014-2016 Lorenzo Battistini - Agile Business Group
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import fields, models, api, _
 from odoo.exceptions import ValidationError
