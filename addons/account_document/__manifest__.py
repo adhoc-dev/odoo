@@ -1,10 +1,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 {
-    "name": "Accounting Documents Management",
-    "version": "11.0.1.4.2",
-    "author": "Moldeo Interactive,ADHOC SA",
-    "license": "AGPL-3",
-    "category": "Accounting",
+    "name": "Latam Documents",
+    "version": "12.0.1.0.0",
+    "author": "ADHOC SA",
+    "category": "Localization",
     "depends": [
         "account",
         "base_validator",
@@ -29,10 +28,6 @@
         # 'wizards/account_invoice_refund_view.xml',
         # 'security/ir.model.access.csv',
         # 'security/security.xml',
-    ],
-    "demo": [
-    ],
-    'images': [
     ],
     'installable': True,
 }
