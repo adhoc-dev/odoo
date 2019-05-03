@@ -24,33 +24,33 @@ class AccountInvoiceRefund(models.TransientModel):
         'Invoice',
         default=_get_invoice_id,
     )
-    use_documents = fields.Boolean(
+    l10n_latam_use_documents = fields.Boolean(
         related='invoice_id.journal_id.l10n_latam_use_documents',
         string='Use Documents?',
         readonly=True,
     )
-    journal_document_type_id = fields.Many2one(
+    l10n_latam_journal_document_type_id = fields.Many2one(
         'l10n_latam.account.journal.document.type',
         'Document Type',
         ondelete='cascade',
     )
-    document_sequence_id = fields.Many2one(
-        related='journal_document_type_id.sequence_id',
+    l10n_latam_document_sequence_id = fields.Many2one(
+        related='l10n_latam_journal_document_type_id.sequence_id',
         readonly=True,
     )
-    document_number = fields.Char(
+    l10n_latam_document_number = fields.Char(
         string='Document Number',
     )
-    available_journal_document_type_ids = fields.Many2many(
+    l10n_latam_available_journal_document_type_ids = fields.Many2many(
         'l10n_latam.account.journal.document.type',
-        compute='_compute_available_journal_document_types',
+        compute='_compute_l10n_latam_available_journal_document_types',
         string='Available Journal Document Types',
     )
 
 
     @api.multi
     @api.depends('invoice_id')
-    def _compute_available_journal_document_types(self):
+    def _compute_l10n_latam_available_journal_document_types(self):
         for rec in self:
             invoice = rec.invoice_id
             if not invoice:
@@ -58,14 +58,14 @@ class AccountInvoiceRefund(models.TransientModel):
             invoice_type = TYPE2REFUND[invoice.type]
             res = invoice._get_available_journal_document_types(
                 invoice.journal_id, invoice_type, invoice.partner_id)
-            rec.available_journal_document_type_ids = res[
-                'available_journal_document_types']
-            rec.journal_document_type_id = res[
-                'journal_document_type']
+            rec.l10n_latam_available_journal_document_type_ids = res[
+                'l10n_latam_available_journal_document_type_ids']
+            rec.l10n_latam_journal_document_type_id = res[
+                'l10n_latam_journal_document_type_id']
 
     @api.multi
     def compute_refund(self, mode='refund'):
         return super(AccountInvoiceRefund, self.with_context(
-            refund_journal_document_type_id=self.journal_document_type_id.id,
+            refund_journal_document_type_id=self.l10n_latam_journal_document_type_id.id,
             refund_document_number=self.l10n_latam_document_number,
         )).compute_refund(mode=mode)
