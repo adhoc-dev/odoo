@@ -1,3 +1,4 @@
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 {
     "name": "Accounting Documents Management",
     "version": "11.0.1.4.2",
