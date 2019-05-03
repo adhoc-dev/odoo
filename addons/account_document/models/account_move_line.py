@@ -7,19 +7,13 @@ old_method = account_move.AccountMoveLine.domain_move_lines_for_reconciliation
 
 
 class AccountMoveLine(models.Model):
-    """
-    Show and allow to search by move display name (Document number) on
-    bank statements and partner debt reconcile
-    """
 
     _inherit = 'account.move.line'
 
-    # useful to group by this field
-    document_type_id = fields.Many2one(
-        related='move_id.document_type_id',
+    l10n_latam_document_type_id = fields.Many2one(
+        related='move_id.l10n_latam_document_type_id',
         readonly=True,
         auto_join=True,
-        # stored required to group by
         store=True,
         index=True,
     )
@@ -27,6 +21,10 @@ class AccountMoveLine(models.Model):
     @api.multi
     def prepare_move_lines_for_reconciliation_widget(
             self, target_currency=False, target_date=False):
+        """ Use display_name instead of name on getting account.move rec name,
+        usefull on bank statements and partner debt reconcile
+        TODO remove when changed in odoo
+        """
         res = super(
             AccountMoveLine,
             self).prepare_move_lines_for_reconciliation_widget(
@@ -42,7 +40,9 @@ class AccountMoveLine(models.Model):
 
     @api.model
     def domain_move_lines_for_reconciliation(self, str):
-        """ Add move display name in search of move lines"""
+        """ Allow to search by display_name on bank statements and partner
+        debt reconcile
+        """
         _super = super(AccountMoveLine, self)
         _get_domain = _super.domain_move_lines_for_reconciliation
         domain = _get_domain(str)

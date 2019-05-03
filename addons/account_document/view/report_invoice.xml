@@ -8,8 +8,8 @@
 
     <xpath expr="//h2" position="after">
         <h2 t-if="o.use_documents">
-            <span t-field="o.document_type_id.report_name"/>
-            <span t-field="o.document_number"/>
+            <span t-field="o.l10n_latam_document_type_id.report_name"/>
+            <span t-field="o.l10n_latam_document_number"/>
         </h2>
     </xpath>
 

@@ -5,7 +5,6 @@ from odoo.addons.account.models.account_invoice import TYPE2REFUND
 
 
 class AccountInvoiceRefund(models.TransientModel):
-    """Refunds invoice"""
 
     _inherit = "account.invoice.refund"
 
@@ -25,12 +24,12 @@ class AccountInvoiceRefund(models.TransientModel):
         default=_get_invoice_id,
     )
     use_documents = fields.Boolean(
-        related='invoice_id.journal_id.use_documents',
+        related='invoice_id.journal_id.l10n_latam_use_documents',
         string='Use Documents?',
         readonly=True,
     )
     journal_document_type_id = fields.Many2one(
-        'account.journal.document.type',
+        'l10n_latam.account.journal.document.type',
         'Document Type',
         ondelete='cascade',
     )
@@ -42,29 +41,11 @@ class AccountInvoiceRefund(models.TransientModel):
         string='Document Number',
     )
     available_journal_document_type_ids = fields.Many2many(
-        'account.journal.document.type',
+        'l10n_latam.account.journal.document.type',
         compute='_compute_available_journal_document_types',
         string='Available Journal Document Types',
     )
 
-    @api.multi
-    def onchange(self, values, field_name, field_onchange):
-        """
-        Idea obtenida de aca
-        https://github.com/odoo/odoo/issues/16072#issuecomment-289833419
-        por el cambio que se introdujo en esa mimsa conversación, TODO en v11
-        no haría mas falta, simplemente domain="[('id', 'in', x2m_field)]"
-        Otras posibilidades que probamos pero no resultaron del todo fue:
-        * agregar onchange sobre campos calculados y que devuelvan un dict con
-        domain. El tema es que si se entra a un registro guardado el onchange
-        no se ejecuta
-        * usae el modulo de web_domain_field que esta en un pr a la oca
-        """
-        for field in field_onchange.keys():
-            if field.startswith('available_journal_document_type_ids.'):
-                del field_onchange[field]
-        return super(AccountInvoiceRefund, self).onchange(
-            values, field_name, field_onchange)
 
     @api.multi
     @api.depends('invoice_id')
@@ -85,5 +66,5 @@ class AccountInvoiceRefund(models.TransientModel):
     def compute_refund(self, mode='refund'):
         return super(AccountInvoiceRefund, self.with_context(
             refund_journal_document_type_id=self.journal_document_type_id.id,
-            refund_document_number=self.document_number,
+            refund_document_number=self.l10n_latam_document_number,
         )).compute_refund(mode=mode)

@@ -9,8 +9,8 @@
                 <field name="display_name"/>
             </field>
             <field name="ref" position="before">
-                <field name="document_type_id"/>
-                <field name="document_number"/>
+                <field name="l10n_latam_document_type_id"/>
+                <field name="l10n_latam_document_number"/>
             </field>
         </field>
     </record>
@@ -27,8 +27,8 @@
                 <field name="display_name"/>
             </field>
 <!--                 <field name="name" position="after">
-                <field name="document_type_id"/>
-                <field name="document_number"/>
+                <field name="l10n_latam_document_type_id"/>
+                <field name="l10n_latam_document_number"/>
             </field> -->
         </field>
     </record>
@@ -39,17 +39,17 @@
         <field name="inherit_id" ref="account.view_account_move_filter"/>
         <field name="arch" type="xml">
             <field name="name" position="attributes">
-                <!-- we keep name on domain just in case we want to search by name but display_name is computed with document_number -->
+                <!-- we keep name on domain just in case we want to search by name but display_name is computed with l10n_latam_document_number -->
                 <attribute name="filter_domain">['|', '|', ('display_name','ilike',self), ('name','ilike',self), ('ref','ilike',self)]</attribute>
             </field>
 <!--                 <field name="name" position="after">
-                <field name="document_number"/>
+                <field name="l10n_latam_document_number"/>
             </field> -->
             <field name="partner_id" position="after">
-                <field name="document_type_id"/>
+                <field name="l10n_latam_document_type_id"/>
             </field>
             <group>
-                <filter string="Document Type" domain="[]" context="{'group_by':'document_type_id'}"/>
+                <filter string="Document Type" domain="[]" context="{'group_by':'l10n_latam_document_type_id'}"/>
             </group>
         </field>
     </record>

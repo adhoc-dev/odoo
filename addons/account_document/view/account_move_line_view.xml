@@ -6,10 +6,10 @@
         <field name="inherit_id" ref="account.view_account_move_line_filter"/>
         <field name="arch" type="xml">
             <separator position="before">
-                <field name="document_type_id"/>
+                <field name="l10n_latam_document_type_id"/>
             </separator>
             <group>
-                <filter string="Document Type" domain="[]" context="{'group_by':'document_type_id'}"/>
+                <filter string="Document Type" domain="[]" context="{'group_by':'l10n_latam_document_type_id'}"/>
             </group>
         </field>
     </record>
