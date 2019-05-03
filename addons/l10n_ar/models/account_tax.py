@@ -79,6 +79,7 @@ class AccountFiscalPositionTemplate(models.Model):
         'reports'
     )
     # TODO borrar si no lo usamos, por ahora lo resolivmos de manera nativa
+    # TODO ver que hacer con esto no va a funcionar
     afip_responsability_type_ids = fields.Many2many(
         'afip.responsability.type',
         'afip_reponsbility_account_fiscal_pos_temp_rel',
@@ -127,9 +128,8 @@ class AccountFiscalPosition(models.Model):
     def _get_fpos_by_region_and_responsability(
             self, country_id=False, state_id=False,
             zipcode=False, afip_responsability_type_id=False):
-        """
-        We use similar code than _get_fpos_by_region but we use
-        "afip_responsability_type_id" insted of vat_required
+        """ We use similar code than _get_fpos_by_region but we use
+        "afip_responsability_type" insted of vat_required
         """
 
         base_domain = [
@@ -218,7 +218,7 @@ class AccountFiscalPosition(models.Model):
         #####
 
         afip_responsability = (
-            partner.commercial_partner_id.afip_responsability_type_id)
+            partner.commercial_partner_id.afip_responsability_type)
 
         # First search only matching responsability positions
         fpos = self._get_fpos_by_region_and_responsability(

@@ -3,11 +3,12 @@
 <template id="report_invoice_document" inherit_id="account_document.report_invoice_document">
 
     <xpath expr="//span[@t-if='o.partner_id.vat']" position="after">
-        <span t-if="o.afip_responsability_type_id">AFIP Responsability Type: <span t-field="o.afip_responsability_type_id.name"/></span>
+        <span t-if="o.afip_responsability_type">AFIP Responsability Type: <span t-field="o.afip_responsability_type"/></span>
+        <!-- TODO extract human readble name from selection -->
     </xpath>
 
     <span t-field="o.document_type_id.report_name" position="after">
-        <span t-field="o.document_letter_id.name"/>
+        <span t-field="o.l10n_ar_letter"/>
     </span>
 
 </template>

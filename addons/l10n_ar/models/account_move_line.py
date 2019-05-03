@@ -8,13 +8,9 @@ _logger = logging.getLogger(__name__)
 
 
 class AccountMoveLine(models.Model):
+
     _inherit = 'account.move.line'
 
-    # useful to group by this field
-    afip_responsability_type_id = fields.Many2one(
-        related='move_id.afip_responsability_type_id',
-        readonly=True,
-        auto_join=True,
-        # stored required to group by
-        store=True,
+    afip_responsability_type = fields.Selection(
+        related='move_id.afip_responsability_type',
     )

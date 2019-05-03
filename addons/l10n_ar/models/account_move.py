@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import models, api, fields
+from odoo.addons.l10n_ar.models.res_partner import ResPartner
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -8,25 +9,17 @@ _logger = logging.getLogger(__name__)
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
-    # lo agregamos en los moves y no en los lines porque en el codigo de odoo
-    # parece decir que van a mover partner_id e invoice_id a los moves
-    # y la verdad no se nos ocurre un caso donde se mesclen partners, de hecho
-    # solo interesa si el move tiene partner (no se mezcla), no interesa
-    # para move lines de deuda o asientos de inicio, etc
-    # seteamos este campo aca ya que por mas que cambie el partner necesitamos
-    # que este dato sea fijo y no cambie
-    afip_responsability_type_id = fields.Many2one(
-        'afip.responsability.type',
-        string='AFIP Responsability Type',
-        readonly=True,
-        copy=False,
-        auto_join=True,
+    afip_responsability_type = fields.Selection(
+        ResPartner._afip_responsabilities,
+        'AFIP Responsability Type',
+        index=True,
+        help='Responsability type from journal entry where it is stored and '
+        'it nevers change',
     )
 
-    @api.multi
     @api.constrains('partner_id')
-    def set_afip_responsability_type_id(self):
+    def set_afip_responsability_type(self):
         for rec in self:
             commercial_partner = rec.partner_id.commercial_partner_id
-            rec.afip_responsability_type_id = (
-                commercial_partner.afip_responsability_type_id.id)
+            rec.afip_responsability_type = (
+                commercial_partner.afip_responsability_type)

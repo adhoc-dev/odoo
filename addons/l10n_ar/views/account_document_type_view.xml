@@ -7,7 +7,7 @@
         <field name="inherit_id" ref="account_document.view_document_type_form"/>
         <field name="arch" type="xml">
             <field name='doc_code_prefix' position="after">
-                <field name='document_letter_id'/>
+                <field name='l10n_ar_letter'/>
                 <field name='purchase_cuit_required'/>
                 <field name='purchase_alicuots'/>
             </field>
@@ -20,7 +20,7 @@
         <field name="inherit_id" ref="account_document.view_document_type_tree"/>
         <field name="arch" type="xml">
             <field name='doc_code_prefix' position="after">
-                <field name='document_letter_id'/>
+                <field name='l10n_ar_letter'/>
             </field>
         </field>
     </record>
@@ -31,10 +31,10 @@
         <field name="inherit_id" ref="account_document.view_document_type_filter"/>
         <field name="arch" type="xml">
             <field name='code' position="after">
-                <field name='document_letter_id'/>
+                <field name='l10n_ar_letter'/>
             </field>
             <group>
-                <filter string="Document Letter" name="document_letter_id" context="{'group_by':'document_letter_id'}"/>
+                <filter string="Document Letter" name="l10n_ar_letter" context="{'group_by':'l10n_ar_letter'}"/>
             </group>
         </field>
     </record>

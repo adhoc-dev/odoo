@@ -2,6 +2,7 @@
 
 from odoo import fields, models, api
 from odoo.addons.account_document.models.res_company import ResCompany
+from odoo.addons.l10n_ar.models.res_partner import ResPartner
 
 
 class ResCompany(models.Model):
@@ -19,11 +20,11 @@ class ResCompany(models.Model):
     start_date = fields.Date(
         related='partner_id.start_date',
     )
-    afip_responsability_type_id = fields.Many2one(
-        related='partner_id.afip_responsability_type_id',
+    afip_responsability_type = fields.Selection(
+        related='partner_id.afip_responsability_type',
     )
     company_requires_vat = fields.Boolean(
-        related='afip_responsability_type_id.company_requires_vat',
+        compute='_compute_company_requires_vat',
         readonly=True,
     )
     # use globally as default so that if child companies are created they
@@ -32,3 +33,9 @@ class ResCompany(models.Model):
     tax_calculation_rounding_method = fields.Selection(
         default='round_globally',
     )
+
+    @api.depends('afip_responsability_type')
+    def _compute_company_requires_vat(self):
+        for rec in self.filtered(
+                lambda x: x.afip_responsability_type in ['1', '1FM']):
+            rec.company_requires_vat = True

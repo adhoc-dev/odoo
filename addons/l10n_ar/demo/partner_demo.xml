@@ -4,59 +4,59 @@
 <!-- Partners -->
     <!-- ADHOC - Supplier/Customer -->
     <record id="l10n_ar_partner.res_partner_adhoc" model="res.partner">
-        <field name='afip_responsability_type_id' ref='res_IVARI'/>
+        <field name='afip_responsability_type'>1</field>
     </record>
 
     <!-- Gritti Agrimensura - Supplier/Customer -->
     <record id="l10n_ar_partner.res_partner_gritti_agrimensura" model="res.partner">
-        <field name='afip_responsability_type_id' ref='res_RM'/>
+        <field name='afip_responsability_type'>6</field>
     </record>
 
     <!-- Consejo Municipal Rosario - Customer -->
     <record id="l10n_ar_partner.res_partner_cmr" model="res.partner">
-        <field name='afip_responsability_type_id' ref='res_IVAE'/>
+        <field name='afip_responsability_type'>4</field>
     </record>
 
     <!-- Banco Municipal Rosario - Customer -->
     <!-- por ahora no lo usamos -->
 <!--         <record id="l10n_ar_partner.res_partner_bmr" model="res.partner">
-        <field name='afip_responsability_type_id' ref='res_IVARI'/>
+        <field name='afip_responsability_type'>1</field>
     </record> -->
 
     <!-- Odoo - Supplier -->
     <record id="l10n_ar_partner.res_partner_odoo" model="res.partner">
-        <field name='afip_responsability_type_id' ref='res_EXT'/>
+        <field name='afip_responsability_type'>8</field>
     </record>
 
     <!-- Expresso - Customer -->
     <record id="l10n_ar_partner.res_partner_expresso" model="res.partner">
-        <field name='afip_responsability_type_id' ref='res_CLI_EXT'/>
+        <field name='afip_responsability_type'>9</field>
     </record>
 
     <!-- Cerro Castor - Customer -->
     <record id="l10n_ar_partner.res_partner_cerrocastor" model="res.partner">
-        <field name='afip_responsability_type_id' ref='res_IVA_LIB'/>
+        <field name='afip_responsability_type'>10</field>
     </record>
 
 <!-- partners originales de odoo -->
     <!-- ASUSTeK - Supplier -->
     <record id="base.res_partner_1" model="res.partner">
-        <field name='afip_responsability_type_id' ref='res_IVARI'/>
+        <field name='afip_responsability_type'>1</field>
     </record>
     <!-- Agrolait - Customer -->
     <record id="base.res_partner_2" model="res.partner">
-        <field name='afip_responsability_type_id' ref='res_IVARI'/>
+        <field name='afip_responsability_type'>1</field>
     </record>
     <!-- Camptocamp - Supplier/Customer -->
     <record id="base.res_partner_12" model="res.partner">
-        <field name='afip_responsability_type_id' ref='res_IVARI'/>
+        <field name='afip_responsability_type'>1</field>
     </record>
     <!-- Global Solutions  - cliente exterior -->
     <record id="base.res_partner_4" model="res.partner">
-        <field name='afip_responsability_type_id' ref='res_CLI_EXT'/>
+        <field name='afip_responsability_type'>9</field>
     </record>
     <!--   - cliente exterior -->
     <record id="base.res_partner_3" model="res.partner">
-        <field name='afip_responsability_type_id' ref='res_IVARI'/>
+        <field name='afip_responsability_type'>1</field>
     </record>
 </odoo>

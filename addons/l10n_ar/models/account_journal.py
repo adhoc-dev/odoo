@@ -41,29 +41,36 @@ class AccountJournal(models.Model):
         This method is used to populate document types on journals and also
         to filter document types on specific invoices to/from customer/supplier
         """
-        responsability = company.afip_responsability_type_id
-        if journal_type == 'sale':
-            resp_field = 'issuer_ids'
-        elif journal_type == 'purchase':
-            resp_field = 'receptor_ids'
-        else:
-            raise UserError(_(
-                'Letters not implemented for journal type %s' % (
-                    journal_type)))
-        letters = self.env['account.document.letter'].search([
-            '|', (resp_field, '=', responsability.id),
-            (resp_field, '=', False)])
-
+        # TODO mover a otro lado este dict
+        letters_data = {
+            'issued': {
+                '1': ['A', 'B', 'E'],
+                '1FM': ['B', 'M'],
+                '4': ['C'],
+                '5': [],
+                '6': ['C', 'E'],
+                '8': [],
+                '9': [],
+                '10': [],
+            }
+            'received': {
+                '1': ['A', 'C', 'M'],
+                '1FM': ['A', 'M'],
+                '4': ['C', 'B'],
+                '5': ['B', 'C'],
+                '6': ['B', 'C'],
+                '8': ['E'],
+                '9': ['E'],
+                '10': ['E'],
+            }
+        }
+        letters = letters_data['issued' if 'sale' else 'received'][
+            company.afip_responsability_type]
         if counterpart_partner:
-            counterpart_resp = counterpart_partner.afip_responsability_type_id
-            if journal_type == 'sale':
-                letters = letters.filtered(
-                    lambda x: not x.receptor_ids or
-                    counterpart_resp in x.receptor_ids)
-            else:
-                letters = letters.filtered(
-                    lambda x: not x.issuer_ids or
-                    counterpart_resp in x.issuer_ids)
+            counterpart_letters = letters_data[
+                'issued' if 'purchase' else 'received'][
+                    counterpart_partner.afip_responsability_type]
+            letters = list(set(letters) & set(counterpart_letters))
         return letters
 
     @api.multi
@@ -97,8 +104,8 @@ class AccountJournal(models.Model):
         document_types = self.env['account.document.type'].search([
             ('internal_type', 'in', internal_types),
             ('localization', '=', self.localization),
-            '|', ('document_letter_id', 'in', letters.ids),
-            ('document_letter_id', '=', False)])
+            '|', ('l10n_ar_letter', 'in', letters),
+            ('l10n_ar_letter', '=', False)])
 
         # no queremos que todo lo que es factura de credito electronica se cree
         # por defecto ya que es poco usual
@@ -133,8 +140,8 @@ class AccountJournal(models.Model):
                         self.document_sequence_type == 'same_sequence'
                 ):
                     journal_document = self.journal_document_type_ids.search([
-                        ('document_type_id.document_letter_id', '=',
-                            document_type.document_letter_id.id),
+                        ('document_type_id.l10n_ar_letter', '=',
+                            document_type.l10n_ar_letter),
                         ('journal_id', '=', self.id)], limit=1)
                     sequence_id = journal_document.sequence_id.id
                 else:

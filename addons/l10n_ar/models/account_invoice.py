@@ -50,24 +50,14 @@ class AccountInvoice(models.Model):
     #     compute='_compute_currency_rate',
     #     digits=(10, 6),
     # )
-    document_letter_id = fields.Many2one(
-        related='document_type_id.document_letter_id',
-        readonly=True,
-    )
-    document_letter_name = fields.Char(
-        related='document_letter_id.name',
-        readonly=True,
+    l10n_ar_letter = fields.Selection(
+        related='l10n_latam_document_type_id.l10n_ar_letter',
     )
     # mostly used on reports
-    afip_responsability_type_id = fields.Many2one(
-        'afip.responsability.type',
-        string='AFIP Responsability Type',
-        readonly=True,
-        help='Responsability type from journal entry where it is stored and '
-        'it nevers change',
-        related='move_id.afip_responsability_type_id',
+    afip_responsability_type = fields.Selection(
+        related='move_id.afip_responsability_type',
+        'AFIP Responsability Type',
         index=True,
-        auto_join=True,
     )
     invoice_number = fields.Integer(
         compute='_compute_invoice_number',
@@ -398,8 +388,8 @@ class AccountInvoice(models.Model):
                 domain = [
                     ('journal_id', '=', journal.id),
                     '|',
-                    ('document_type_id.document_letter_id', 'in', letters.ids),
-                    ('document_type_id.document_letter_id', '=', False),
+                    ('document_type_id.l10n_ar_letter', 'in', letters),
+                    ('document_type_id.l10n_ar_letter', '=', False),
                 ]
 
                 # if invoice_type is refund, only credit notes
@@ -498,7 +488,7 @@ class AccountInvoice(models.Model):
         # check partner has responsability so it will be assigned on invoice
         # validate
         without_responsability = argentinian_invoices.filtered(
-            lambda x: not x.commercial_partner_id.afip_responsability_type_id)
+            lambda x: not x.commercial_partner_id.afip_responsability_type)
         if without_responsability:
             raise ValidationError(_(
                 'The following invoices has a partner without AFIP '

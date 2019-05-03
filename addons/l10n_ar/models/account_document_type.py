@@ -2,14 +2,17 @@ from odoo import models, api, fields
 
 
 class AccountDocmentType(models.Model):
+
     _inherit = 'account.document.type'
 
-    document_letter_id = fields.Many2one(
-        'account.document.letter',
-        'Document Letter',
-        auto_join=True,
-        index=True,
-    )
+    l10n_ar_letter = fields.Selection([
+        ('A', 'A'),
+        ('B', 'B'),
+        ('C', 'C'),
+        ('E', 'E'),
+        ('M', 'M'),
+        ('T', 'T'),
+    ])
     purchase_cuit_required = fields.Boolean(
         help='Verdadero si la declaración del CITI compras requiere informar '
         'CUIT'
@@ -33,15 +36,13 @@ class AccountDocmentType(models.Model):
 
     @api.multi
     def get_taxes_included(self):
-        """
-        In argentina we include taxes depending on document letter
+        """ In argentina we include taxes depending on document letter
         """
         self.ensure_one()
-        if self.country_id.code == 'AR':
-            if self.document_letter_id.taxes_included:
-                # solo incluir el IVA, el resto se debe discriminar
-                return self.env['account.tax'].search(
-                    [('tax_group_id.tax', '=', 'vat'),
-                     ('tax_group_id.type', '=', 'tax')])
+        if self.country_id.code == 'AR' and self.l10n_ar_letter in [
+           'B', 'C', 'X', 'R']:
+            return self.env['account.tax'].search(
+                [('tax_group_id.tax', '=', 'vat'),
+                    ('tax_group_id.type', '=', 'tax')])
         else:
             return super(AccountDocmentType, self).get_taxes_included()
