@@ -1,11 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import models, api, fields
-# from odoo.exceptions import UserError
-from odoo.osv import expression
-from odoo.addons.account.models import account_move
-
-old_method = account_move.AccountMoveLine.domain_move_lines_for_reconciliation
 
 
 class AccountMoveLine(models.Model):
@@ -39,16 +34,3 @@ class AccountMoveLine(models.Model):
                 display_name + ': ' + line.name or
                 display_name)
         return res
-
-    @api.model
-    def domain_move_lines_for_reconciliation(self, str):
-        """ Allow to search by display_name on bank statements and partner
-        debt reconcile
-        """
-        _super = super(AccountMoveLine, self)
-        _get_domain = _super.domain_move_lines_for_reconciliation
-        domain = _get_domain(str)
-        if not str and str != '/':
-            return domain
-        domain_trans_ref = [('move_id.display_name', 'ilike', str)]
-        return expression.OR([domain, domain_trans_ref])
