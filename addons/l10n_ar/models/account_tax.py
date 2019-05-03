@@ -23,7 +23,7 @@ class AccountTax(models.Model):
 class AccountTaxGroup(models.Model):
     _inherit = 'account.tax.group'
 
-    afip_code = fields.Integer(
+    l10n_ar_afip_code = fields.Integer(
         'AFIP Code',
     )
     type = fields.Selection([
@@ -75,7 +75,7 @@ class AccountTaxGroup(models.Model):
 class AccountFiscalPositionTemplate(models.Model):
     _inherit = 'account.fiscal.position.template'
 
-    afip_code = fields.Char(
+    l10n_ar_afip_code = fields.Char(
         'AFIP Code',
         help='For eg. This code will be used on electronic invoice and citi '
         'reports'
@@ -110,7 +110,7 @@ class AccountFiscalPositionTemplate(models.Model):
 class AccountFiscalPosition(models.Model):
     _inherit = 'account.fiscal.position'
 
-    afip_code = fields.Char(
+    l10n_ar_afip_code = fields.Char(
         'AFIP Code',
         help='For eg. This code will be used on electronic invoice and citi '
         'reports',

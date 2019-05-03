@@ -191,7 +191,7 @@ class AccountInvoice(models.Model):
             # on afip
             vat_taxables = vat_taxes.filtered(
                 lambda r: (
-                    r.tax_id.tax_group_id.afip_code not in
+                    r.tax_id.tax_group_id.l10n_ar_afip_code not in
                     [0, 1, 2]) and r.base)
 
             vat_amount = sum(vat_taxes.mapped('amount'))
@@ -209,7 +209,7 @@ class AccountInvoice(models.Model):
                 lambda r: (
                     r.tax_id.tax_group_id.type == 'tax' and
                     r.tax_id.tax_group_id.tax == 'vat' and
-                    r.tax_id.tax_group_id.afip_code == 2))
+                    r.tax_id.tax_group_id.l10n_ar_afip_code == 2))
             rec.vat_exempt_base_amount = sum(
                 vat_exempt_taxes.mapped('base'))
             # rec.vat_exempt_base_amount = sum(
@@ -221,7 +221,7 @@ class AccountInvoice(models.Model):
                 lambda r: (
                     r.tax_id.tax_group_id.type == 'tax' and
                     r.tax_id.tax_group_id.tax == 'vat' and
-                    r.tax_id.tax_group_id.afip_code == 1))
+                    r.tax_id.tax_group_id.l10n_ar_afip_code == 1))
             rec.vat_untaxed_base_amount = sum(
                 vat_untaxed_taxes.mapped('base'))
             # rec.vat_untaxed_base_amount = sum(
@@ -559,7 +559,7 @@ class AccountInvoice(models.Model):
         not_zero_alicuot = argentinian_invoices.filtered(
             lambda x: x.type in ['in_invoice', 'in_refund'] and
             x.document_type_id.purchase_alicuots == 'zero' and
-            any([t.tax_id.tax_group_id.afip_code != 0 for t in x.vat_tax_ids]))
+            any([t.tax_id.tax_group_id.l10n_ar_afip_code != 0 for t in x.vat_tax_ids]))
         if not_zero_alicuot:
             raise ValidationError(_(
                 'Las siguientes facturas tienen configurados IVA incorrecto. '
@@ -571,7 +571,7 @@ class AccountInvoice(models.Model):
         zero_alicuot = argentinian_invoices.filtered(
             lambda x: x.type in ['in_invoice', 'in_refund'] and
             x.document_type_id.purchase_alicuots == 'not_zero' and
-            any([t.tax_id.tax_group_id.afip_code == 0 for t in x.vat_tax_ids]))
+            any([t.tax_id.tax_group_id.l10n_ar_afip_code == 0 for t in x.vat_tax_ids]))
         if zero_alicuot:
             raise ValidationError(_(
                 'Las siguientes facturas tienen IVA no corresponde pero debe '
@@ -584,10 +584,10 @@ class AccountInvoice(models.Model):
         afip_exempt_codes = ['Z', 'X', 'E', 'N', 'C']
         for invoice in argentinian_invoices:
             special_vat_taxes = invoice.tax_line_ids.filtered(
-                lambda r: r.tax_id.tax_group_id.afip_code in [1, 2, 3])
+                lambda r: r.tax_id.tax_group_id.l10n_ar_afip_code in [1, 2, 3])
             if (
                     special_vat_taxes and
-                    invoice.fiscal_position_id.afip_code
+                    invoice.fiscal_position_id.l10n_ar_afip_code
                     not in afip_exempt_codes):
                 raise ValidationError(_(
                     "If you have choose a 0, exempt or untaxed 'tax', or "
@@ -603,11 +603,11 @@ class AccountInvoice(models.Model):
             # esta restriccion no es de FE si no de aplicativo citi
             zero_vat_lines = invoice.tax_line_ids.filtered(
                 lambda r: ((
-                    r.tax_id.tax_group_id.afip_code in [4, 5, 6, 8, 9] and
+                    r.tax_id.tax_group_id.l10n_ar_afip_code in [4, 5, 6, 8, 9] and
                     r.currency_id.is_zero(r.amount))))
             if (
                     zero_vat_lines and
-                    invoice.fiscal_position_id.afip_code
+                    invoice.fiscal_position_id.l10n_ar_afip_code
                     not in afip_exempt_codes):
                 raise ValidationError(_(
                     "Si hay líneas con IVA declarado 0, entonces debe elegir "

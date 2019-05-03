@@ -8,7 +8,7 @@ from odoo import fields, models
 class ResCurrency(models.Model):
     _inherit = "res.currency"
 
-    afip_code = fields.Char(
+    l10n_ar_afip_code = fields.Char(
         'AFIP Code',
         size=4,
     )

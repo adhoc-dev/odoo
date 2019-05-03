@@ -9,7 +9,7 @@ class ResCountry(models.Model):
 
     _inherit = 'res.country'
 
-    afip_code = fields.Char(
+    l10n_ar_afip_code = fields.Char(
         'Afip Code',
         size=3,
     )

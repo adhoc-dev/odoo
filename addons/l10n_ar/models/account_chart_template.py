@@ -55,8 +55,8 @@ class AccountChartTemplate(models.Model):
     def generate_fiscal_position(
             self, tax_template_ref, acc_template_ref, company):
         """
-        if chart is argentina localization, then we add afip_code to fiscal
-        positions.
+        if chart is argentina localization, then we add l10n_ar_afip_code to
+        fiscal positions.
         We also add other data to add fiscal positions automatically
         """
         res = super(AccountChartTemplate, self).generate_fiscal_position(
@@ -72,7 +72,7 @@ class AccountChartTemplate(models.Model):
                 ('note', '=', position.note)], limit=1)
             if created_position:
                 created_position.update({
-                    'afip_code': position.afip_code,
+                    'l10n_ar_afip_code': position.l10n_ar_afip_code,
                     'afip_responsability_type_ids': (
                         position.afip_responsability_type_ids),
                     # TODO this should be done in odoo core
