@@ -10,16 +10,28 @@
 Argentinian accounting chart and tax localization.
 ==================================================
 
-Plan contable argentino e impuestos de acuerdo a disposiciones vigentes
+Install Argentinian chart of accounts:
 
+* Responsable Inscripto (RI)
     """,
     'author': ['ADHOC SA'],
     'category': 'Localization',
     'depends': [
         'l10n_latam_document',
         'l10n_ar_base',
-        ],
+    ],
+    # TODO review OLD dependencies from l10n_ar_chart
+    # # for afip_code on fiscal position and other tax modifications
+    # 'l10n_ar_account',
+    # 'account_withholding',
+    # 'account_check',
     'data':[
+        'data/account_chart_template.xml',
+        'data/account_chart_base.xml',
+        'data/account_chart_exento.xml',
+        'data/account_chart_respinsc.xml',
+        'data/account_tax_withholding_template.xml',
+        'data/account_fiscal_template.xml',
         'data/account_tax_group.xml',
         'data/account_account_tag_data.xml',
         'data/account_tax_template.xml',
