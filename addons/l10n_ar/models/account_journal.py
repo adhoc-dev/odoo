@@ -103,7 +103,7 @@ class AccountJournal(models.Model):
 
         document_types = self.env['l10n_latam.document.type'].search([
             ('internal_type', 'in', internal_types),
-            ('localization', '=', self.localization),
+            ('country_id.code', '=', self.company_id.country_id.code),
             '|', ('l10n_ar_letter', 'in', letters),
             ('l10n_ar_letter', '=', False)])
 

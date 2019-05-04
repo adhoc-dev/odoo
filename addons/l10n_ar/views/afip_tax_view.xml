@@ -34,6 +34,6 @@
         <field name="view_mode">tree,form</field>
     </record>
 
-    <menuitem name="Taxes" action="act_afip_tax" id="menu_action_afip_tax" sequence="30" parent="l10n_ar_account.menu_afip_config"/>
+    <menuitem name="Taxes" action="act_afip_tax" id="menu_action_afip_tax" sequence="30" parent="l10n_ar.menu_afip_config"/>
 
 </odoo>

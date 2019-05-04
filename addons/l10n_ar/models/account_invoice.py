@@ -221,7 +221,7 @@ class AccountInvoice(models.Model):
             rec.other_taxes_amount = other_taxes_amount
 
     @api.multi
-    @api.depends('document_number', 'number')
+    @api.depends('l10n_latam_document_number', 'number')
     def _compute_invoice_number(self):
         """ Funcion que calcula numero de punto de venta y numero de factura
         a partir del document number. Es utilizado principalmente por el modulo
@@ -308,7 +308,7 @@ class AccountInvoice(models.Model):
         'invoice_line_ids',
         'invoice_line_ids.product_id',
         'invoice_line_ids.product_id.type',
-        'localization',
+        'company_id.country_id.code',
         'force_afip_concept',
     )
     def _compute_concept(self):
@@ -340,7 +340,7 @@ class AccountInvoice(models.Model):
         self.ensure_one()
         # TODO depreciar esta funcion y convertir a currency_rate campo
         # calculado que la calcule en funcion a los datos del move
-        if self.localization == 'argentina':
+        if self.company_id.country_id.code == 'AR':
             if self.company_id.currency_id == self.currency_id:
                 currency_rate = 1.0
             else:
@@ -367,7 +367,7 @@ class AccountInvoice(models.Model):
         If needed, we can make this funcion inheritable and customizable per
         localization
         """
-        if journal.localization != 'argentina':
+        if journal.company_id.country_id.code != 'AR':
             return super(
                 AccountInvoice, self)._get_available_journal_document_types(
                     journal, invoice_type, partner)
@@ -465,7 +465,7 @@ class AccountInvoice(models.Model):
         # use_documents
         argentinian_invoices = self.filtered(
             lambda r: (
-                r.localization == 'argentina' and r.use_documents))
+                r.company_id.country_id.code != 'AR' and r.use_documents))
         if not argentinian_invoices:
             return True
 

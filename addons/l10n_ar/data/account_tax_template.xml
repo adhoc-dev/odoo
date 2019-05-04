@@ -11,8 +11,8 @@
         <field name="account_id" ref="ri_percepcion_iva_aplicada"/>
         <field name="refund_account_id" ref="ri_percepcion_iva_aplicada"/>
         <field name="type_tax_use">sale</field>
-        <field name="tax_group_id" ref="l10n_ar_account.tax_group_percepcion_iva"/>
-        <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar_account.tag_ret_perc_sicore_aplicada')])]"/>
+        <field name="tax_group_id" ref="l10n_ar.tax_group_percepcion_iva"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar.tag_ret_perc_sicore_aplicada')])]"/>
     </record>
 
     <record id="ri_tax_percepcion_ganancias_aplicada" model="account.tax.template">
@@ -25,8 +25,8 @@
         <field name="account_id" ref="ri_percepcion_ganancias_aplicada"/>
         <field name="refund_account_id" ref="ri_percepcion_ganancias_aplicada"/>
         <field name="type_tax_use">sale</field>
-        <field name="tax_group_id" ref="l10n_ar_account.tax_group_percepcion_ganancias"/>
-        <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar_account.tag_ret_perc_sicore_aplicada')])]"/>
+        <field name="tax_group_id" ref="l10n_ar.tax_group_percepcion_ganancias"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar.tag_ret_perc_sicore_aplicada')])]"/>
     </record>
 
     <record id="ri_tax_percepcion_ganancias_sufrida" model="account.tax.template">
@@ -39,7 +39,7 @@
         <field name="account_id" ref="base_percepcion_ganancias_sufrida"/>
         <field name="refund_account_id" ref="base_percepcion_ganancias_sufrida"/>
         <field name="type_tax_use">purchase</field>
-        <field name="tax_group_id" ref="l10n_ar_account.tax_group_percepcion_ganancias"/>
+        <field name="tax_group_id" ref="l10n_ar.tax_group_percepcion_ganancias"/>
     </record>
 
     <record id="ri_tax_percepcion_iibb_caba_sufrida" model="account.tax.template">
@@ -52,8 +52,8 @@
         <field name="account_id" ref="base_percepcion_iibb_caba_sufrida"/>
         <field name="refund_account_id" ref="base_percepcion_iibb_caba_sufrida"/>
         <field name="type_tax_use">purchase</field>
-        <field name="tax_group_id" ref="l10n_ar_account.tax_group_percepcion_iibb"/>
-        <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar_account.tax_tag_a_cuenta_iibb'), ref('l10n_ar_account.tag_tax_jurisdiccion_901')])]"/>
+        <field name="tax_group_id" ref="l10n_ar.tax_group_percepcion_iibb"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar.tax_tag_a_cuenta_iibb'), ref('l10n_ar.tag_tax_jurisdiccion_901')])]"/>
     </record>
 
     <record id="ri_tax_percepcion_iibb_ba_sufrida" model="account.tax.template">
@@ -66,8 +66,8 @@
         <field name="account_id" ref="base_percepcion_iibb_ba_sufrida"/>
         <field name="refund_account_id" ref="base_percepcion_iibb_ba_sufrida"/>
         <field name="type_tax_use">purchase</field>
-        <field name="tax_group_id" ref="l10n_ar_account.tax_group_percepcion_iibb"/>
-        <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar_account.tax_tag_a_cuenta_iibb'), ref('l10n_ar_account.tag_tax_jurisdiccion_902')])]"/>
+        <field name="tax_group_id" ref="l10n_ar.tax_group_percepcion_iibb"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar.tax_tag_a_cuenta_iibb'), ref('l10n_ar.tag_tax_jurisdiccion_902')])]"/>
     </record>
 
     <record id="ri_tax_percepcion_iibb_co_sufrida" model="account.tax.template">
@@ -80,8 +80,8 @@
         <field name="account_id" ref="base_percepcion_iibb_co_sufrida"/>
         <field name="refund_account_id" ref="base_percepcion_iibb_co_sufrida"/>
         <field name="type_tax_use">purchase</field>
-        <field name="tax_group_id" ref="l10n_ar_account.tax_group_percepcion_iibb"/>
-        <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar_account.tax_tag_a_cuenta_iibb'), ref('l10n_ar_account.tag_tax_jurisdiccion_904')])]"/>
+        <field name="tax_group_id" ref="l10n_ar.tax_group_percepcion_iibb"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar.tax_tag_a_cuenta_iibb'), ref('l10n_ar.tag_tax_jurisdiccion_904')])]"/>
     </record>
 
     <record id="ri_tax_percepcion_iibb_sf_sufrida" model="account.tax.template">
@@ -94,8 +94,8 @@
         <field name="account_id" ref="base_percepcion_iibb_sf_sufrida"/>
         <field name="refund_account_id" ref="base_percepcion_iibb_sf_sufrida"/>
         <field name="type_tax_use">purchase</field>
-        <field name="tax_group_id" ref="l10n_ar_account.tax_group_percepcion_iibb"/>
-        <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar_account.tax_tag_a_cuenta_iibb'), ref('l10n_ar_account.tag_tax_jurisdiccion_921')])]"/>
+        <field name="tax_group_id" ref="l10n_ar.tax_group_percepcion_iibb"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar.tax_tag_a_cuenta_iibb'), ref('l10n_ar.tag_tax_jurisdiccion_921')])]"/>
     </record>
 
     <record id="ri_tax_percepcion_iibb_aplicada" model="account.tax.template">
@@ -108,8 +108,8 @@
         <field name="account_id" ref="ri_percepcion_iibb_aplicada"/>
         <field name="refund_account_id" ref="ri_percepcion_iibb_aplicada"/>
         <field name="type_tax_use">sale</field>
-        <field name="tax_group_id" ref="l10n_ar_account.tax_group_percepcion_iibb"/>
-        <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar_account.tag_ret_perc_iibb_aplicada')])]"/>
+        <field name="tax_group_id" ref="l10n_ar.tax_group_percepcion_iibb"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar.tag_ret_perc_iibb_aplicada')])]"/>
     </record>
 
     <!-- SOLO RI -->
@@ -123,7 +123,7 @@
         <field eval="0.0" name="amount"/>
         <field name="account_id" ref="ri_iva_debito_fiscal"/>
         <field name="refund_account_id" ref="ri_iva_credito_fiscal"/>
-        <field name="tax_group_id" ref="l10n_ar_account.tax_group_iva_no_corresponde"/>
+        <field name="tax_group_id" ref="l10n_ar.tax_group_iva_no_corresponde"/>
         <field name="type_tax_use">sale</field>
     </record>
 
@@ -136,7 +136,7 @@
         <field eval="0.0" name="amount"/>
         <field name="account_id" ref="ri_iva_credito_fiscal"/>
         <field name="refund_account_id" ref="ri_iva_debito_fiscal"/>
-        <field name="tax_group_id" ref="l10n_ar_account.tax_group_iva_no_corresponde"/>
+        <field name="tax_group_id" ref="l10n_ar.tax_group_iva_no_corresponde"/>
         <field name="type_tax_use">purchase</field>
     </record>
 
@@ -149,7 +149,7 @@
         <field eval="0.0" name="amount"/>
         <field name="account_id" ref="ri_iva_debito_fiscal"/>
         <field name="refund_account_id" ref="ri_iva_credito_fiscal"/>
-        <field name="tax_group_id" ref="l10n_ar_account.tax_group_iva_no_gravado"/>
+        <field name="tax_group_id" ref="l10n_ar.tax_group_iva_no_gravado"/>
         <field name="type_tax_use">sale</field>
     </record>
 
@@ -162,7 +162,7 @@
         <field eval="0.0" name="amount"/>
         <field name="account_id" ref="ri_iva_credito_fiscal"/>
         <field name="refund_account_id" ref="ri_iva_debito_fiscal"/>
-        <field name="tax_group_id" ref="l10n_ar_account.tax_group_iva_no_gravado"/>
+        <field name="tax_group_id" ref="l10n_ar.tax_group_iva_no_gravado"/>
         <field name="type_tax_use">purchase</field>
     </record>
 
@@ -175,7 +175,7 @@
         <field eval="0.0" name="amount"/>
         <field name="account_id" ref="ri_iva_debito_fiscal"/>
         <field name="refund_account_id" ref="ri_iva_credito_fiscal"/>
-        <field name="tax_group_id" ref="l10n_ar_account.tax_group_iva_exento"/>
+        <field name="tax_group_id" ref="l10n_ar.tax_group_iva_exento"/>
         <field name="type_tax_use">sale</field>
     </record>
 
@@ -188,7 +188,7 @@
         <field eval="0.0" name="amount"/>     
         <field name="account_id" ref="ri_iva_credito_fiscal"/>
         <field name="refund_account_id" ref="ri_iva_debito_fiscal"/>
-        <field name="tax_group_id" ref="l10n_ar_account.tax_group_iva_exento"/>
+        <field name="tax_group_id" ref="l10n_ar.tax_group_iva_exento"/>
         <field name="type_tax_use">purchase</field>
     </record>
 
@@ -201,7 +201,7 @@
         <field name="amount_type">percent</field>
         <field name="account_id" ref="ri_iva_debito_fiscal"/>
         <field name="refund_account_id" ref="ri_iva_credito_fiscal"/>
-        <field name="tax_group_id" ref="l10n_ar_account.tax_group_iva_0"/>
+        <field name="tax_group_id" ref="l10n_ar.tax_group_iva_0"/>
         <field name="type_tax_use">sale</field>
     </record>
 
@@ -214,7 +214,7 @@
         <field name="amount_type">percent</field>
         <field name="account_id" ref="ri_iva_credito_fiscal"/>
         <field name="refund_account_id" ref="ri_iva_debito_fiscal"/>
-        <field name="tax_group_id" ref="l10n_ar_account.tax_group_iva_0"/>
+        <field name="tax_group_id" ref="l10n_ar.tax_group_iva_0"/>
         <field name="type_tax_use">purchase</field>
     </record>
 
@@ -227,7 +227,7 @@
         <field name="amount_type">percent</field>
         <field name="account_id" ref="ri_iva_debito_fiscal"/>
         <field name="refund_account_id" ref="ri_iva_credito_fiscal"/>
-        <field name="tax_group_id" ref="l10n_ar_account.tax_group_iva_10"/>
+        <field name="tax_group_id" ref="l10n_ar.tax_group_iva_10"/>
         <field name="type_tax_use">sale</field>
     </record>
 
@@ -240,7 +240,7 @@
         <field name="amount_type">percent</field>
         <field name="account_id" ref="ri_iva_credito_fiscal"/>
         <field name="refund_account_id" ref="ri_iva_debito_fiscal"/>
-        <field name="tax_group_id" ref="l10n_ar_account.tax_group_iva_10"/>
+        <field name="tax_group_id" ref="l10n_ar.tax_group_iva_10"/>
         <field name="type_tax_use">purchase</field>
     </record>
 
@@ -253,7 +253,7 @@
         <field name="amount_type">percent</field>
         <field name="account_id" ref="ri_iva_debito_fiscal"/>
         <field name="refund_account_id" ref="ri_iva_credito_fiscal"/>
-        <field name="tax_group_id" ref="l10n_ar_account.tax_group_iva_21"/>
+        <field name="tax_group_id" ref="l10n_ar.tax_group_iva_21"/>
         <field name="type_tax_use">sale</field>
     </record>
 
@@ -266,7 +266,7 @@
         <field name="amount_type">percent</field>
         <field name="account_id" ref="ri_iva_credito_fiscal"/>
         <field name="refund_account_id" ref="ri_iva_debito_fiscal"/>
-        <field name="tax_group_id" ref="l10n_ar_account.tax_group_iva_21"/>
+        <field name="tax_group_id" ref="l10n_ar.tax_group_iva_21"/>
         <field name="type_tax_use">purchase</field>
     </record>
 
@@ -279,7 +279,7 @@
         <field name="amount_type">percent</field>
         <field name="account_id" ref="ri_iva_debito_fiscal"/>
         <field name="refund_account_id" ref="ri_iva_credito_fiscal"/>
-        <field name="tax_group_id" ref="l10n_ar_account.tax_group_iva_27"/>
+        <field name="tax_group_id" ref="l10n_ar.tax_group_iva_27"/>
         <field name="type_tax_use">sale</field>
     </record>
 
@@ -292,7 +292,7 @@
         <field name="amount_type">percent</field>
         <field name="account_id" ref="ri_iva_credito_fiscal"/>
         <field name="refund_account_id" ref="ri_iva_debito_fiscal"/>
-        <field name="tax_group_id" ref="l10n_ar_account.tax_group_iva_27"/>
+        <field name="tax_group_id" ref="l10n_ar.tax_group_iva_27"/>
         <field name="type_tax_use">purchase</field>
     </record>
 
@@ -305,7 +305,7 @@
         <field name="amount_type">percent</field>
         <field name="account_id" ref="ri_iva_debito_fiscal"/>
         <field name="refund_account_id" ref="ri_iva_credito_fiscal"/>
-        <field name="tax_group_id" ref="l10n_ar_account.tax_group_iva_25"/>
+        <field name="tax_group_id" ref="l10n_ar.tax_group_iva_25"/>
         <field name="type_tax_use">sale</field>
     </record>
 
@@ -318,7 +318,7 @@
         <field name="amount_type">percent</field>
         <field name="account_id" ref="ri_iva_credito_fiscal"/>
         <field name="refund_account_id" ref="ri_iva_debito_fiscal"/>
-        <field name="tax_group_id" ref="l10n_ar_account.tax_group_iva_25"/>
+        <field name="tax_group_id" ref="l10n_ar.tax_group_iva_25"/>
         <field name="type_tax_use">purchase</field>
     </record>
 
@@ -331,7 +331,7 @@
         <field name="amount_type">percent</field>
         <field name="account_id" ref="ri_iva_debito_fiscal"/>
         <field name="refund_account_id" ref="ri_iva_credito_fiscal"/>
-        <field name="tax_group_id" ref="l10n_ar_account.tax_group_iva_5"/>
+        <field name="tax_group_id" ref="l10n_ar.tax_group_iva_5"/>
         <field name="type_tax_use">sale</field>
     </record>
 
@@ -344,7 +344,7 @@
         <field name="amount_type">percent</field>
         <field name="account_id" ref="ri_iva_credito_fiscal"/>
         <field name="refund_account_id" ref="ri_iva_debito_fiscal"/>
-        <field name="tax_group_id" ref="l10n_ar_account.tax_group_iva_5"/>
+        <field name="tax_group_id" ref="l10n_ar.tax_group_iva_5"/>
         <field name="type_tax_use">purchase</field>
     </record>
 
@@ -358,7 +358,7 @@
         <field name="account_id" ref="ri_percepcion_iva_sufrida"/>
         <field name="refund_account_id" ref="ri_percepcion_iva_sufrida"/>
         <field name="type_tax_use">purchase</field>
-        <field name="tax_group_id" ref="l10n_ar_account.tax_group_percepcion_iva"/>
+        <field name="tax_group_id" ref="l10n_ar.tax_group_percepcion_iva"/>
     </record>
 
     <record id="ri_tax_ganancias_iva_adicional" model="account.tax.template">
@@ -371,6 +371,6 @@
         <field name="account_id" ref="ri_percepcion_iva_sufrida"/>
         <field name="refund_account_id" ref="ri_percepcion_iva_sufrida"/>
         <field name="type_tax_use">purchase</field>
-        <field name="tax_group_id" ref="l10n_ar_account.tax_group_percepcion_iva"/>
+        <field name="tax_group_id" ref="l10n_ar.tax_group_percepcion_iva"/>
     </record>
 </odoo>

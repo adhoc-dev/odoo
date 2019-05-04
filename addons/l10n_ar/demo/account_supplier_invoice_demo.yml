@@ -10,7 +10,7 @@
     company_id: base.main_company
     partner_id: l10n_ar_partner.res_partner_gritti_agrimensura
     user_id: base.user_demo
-    document_number: 0001-00000008
+    l10n_latam_document_number: 0001-00000008
     reference_type: none
     payment_term_id: account.account_payment_term
     type: 'in_invoice'
@@ -60,7 +60,7 @@
     partner_id: base.res_partner_1
     user_id: base.user_demo
     reference_type: none
-    document_number: 0002-00000123
+    l10n_latam_document_number: 0002-00000123
     payment_term_id: account.account_payment_term
     type: 'in_invoice'
     invoice_line_ids:
@@ -91,7 +91,7 @@
     partner_id: base.res_partner_1
     user_id: base.user_demo
     reference_type: none
-    document_number: 0003-00000312
+    l10n_latam_document_number: 0003-00000312
     payment_term_id: account.account_payment_term
     type: 'in_invoice'
     invoice_line_ids:
@@ -123,7 +123,7 @@
     partner_id: base.res_partner_1
     user_id: base.user_demo
     reference_type: none
-    document_number: 0001-00000200
+    l10n_latam_document_number: 0001-00000200
     payment_term_id: account.account_payment_term
     type: 'in_invoice'
     invoice_line_ids:
@@ -155,7 +155,7 @@
     partner_id: base.res_partner_1
     user_id: base.user_demo
     reference_type: none
-    document_number: 0001-00000222
+    l10n_latam_document_number: 0001-00000222
     payment_term_id: account.account_payment_term
     type: 'in_invoice'
     invoice_line_ids:
@@ -206,7 +206,7 @@
     user_id: base.user_demo
     reference_type: none
     # analizar si para este tipo de doc asignamos numero nosotros o no
-    document_number: 0001-00000333
+    l10n_latam_document_number: 0001-00000333
     payment_term_id: account.account_payment_term
     type: 'in_invoice'
     invoice_line_ids:
@@ -230,7 +230,7 @@
     user_id: base.user_demo
     reference_type: none
     # analizar si para este tipo de doc asignamos numero nosotros o no
-    document_number: 0001-00000334
+    l10n_latam_document_number: 0001-00000334
     payment_term_id: account.account_payment_term
     type: 'in_invoice'
     invoice_line_ids:

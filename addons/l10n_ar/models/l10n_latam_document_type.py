@@ -27,7 +27,7 @@ class L10nLtamDocumentType(models.Model):
     def get_document_sequence_vals(self, journal):
         vals = super(L10nLtamDocumentType, self).get_document_sequence_vals(
             journal)
-        if self.localization == 'argentina':
+        if self.country_id.code == 'AR':
             vals.update({
                 'padding': 8,
                 'implementation': 'no_gap',

@@ -34,6 +34,6 @@
         <field name="view_mode">tree,form</field>
     </record>
 
-    <menuitem name="Concepts" action="act_afip_concept" id="menu_action_afip_concept" sequence="30" parent="l10n_ar_account.menu_afip_config"/>
+    <menuitem name="Concepts" action="act_afip_concept" id="menu_action_afip_concept" sequence="30" parent="l10n_ar.menu_afip_config"/>
 
 </odoo>

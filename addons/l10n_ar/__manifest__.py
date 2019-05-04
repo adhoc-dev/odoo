@@ -26,6 +26,7 @@ Install Argentinian chart of accounts:
     # 'account_withholding',
     # 'account_check',
     'data':[
+        'data/account_account_tag_data.xml',
         'data/account_chart_template.xml',
         'data/account_chart_base.xml',
         'data/account_chart_exento.xml',
@@ -33,7 +34,6 @@ Install Argentinian chart of accounts:
         'data/account_tax_withholding_template.xml',
         'data/account_fiscal_template.xml',
         'data/account_tax_group.xml',
-        'data/account_account_tag_data.xml',
         'data/account_tax_template.xml',
         'data/uom_uom.xml',
         'data/res_partner_data.xml',

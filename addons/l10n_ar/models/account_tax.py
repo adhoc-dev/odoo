@@ -78,16 +78,7 @@ class AccountFiscalPositionTemplate(models.Model):
         help='For eg. This code will be used on electronic invoice and citi '
         'reports'
     )
-    # TODO borrar si no lo usamos, por ahora lo resolivmos de manera nativa
-    # TODO ver que hacer con esto no va a funcionar
-    afip_responsability_type_ids = fields.Many2many(
-        'afip.responsability.type',
-        'afip_reponsbility_account_fiscal_pos_temp_rel',
-        'position_id', 'afip_responsability_type_id',
-        'AFIP Responsabilities',
-        help='Add this fiscalposition if partner has one of this '
-        'responsabilities'
-    )
+
     # TODO this fields should be added on odoo core
     auto_apply = fields.Boolean(
         string='Detect Automatically',
@@ -115,26 +106,35 @@ class AccountFiscalPosition(models.Model):
         'reports',
     )
     # TODO tal vez podriamos usar funcionalidad nativa con "vat subjected"
-    afip_responsability_type_ids = fields.Many2many(
-        'afip.responsability.type',
-        'afip_reponsbility_account_fiscal_pos_rel',
-        'position_id', 'afip_responsability_type_id',
-        'AFIP Responsabilities',
-        help='Add this fiscalposition if partner has one of this '
-        'responsabilities'
-    )
+
+
+    """
+    # TODO borrar si no lo usamos, por ahora lo resolivmos de manera nativa
+    # TODO ver que hacer con esto no va a funcionar
+    afip_responsability_type_ids
+
+    id='fiscal_position_template_iva_no_corresponde' [(6, False, [ref('l10n_ar.res_RM'), ref('l10n_ar.res_IVAE'), ref('l10n_ar.res_CLI_EXT'), ref('l10n_ar.res_EXT')])]
+
+    id='fiscal_position_template_zona_franca' [(6, False, [ref('l10n_ar.res_IVA_LIB')])]"
+
+    id='fiscal_position_template_exportaciones_al_exterior' [(6, False, [ref('l10n_ar.res_CLI_EXT')])]
+
+    <field name="vat_required" position="replace">
+        <field name="afip_responsability_type_ids" widget="many2many_tags" attrs="{'invisible': [('auto_apply', '!=', True)]}"/>
+    </field>
+    """
 
     @api.model
     def _get_fpos_by_region_and_responsability(
             self, country_id=False, state_id=False,
-            zipcode=False, afip_responsability_type_id=False):
+            zipcode=False, afip_responsability_type=False):
         """ We use similar code than _get_fpos_by_region but we use
         "afip_responsability_type" insted of vat_required
         """
 
         base_domain = [
             ('auto_apply', '=', True),
-            ('afip_responsability_type_ids', '=', afip_responsability_type_id)
+            ('afip_responsability_type', '=', afip_responsability_type)
         ]
 
         if self.env.context.get('force_company'):
@@ -223,7 +223,7 @@ class AccountFiscalPosition(models.Model):
         # First search only matching responsability positions
         fpos = self._get_fpos_by_region_and_responsability(
             delivery.country_id.id, delivery.state_id.id, delivery.zip,
-            afip_responsability.id)
+            afip_responsability)
         if not fpos and afip_responsability:
             fpos = self._get_fpos_by_region_and_responsability(
                 delivery.country_id.id, delivery.state_id.id, delivery.zip,

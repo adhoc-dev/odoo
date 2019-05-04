@@ -7,7 +7,7 @@
         <field name="model">res.company</field>
         <field name="arch" type="xml">
             <!-- extendemos l10n_ar_partner para hacer obligatorio si cia argentina -->
-            <field name="main_id_category_id" position="attributes">
+            <field name="l10n_ar_identification_type_id" position="attributes">
                 <attribute name="attrs">{'required': [('localization', '=', 'argentina')]}</attribute>
             </field>
             <field name="l10n_ar_id_number" position="attributes">

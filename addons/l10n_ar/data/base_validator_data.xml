@@ -6,12 +6,12 @@
         <field name='input_test_string'>123-123</field>
         <field name="validation_code"><![CDATA[
 # Python code. Use:
-#  -  failed = True: specify that the l10n_latam_document_number is not valid.
-#  -  l10n_latam_document_number = 'something': overwrite l10n_latam_document_number value (for formatting for eg.).
+#  -  failed = True: specify that the l10n_latam_l10n_latam_document_number is not valid.
+#  -  l10n_latam_l10n_latam_document_number = 'something': overwrite l10n_latam_l10n_latam_document_number value (for formatting for eg.).
 # You can use the following:
 #  - re: regex Python library
 #  - self: browse_record of the current document type browse_record
-#  - document_number: string with the l10n_latam_document_number to validate
+#  - l10n_latam_document_number: string with the l10n_latam_l10n_latam_document_number to validate
 if value:
     args = value.split('-')
     if len(args) != 2:

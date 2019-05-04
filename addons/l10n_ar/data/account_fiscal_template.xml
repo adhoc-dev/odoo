@@ -8,7 +8,6 @@
             <field name='afip_code'>Z</field>
             <field name='name'>Exportaciones a la zona franca</field>
             <field name="auto_apply" eval="True"/>
-            <field name="afip_responsability_type_ids" eval="[(6, False, [ref('l10n_ar_account.res_IVA_LIB')])]"/>
             <field name="chart_template_id" ref="l10nar_ri_chart_template"/>
             <!-- usamos iva liberado en vez de provincia al final -->
             <!-- <field name="state_ids" eval="[(6, False, [ref('l10n_ar_states.V')])]"/> -->
@@ -43,7 +42,6 @@
             <field name="chart_template_id" ref="l10nar_ri_chart_template"/>
             <!-- Proveedor y cliente del exterior -->
             <!-- no agregamos proveedores porque elije mal en factura de compra -->
-            <field name="afip_responsability_type_ids" eval="[(6, False, [ref('l10n_ar_account.res_CLI_EXT')])]"/>
         </record>
         <record id="fiscal_position_template_exportaciones_al_exterior_tax_0" model="account.fiscal.position.tax.template">
             <field name="position_id" ref="fiscal_position_template_exportaciones_al_exterior"/>
@@ -112,7 +110,6 @@
             <field name="auto_apply" eval="True"/>
             <field name="chart_template_id" ref="l10nar_ri_chart_template"/>
             <!-- en compras reemplazamos por iva no corresponde para importaciones, monotributsistas, exentos -->
-            <field name="afip_responsability_type_ids" eval="[(6, False, [ref('l10n_ar_account.res_RM'), ref('l10n_ar_account.res_IVAE'), ref('l10n_ar_account.res_CLI_EXT'), ref('l10n_ar_account.res_EXT')])]"/>
         </record>
         <record id="fiscal_position_template_iva_no_corresponde_tax_0" model="account.fiscal.position.tax.template">
             <field name="position_id" ref="fiscal_position_template_iva_no_corresponde"/>

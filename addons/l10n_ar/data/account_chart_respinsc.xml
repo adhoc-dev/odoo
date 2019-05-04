@@ -9,7 +9,7 @@
             <field name="currency_id" ref="base.ARS"/>
             <field name="bank_account_code_prefix">1.1.10.00.</field>
             <field name="cash_account_code_prefix">1.1.10.00.</field>
-            <field name="localization">argentina</field>
+            <field name="transfer_account_code_prefix">1.1.10.00.</field>
             <field name="code_digits">13</field>
         </record>
 
@@ -29,7 +29,7 @@
                     <field name="code">1.1.04.01.010</field>
                     <field name="user_type_id" ref="account.data_account_type_current_assets"/>
                     <field name="name">Retención IVA Sufrida</field>
-                    <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar_account.tag_a_cuenta_iva')])]"/>
+                    <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar.tag_a_cuenta_iva')])]"/>
                 </record>
 
                 <record model="account.account.template" id="ri_percepcion_iva_sufrida">
@@ -37,7 +37,7 @@
                     <field name="code">1.1.04.01.020</field>
                     <field name="user_type_id" ref="account.data_account_type_current_assets"/>
                     <field name="name">Percepción IVA Sufrida</field>
-                    <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar_account.tag_a_cuenta_iva')])]"/>
+                    <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar.tag_a_cuenta_iva')])]"/>
                 </record>
 
                 <record model="account.account.template" id="ri_iva_credito_fiscal">
@@ -45,7 +45,7 @@
                     <field name="code">1.1.04.01.030</field>
                     <field name="user_type_id" ref="account.data_account_type_current_assets"/>
                     <field name="name">IVA crédito fiscal</field>
-                    <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar_account.tag_iva_primer_parrafo')])]"/>
+                    <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar.tag_iva_primer_parrafo')])]"/>
                 </record>
 
                 <!-- cambiamos el nombre a primer parrafo porque seria mas claro y se mantiene similar al de 2do parrafo -->
@@ -54,7 +54,7 @@
                     <field name="code">1.1.04.01.040</field>
                     <field name="user_type_id" ref="account.data_account_type_current_assets"/>
                     <field name="name">IVA 1er Parráfo a favor</field>
-                    <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar_account.tag_iva_primer_parrafo')])]"/>
+                    <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar.tag_iva_primer_parrafo')])]"/>
                 </record>
 
 
@@ -65,7 +65,7 @@
                 <field name="code">2.1.02.00.010</field>
                 <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
                 <field name="name">IVA débito fiscal</field>
-                <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar_account.tag_iva_primer_parrafo')])]"/>
+                <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar.tag_iva_primer_parrafo')])]"/>
             </record>
 
             <record model="account.account.template" id="ri_iva_saldo_a_pagar">
