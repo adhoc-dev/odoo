@@ -3,7 +3,7 @@
     <record model="ir.ui.view" id="view_company_inherit_form">
         <field name="name">res.company.form.inherit</field>
         <field name="inherit_id" ref="l10n_ar_partner.view_company_inherit_form"/>
-        <!-- <field name="inherit_id" ref="l10n_latam_document.view_company_inherit_form"/> -->
+        <!-- <field name="inherit_id" ref="l10n_latam_documents.view_company_inherit_form"/> -->
         <field name="model">res.company</field>
         <field name="arch" type="xml">
             <!-- extendemos l10n_ar_partner para hacer obligatorio si cia argentina -->

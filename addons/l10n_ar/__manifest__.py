@@ -17,7 +17,7 @@ Install Argentinian chart of accounts:
     'author': ['ADHOC SA'],
     'category': 'Localization',
     'depends': [
-        'l10n_latam_document',
+        'l10n_latam_documents',
         'l10n_ar_base',
     ],
     # TODO review OLD dependencies from l10n_ar_chart
@@ -63,14 +63,12 @@ Install Argentinian chart of accounts:
         'views/account_journal_view.xml',
         'views/account_invoice_view.xml',
         'views/l10n_latam_document_type_view.xml',
-        'views/product_template_view.xml',
         'views/afip_activity_view.xml',
         'views/afip_concept_view.xml',
         'views/afip_tax_view.xml',
         'security/ir.model.access.csv',
         'security/security.xml',
         'report/account_ar_vat_line_view.xml',
-        'report/invoice_analysis.xml',
     ],
     'demo': [
         'demo/partner_demo.xml',

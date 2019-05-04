@@ -52,7 +52,7 @@ class AccountJournal(models.Model):
                 '8': [],
                 '9': [],
                 '10': [],
-            }
+            },
             'received': {
                 '1': ['A', 'C', 'M'],
                 '1FM': ['A', 'M'],
@@ -62,7 +62,7 @@ class AccountJournal(models.Model):
                 '8': ['E'],
                 '9': ['E'],
                 '10': ['E'],
-            }
+            },
         }
         letters = letters_data['issued' if 'sale' else 'received'][
             company.afip_responsability_type]

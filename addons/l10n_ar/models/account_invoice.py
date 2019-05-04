@@ -56,7 +56,6 @@ class AccountInvoice(models.Model):
     # mostly used on reports
     afip_responsability_type = fields.Selection(
         related='move_id.afip_responsability_type',
-        'AFIP Responsability Type',
         index=True,
     )
     invoice_number = fields.Integer(
