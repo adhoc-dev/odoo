@@ -101,7 +101,7 @@ class AccountJournal(models.Model):
         else:
             raise UserError(_('Type %s not implemented yet' % self.type))
 
-        document_types = self.env['account.document.type'].search([
+        document_types = self.env['l10n_latam.document.type'].search([
             ('internal_type', 'in', internal_types),
             ('localization', '=', self.localization),
             '|', ('l10n_ar_letter', 'in', letters),
@@ -120,7 +120,7 @@ class AccountJournal(models.Model):
         # o tal vez, en vez de usar letra x, lo deberiamos motrar tambien como
         # factible por no tener letra y ser tique
         # if self.type == 'purchase':
-        #     document_types += self.env['account.document.type'].search([
+        #     document_types += self.env['l10n_latam.document.type'].search([
         #         ('internal_type', 'in', other_purchase_internal_types),
         #         ('document_letter_id', '=', False)])
 

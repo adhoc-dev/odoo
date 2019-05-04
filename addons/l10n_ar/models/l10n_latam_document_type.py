@@ -1,9 +1,9 @@
 from odoo import models, api, fields
 
 
-class AccountDocmentType(models.Model):
+class L10nLtamDocumentType(models.Model):
 
-    _inherit = 'account.document.type'
+    _inherit = 'l10n_latam.document.type'
 
     l10n_ar_letter = fields.Selection([
         ('A', 'A'),
@@ -11,8 +11,9 @@ class AccountDocmentType(models.Model):
         ('C', 'C'),
         ('E', 'E'),
         ('M', 'M'),
-        ('T', 'T'),
-    ])
+        ('T', 'T')],
+        'Letters',
+    )
     purchase_cuit_required = fields.Boolean(
         help='Verdadero si la declaración del CITI compras requiere informar '
         'CUIT'
@@ -24,7 +25,7 @@ class AccountDocmentType(models.Model):
 
     @api.multi
     def get_document_sequence_vals(self, journal):
-        vals = super(AccountDocmentType, self).get_document_sequence_vals(
+        vals = super(L10nLtamDocumentType, self).get_document_sequence_vals(
             journal)
         if self.localization == 'argentina':
             vals.update({
@@ -45,4 +46,4 @@ class AccountDocmentType(models.Model):
                 [('tax_group_id.tax', '=', 'vat'),
                     ('tax_group_id.type', '=', 'tax')])
         else:
-            return super(AccountDocmentType, self).get_taxes_included()
+            return super(L10nLtamDocumentType, self).get_taxes_included()
