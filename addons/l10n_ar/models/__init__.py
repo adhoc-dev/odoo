@@ -2,7 +2,7 @@
 
 from . import account_journal
 from . import account_tax
-from . import account_document_type
+from . import l10n_latam_document_type
 from . import afip_incoterm
 from . import res_partner
 from . import res_country

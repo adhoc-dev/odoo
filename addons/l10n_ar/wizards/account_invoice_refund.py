@@ -16,7 +16,7 @@ class AccountInvoiceRefund(models.TransientModel):
             # invoice = self.env['account.invoice'].browse(invoice_ids)
             invoice = self.invoice_id
             refund_invoices.write({
-                # TODO this origin should be set on account_document module
+                # TODO this origin should be set on l10n_latam_document module
                 'origin': invoice.document_number or invoice.number,
                 'afip_service_start': invoice.afip_service_start,
                 'afip_service_end': invoice.afip_service_end,
