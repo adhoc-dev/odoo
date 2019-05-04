@@ -10,7 +10,7 @@
             <field name="main_id_category_id" position="attributes">
                 <attribute name="attrs">{'required': [('localization', '=', 'argentina')]}</attribute>
             </field>
-            <field name="main_id_number" position="attributes">
+            <field name="l10n_ar_id_number" position="attributes">
                 <attribute name="attrs">{'required': [('localization', '=', 'argentina')]}</attribute>
             </field>
 

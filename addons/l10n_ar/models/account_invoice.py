@@ -18,8 +18,8 @@ class AccountInvoice(models.Model):
         ('4', '4-Otros (exportación)'),
     ]
 
-    main_id_number = fields.Char(
-        related='commercial_partner_id.main_id_number',
+    l10n_ar_id_number = fields.Char(
+        related='commercial_partner_id.l10n_ar_id_number',
         readonly=True,
     )
     state_id = fields.Many2one(
@@ -233,7 +233,7 @@ class AccountInvoice(models.Model):
 
         # decidimos obtener esto solamente para comprobantes con doc number
         for rec in self:
-            str_number = rec.document_number or False
+            str_number = rec.l10n_latam_document_number or False
             if str_number:
                 if rec.document_type_id.code in ['33', '99', '331', '332']:
                     point_of_sale = '0'

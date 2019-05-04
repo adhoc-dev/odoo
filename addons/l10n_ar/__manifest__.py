@@ -35,7 +35,7 @@ Install Argentinian chart of accounts:
         'data/account_tax_group.xml',
         'data/account_account_tag_data.xml',
         'data/account_tax_template.xml',
-        'data/product_uom.xml',
+        'data/uom_uom.xml',
         'data/res_partner_data.xml',
         'data/res_currency_data.xml',
         'data/afip_vat_f2002_category_data.xml',
@@ -46,7 +46,6 @@ Install Argentinian chart of accounts:
         'data/product_data.xml',
         'data/base_validator_data.xml',
         'data/afip_incoterm.xml',
-        'data/product_uom.xml',
         # los cargamos con csv pero los hacemos no actualizables con un hook
         'data/l10n.latam.document.type.csv',
         'views/account_move_line_view.xml',
@@ -68,7 +67,6 @@ Install Argentinian chart of accounts:
         'views/afip_tax_view.xml',
         'security/ir.model.access.csv',
         'security/security.xml',
-        'report/account_ar_vat_line_view.xml',
     ],
     'demo': [
         'demo/partner_demo.xml',

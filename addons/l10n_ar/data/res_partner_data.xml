@@ -24,7 +24,7 @@
         <field name="customer" eval="True"/>
         <field name="supplier" eval="True"/>
         <field name='main_id_category_id' ref="l10n_ar_partner.dt_CUIT"/>
-        <field name='main_id_number'>33693450239</field>
+        <field name='l10n_ar_id_number'>33693450239</field>
         <field name='afip_responsability_type'>3</field>
         <!-- TODO revisar Creo que este no existe no lo tamos en cuenta. "IVA no Responsable" -->
         <!-- add doc despacho y despacho imp serv -->

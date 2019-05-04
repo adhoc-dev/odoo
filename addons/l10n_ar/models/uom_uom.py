@@ -3,8 +3,8 @@
 from odoo import fields, models
 
 
-class ProductUom(models.Model):
-    _inherit = 'product.uom'
+class Uom(models.Model):
+    _inherit = 'uom.uom'
 
     l10n_ar_afip_code = fields.Char(
         'Afip Code',

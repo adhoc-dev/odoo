@@ -11,7 +11,7 @@ from . import res_company
 from . import account_invoice_tax
 from . import account_invoice
 from . import account_invoice_line
-from . import product_uom
+from . import uom_uom
 from . import account_chart_template
 from . import afip_vat_f2002_category
 from . import account_move_line

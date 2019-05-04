@@ -14,7 +14,7 @@
     <record id="partner_mono" model="res.partner">
         <field name='afip_responsability_type'>6</field>
         <field name='main_id_category_id' ref="l10n_ar_partner.dt_CUIT"/>
-        <field name='main_id_number'>20222222223</field>
+        <field name='l10n_ar_id_number'>20222222223</field>
         <field name='name'>Monotributista</field>
         <field name="street">Calle Falsa 123</field>
         <field name="city">Rosario</field>
@@ -49,7 +49,7 @@
     <record id="partner_exento" model="res.partner">
         <field name='afip_responsability_type'>4</field>
         <field name='main_id_category_id' ref="l10n_ar_partner.dt_CUIT"/>
-        <field name='main_id_number'>30999999995</field>
+        <field name='l10n_ar_id_number'>30999999995</field>
         <field name='name'>Exento</field>
         <field name="street">Soyexento 123</field>
         <field name="city">Rosario</field>
