@@ -2,7 +2,7 @@
   agregamos doc type para tique en diario manual
 -
   !python {model: ir.model.data} : |
-      manual_journal = self.env['account.journal'].search([('type', '=', 'sale'), ('point_of_sale_type', '=', 'manual')], limit=1)
+      manual_journal = self.env['account.journal'].search([('type', '=', 'sale'), ('l10n_ar_afip_pos_type', '=', 'manual')], limit=1)
       if manual_journal:
         type_tique_id = self.env['account.journal.document.type'].create({
           'journal_id': manual_journal.id,

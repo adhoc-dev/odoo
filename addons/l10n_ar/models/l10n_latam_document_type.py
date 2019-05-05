@@ -57,7 +57,7 @@ class L10nLtamDocumentType(models.Model):
             vals.update({
                 'padding': 8,
                 'implementation': 'no_gap',
-                'prefix': "%04i-" % (journal.point_of_sale_number),
+                'prefix': "%04i-" % (journal.l10n_ar_afip_pos_number),
             })
         return vals
 

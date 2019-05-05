@@ -8,18 +8,18 @@ class AccountJournal(models.Model):
 
     _inherit = "account.journal"
 
-    _point_of_sale_types_selection = [
+    _l10n_ar_afip_pos_types_selection = [
         ('manual', 'Manual'),
         ('preprinted', 'Preprinted'),
         ('online', 'Online'),
     ]
 
-    point_of_sale_type = fields.Selection(
-        _point_of_sale_types_selection,
+    l10n_ar_afip_pos_type = fields.Selection(
+        _l10n_ar_afip_pos_types_selection,
         'Point Of Sale Type',
     )
-    point_of_sale_number = fields.Integer(
-        'Point Of Sale Number',
+    l10n_ar_afip_pos_number = fields.Integer(
+        'AFIP Point Of Sale Number',
     )
     l10n_ar_country_code = fields.Char(
         related='company_id.l10n_ar_country_code',

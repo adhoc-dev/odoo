@@ -47,9 +47,9 @@ class AccountInvoice(models.Model):
     invoice_number = fields.Integer(
         compute='_compute_invoice_number',
     )
-    point_of_sale_number = fields.Integer(
+    l10n_ar_afip_pos_number = fields.Integer(
         compute='_compute_invoice_number',
-        string="Point Of Sale",
+        string="AFIP Point Of Sale",
     )
     vat_tax_ids = fields.One2many(
         compute="_compute_argentina_amounts",
@@ -98,8 +98,8 @@ class AccountInvoice(models.Model):
         readonly=True,
         states={'draft': [('readonly', False)]},
     )
-    point_of_sale_type = fields.Selection(
-        related='journal_id.point_of_sale_type',
+    l10n_ar_afip_pos_type = fields.Selection(
+        related='journal_id.l10n_ar_afip_pos_type',
         readonly=True,
     )
     # la idea es incorporar la posibilidad de forzar otro concepto distinto
@@ -217,7 +217,7 @@ class AccountInvoice(models.Model):
                         'Invoice [%i] %s') % (rec.id, rec.display_name))
                 rec.invoice_number = int(
                     re.sub("[^0-9]", "", invoice_number))
-                rec.point_of_sale_number = int(
+                rec.l10n_ar_afip_pos_number = int(
                     re.sub("[^0-9]", "", point_of_sale))
 
     @api.multi
