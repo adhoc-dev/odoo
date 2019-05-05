@@ -6,7 +6,7 @@ from . import account_tax_group
 from . import account_fiscal_position
 from . import account_fiscal_position_template
 from . import l10n_latam_document_type
-from . import afip_incoterm
+from . import l10n_ar_afip_incoterm
 from . import res_partner
 from . import res_country
 from . import res_currency

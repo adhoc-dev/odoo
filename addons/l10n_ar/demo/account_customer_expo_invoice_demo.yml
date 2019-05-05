@@ -9,7 +9,7 @@
     user_id: base.user_demo
     reference_type: none
     payment_term_id: account.account_payment_term
-    afip_incoterm_id: l10n_ar.incoterm_exw
+    l10n_ar_afip_incoterm_id: l10n_ar.incoterm_exw
     type: 'out_invoice'
     invoice_line_ids:
       - name: 'Laptop Customized (IVA 21)'
@@ -49,7 +49,7 @@
     user_id: base.user_demo
     reference_type: none
     payment_term_id: account.account_payment_term
-    afip_incoterm_id: l10n_ar.incoterm_exw
+    l10n_ar_afip_incoterm_id: l10n_ar.incoterm_exw
     type: 'out_invoice'
     invoice_line_ids:
       - name: 'Laptop Customized (IVA 21)'
@@ -89,7 +89,7 @@
     user_id: base.user_demo
     reference_type: none
     payment_term_id: account.account_payment_term
-    afip_incoterm_id: l10n_ar.incoterm_exw
+    l10n_ar_afip_incoterm_id: l10n_ar.incoterm_exw
     type: 'out_invoice'
     invoice_line_ids:
       - name: 'Laptop Customized (IVA 21)'
@@ -109,7 +109,7 @@
     user_id: base.user_demo
     reference_type: none
     payment_term_id: account.account_payment_term
-    afip_incoterm_id: l10n_ar.incoterm_exw
+    l10n_ar_afip_incoterm_id: l10n_ar.incoterm_exw
     type: 'out_invoice'
     invoice_line_ids:
       - name: 'Servicio de telefonía (IVA 27)'
@@ -129,7 +129,7 @@
     user_id: base.user_demo
     reference_type: none
     payment_term_id: account.account_payment_term
-    afip_incoterm_id: l10n_ar.incoterm_exw
+    l10n_ar_afip_incoterm_id: l10n_ar.incoterm_exw
     type: 'out_invoice'
     invoice_line_ids:
       - name: 'Laptop Customized (IVA 21)'

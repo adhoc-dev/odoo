@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <record id="view_afip_incoterm_form" model="ir.ui.view">
-        <field name="name">afip.incoterm.form</field>
-        <field name="model">afip.incoterm</field>
+    <record id="view_l10n_ar_afip_incoterm_form" model="ir.ui.view">
+        <field name="name">l10n_ar.afip.incoterm.form</field>
+        <field name="model">l10n_ar.afip.incoterm</field>
         <field name="arch" type="xml">
             <form string="AFIP Incoterms">
                 <group>
@@ -14,9 +14,9 @@
         </field>
     </record>
 
-    <record id="view_afip_incoterm_tree" model="ir.ui.view">
-        <field name="name">afip.incoterm.tree</field>
-        <field name="model">afip.incoterm</field>
+    <record id="view_l10n_ar_afip_incoterm_tree" model="ir.ui.view">
+        <field name="name">l10n_ar.afip.incoterm.tree</field>
+        <field name="model">l10n_ar.afip.incoterm</field>
         <field name="arch" type="xml">
             <tree string="AFIP Incoterms">
                 <field name='afip_code'/>
@@ -25,14 +25,14 @@
         </field>
     </record>
 
-    <record model="ir.actions.act_window" id="act_afip_incoterm">
+    <record model="ir.actions.act_window" id="act_l10n_ar_afip_incoterm">
         <field name="name">AFIP Incoterms</field>
         <field name="type">ir.actions.act_window</field>
-        <field name="res_model">afip.incoterm</field>
+        <field name="res_model">l10n_ar.afip.incoterm</field>
         <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
     </record>
 
-    <menuitem name="Incoterms" action="act_afip_incoterm" id="menu_action_afip_incoterm" sequence="20" parent="menu_afip_config"/>
+    <menuitem name="Incoterms" action="act_l10n_ar_afip_incoterm" id="menu_action_l10n_ar_afip_incoterm" sequence="20" parent="menu_afip_config"/>
 
 </odoo>

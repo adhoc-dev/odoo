@@ -116,8 +116,8 @@ class AccountInvoice(models.Model):
         compute="_compute_argentina_amounts",
         string='Other Taxes Amount'
     )
-    afip_incoterm_id = fields.Many2one(
-        'afip.incoterm',
+    l10n_ar_afip_incoterm_id = fields.Many2one(
+        'l10n_ar.afip.incoterm',
         'AFIP Incoterm',
         readonly=True,
         states={'draft': [('readonly', False)]},
