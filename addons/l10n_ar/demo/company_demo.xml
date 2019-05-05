@@ -5,7 +5,7 @@
         <!-- because argentina country is configurade by base, argentina chart is loaded and localization is setted -->
         <field name='l10n_ar_gross_income_type'>no_liquida</field>
         <field name='l10n_ar_afip_responsability_type'>1</field>
-        <field name="start_date" eval="time.strftime('%Y-%m')+'-1'"/>
+        <field name="l10n_ar_start_date" eval="time.strftime('%Y-%m')+'-1'"/>
         <!-- por errores en los test de odoo, para demo revertimos el cambio, lo ideal seria modificar el caso de test pero no lo logre  -->
         <!-- <field name="tax_calculation_rounding_method">round_per_line</field> -->
     </record>
@@ -25,7 +25,7 @@
         <field name="email">info@yourcompany.example.com</field>
         <field name="website">www.example.com</field>
         <field name="supplier" eval="True"/>
-        <field name="start_date" eval="time.strftime('%Y-%m')+'-1'"/>
+        <field name="l10n_ar_start_date" eval="time.strftime('%Y-%m')+'-1'"/>
         <!-- <field name="image" type="base64" file="base/static/img/main_partner-image.png"/> -->
     </record>
 
@@ -60,7 +60,7 @@
         <field name="email">info@exento.example.com</field>
         <field name="website">www.exento.com</field>
         <field name="supplier" eval="True"/>
-        <field name="start_date" eval="time.strftime('%Y-%m')+'-1'"/>
+        <field name="l10n_ar_start_date" eval="time.strftime('%Y-%m')+'-1'"/>
         <!-- <field name="image" type="base64" file="base/static/img/main_partner-image.png"/> -->
     </record>
 

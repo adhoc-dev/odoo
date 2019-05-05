@@ -28,7 +28,7 @@
                     <!-- add other documents -->
                     <group string="AFIP" name="afip">
                         <group name="afip_col_1">
-                            <field name="start_date"/>
+                            <field name="l10n_ar_start_date"/>
                         </group>
                     </group>
                     <group string="Others" name="others">

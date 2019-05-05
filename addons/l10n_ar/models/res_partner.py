@@ -28,7 +28,7 @@ class ResPartner(models.Model):
     ],
         'Gross Income Type',
     )
-    start_date = fields.Date(
+    l10n_ar_start_date = fields.Date(
         'Start-up Date',
     )
     l10n_ar_afip_responsability_type = fields.Selection(
