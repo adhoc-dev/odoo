@@ -56,7 +56,7 @@ Install Argentinian chart of accounts:
         'views/account_account_view.xml',
         'views/res_currency_view.xml',
         'views/account_fiscal_position_view.xml',
-        'views/product_uom_view.xml',
+        'views/uom_uom_view.xml',
         'views/account_journal_view.xml',
         'views/account_invoice_view.xml',
         'views/l10n_latam_document_type_view.xml',

@@ -4,7 +4,7 @@
     <record id="product_uom_tree_view" model="ir.ui.view">
         <field name="name">uom.uom.tree</field>
         <field name="model">uom.uom</field>
-        <field name="inherit_id" ref="product.product_uom_tree_view"/>
+        <field name="inherit_id" ref="uom.product_uom_tree_view"/>
         <field name="arch" type="xml">
             <tree>
                 <field name="l10n_ar_afip_code"/>
@@ -15,7 +15,7 @@
     <record id="product_uom_form_view" model="ir.ui.view">
         <field name="name">uom.uom.form</field>
         <field name="model">uom.uom</field>
-        <field name="inherit_id" ref="product.product_uom_form_view"/>
+        <field name="inherit_id" ref="uom.product_uom_form_view"/>
         <field name="arch" type="xml">
             <field name="rounding" position="after">
                 <field name="l10n_ar_afip_code"/>
