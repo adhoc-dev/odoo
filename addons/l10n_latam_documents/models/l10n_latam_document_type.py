@@ -35,13 +35,12 @@ class L10nLatamAccountDocmentType(models.Model):
         'Name on Reports',
         help='Name that will be printed in reports, for example "CREDIT NOTE"'
     )
-    # analog to odoo account.invoice.type but with more options allowing to
-    # identifiy the kind of domecunt we are working with. (not only
-    # related to account.invoice, could be for documents of other models like
-    # stock.picking)
     internal_type = fields.Selection([],
-        string='Internal Type',
         index=True,
+        help='Analog to odoo account.invoice.type but with more options'
+        ' allowing to identify the kind of document we are working with.'
+        ' (not only related to account.invoice, could be for documents of'
+        ' other models like stock.picking)'
     )
     validator_id = fields.Many2one(
         'base.validator',
