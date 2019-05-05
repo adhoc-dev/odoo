@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record model="ir.ui.view" id="view_company_inherit_form">
+    <record model="ir.ui.view" id="view_company_form">
         <field name="name">res.company.form.inherit</field>
-        <field name="inherit_id" ref="l10n_ar_partner.view_company_inherit_form"/>
-        <!-- <field name="inherit_id" ref="l10n_latam_documents.view_company_inherit_form"/> -->
+        <field name="inherit_id" ref="l10n_ar_base.view_company_form"/>
         <field name="model">res.company</field>
         <field name="arch" type="xml">
-            <!-- extendemos l10n_ar_partner para hacer obligatorio si cia argentina -->
+            <!-- extendemos l10n_ar_base para hacer obligatorio si cia argentina -->
             <field name="l10n_ar_identification_type_id" position="attributes">
                 <attribute name="attrs">{'required': [('localization', '=', 'argentina')]}</attribute>
             </field>
