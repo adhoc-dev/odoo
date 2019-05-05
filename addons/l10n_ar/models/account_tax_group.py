@@ -33,13 +33,13 @@ class AccountTaxGroup(models.Model):
         help='Other Taxes According AFIP',
         index=True,
     )
-    application_code = fields.Char(
+    l10n_ar_application_code = fields.Char(
         'Application Code',
-        compute='_compute_application_code',
+        compute='_compute_l10n_ar_application_code',
     )
 
     @api.depends('application')
-    def _compute_application_code(self):
+    def _compute_l10n_ar_application_code(self):
         code = {
             'national_taxes': '01',
             'provincial_taxes': '02',
@@ -47,4 +47,4 @@ class AccountTaxGroup(models.Model):
             'internal_taxes': '04',
         }
         for rec in self:
-            rec.application_code = code.get(rec.application, '99')
+            rec.l10n_ar_application_code = code.get(rec.application, '99')
