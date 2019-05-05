@@ -23,7 +23,7 @@ class AccountInvoice(models.Model):
         related='commercial_partner_id.l10n_ar_id_number',
         readonly=True,
     )
-    state_id = fields.Many2one(
+    l10n_ar_state_id = fields.Many2one(
         related='partner_id.state_id',
         store=True,
         readonly=True,
