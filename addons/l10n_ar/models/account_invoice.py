@@ -105,7 +105,7 @@ class AccountInvoice(models.Model):
     # la idea es incorporar la posibilidad de forzar otro concepto distinto
     # al sugerido, para no complicarla y ser compatible hacia atras de manera
     # simple, agregamos este otro campo
-    force_afip_concept = fields.Selection(
+    l10n_ar_force_afip_concept = fields.Selection(
         selection=afip_invoice_concepts,
         string="AFIP concept",
         readonly=True,
