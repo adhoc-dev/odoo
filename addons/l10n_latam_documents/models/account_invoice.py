@@ -59,7 +59,7 @@ class AccountInvoice(models.Model):
         index=True,
     )
     l10n_latam_next_number = fields.Integer(
-        compute='_compute_next_number',
+        compute='_compute_l10n_latam_next_number',
         string='Next Number',
     )
     l10n_latam_use_documents = fields.Boolean(
