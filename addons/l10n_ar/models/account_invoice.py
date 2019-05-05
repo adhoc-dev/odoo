@@ -44,11 +44,11 @@ class AccountInvoice(models.Model):
         related='move_id.l10n_ar_afip_responsability_type',
         index=True,
     )
-    invoice_number = fields.Integer(
-        compute='_compute_invoice_number',
+    l10n_ar_invoice_number = fields.Integer(
+        compute='_compute_l10n_ar_invoice_number',
     )
     l10n_ar_afip_pos_number = fields.Integer(
-        compute='_compute_invoice_number',
+        compute='_compute_l10n_ar_invoice_number',
         string="AFIP Point Of Sale",
     )
     vat_tax_ids = fields.One2many(
@@ -179,7 +179,7 @@ class AccountInvoice(models.Model):
 
     @api.multi
     @api.depends('l10n_latam_document_number', 'number')
-    def _compute_invoice_number(self):
+    def _compute_l10n_ar_invoice_number(self):
         """ Funcion que calcula numero de punto de venta y numero de factura
         a partir del document number. Es utilizado principalmente por el modulo
         de vat ledger citi
