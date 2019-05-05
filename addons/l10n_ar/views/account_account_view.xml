@@ -7,7 +7,6 @@
         <field name="inherit_id" ref="account.view_account_form"/>
         <field name="arch" type="xml">
             <field name="company_id" position="before">
-                <field name="afip_activity_id"/>
                 <field name="vat_f2002_category_id"/>
             </field>
         </field>
