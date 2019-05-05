@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
     <record id="view_account_position_form" model="ir.ui.view">
         <field name="name">account.fiscal.position.form</field>
         <field name="model">account.fiscal.position</field>
@@ -10,6 +11,7 @@
             </field>
         </field>
     </record>
+
     <record id="view_account_position_template_form" model="ir.ui.view">
         <field name="name">account.fiscal.position.template.form</field>
         <field name="model">account.fiscal.position.template</field>
@@ -17,6 +19,7 @@
         <field name="arch" type="xml">
             <field name="name" position="after">
                 <field name="l10n_ar_afip_code"/>
+
                 <!-- TODO this should be added in odoo core -->
                 <field name="auto_apply"/>
                 <field name="country_group_id" attrs="{'invisible': [('auto_apply', '!=', True)]}"/>
@@ -32,7 +35,9 @@
                     <span> To </span>
                     <field name="zip_to" class="oe_inline"/>
                 </div>
+
             </field>
         </field>
     </record>
+
 </odoo>
