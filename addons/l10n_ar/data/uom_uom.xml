@@ -54,7 +54,7 @@
     <record model='uom.uom' forcecreate="False" id='product.product_uom_ton'>
         <field name='l10n_ar_afip_code'>29</field>
     </record>
-    <record model='uom.uom' forcecreate="False" id='product.product_uom_unit'>
+    <record model='uom.uom' forcecreate="False" id='uom.product_uom_unit'>
         <field name='l10n_ar_afip_code'>7</field>
     </record>
 </odoo>
