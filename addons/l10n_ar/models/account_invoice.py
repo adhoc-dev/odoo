@@ -9,6 +9,7 @@ _logger = logging.getLogger(__name__)
 
 
 class AccountInvoice(models.Model):
+
     _inherit = "account.invoice"
 
     afip_invoice_concepts = [
@@ -23,44 +24,28 @@ class AccountInvoice(models.Model):
         readonly=True,
     )
     state_id = fields.Many2one(
-        # related='commercial_partner_id.state_id',
-        # al final lo hacemos por contacto (y no commercial) para poder usar
-        # direcciones distintas
         related='partner_id.state_id',
         store=True,
         readonly=True,
         auto_join=True,
     )
-    # IMPORANTE: si llegamos a implementar el campo computado no usar
-    # cotizacion de la moneda ya que esta puede cambiar y ademas, si facturamos
-    # algo futuro y no existe cotizacion, se usa la de hoy y luego al agregar
-    # la cotizacion este dato va a cambiar
-    # TODO: depreciar este campo y la funcion que lo setea, lo dejamos por
-    # ahora para que no se borre esta columna que ya esta calculada, pero si
-    # todo va bien con el nuevo computado, lo vamos a borrar directamente
     currency_rate = fields.Float(
-        string='Currency Rate',
         copy=False,
         digits=(16, 4),
         # TODO make it editable, we have to change move create method
         readonly=True,
     )
-    # computed_currency_rate = fields.Float(
-    #     string='Currency Rate',
-    #     compute='_compute_currency_rate',
-    #     digits=(10, 6),
-    # )
     l10n_ar_letter = fields.Selection(
         related='l10n_latam_document_type_id.l10n_ar_letter',
     )
-    # mostly used on reports
+
+    # Mostly used on reports
     afip_responsability_type = fields.Selection(
         related='move_id.afip_responsability_type',
         index=True,
     )
     invoice_number = fields.Integer(
         compute='_compute_invoice_number',
-        string="Invoice Number",
     )
     point_of_sale_number = fields.Integer(
         compute='_compute_invoice_number',
@@ -89,29 +74,20 @@ class AccountInvoice(models.Model):
     # TODO revisar si se usa y si no borrar
     vat_base_amount = fields.Monetary(
         compute="_compute_argentina_amounts",
-        string='VAT Base Amount'
     )
     # base imponible (no se incluyen no corresponde, exento y no gravado)
     vat_taxable_amount = fields.Monetary(
         compute="_compute_argentina_amounts",
-        string='VAT Taxable Amount'
     )
-    # base iva exento
     vat_exempt_base_amount = fields.Monetary(
         compute="_compute_argentina_amounts",
-        string='VAT Exempt Base Amount'
     )
-    # base iva no gravado
     vat_untaxed_base_amount = fields.Monetary(
         compute="_compute_argentina_amounts",
-        string='VAT Untaxed Base Amount'
     )
-    # importe de iva
     vat_amount = fields.Monetary(
         compute="_compute_argentina_amounts",
-        string='VAT Amount'
     )
-    # importe de otros impuestos
     other_taxes_amount = fields.Monetary(
         compute="_compute_argentina_amounts",
         string='Other Taxes Amount'
@@ -243,20 +219,6 @@ class AccountInvoice(models.Model):
                     re.sub("[^0-9]", "", invoice_number))
                 rec.point_of_sale_number = int(
                     re.sub("[^0-9]", "", point_of_sale))
-
-    # TODO borrar o implementar. Al final usamos el currency rate que
-    # almacenamos porque es muy inexacto calcularlo ya que se pierde
-    # información y segun el importe, al mismo cambio, podriamos tener
-    # distintos valores de cambio
-    # @api.multi
-    # def _compute_currency_rate(self):
-    #     for rec in self:
-    #         if rec.currency_id and rec.company_id and (
-    #                 rec.currency_id != rec.company_id.currency_id):
-    #             rec.computed_currency_rate = abs(
-    #                 rec.amount_total_company_signed / rec.amount_total)
-    #         else:
-    #             rec.computed_currency_rate = 1.0
 
     @api.multi
     def get_localization_invoice_vals(self):
@@ -425,17 +387,6 @@ class AccountInvoice(models.Model):
                     ', '.join(unconfigured_tax_groups.mapped(
                         lambda x: '%s (%s)' % (x.name, x.id))))))
 
-        # for invoice in argentinian_invoices:
-        #     # TODO usar round
-        #     # TODO tal vez debamos usar esto para un chequeo de suma de
-        #     # importes y demas, tener en cuenta caso de importaciones
-        #     # tal como esta este chequeo da error si se agregan impuestos
-        #     # manuales
-        #     if abs(invoice.vat_base_amount - invoice.amount_untaxed) > 0.1:
-        #         raise ValidationError(_(
-        #             "Invoice with ID %i has some lines without vat Tax ") % (
-        #                 invoice.id))
-
         # verificamos facturas de compra que deben reportar cuit y no lo tienen
         # configurado
         without_cuit = argentinian_invoices.filtered(
@@ -510,23 +461,6 @@ class AccountInvoice(models.Model):
                         afip_exempt_codes,
                         invoice.id,
                         invoice.display_name))
-
-    # TODO sacamos esto porque no era muy lindo y daba algunos errores con
-    # el account_fix, hicimos que los datos demo hagan el compute tax
-    # habria que ver una mejor forma de hacerlo para que tambien ande bien si
-    # se importa desde interfaz
-    # If we import or get demo data
-    # tax_id is not loaded on tax lines, we couldn't find the error
-    # so we add this to fix it
-    # @api.one
-    # @api.constrains('invoice_line_ids')
-    # def update_taxes_fix(self):
-    #     context = dict(self._context)
-    #     if context.get('constraint_update_taxes'):
-    #         return True
-    #     self.with_context(constraint_update_taxes=True).compute_taxes()
-
-    # we add fiscal position with fp method instead of directly from partner
 
     @api.constrains('date_invoice')
     def set_date_afip(self):
