@@ -158,7 +158,6 @@ class AccountInvoice(models.Model):
             recs = self.search([('name', operator, name)] + args, limit=limit)
         return recs.name_get()
 
-    @api.multi
     @api.constrains(
         'journal_id',
         'partner_id',
@@ -178,7 +177,6 @@ class AccountInvoice(models.Model):
                     rec.journal_id, rec.type, rec.partner_id
                 ).get('journal_document_type'))
 
-    @api.multi
     @api.depends(
         'move_name',
         'l10n_latam_document_number',
@@ -277,14 +275,12 @@ class AccountInvoice(models.Model):
             invoice.write(inv_vals)
         return True
 
-    @api.multi
     @api.onchange('journal_id', 'partner_id', 'company_id')
     def onchange_journal_partner_company(self):
         res = self._get_available_journal_document_types(
             self.journal_id, self.type, self.partner_id)
         self.l10n_latam_journal_document_type_id = res['journal_document_type']
 
-    @api.multi
     @api.depends('journal_id', 'partner_id', 'company_id')
     def _compute_l10n_latam_available_journal_document_types(self):
         """
@@ -347,7 +343,6 @@ class AccountInvoice(models.Model):
             'Method ot implemented by localization of %s') % (
                 journal.company_id.country_id.name))
 
-    @api.multi
     @api.constrains('l10n_latam_document_type_id', 'l10n_latam_document_number')
     @api.onchange('l10n_latam_document_type_id', 'l10n_latam_document_number')
     def validate_document_number(self):
@@ -360,7 +355,6 @@ class AccountInvoice(models.Model):
             if res and res != rec.l10n_latam_document_number:
                 rec.l10n_latam_document_number = res
 
-    @api.multi
     @api.constrains('l10n_latam_journal_document_type_id', 'journal_id')
     def check_journal_document_type_journal(self):
         for rec in self:
@@ -374,7 +368,6 @@ class AccountInvoice(models.Model):
                         rec.l10n_latam_journal_document_type_id.display_name,
                         rec.journal_id.name)))
 
-    @api.multi
     @api.constrains('type', 'l10n_latam_document_type_id')
     def check_invoice_type_document_type(self):
         for rec in self:
@@ -420,7 +413,6 @@ class AccountInvoice(models.Model):
         return super(
             AccountInvoice, self.filtered(lambda x: not x.l10n_latam_use_documents))
 
-    @api.multi
     @api.constrains('l10n_latam_document_number', 'partner_id', 'company_id')
     def _check_document_number_unique(self):
         """ We dont implement this on _check_duplicate_supplier_reference
