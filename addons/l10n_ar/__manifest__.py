@@ -54,7 +54,6 @@ Install Argentinian chart of accounts:
         'views/afip_menuitem.xml',
         'views/afip_incoterm_view.xml',
         'views/account_account_view.xml',
-        'views/res_country_view.xml',
         'views/res_currency_view.xml',
         'views/account_fiscal_position_view.xml',
         'views/product_uom_view.xml',
