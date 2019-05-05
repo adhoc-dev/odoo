@@ -9,7 +9,7 @@ class AccountTaxGroup(models.Model):
     l10n_ar_afip_code = fields.Integer(
         'AFIP Code',
     )
-    type = fields.Selection([
+    l10n_ar_type = fields.Selection([
         ('tax', 'TAX'),
         ('perception', 'Perception'),
         ('withholding', 'Withholding'),
