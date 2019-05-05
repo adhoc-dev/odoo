@@ -42,7 +42,6 @@ Install Argentinian chart of accounts:
         'data/res_currency_data.xml',
         'data/afip_vat_f2002_category_data.xml',
         'data/res_country_afip_code.xml',
-        'data/res_country_cuit.xml',
         'data/res_country_group_data.xml',
         'data/menuitem.xml',
         'data/product_data.xml',
