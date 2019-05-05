@@ -24,7 +24,7 @@ class AccountTaxGroup(models.Model):
         ('other', 'Other')],
         index=True,
     )
-    application = fields.Selection([
+    l10n_ar_application = fields.Selection([
         ('national_taxes', 'National Taxes'),
         ('provincial_taxes', 'Provincial Taxes'),
         ('municipal_taxes', 'Municipal Taxes'),
