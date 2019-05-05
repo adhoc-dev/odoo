@@ -29,7 +29,7 @@ class AccountInvoice(models.Model):
         readonly=True,
         auto_join=True,
     )
-    currency_rate = fields.Float(
+    l10n_ar_currency_rate = fields.Float(
         copy=False,
         digits=(16, 4),
         # TODO make it editable, we have to change move create method
@@ -223,18 +223,18 @@ class AccountInvoice(models.Model):
     @api.multi
     def get_localization_invoice_vals(self):
         self.ensure_one()
-        # TODO depreciar esta funcion y convertir a currency_rate campo
+        # TODO depreciar esta funcion y convertir a l10n_ar_currency_rate campo
         # calculado que la calcule en funcion a los datos del move
         if self.company_id.country_id.code == 'AR':
             if self.company_id.currency_id == self.currency_id:
-                currency_rate = 1.0
+                l10n_ar_currency_rate = 1.0
             else:
                 currency = self.currency_id.with_context(
                     date=self.date_invoice or fields.Date.context_today(self))
-                currency_rate = currency.compute(
+                l10n_ar_currency_rate = currency.compute(
                     1., self.company_id.currency_id, round=False)
             return {
-                'currency_rate': currency_rate,
+                'l10n_ar_currency_rate': l10n_ar_currency_rate,
             }
         else:
             return super(
