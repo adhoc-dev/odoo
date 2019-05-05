@@ -24,8 +24,8 @@ class ResCompany(models.Model):
     l10n_ar_afip_responsability_type = fields.Selection(
         related='partner_id.l10n_ar_afip_responsability_type',
     )
-    company_requires_vat = fields.Boolean(
-        compute='_compute_company_requires_vat',
+    l10n_ar_company_requires_vat = fields.Boolean(
+        compute='_compute_l10n_ar_company_requires_vat',
         readonly=True,
     )
 
@@ -38,7 +38,7 @@ class ResCompany(models.Model):
             rec.tax_calculation_rounding_method = 'round_globally'
 
     @api.depends('l10n_ar_afip_responsability_type')
-    def _compute_company_requires_vat(self):
+    def _compute_l10n_ar_company_requires_vat(self):
         for rec in self.filtered(
                 lambda x: x.l10n_ar_afip_responsability_type in ['1', '1FM']):
-            rec.company_requires_vat = True
+            rec.l10n_ar_company_requires_vat = True

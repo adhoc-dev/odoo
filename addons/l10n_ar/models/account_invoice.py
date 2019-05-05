@@ -342,7 +342,7 @@ class AccountInvoice(models.Model):
         # validation to avoid errors on invoice creations from other menus
         # and for performance
         for inv_line in argentinian_invoices.filtered(
-                lambda x: x.company_id.company_requires_vat).mapped(
+                lambda x: x.company_id.l10n_ar_company_requires_vat).mapped(
                     'invoice_line_ids'):
             vat_taxes = inv_line.invoice_line_tax_ids.filtered(
                 lambda x:
