@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<odoo>
-  <data noupdate="0">
+<odoo noupdate="0">
 
 <!-- EXENTO -->
     <!-- Retenciones suss -->
@@ -147,5 +146,4 @@
             <field name="tax_group_id" ref="l10n_ar.tax_group_retencion_iva"/>
         </record>
 
-  </data>
 </odoo>

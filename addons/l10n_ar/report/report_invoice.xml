@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-<data>
 <template id="report_invoice_document" inherit_id="account.report_invoice_document" name="Argentina Invoice">
         <xpath expr="//span[@t-field='o.number']" position="replace">
             <span t-field="o.journal_document_class_id.document_type_id.l10n_ar_letter"/>
         </xpath>
         <xpath expr="//span[@t-field='l.price_unit']" position="replace">
-            <span t-field="l.printed_price_unit"/>  
+            <span t-field="l.printed_price_unit"/>
         </xpath>
         <xpath expr="//span[@t-field='l.price_subtotal']" position="replace">
             <span t-field="l.printed_price_subtotal" t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>
@@ -31,5 +30,4 @@
             </tr>
         </xpath>
 </template>
-</data>
 </odoo>
