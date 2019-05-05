@@ -115,7 +115,7 @@ class AccountInvoice(models.Model):
         readonly=True,
         states={'draft': [('readonly', False)]},
     )
-    afip_service_end = fields.Date(
+    l10n_ar_afip_service_end = fields.Date(
         string='Service End Date',
         readonly=True,
         states={'draft': [('readonly', False)]},
@@ -471,8 +471,8 @@ class AccountInvoice(models.Model):
             if not rec.afip_service_start:
                 vals['afip_service_start'] = (
                     date_invoice + relativedelta(day=1))
-            if not rec.afip_service_end:
-                vals['afip_service_end'] = date_invoice + \
+            if not rec.l10n_ar_afip_service_end:
+                vals['l10n_ar_afip_service_end'] = date_invoice + \
                     relativedelta(day=1, days=-1, months=+1)
             if vals:
                 rec.write(vals)
