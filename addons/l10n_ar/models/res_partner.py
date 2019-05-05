@@ -17,7 +17,7 @@ class ResPartner(models.Model):
         ('10', 'IVA Liberado – Ley Nº 19.640'),
     ]
 
-    gross_income_number = fields.Char(
+    l10n_ar_gross_income_number = fields.Char(
         'Gross Income Number',
         size=64,
     )

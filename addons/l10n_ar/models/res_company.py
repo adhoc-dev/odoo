@@ -10,8 +10,8 @@ class ResCompany(models.Model):
         related='country_id.code',
         string='Country Code',
     )
-    gross_income_number = fields.Char(
-        related='partner_id.gross_income_number',
+    l10n_ar_gross_income_number = fields.Char(
+        related='partner_id.l10n_ar_gross_income_number',
         string='Gross Income Number',
     )
     gross_income_type = fields.Selection(
