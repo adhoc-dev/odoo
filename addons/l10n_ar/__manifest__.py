@@ -60,7 +60,6 @@ Install Argentinian chart of accounts:
         'views/account_journal_view.xml',
         'views/account_invoice_view.xml',
         'views/l10n_latam_document_type_view.xml',
-        'views/afip_tax_view.xml',
         'security/ir.model.access.csv',
         'security/security.xml',
     ],
