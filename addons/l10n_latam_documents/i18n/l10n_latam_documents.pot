@@ -41,12 +41,12 @@ msgstr ""
 #. module: l10n_latam_documents
 #: model:ir.model,name:l10n_latam_documents.model_account_chart_template
 msgid "Account Chart Template"
-msgstr "Plantilla de Plan de Cuentas"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model,name:l10n_latam_documents.model_account_reconciliation_widget
 msgid "Account Reconciliation widget"
-msgstr "Widget de reconciliación de cuenta"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model,name:l10n_latam_documents.model_l10n_latam_account_payment_receiptbook
@@ -56,7 +56,7 @@ msgstr ""
 #. module: l10n_latam_documents
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_account_payment_receiptbook__active
 msgid "Active"
-msgstr "Activo"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_account_journal_document_type__next_number
@@ -67,7 +67,7 @@ msgstr ""
 #. module: l10n_latam_documents
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_account_invoice_line__l10n_latam_price_subtotal
 msgid "Amount"
-msgstr "Importe"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: code:addons/l10n_latam_documents/models/account_chart_template.py:57
@@ -85,7 +85,7 @@ msgstr ""
 #. module: l10n_latam_documents
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_document_type__code
 msgid "Code"
-msgstr "Código"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model.fields,help:l10n_latam_documents.field_l10n_latam_document_type__code
@@ -95,36 +95,36 @@ msgstr ""
 #. module: l10n_latam_documents
 #: model:ir.model,name:l10n_latam_documents.model_res_company
 msgid "Companies"
-msgstr "Compañías"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_account_payment_receiptbook__company_id
 msgid "Company"
-msgstr "Compañía"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_document_type__country_id
 msgid "Country"
-msgstr "País"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_account_journal_document_type__create_uid
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_account_payment_receiptbook__create_uid
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_document_type__create_uid
 msgid "Created by"
-msgstr "Creado por"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_account_journal_document_type__create_date
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_account_payment_receiptbook__create_date
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_document_type__create_date
 msgid "Created on"
-msgstr "Creado el"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model,name:l10n_latam_documents.model_account_invoice_refund
 msgid "Credit Note"
-msgstr "Rectificativa"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: selection:l10n_latam.document.type,internal_type:0
@@ -152,7 +152,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_account_payment_receiptbook__display_name
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_document_type__display_name
 msgid "Display Name"
-msgstr "Nombre mostrado"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_document_type__doc_code_prefix
@@ -203,7 +203,7 @@ msgstr ""
 #: model:ir.actions.act_window,name:l10n_latam_documents.action_document_type
 #: model:ir.ui.menu,name:l10n_latam_documents.menu_document_type
 msgid "Document Types"
-msgstr "Tipos de Documentos"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model_terms:ir.ui.view,arch_db:l10n_latam_documents.view_account_journal_form
@@ -226,7 +226,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_account_invoice_refund__l10n_latam_document_sequence_id
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_account_journal_document_type__sequence_id
 msgid "Entry Sequence"
-msgstr "Secuencia del asiento"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: code:addons/l10n_latam_documents/models/account_invoice.py:260
@@ -243,7 +243,7 @@ msgstr ""
 #. module: l10n_latam_documents
 #: model_terms:ir.ui.view,arch_db:l10n_latam_documents.view_document_type_filter
 msgid "Group By..."
-msgstr "Agrupar por..."
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_account_journal_document_type__id
@@ -261,7 +261,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_document_type__internal_type
 #: model_terms:ir.ui.view,arch_db:l10n_latam_documents.view_document_type_filter
 msgid "Internal Type"
-msgstr "Tipo interno"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: code:addons/l10n_latam_documents/models/account_invoice.py:135
@@ -269,12 +269,12 @@ msgstr "Tipo interno"
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_account_invoice_refund__invoice_id
 #, python-format
 msgid "Invoice"
-msgstr "Factura"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model,name:l10n_latam_documents.model_account_invoice_line
 msgid "Invoice Line"
-msgstr "Linea de Factura"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: selection:l10n_latam.document.type,internal_type:0
@@ -284,7 +284,7 @@ msgstr ""
 #. module: l10n_latam_documents
 #: model:ir.model,name:l10n_latam_documents.model_account_invoice_report
 msgid "Invoices Statistics"
-msgstr "Estadísticas de facturas"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model.fields,help:l10n_latam_documents.field_l10n_latam_document_type__internal_type
@@ -295,7 +295,7 @@ msgstr ""
 #: model:ir.model,name:l10n_latam_documents.model_account_journal
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_account_journal_document_type__journal_id
 msgid "Journal"
-msgstr "Diario"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model,name:l10n_latam_documents.model_l10n_latam_account_journal_document_type
@@ -311,33 +311,33 @@ msgstr ""
 #. module: l10n_latam_documents
 #: model:ir.model,name:l10n_latam_documents.model_account_move
 msgid "Journal Entries"
-msgstr "Asientos contables"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model,name:l10n_latam_documents.model_account_move_line
 msgid "Journal Item"
-msgstr "Apunte contable"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_account_journal_document_type____last_update
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_account_payment_receiptbook____last_update
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_document_type____last_update
 msgid "Last Modified on"
-msgstr "Última modificación en"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_account_journal_document_type__write_uid
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_account_payment_receiptbook__write_uid
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_document_type__write_uid
 msgid "Last Updated by"
-msgstr "Última actualización por"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_account_journal_document_type__write_date
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_account_payment_receiptbook__write_date
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_document_type__write_date
 msgid "Last Updated on"
-msgstr "Última actualización el"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model,name:l10n_latam_documents.model_l10n_latam_document_type
@@ -347,7 +347,7 @@ msgstr ""
 #. module: l10n_latam_documents
 #: model_terms:ir.ui.view,arch_db:l10n_latam_documents.view_document_type_filter
 msgid "Localization"
-msgstr "Localización"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: code:addons/l10n_latam_documents/models/account_chart_template.py:58
@@ -366,7 +366,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_account_payment_receiptbook__name
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_document_type__name
 msgid "Name"
-msgstr "Nombre"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_document_type__report_name
@@ -387,13 +387,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_account_invoice__l10n_latam_next_number
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_account_payment__l10n_latam_next_number
 msgid "Next Number"
-msgstr "Próximo número"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model.fields,help:l10n_latam_documents.field_l10n_latam_account_journal_document_type__next_number
 #: model:ir.model.fields,help:l10n_latam_documents.field_l10n_latam_account_payment_receiptbook__next_number
 msgid "Next number that will be used. This number can be incremented frequently so the displayed value might already be obsolete"
-msgstr "Próximo número que se utilizará. Este número puede incrementarse frecuentemente por lo que el valor mostrado puede estar ya obsoleto."
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_account_payment_receiptbook__padding
@@ -403,17 +403,17 @@ msgstr ""
 #. module: l10n_latam_documents
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_account_payment_receiptbook__partner_type
 msgid "Partner Type"
-msgstr "Tipo de Empresa"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model,name:l10n_latam_documents.model_account_payment
 msgid "Payments"
-msgstr "Pagos"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_account_payment_receiptbook__prefix
 msgid "Prefix"
-msgstr "Prefijo"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model.fields,help:l10n_latam_documents.field_l10n_latam_document_type__doc_code_prefix
@@ -446,7 +446,7 @@ msgstr ""
 #: model:ir.actions.act_window,name:l10n_latam_documents.action_receiptbook_form
 #: model:ir.ui.menu,name:l10n_latam_documents.menu_receiptbook_form
 msgid "Receiptbooks"
-msgstr "Talonarios de recibos"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: code:addons/l10n_latam_documents/models/account_invoice.py:137
@@ -464,7 +464,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_account_payment_receiptbook__sequence
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_document_type__sequence
 msgid "Sequence"
-msgstr "Secuencia"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_account_payment_receiptbook__sequence_type
@@ -486,18 +486,18 @@ msgstr ""
 #. module: l10n_latam_documents
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_account_invoice__l10n_latam_amount_tax
 msgid "Tax"
-msgstr "Impuesto"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.ui.menu,name:l10n_latam_documents.menu_tax_entities_config
 msgid "Tax Entities"
-msgstr "Entidades Tributarias"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_account_invoice__l10n_latam_tax_line_ids
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_account_invoice_line__l10n_latam_invoice_line_tax_ids
 msgid "Taxes"
-msgstr "Impuestos"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: code:addons/l10n_latam_documents/models/account_payment.py:159
@@ -526,12 +526,12 @@ msgstr ""
 #. module: l10n_latam_documents
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_account_invoice_line__l10n_latam_price_unit
 msgid "Unit Price"
-msgstr "Precio unitario"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_account_invoice__l10n_latam_amount_untaxed
 msgid "Untaxed Amount"
-msgstr "Base imponible"
+msgstr ""
 
 #. module: l10n_latam_documents
 #: model_terms:ir.ui.view,arch_db:l10n_latam_documents.view_account_journal_form
