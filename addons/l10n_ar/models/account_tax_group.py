@@ -17,7 +17,7 @@ class AccountTaxGroup(models.Model):
     ],
         index=True,
     )
-    tax = fields.Selection([
+    l10n_ar_tax = fields.Selection([
         ('vat', 'VAT'),
         ('profits', 'Profits'),
         ('gross_income', 'Gross Income'),
