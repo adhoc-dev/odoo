@@ -36,7 +36,6 @@ class AccountFiscalPosition(models.Model):
         """ We use similar code than _get_fpos_by_region but we use
         "afip_responsability_type" insted of vat_required
         """
-
         base_domain = [
             ('auto_apply', '=', True),
             ('afip_responsability_type', '=', afip_responsability_type)
@@ -93,17 +92,13 @@ class AccountFiscalPosition(models.Model):
                 base_domain + null_country_dom, limit=1)
         return fpos or False
 
+    # We overwrite original Odoo methods in order ro replace vat_required logic
+    # for afip_responsability_type_ids
     @api.model
     def get_fiscal_position(self, partner_id, delivery_id=None):
-        """
-        We overwrite original functionality and replace vat_required logic
-        for afip_responsability_type_ids
-        """
-        # we need to overwrite code (between #####) from original function
-        #####
         if not partner_id:
             return False
-        # This can be easily overriden to apply more complex fiscal rules
+        # This can be easily overridden to apply more complex fiscal rules
         PartnerObj = self.env['res.partner']
         partner = PartnerObj.browse(partner_id)
 
@@ -114,14 +109,23 @@ class AccountFiscalPosition(models.Model):
             delivery = partner
 
         # partner manually set fiscal position always win
-        if (
-                delivery.property_account_position_id or
-                partner.property_account_position_id):
-            return (
-                delivery.property_account_position_id.id or
-                partner.property_account_position_id.id)
-        #####
+        if delivery.property_account_position_id or  partner.property_account_position_id:
+            return delivery.property_account_position_id.id or partner.property_account_position_id.id
 
+        ##### COMMENTED ORIGINAL CODE
+        """
+        # First search only matching VAT positions
+        vat_required = bool(partner.vat)
+
+        fp = self._get_fpos_by_region(delivery.country_id.id, delivery.state_id.id, delivery.zip, vat_required)
+
+        # Then if VAT required found no match, try positions that do not require it
+        if not fp and vat_required:
+            fp = self._get_fpos_by_region(delivery.country_id.id, delivery.state_id.id, delivery.zip, False)
+
+        return fp.id if fp else False
+        """
+        ##### INIT NEW CODE
         afip_responsability = (
             partner.commercial_partner_id.afip_responsability_type)
 
@@ -135,3 +139,4 @@ class AccountFiscalPosition(models.Model):
                 False)
 
         return fpos.id if fpos else False
+        ##### END NEW CODE
