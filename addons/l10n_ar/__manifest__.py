@@ -36,6 +36,7 @@ Install Argentinian chart of accounts:
         'data/account_tax_template.xml',
         'data/account_fiscal_template.xml',
         'data/uom_uom.xml',
+        'data/base_validator_data.xml',
         'data/l10n_latam.document.type.csv',
         'data/res_partner_data.xml',
         'data/res_currency_data.xml',
@@ -45,7 +46,6 @@ Install Argentinian chart of accounts:
         'data/res_country_group_data.xml',
         'data/menuitem.xml',
         'data/product_data.xml',
-        'data/base_validator_data.xml',
         'data/afip_incoterm.xml',
         # los cargamos con csv pero los hacemos no actualizables con un hook
         'views/account_move_line_view.xml',
