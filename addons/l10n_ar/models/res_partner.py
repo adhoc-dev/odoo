@@ -1,16 +1,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
-from odoo import fields, models, api, _
-from odoo.exceptions import UserError
-try:
-    from pysimplesoap.client import SoapFault
-except ImportError:
-    SoapFault = None
-import logging
-_logger = logging.getLogger(__name__)
+from odoo import fields, models
 
 
 class ResPartner(models.Model):
+
     _inherit = 'res.partner'
 
     _afip_responsabilities = [

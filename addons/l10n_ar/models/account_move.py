@@ -1,12 +1,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
 from odoo import models, api, fields
 from odoo.addons.l10n_ar.models.res_partner import ResPartner
-import logging
-_logger = logging.getLogger(__name__)
 
 
 class AccountMove(models.Model):
+
     _inherit = 'account.move'
 
     afip_responsability_type = fields.Selection(

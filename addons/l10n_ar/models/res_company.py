@@ -1,8 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
 from odoo import fields, models, api
-from odoo.addons.l10n_latam_documents.models.res_company import ResCompany
-from odoo.addons.l10n_ar.models.res_partner import ResPartner
 
 
 class ResCompany(models.Model):
@@ -31,12 +28,14 @@ class ResCompany(models.Model):
         compute='_compute_company_requires_vat',
         readonly=True,
     )
-    # use globally as default so that if child companies are created they
-    # also use this as default
-    # TODO cambiar a un onchange en vez de modificar default
-    tax_calculation_rounding_method = fields.Selection(
-        default='round_globally',
-    )
+
+    @api.onchange('country_id')
+    def onchange_country(self):
+        """ Argentinian companies use round_globally as
+        tax_calculation_rounding_method
+        """
+        for rec in self.filtered(lambda x: x.country_id.code == 'AR'):
+            rec.tax_calculation_rounding_method = 'round_globally'
 
     @api.depends('afip_responsability_type')
     def _compute_company_requires_vat(self):

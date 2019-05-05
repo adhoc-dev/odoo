@@ -3,6 +3,7 @@ from odoo import fields, models, api
 
 
 class AccountTaxGroup(models.Model):
+
     _inherit = 'account.tax.group'
 
     l10n_ar_afip_code = fields.Integer(
@@ -39,15 +40,11 @@ class AccountTaxGroup(models.Model):
 
     @api.depends('application')
     def _compute_application_code(self):
+        code = {
+            'national_taxes': '01',
+            'provincial_taxes': '02',
+            'municipal_taxes': '03',
+            'internal_taxes': '04',
+        }
         for rec in self:
-            if rec.application == 'national_taxes':
-                application_code = '01'
-            elif rec.application == 'provincial_taxes':
-                application_code = '02'
-            elif rec.application == 'municipal_taxes':
-                application_code = '03'
-            elif rec.application == 'internal_taxes':
-                application_code = '04'
-            else:
-                application_code = '99'
-            rec.application_code = application_code
+            rec.application_code = code.get(rec.application, '99')
