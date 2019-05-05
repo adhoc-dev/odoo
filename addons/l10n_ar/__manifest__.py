@@ -36,6 +36,7 @@ Install Argentinian chart of accounts:
         'data/account_tax_template.xml',
         'data/account_fiscal_template.xml',
         'data/uom_uom.xml',
+        'data/l10n_latam.document.type.csv',
         'data/res_partner_data.xml',
         'data/res_currency_data.xml',
         'data/afip_vat_f2002_category_data.xml',
@@ -47,7 +48,6 @@ Install Argentinian chart of accounts:
         'data/base_validator_data.xml',
         'data/afip_incoterm.xml',
         # los cargamos con csv pero los hacemos no actualizables con un hook
-        'data/l10n.latam.document.type.csv',
         'views/account_move_line_view.xml',
         'views/account_move_view.xml',
         'views/res_partner_view.xml',
@@ -69,7 +69,8 @@ Install Argentinian chart of accounts:
         'security/security.xml',
     ],
     'demo': [
-        'demo/partner_demo.xml',
+        # 'demo/partner_demo.xml',
+        # TODO this partners depends of the ones defined in l10n_ar_base that we delete so this ones will not work
         'demo/company_demo.xml',
         # 'demo/product_product_demo.xml',
         # 'demo/account_customer_invoice_demo.yml',
