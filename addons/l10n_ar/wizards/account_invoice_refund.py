@@ -18,7 +18,7 @@ class AccountInvoiceRefund(models.TransientModel):
             refund_invoices.write({
                 # TODO this origin should be set on l10n_latam_document module
                 'origin': invoice.l10n_latam_document_number or invoice.number,
-                'afip_service_start': invoice.afip_service_start,
+                'l10n_ar_afip_service_start': invoice.l10n_ar_afip_service_start,
                 'l10n_ar_afip_service_end': invoice.l10n_ar_afip_service_end,
             })
         return res

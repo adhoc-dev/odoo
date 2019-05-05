@@ -110,7 +110,7 @@ class AccountInvoice(models.Model):
         string="AFIP concept",
         readonly=True,
     )
-    afip_service_start = fields.Date(
+    l10n_ar_afip_service_start = fields.Date(
         string='Service Start Date',
         readonly=True,
         states={'draft': [('readonly', False)]},
@@ -468,8 +468,8 @@ class AccountInvoice(models.Model):
         for rec in self.filtered('date_invoice'):
             date_invoice = fields.Datetime.from_string(rec.date_invoice)
             vals = {}
-            if not rec.afip_service_start:
-                vals['afip_service_start'] = (
+            if not rec.l10n_ar_afip_service_start:
+                vals['l10n_ar_afip_service_start'] = (
                     date_invoice + relativedelta(day=1))
             if not rec.l10n_ar_afip_service_end:
                 vals['l10n_ar_afip_service_end'] = date_invoice + \
