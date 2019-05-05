@@ -14,8 +14,8 @@ class ResCompany(models.Model):
         related='partner_id.l10n_ar_gross_income_number',
         string='Gross Income Number',
     )
-    gross_income_type = fields.Selection(
-        related='partner_id.gross_income_type',
+    l10n_ar_gross_income_type = fields.Selection(
+        related='partner_id.l10n_ar_gross_income_type',
         string='Gross Income',
     )
     start_date = fields.Date(

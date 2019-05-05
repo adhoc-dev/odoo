@@ -3,7 +3,7 @@
 <!-- Yourcompany Company -->
     <record id="base.main_company" model="res.company">
         <!-- because argentina country is configurade by base, argentina chart is loaded and localization is setted -->
-        <field name='gross_income_type'>no_liquida</field>
+        <field name='l10n_ar_gross_income_type'>no_liquida</field>
         <field name='l10n_ar_afip_responsability_type'>1</field>
         <field name="start_date" eval="time.strftime('%Y-%m')+'-1'"/>
         <!-- por errores en los test de odoo, para demo revertimos el cambio, lo ideal seria modificar el caso de test pero no lo logre  -->
@@ -34,7 +34,7 @@
         <field name='currency_id' ref='base.ARS'/>
         <field name='partner_id' ref='partner_mono'/>
         <field name='name'>Monotributista</field>
-        <field name='gross_income_type'>no_liquida</field>
+        <field name='l10n_ar_gross_income_type'>no_liquida</field>
         <!-- <field name="logo" type="base64" file="l10n_ar_account/demo/monotributista.png"/> -->
     </record>
 
@@ -69,7 +69,7 @@
         <field name='currency_id' ref='base.ARS'/>
         <field name='partner_id' ref='partner_exento'/>
         <field name='name'>Exento</field>
-        <field name='gross_income_type'>no_liquida</field>
+        <field name='l10n_ar_gross_income_type'>no_liquida</field>
         <!-- <field name="logo" type="base64" file="l10n_ar_account/demo/monotributista.png"/> -->
     </record>
 

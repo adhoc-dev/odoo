@@ -35,8 +35,8 @@
                         <group name="others_col_1">
                             <label for="l10n_ar_gross_income_number" string="Gross Income"/>
                             <div>
-                                <field name="gross_income_type" class="oe_inline"/>
-                                <field name="l10n_ar_gross_income_number" placeholder="Number..." class="oe_inline" attrs="{'invisible': [('gross_income_type', 'not in', ['multilateral', 'local'])], 'required': [('gross_income_type', 'in', ['multilateral', 'local'])]}"/>
+                                <field name=l10n_ar_gross_income_type class="oe_inline"/>
+                                <field name="l10n_ar_gross_income_number" placeholder="Number..." class="oe_inline" attrs="{'invisible': [('l10n_ar_gross_income_type', 'not in', ['multilateral', 'local'])], 'required': [('l10n_ar_gross_income_type', 'in', ['multilateral', 'local'])]}"/>
                             </div>
                         </group>
                         <group name="others_col_2">

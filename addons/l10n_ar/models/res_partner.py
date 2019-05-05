@@ -21,7 +21,7 @@ class ResPartner(models.Model):
         'Gross Income Number',
         size=64,
     )
-    gross_income_type = fields.Selection([
+    l10n_ar_gross_income_type = fields.Selection([
         ('multilateral', 'Multilateral'),
         ('local', 'Local'),
         ('no_liquida', 'No Liquida'),
