@@ -89,7 +89,7 @@ class AccountJournal(models.Model):
             return super(
                 AccountJournal, self)._update_journal_document_types()
 
-        if not self.use_documents:
+        if not self.l10n_latam_use_documents:
             return True
 
         letters = self.get_journal_letter()

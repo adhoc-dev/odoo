@@ -7,8 +7,8 @@
         <field name="inherit_id" ref="account.view_account_journal_form"/>
         <field name="arch" type="xml">
             <field name="type" position="after">
-                <field name="point_of_sale_type" attrs="{'invisible':['|', '|', ('l10n_ar_country_code', '!=', 'AR'), ('use_documents', '=', False), ('type', '!=', 'sale')], 'required':[('l10n_ar_country_code', '=', 'AR'), ('use_documents', '=', True), ('type', '=', 'sale')]}"/>
-                <field name="point_of_sale_number" attrs="{'invisible':['|', '|', ('l10n_ar_country_code', '!=', 'AR'), ('use_documents', '=', False), ('type', '!=', 'sale')], 'required':[('l10n_ar_country_code', '=', 'AR'), ('use_documents', '=', True), ('type', '=', 'sale')]}"/>
+                <field name="point_of_sale_type" attrs="{'invisible':['|', '|', ('l10n_ar_country_code', '!=', 'AR'), ('l10n_latam_use_documents', '=', False), ('type', '!=', 'sale')], 'required':[('l10n_ar_country_code', '=', 'AR'), ('l10n_latam_use_documents', '=', True), ('type', '=', 'sale')]}"/>
+                <field name="point_of_sale_number" attrs="{'invisible':['|', '|', ('l10n_ar_country_code', '!=', 'AR'), ('l10n_latam_use_documents', '=', False), ('type', '!=', 'sale')], 'required':[('l10n_ar_country_code', '=', 'AR'), ('l10n_latam_use_documents', '=', True), ('type', '=', 'sale')]}"/>
             </field>
         </field>
     </record>
