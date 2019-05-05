@@ -28,7 +28,6 @@
         <!-- TODO review with Juan-->
         <!-- <field name='afip_responsability_type'>3</field> -->
         <!-- add doc despacho y despacho imp serv -->
-        <field name='other_document_type_ids' eval='[(4, ref("dc_desp_imp"), False), (4, ref("dc_imp_serv"), False)]'/>
     </record>
 
 </odoo>
