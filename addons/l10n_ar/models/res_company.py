@@ -15,11 +15,11 @@ class ResCompany(models.Model):
     )
     gross_income_number = fields.Char(
         related='partner_id.gross_income_number',
-        string='Gross Income'
+        string='Gross Income Number',
     )
     gross_income_type = fields.Selection(
         related='partner_id.gross_income_type',
-        string='Gross Income'
+        string='Gross Income',
     )
     start_date = fields.Date(
         related='partner_id.start_date',

@@ -66,19 +66,18 @@ class AccountInvoice(models.Model):
         compute='_compute_invoice_number',
         string="Point Of Sale",
     )
-# impuestos e importes de impuestos
-    # todos los impuestos tipo iva (es un concepto mas bien interno)
     vat_tax_ids = fields.One2many(
         compute="_compute_argentina_amounts",
         comodel_name='account.invoice.tax',
-        string='VAT Taxes'
+        string='VAT Taxes',
+        help='Vat Taxes and vat tax amounts. Is an ADHOC internal concept',
     )
-    # todos los impuestos iva que componene base imponible (no se incluyen 0,
-    # 1, 2 que no son impuesto en si)
     vat_taxable_ids = fields.One2many(
         compute="_compute_argentina_amounts",
         comodel_name='account.invoice.tax',
-        string='VAT Taxes'
+        string='VAT Taxable Taxes',
+        help="Does not include afip_code [0, 1, 2] because their are"
+        " not taxes themselves: VAT Exempt, VAT Untaxed and VAT Not applicable"
     )
     # todos los impuestos menos los tipo iva vat_tax_ids
     not_vat_tax_ids = fields.One2many(
@@ -119,7 +118,7 @@ class AccountInvoice(models.Model):
     )
     afip_incoterm_id = fields.Many2one(
         'afip.incoterm',
-        'Incoterm',
+        'AFIP Incoterm',
         readonly=True,
         states={'draft': [('readonly', False)]},
     )
