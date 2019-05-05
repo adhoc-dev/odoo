@@ -11,23 +11,6 @@ class AccountFiscalPosition(models.Model):
         help='For eg. This code will be used on electronic invoice and citi '
         'reports',
     )
-    # TODO tal vez podriamos usar funcionalidad nativa con "vat subjected"
-
-    """
-    # TODO borrar si no lo usamos, por ahora lo resolivmos de manera nativa
-    # TODO ver que hacer con esto no va a funcionar
-    afip_responsability_type_ids
-
-    id='fiscal_position_template_iva_no_corresponde' [(6, False, [ref('l10n_ar.res_RM'), ref('l10n_ar.res_IVAE'), ref('l10n_ar.res_CLI_EXT'), ref('l10n_ar.res_EXT')])]
-
-    id='fiscal_position_template_zona_franca' [(6, False, [ref('l10n_ar.res_IVA_LIB')])]"
-
-    id='fiscal_position_template_exportaciones_al_exterior' [(6, False, [ref('l10n_ar.res_CLI_EXT')])]
-
-    <field name="vat_required" position="replace">
-        <field name="afip_responsability_type_ids" widget="many2many_tags" attrs="{'invisible': [('auto_apply', '!=', True)]}"/>
-    </field>
-    """
 
     @api.model
     def _get_fpos_by_region_and_responsability(
@@ -38,8 +21,17 @@ class AccountFiscalPosition(models.Model):
         """
         base_domain = [
             ('auto_apply', '=', True),
-            ('afip_responsability_type', '=', afip_responsability_type)
         ]
+        resp_code = {
+            '9': ['|', ('l10n_ar_afip_code', 'in', 'X'),
+                ('l10n_ar_afip_code', '=', False)],
+            '10': [('l10n_ar_afip_code', '=', 'Z')],
+            '6': [('l10n_ar_afip_code', '=', False)],
+            '4': [('l10n_ar_afip_code', '=', False)],
+            '8': [('l10n_ar_afip_code', '=', False)],
+        }
+        code_domain = resp_code.get(afip_responsability_type, [])
+        base_domain.extend(code_domain)
 
         if self.env.context.get('force_company'):
             base_domain.append(
@@ -93,7 +85,7 @@ class AccountFiscalPosition(models.Model):
         return fpos or False
 
     # We overwrite original Odoo methods in order ro replace vat_required logic
-    # for afip_responsability_type_ids
+    # for afip_responsability_type
     @api.model
     def get_fiscal_position(self, partner_id, delivery_id=None):
         if not partner_id:
