@@ -77,6 +77,5 @@ Install Argentinian chart of accounts:
         # 'demo/account_tax_template_demo.xml',
         # 'demo/account_other_docs_demo.yml',
     ],
-    'application': True,
     'post_init_hook': 'post_init_hook',
 }
