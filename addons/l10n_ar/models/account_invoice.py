@@ -128,8 +128,8 @@ class AccountInvoice(models.Model):
         for rec in self:
             vat_taxes = rec.tax_line_ids.filtered(
                 lambda r: (
-                    r.tax_id.tax_group_id.type == 'tax' and
-                    r.tax_id.tax_group_id.tax == 'vat'))
+                    r.tax_id.tax_group_id.l10n_ar_type == 'tax' and
+                    r.tax_id.tax_group_id.l10n_ar_tax == 'vat'))
             # we add and "r.base" because only if a there is a base amount it
             # is considered taxable, this is used for eg to validate invoices
             # on afip
@@ -151,8 +151,8 @@ class AccountInvoice(models.Model):
             # exempt taxes are the ones with code 2
             vat_exempt_taxes = rec.tax_line_ids.filtered(
                 lambda r: (
-                    r.tax_id.tax_group_id.type == 'tax' and
-                    r.tax_id.tax_group_id.tax == 'vat' and
+                    r.tax_id.tax_group_id.l10n_ar_type == 'tax' and
+                    r.tax_id.tax_group_id.l10n_ar_tax == 'vat' and
                     r.tax_id.tax_group_id.l10n_ar_afip_code == 2))
             rec.vat_exempt_base_amount = sum(
                 vat_exempt_taxes.mapped('base'))
@@ -163,8 +163,8 @@ class AccountInvoice(models.Model):
             # vat exempt taxes are the ones with code 1
             vat_untaxed_taxes = rec.tax_line_ids.filtered(
                 lambda r: (
-                    r.tax_id.tax_group_id.type == 'tax' and
-                    r.tax_id.tax_group_id.tax == 'vat' and
+                    r.tax_id.tax_group_id.l10n_ar_type == 'tax' and
+                    r.tax_id.tax_group_id.l10n_ar_tax == 'vat' and
                     r.tax_id.tax_group_id.l10n_ar_afip_code == 1))
             rec.vat_untaxed_base_amount = sum(
                 vat_untaxed_taxes.mapped('base'))
@@ -346,7 +346,7 @@ class AccountInvoice(models.Model):
                     'invoice_line_ids'):
             vat_taxes = inv_line.invoice_line_tax_ids.filtered(
                 lambda x:
-                x.tax_group_id.tax == 'vat' and x.tax_group_id.type == 'tax')
+                x.tax_group_id.l10n_ar_tax == 'vat' and x.tax_group_id.l10n_ar_type == 'tax')
             if len(vat_taxes) != 1:
                 raise ValidationError(_(
                     'Debe haber un y solo un impuesto de IVA por línea. '
@@ -380,7 +380,8 @@ class AccountInvoice(models.Model):
         tax_groups = argentinian_invoices.mapped(
             'tax_line_ids.tax_id.tax_group_id')
         unconfigured_tax_groups = tax_groups.filtered(
-            lambda r: not r.type or not r.tax or not r.application)
+            lambda r: not r.l10n_ar_type or
+            not r.l10n_ar_tax or not r.l10n_ar_application)
         if unconfigured_tax_groups:
             raise ValidationError(_(
                 "You are using argentinian localization and there are some tax"

@@ -13,8 +13,8 @@ class AccountInvoiceTax(models.Model):
         added on the invoice lines.
         """
         for rec in self:
-            if rec.manual and rec.tax_id.tax_group_id.type == 'tax' and \
-                    rec.tax_id.tax_group_id.tax == 'vat':
+            if rec.manual and rec.tax_id.tax_group_id.l10n_ar_type == 'tax' and \
+                    rec.tax_id.tax_group_id.l10n_ar_tax == 'vat':
                 raise ValidationError(_(
                     'You can not add VAT taxes manually, you should add it to'
                     ' the invoice lines'))

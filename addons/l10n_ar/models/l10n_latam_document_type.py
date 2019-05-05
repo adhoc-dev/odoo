@@ -69,7 +69,7 @@ class L10nLtamDocumentType(models.Model):
         if self.country_id.code == 'AR' and self.l10n_ar_letter in [
            'B', 'C', 'X', 'R']:
             return self.env['account.tax'].search(
-                [('tax_group_id.tax', '=', 'vat'),
-                    ('tax_group_id.type', '=', 'tax')])
+                [('tax_group_id.l10n_ar_tax', '=', 'vat'),
+                 ('tax_group_id.l10n_ar_type', '=', 'tax')])
         else:
             return super(L10nLtamDocumentType, self).get_taxes_included()

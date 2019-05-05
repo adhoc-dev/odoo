@@ -38,7 +38,7 @@ class AccountTaxGroup(models.Model):
         compute='_compute_l10n_ar_application_code',
     )
 
-    @api.depends('application')
+    @api.depends('l10n_ar_application')
     def _compute_l10n_ar_application_code(self):
         code = {
             'national_taxes': '01',
@@ -47,4 +47,5 @@ class AccountTaxGroup(models.Model):
             'internal_taxes': '04',
         }
         for rec in self:
-            rec.l10n_ar_application_code = code.get(rec.application, '99')
+            rec.l10n_ar_application_code = code.get(
+                rec.l10n_ar_application, '99')
