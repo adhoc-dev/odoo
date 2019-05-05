@@ -10,7 +10,7 @@ class AccountInvoiceRefund(models.TransientModel):
     _inherit = "account.invoice.refund"
 
     @api.model
-    def _get_invoice_id(self):
+    def _get_l10n_ar_invoice_id(self):
         invoice = self.env['account.invoice'].browse(
             self._context.get('active_ids', False))
         # we dont force one for compatibility with already running dsbs
@@ -19,13 +19,13 @@ class AccountInvoiceRefund(models.TransientModel):
                 'Refund wizard must be call only from one invoice'))
         return invoice
 
-    invoice_id = fields.Many2one(
+    l10n_ar_invoice_id = fields.Many2one(
         'account.invoice',
         'Invoice',
-        default=_get_invoice_id,
+        default=_get_l10n_ar_invoice_id,
     )
     l10n_latam_use_documents = fields.Boolean(
-        related='invoice_id.journal_id.l10n_latam_use_documents',
+        related='l10n_ar_invoice_id.journal_id.l10n_latam_use_documents',
         string='Use Documents?',
         readonly=True,
     )
@@ -49,10 +49,10 @@ class AccountInvoiceRefund(models.TransientModel):
 
 
     @api.multi
-    @api.depends('invoice_id')
+    @api.depends('l10n_ar_invoice_id')
     def _compute_l10n_latam_available_journal_document_types(self):
         for rec in self:
-            invoice = rec.invoice_id
+            invoice = rec.l10n_ar_invoice_id
             if not invoice:
                 return True
             invoice_type = TYPE2REFUND[invoice.type]

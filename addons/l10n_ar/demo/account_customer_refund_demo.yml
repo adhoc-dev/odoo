@@ -8,7 +8,7 @@
 -
   !record {model: account.invoice.refund, id: demo_refund_invoice_3}:
     description: 'Mercadería defectuosa'
-    invoice_id: demo_invoice_3
+    l10n_ar_invoice_id: demo_invoice_3
     filter_refund: 'refund'
 -
   !python {model: account.invoice.refund} : |
@@ -21,7 +21,7 @@
 -
   !record {model: account.invoice.refund, id: demo_refund_invoice_4}:
     description: 'Venta cancelada'
-    invoice_id: demo_invoice_4
+    l10n_ar_invoice_id: demo_invoice_4
     filter_refund: 'cancel'
 -
   !python {model: account.invoice.refund} : |
@@ -34,7 +34,7 @@
 -
   !record {model: account.invoice.refund, id: demo_refund_invoice_16}:
     description: 'Venta cancelada'
-    invoice_id: demo_invoice_16
+    l10n_ar_invoice_id: demo_invoice_16
     filter_refund: 'cancel'
 -
   !python {model: account.invoice.refund} : |
