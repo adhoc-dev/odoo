@@ -21,6 +21,9 @@ class AccountJournal(models.Model):
     point_of_sale_number = fields.Integer(
         'Point Of Sale Number',
     )
+    l10n_ar_country_code = fields.Char(
+        related='company_id.l10n_ar_country_code',
+    )
 
     @api.multi
     def get_journal_letter(self, counterpart_partner=False):
