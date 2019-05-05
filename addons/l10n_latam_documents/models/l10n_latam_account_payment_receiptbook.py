@@ -1,8 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import models, fields, api
-import logging
-_logger = logging.getLogger(__name__)
 
 
 class L10nLatamAccountPaymentReceiptbook(models.Model):
@@ -72,7 +70,7 @@ class L10nLatamAccountPaymentReceiptbook(models.Model):
                 rec.sequence_id.prefix = prefix
             if padding and rec.sequence_id:
                 rec.sequence_id.padding = padding
-        return super(AccountPaymentReceiptbook, self).write(vals)
+        return super(L10nLatamAccountPaymentReceiptbook, self).write(vals)
 
     @api.model
     def create(self, vals):
@@ -96,4 +94,4 @@ class L10nLatamAccountPaymentReceiptbook(models.Model):
             }
             sequence = self.env['ir.sequence'].sudo().create(seq_vals)
             vals.update({'sequence_id': sequence.id})
-        return super(AccountPaymentReceiptbook, self).create(vals)
+        return super(L10nLatamAccountPaymentReceiptbook, self).create(vals)
