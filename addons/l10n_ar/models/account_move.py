@@ -7,7 +7,7 @@ class AccountMove(models.Model):
 
     _inherit = 'account.move'
 
-    afip_responsability_type = fields.Selection(
+    l10n_ar_afip_responsability_type = fields.Selection(
         ResPartner._afip_responsabilities,
         'AFIP Responsability Type',
         index=True,
@@ -16,8 +16,8 @@ class AccountMove(models.Model):
     )
 
     @api.constrains('partner_id')
-    def set_afip_responsability_type(self):
+    def set_l10n_ar_afip_responsability_type(self):
         for rec in self:
             commercial_partner = rec.partner_id.commercial_partner_id
-            rec.afip_responsability_type = (
-                commercial_partner.afip_responsability_type)
+            rec.l10n_ar_afip_responsability_type = (
+                commercial_partner.l10n_ar_afip_responsability_type)

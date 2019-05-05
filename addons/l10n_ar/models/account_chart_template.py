@@ -29,8 +29,8 @@ class AccountChartTemplate(models.Model):
             if created_position:
                 created_position.update({
                     'l10n_ar_afip_code': position.l10n_ar_afip_code,
-                    'afip_responsability_type': (
-                        position.afip_responsability_type),
+                    'l10n_ar_afip_responsability_type': (
+                        position.l10n_ar_afip_responsability_type),
                 })
         return res
 

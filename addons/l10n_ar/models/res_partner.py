@@ -31,7 +31,7 @@ class ResPartner(models.Model):
     start_date = fields.Date(
         'Start-up Date',
     )
-    afip_responsability_type = fields.Selection(
+    l10n_ar_afip_responsability_type = fields.Selection(
         _afip_responsabilities,
         'AFIP Responsability Type',
         index=True,

@@ -119,7 +119,7 @@ class AccountFiscalPosition(models.Model):
         """
         ##### INIT NEW CODE
         afip_responsability = (
-            partner.commercial_partner_id.afip_responsability_type)
+            partner.commercial_partner_id.l10n_ar_afip_responsability_type)
 
         # First search only matching responsability positions
         fpos = self._get_fpos_by_region_and_responsability(

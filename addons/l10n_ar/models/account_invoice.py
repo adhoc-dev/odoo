@@ -40,8 +40,8 @@ class AccountInvoice(models.Model):
     )
 
     # Mostly used on reports
-    afip_responsability_type = fields.Selection(
-        related='move_id.afip_responsability_type',
+    l10n_ar_afip_responsability_type = fields.Selection(
+        related='move_id.l10n_ar_afip_responsability_type',
         index=True,
     )
     invoice_number = fields.Integer(
@@ -356,7 +356,8 @@ class AccountInvoice(models.Model):
         # check partner has responsability so it will be assigned on invoice
         # validate
         without_responsability = argentinian_invoices.filtered(
-            lambda x: not x.commercial_partner_id.afip_responsability_type)
+            lambda x:
+                not x.commercial_partner_id.l10n_ar_afip_responsability_type)
         if without_responsability:
             raise ValidationError(_(
                 'The following invoices has a partner without AFIP '

@@ -68,11 +68,11 @@ class AccountJournal(models.Model):
             },
         }
         letters = letters_data['issued' if 'sale' else 'received'][
-            company.afip_responsability_type]
+            company.l10n_ar_afip_responsability_type]
         if counterpart_partner:
             counterpart_letters = letters_data[
                 'issued' if 'purchase' else 'received'][
-                    counterpart_partner.afip_responsability_type]
+                    counterpart_partner.l10n_ar_afip_responsability_type]
             letters = list(set(letters) & set(counterpart_letters))
         return letters
 
