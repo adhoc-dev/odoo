@@ -6,7 +6,7 @@ from odoo import models, fields, api
 class L10nLatamAccountPaymentReceiptbook(models.Model):
 
     _name = 'l10n_latam.account.payment.receiptbook'
-    _description = 'Account payment Receiptbook'
+    _description = 'Latam Payment Receiptbook'
     _order = 'sequence asc'
 
     sequence = fields.Integer(

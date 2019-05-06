@@ -5,7 +5,7 @@ from odoo import fields, models
 class AfipIncoterm(models.Model):
 
     _name = 'l10n_ar.afip.incoterm'
-    _description = 'Afip Incoterm'
+    _description = 'AFIP Incoterm'
 
     afip_code = fields.Char(
         'Code',
