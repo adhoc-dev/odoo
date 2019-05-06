@@ -25,9 +25,6 @@ Argentinian accounting chart and tax localization.
         'l10n_latam_documents',
         'l10n_ar_base',
     ],
-    # TODO review OLD dependencies from l10n_ar_chart
-    # 'account_withholding',
-    # 'account_check',
     'data':[
         'data/account_account_tag_data.xml',
         'data/account_chart_template.xml',
