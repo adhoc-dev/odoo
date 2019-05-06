@@ -16,9 +16,14 @@ Argentinian accounting chart and tax localization.
 * Fiscal Positions
 * AFIP Defined Legal Documents
 * AFIP Incoterms
-* AFIP Codes for: Currencies, Countries
-
-    """,
+* Add AFIP Codes for models
+    * Currency
+    * Country
+    * Product Unit of Measure
+    * Tax Group
+    * Fiscal Position
+    * Fiscal Position Template
+""",
     'author': ['ADHOC SA'],
     'category': 'Localization',
     'depends': [
