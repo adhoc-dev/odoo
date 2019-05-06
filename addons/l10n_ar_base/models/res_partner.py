@@ -10,11 +10,13 @@ class ResPartner(models.Model):
 
     l10n_ar_cuit = fields.Char(
         compute='_compute_l10n_ar_cuit',
+        string="CUIT",
         help='Computed field that returns cuit or nothing if this one is not'
         ' set for the partner',
     )
     l10n_ar_formated_cuit = fields.Char(
         compute='_compute_l10n_ar_formated_cuit',
+        string="Formated CUIT",
         help='Computed field that will convert the given cuit number to the'
         ' format {person_category:2}-{number:10}-{validation_number:1}',
     )

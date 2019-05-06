@@ -26,12 +26,11 @@ class AccountInvoiceRefund(models.TransientModel):
     )
     l10n_latam_use_documents = fields.Boolean(
         related='l10n_ar_invoice_id.journal_id.l10n_latam_use_documents',
-        string='Use Documents?',
         readonly=True,
     )
     l10n_latam_journal_mapping_id = fields.Many2one(
         'l10n_latam.journal.mapping',
-        'Document Type',
+        'Document Type Mapping',
         ondelete='cascade',
     )
     l10n_latam_document_sequence_id = fields.Many2one(

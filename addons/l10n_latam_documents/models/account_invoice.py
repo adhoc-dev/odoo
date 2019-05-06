@@ -31,7 +31,7 @@ class AccountInvoice(models.Model):
     )
     l10n_latam_journal_mapping_id = fields.Many2one(
         'l10n_latam.journal.mapping',
-        'Document Type',
+        'Document Type Mapping',
         readonly=True,
         ondelete='restrict',
         copy=False,
@@ -64,7 +64,6 @@ class AccountInvoice(models.Model):
     )
     l10n_latam_use_documents = fields.Boolean(
         related='journal_id.l10n_latam_use_documents',
-        readonly=True,
     )
     display_name = fields.Char(
         compute='_compute_display_name',

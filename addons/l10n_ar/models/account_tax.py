@@ -8,6 +8,7 @@ class AccountTax(models.Model):
 
     l10n_ar_jurisdiction_code = fields.Char(
         compute='_compute_l10n_ar_jurisdiction_code',
+        string="Jurisdiction Code",
     )
 
     @api.multi

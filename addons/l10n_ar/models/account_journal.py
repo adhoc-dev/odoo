@@ -16,7 +16,7 @@ class AccountJournal(models.Model):
 
     l10n_ar_afip_pos_type = fields.Selection(
         _l10n_ar_afip_pos_types_selection,
-        'Point Of Sale Type',
+        'AFIP Point Of Sale Type',
         help='Types available:\n'
         '* Manual: Represents a paper invoice filled by hand\n'
         '* Preprinted: Its a invoice that is printed over a pre numerate'

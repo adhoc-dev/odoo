@@ -17,6 +17,7 @@ class AccountTaxGroup(models.Model):
         ('withholding', 'Withholding'),
         ('other', 'Other'),
     ],
+        string='Type',
         index=True,
     )
     l10n_ar_tax = fields.Selection([
@@ -25,6 +26,7 @@ class AccountTaxGroup(models.Model):
         ('gross_income', 'Gross Income'),
         ('other', 'Other')],
         index=True,
+        string='Tax',
     )
     l10n_ar_application = fields.Selection([
         ('national_taxes', 'National Taxes'),
@@ -32,6 +34,7 @@ class AccountTaxGroup(models.Model):
         ('municipal_taxes', 'Municipal Taxes'),
         ('internal_taxes', 'Internal Taxes'),
         ('others', 'Others')],
+        string="Application",
         help='Other Taxes According AFIP',
         index=True,
     )

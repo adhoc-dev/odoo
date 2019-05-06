@@ -34,6 +34,7 @@ class AccountInvoice(models.Model):
         digits=(16, 4),
         # TODO make it editable, we have to change move create method
         readonly=True,
+        string="Currency Rate",
     )
     l10n_ar_letter = fields.Selection(
         related='l10n_latam_document_type_id.l10n_ar_letter',
@@ -46,6 +47,7 @@ class AccountInvoice(models.Model):
     )
     l10n_ar_invoice_number = fields.Integer(
         compute='_compute_l10n_ar_invoice_number',
+        string='AFIP Invoice Number',
     )
     l10n_ar_afip_pos_number = fields.Integer(
         compute='_compute_l10n_ar_invoice_number',
@@ -109,7 +111,7 @@ class AccountInvoice(models.Model):
         inverse='_inverse_l10n_ar_afip_concept',
         # store=True,
         selection=afip_invoice_concepts,
-        string="AFIP concept",
+        string="AFIP Concept",
         help="Se sugiere un concepto en función a la configuración de los "
         "productos (tipo servicio, consumible o almacenable) pero se puede "
         "cambiar este valor si lo requiere.",
@@ -121,7 +123,7 @@ class AccountInvoice(models.Model):
     # simple, agregamos este otro campo
     l10n_ar_force_afip_concept = fields.Selection(
         selection=afip_invoice_concepts,
-        string="AFIP concept",
+        string="AFIP Concept",
         readonly=True,
         help='AFIP requires to report the kind of products related to the'
         ' invoices. The possible AFIP concepts are:\n'
@@ -131,12 +133,12 @@ class AccountInvoice(models.Model):
         ' * 4 - Otros (exportación)\n',
     )
     l10n_ar_afip_service_start = fields.Date(
-        string='Service Start Date',
+        string='AFIP Service Start Date',
         readonly=True,
         states={'draft': [('readonly', False)]},
     )
     l10n_ar_afip_service_end = fields.Date(
-        string='Service End Date',
+        string='AFIP Service End Date',
         readonly=True,
         states={'draft': [('readonly', False)]},
     )

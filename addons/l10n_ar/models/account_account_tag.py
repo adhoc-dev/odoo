@@ -8,4 +8,5 @@ class AccountAccountTag(models.Model):
 
     l10n_ar_jurisdiction_code = fields.Char(
         size=3,
+        string="Jurisdiction Code",
     )
