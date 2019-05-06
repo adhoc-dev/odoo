@@ -104,6 +104,18 @@ class AccountInvoice(models.Model):
         related='journal_id.l10n_ar_afip_pos_type',
         readonly=True,
     )
+    l10n_ar_afip_concept = fields.Selection(
+        compute='_compute_l10n_ar_afip_concept',
+        inverse='_inverse_l10n_ar_afip_concept',
+        # store=True,
+        selection=afip_invoice_concepts,
+        string="AFIP concept",
+        help="Se sugiere un concepto en función a la configuración de los "
+        "productos (tipo servicio, consumible o almacenable) pero se puede "
+        "cambiar este valor si lo requiere.",
+        readonly=True,
+        states={'draft': [('readonly', False)]},
+    )
     # la idea es incorporar la posibilidad de forzar otro concepto distinto
     # al sugerido, para no complicarla y ser compatible hacia atras de manera
     # simple, agregamos este otro campo
@@ -128,6 +140,63 @@ class AccountInvoice(models.Model):
         readonly=True,
         states={'draft': [('readonly', False)]},
     )
+
+    @api.multi
+    @api.depends(
+        'invoice_line_ids',
+        'invoice_line_ids.product_id',
+        'invoice_line_ids.product_id.type',
+        'l10n_ar_force_afip_concept',
+    )
+    def _compute_l10n_ar_afip_concept(self):
+        for rec in self:
+            afip_concept = False
+            if rec.l10n_ar_afip_pos_type in ['online', 'electronic']:
+                if rec.l10n_ar_force_afip_concept:
+                    afip_concept = rec.l10n_ar_force_afip_concept
+                else:
+                    afip_concept = rec._get_concept()
+            rec.l10n_ar_afip_concept = afip_concept
+
+    @api.multi
+    def _inverse_l10n_ar_afip_concept(self):
+        for rec in self:
+            if rec._get_concept() == rec.l10n_ar_afip_concept:
+                rec.l10n_ar_force_afip_concept = False
+            else:
+                rec.l10n_ar_force_afip_concept = rec.l10n_ar_afip_concept
+
+    @api.multi
+    def _get_concept(self):
+        """
+        Metodo para obtener el concepto en funcion a los productos de una
+        factura, luego es utilizado por los metodos inverse y compute del campo
+        afip_concept
+        """
+        self.ensure_one()
+        invoice_lines = self.invoice_line_ids
+        product_types = set([
+            x.product_id.type for x in invoice_lines
+            if x.product_id])
+        consumible = set(['consu', 'product'])
+        service = set(['service'])
+        mixed = set(['consu', 'service', 'product'])
+        # default value "product"
+        afip_concept = '1'
+        if product_types.issubset(mixed):
+            afip_concept = '3'
+        if product_types.issubset(service):
+            afip_concept = '2'
+        if product_types.issubset(consumible):
+            afip_concept = '1'
+        if self.document_type_id.code in ['19', '20', '21']:
+            # en realidad para expo no se puede informar productos y servicios
+            # en mismo comprobante, este otros no sabemos bien que significa,
+            # si hay mezcla de productos y servicios lo dejamos como producto
+            # ya que es más seguro al exigir que el usuario agregue el Incoterm
+            if afip_concept == '3':
+                afip_concept = '1'
+        return afip_concept
 
     @api.multi
     def _compute_argentina_amounts(self):
