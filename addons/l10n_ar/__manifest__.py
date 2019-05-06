@@ -35,7 +35,6 @@ Argentinian accounting chart and tax localization.
         'data/account_chart_exento.xml',
         'data/account_chart_respinsc.xml',
         'data/account_tax_group.xml',
-        'data/account_tax_withholding_template.xml',
         'data/account_tax_template.xml',
         'data/account_fiscal_template.xml',
         'data/uom_uom.xml',
