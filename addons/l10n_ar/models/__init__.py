@@ -16,7 +16,7 @@ from . import account_invoice
 from . import account_invoice_line
 from . import uom_uom
 from . import account_chart_template
-from . import afip_vat_f2002_category
+from . import l10n_ar_afip_vat_f2002_category
 from . import account_move_line
 from . import account_move
 from . import account_account

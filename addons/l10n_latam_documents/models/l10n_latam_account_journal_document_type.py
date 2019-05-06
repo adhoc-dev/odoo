@@ -1,11 +1,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
 from odoo import fields, models
 
 
 class AccountJournalDocumentType(models.Model):
+
     _name = 'l10n_latam.account.journal.document.type'
-    _description = "Journal Document Types Mapping"
+    _description = "Latam Journal Document Types Mapping"
     _rec_name = 'document_type_id'
     _order = 'document_type_id'
 

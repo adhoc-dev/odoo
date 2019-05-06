@@ -7,7 +7,7 @@ class AccountAccount(models.Model):
     _inherit = 'account.account'
 
     l10n_ar_vat_f2002_category_id = fields.Many2one(
-        'afip.vat.f2002_category',
+        'afip.vat.f2002.category',
         auto_join=True,
         string='Categoría IVA f2002',
     )
