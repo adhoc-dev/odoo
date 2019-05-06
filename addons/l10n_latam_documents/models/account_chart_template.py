@@ -36,7 +36,7 @@ class AccountChartTemplate(models.Model):
         This method used for checking new receipbooks already created or not.
         If not then create new receipbook.
         """
-        receipbook = self.env['l10n_latam.account.payment.receiptbook'].search([
+        receipbook = self.env['l10n_latam.payment.receiptbook'].search([
             ('name', '=', receiptbook_vals['name']),
             ('company_id', '=', company.id)])
         if not receipbook:

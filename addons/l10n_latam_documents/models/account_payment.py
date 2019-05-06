@@ -24,7 +24,7 @@ class AccountPayment(models.Model):
         related='company_id.l10n_latam_use_documents',
     )
     l10n_latam_receiptbook_id = fields.Many2one(
-        'l10n_latam.account.payment.receiptbook',
+        'l10n_latam.payment.receiptbook',
         'ReceiptBook',
         readonly=True,
         states={'draft': [('readonly', False)]},
@@ -124,7 +124,7 @@ class AccountPayment(models.Model):
         partner_type = self.partner_type or self._context.get(
             'partner_type', self._context.get('default_partner_type', False))
         receiptbook = self.env[
-            'l10n_latam.account.payment.receiptbook'].search([
+            'l10n_latam.payment.receiptbook'].search([
                 ('partner_type', '=', partner_type),
                 ('company_id', '=', self.company_id.id),
             ], limit=1)

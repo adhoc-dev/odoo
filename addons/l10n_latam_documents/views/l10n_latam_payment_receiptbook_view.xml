@@ -2,8 +2,8 @@
 <odoo>
 
     <record id="view_receipt_receiptbook_search" model="ir.ui.view">
-        <field name="name">l10n_latam.account.payment.receiptbook.search</field>
-        <field name="model">l10n_latam.account.payment.receiptbook</field>
+        <field name="name">l10n_latam.payment.receiptbook.search</field>
+        <field name="model">l10n_latam.payment.receiptbook</field>
         <field name="arch" type="xml">
             <search string="Receipt Books">
                 <field name="name"/>
@@ -16,8 +16,8 @@
     </record>
 
     <record id="view_receipt_receiptbook_tree" model="ir.ui.view">
-        <field name="name">l10n_latam.account.payment.receiptbook.tree</field>
-        <field name="model">l10n_latam.account.payment.receiptbook</field>
+        <field name="name">l10n_latam.payment.receiptbook.tree</field>
+        <field name="model">l10n_latam.payment.receiptbook</field>
         <field name="arch" type="xml">
             <tree string="Receipt Books">
                 <field name="sequence" widget="handle"/>
@@ -31,8 +31,8 @@
     </record>
 
     <record id="view_receipt_receiptbook_form" model="ir.ui.view">
-        <field name="name">l10n_latam.account.payment.receiptbook.form</field>
-        <field name="model">l10n_latam.account.payment.receiptbook</field>
+        <field name="name">l10n_latam.payment.receiptbook.form</field>
+        <field name="model">l10n_latam.payment.receiptbook</field>
         <field name="arch" type="xml">
             <form string="Receipt Books"> 
                 <sheet string="Receipt Books">
@@ -59,7 +59,7 @@
 
     <record id="action_receiptbook_form" model="ir.actions.act_window">
         <field name="name">Receiptbooks</field>
-        <field name="res_model">l10n_latam.account.payment.receiptbook</field>
+        <field name="res_model">l10n_latam.payment.receiptbook</field>
         <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
         <field name="search_view_id" ref="view_receipt_receiptbook_search"/>

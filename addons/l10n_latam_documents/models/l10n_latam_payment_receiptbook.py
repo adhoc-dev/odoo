@@ -5,7 +5,7 @@ from odoo import models, fields, api
 
 class L10nLatamAccountPaymentReceiptbook(models.Model):
 
-    _name = 'l10n_latam.account.payment.receiptbook'
+    _name = 'l10n_latam.payment.receiptbook'
     _description = 'Latam Payment Receiptbook'
     _order = 'sequence asc'
 
@@ -42,7 +42,7 @@ class L10nLatamAccountPaymentReceiptbook(models.Model):
         'res.company',
         required=True,
         default=lambda self: self.env[
-            'res.company']._company_default_get('l10n_latam.account.payment.receiptbook')
+            'res.company']._company_default_get('l10n_latam.payment.receiptbook')
     )
     prefix = fields.Char(
     )
