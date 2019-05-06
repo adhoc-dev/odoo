@@ -7,7 +7,7 @@
     </xpath>
 
     <xpath expr="//h2" position="after">
-        <h2 t-if="o.use_documents">
+        <h2 t-if="o.l10n_latam_use_documents">
             <span t-field="o.l10n_latam_document_type_id.report_name"/>
             <span t-field="o.l10n_latam_document_number"/>
         </h2>

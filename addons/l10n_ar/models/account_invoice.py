@@ -265,7 +265,7 @@ class AccountInvoice(models.Model):
         if invoice_type in [
                 'out_invoice', 'in_invoice', 'out_refund', 'in_refund']:
 
-            if journal.use_documents:
+            if journal.l10n_latam_use_documents:
                 letters = journal.get_journal_letter(
                     counterpart_partner=commercial_partner)
 
@@ -334,7 +334,7 @@ class AccountInvoice(models.Model):
         # use_documents
         argentinian_invoices = self.filtered(
             lambda r: (
-                r.company_id.country_id.code != 'AR' and r.use_documents))
+                r.company_id.country_id.code != 'AR' and r.l10n_latam_use_documents))
         if not argentinian_invoices:
             return True
 
