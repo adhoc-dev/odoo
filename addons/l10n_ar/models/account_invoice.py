@@ -260,7 +260,7 @@ class AccountInvoice(models.Model):
         commercial_partner = partner.commercial_partner_id
 
         journal_document_types = journal_document_type = self.env[
-            'account.journal.document.type']
+            'l10n_latam.account.journal.document.type']
 
         if invoice_type in [
                 'out_invoice', 'in_invoice', 'out_refund', 'in_refund']:
