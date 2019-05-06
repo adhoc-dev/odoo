@@ -7,5 +7,7 @@ class Uom(models.Model):
     _inherit = 'uom.uom'
 
     l10n_ar_afip_code = fields.Char(
-        'Afip Code',
+        'AFIP Code',
+        help='This code will be used on electronic invoice and citi '
+        'reports',
     )

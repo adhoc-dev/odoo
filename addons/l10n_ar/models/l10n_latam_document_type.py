@@ -13,6 +13,16 @@ class L10nLtamDocumentType(models.Model):
         ('M', 'M'),
         ('T', 'T')],
         'Letters',
+        help='Letters defined by the AFIP that can be used to identify the'
+        ' documents presented to the goverment and that depends on the'
+        ' operation type, the responsability of both the issuer and the'
+        ' receptor or the document. The possible letters are:\n'
+        '* A\n'
+        '* B\n'
+        '* C\n'
+        '* E\n'
+        '* M\n'
+        '* T\n',
     )
     internal_type = fields.Selection(
         selection_add=[

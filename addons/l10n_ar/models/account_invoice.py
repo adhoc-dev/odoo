@@ -97,6 +97,8 @@ class AccountInvoice(models.Model):
         'AFIP Incoterm',
         readonly=True,
         states={'draft': [('readonly', False)]},
+        help='For international invoices AFIP required to identify the invoice'
+        ' with the type of incoterm that correspond'
     )
     l10n_ar_afip_pos_type = fields.Selection(
         related='journal_id.l10n_ar_afip_pos_type',
@@ -109,6 +111,12 @@ class AccountInvoice(models.Model):
         selection=afip_invoice_concepts,
         string="AFIP concept",
         readonly=True,
+        help='AFIP requires to report the kind of products related to the'
+        ' invoices. The possible AFIP concepts are:\n'
+        ' * 1 - Producto / Exportación definitiva de bienes\n'
+        ' * 2 - Servicios\n'
+        ' * 3 - Productos y Servicios\n'
+        ' * 4 - Otros (exportación)\n',
     )
     l10n_ar_afip_service_start = fields.Date(
         string='Service Start Date',

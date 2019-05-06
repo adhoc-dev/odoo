@@ -17,9 +17,18 @@ class AccountJournal(models.Model):
     l10n_ar_afip_pos_type = fields.Selection(
         _l10n_ar_afip_pos_types_selection,
         'Point Of Sale Type',
+        help='Types available:\n'
+        '* Manual: Represents a paper invoice filled by hand\n'
+        '* Preprinted: Its a invoice that is printed over a pre numerate'
+        ' reciptbook pre approved by AFIP\n'
+        '* Online: This is an electronic invoice generate directly in AFIP'
+        ' portal, This invoices are loaded in order to maintain control and'
+        ' and be able to report properly to AFIP all the invoices',
     )
     l10n_ar_afip_pos_number = fields.Integer(
         'AFIP Point Of Sale Number',
+        help='This is the point of sale number assigned by AFIP in order to'
+        ' you in order to generate invoices',
     )
     l10n_ar_country_code = fields.Char(
         related='company_id.l10n_ar_country_code',

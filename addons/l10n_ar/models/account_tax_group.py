@@ -8,6 +8,8 @@ class AccountTaxGroup(models.Model):
 
     l10n_ar_afip_code = fields.Integer(
         'AFIP Code',
+        help='This code will be used on electronic invoice and citi '
+        'reports',
     )
     l10n_ar_type = fields.Selection([
         ('tax', 'TAX'),

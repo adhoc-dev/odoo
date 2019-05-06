@@ -8,7 +8,7 @@ class AccountFiscalPosition(models.Model):
 
     l10n_ar_afip_code = fields.Char(
         'AFIP Code',
-        help='For eg. This code will be used on electronic invoice and citi '
+        help='This code will be used on electronic invoice and citi '
         'reports',
     )
 

@@ -10,9 +10,14 @@
 Argentinian accounting chart and tax localization.
 ==================================================
 
-Install Argentinian chart of accounts:
+* Define Argentinian chart of accounts:
+  * Responsable Inscripto (RI)
+* Argentian Taxes
+* Fiscal Positions
+* AFIP Defined Legal Documents
+* AFIP Incoterms
+* AFIP Codes for: Currencies, Countries
 
-* Responsable Inscripto (RI)
     """,
     'author': ['ADHOC SA'],
     'category': 'Localization',

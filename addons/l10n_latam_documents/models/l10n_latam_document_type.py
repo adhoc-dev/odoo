@@ -12,16 +12,19 @@ class L10nLatamAccountDocmentType(models.Model):
     sequence = fields.Integer(
         default=10,
         required=True,
-        help="Used to order records in tree views and relational fields"
+        help='To set in which order show the documents type taking into'
+        ' account the most commonly used first',
     )
     country_id = fields.Many2one(
         'res.country',
         required=True,
         index=True,
+        help='Country in which this type of document is valid',
     )
     name = fields.Char(
         required=True,
         index=True,
+        help='The document name',
     )
     doc_code_prefix = fields.Char(
         'Document Code Prefix',
