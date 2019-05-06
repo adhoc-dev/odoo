@@ -51,13 +51,13 @@ class AccountInvoice(models.Model):
         compute='_compute_l10n_ar_invoice_number',
         string="AFIP Point Of Sale",
     )
-    vat_tax_ids = fields.One2many(
+    l10n_ar_vat_tax_ids = fields.One2many(
         compute="_compute_argentina_amounts",
         comodel_name='account.invoice.tax',
         string='VAT Taxes',
         help='Vat Taxes and vat tax amounts. Is an ADHOC internal concept',
     )
-    vat_taxable_ids = fields.One2many(
+    l10n_ar_vat_taxable_ids = fields.One2many(
         compute="_compute_argentina_amounts",
         comodel_name='account.invoice.tax',
         string='VAT Taxable Taxes',
@@ -65,30 +65,30 @@ class AccountInvoice(models.Model):
         " not taxes themselves: VAT Exempt, VAT Untaxed and VAT Not applicable"
     )
     # todos los impuestos menos los tipo iva vat_tax_ids
-    not_vat_tax_ids = fields.One2many(
+    l10n_ar_not_vat_tax_ids = fields.One2many(
         compute="_compute_argentina_amounts",
         comodel_name='account.invoice.tax',
         string='Not VAT Taxes'
     )
     # suma de base para todos los impuestos tipo iva
     # TODO revisar si se usa y si no borrar
-    vat_base_amount = fields.Monetary(
+    l10n_ar_vat_base_amount = fields.Monetary(
         compute="_compute_argentina_amounts",
     )
     # base imponible (no se incluyen no corresponde, exento y no gravado)
-    vat_taxable_amount = fields.Monetary(
+    l10n_ar_vat_taxable_amount = fields.Monetary(
         compute="_compute_argentina_amounts",
     )
-    vat_exempt_base_amount = fields.Monetary(
+    l10n_ar_vat_exempt_base_amount = fields.Monetary(
         compute="_compute_argentina_amounts",
     )
-    vat_untaxed_base_amount = fields.Monetary(
+    l10n_ar_vat_untaxed_base_amount = fields.Monetary(
         compute="_compute_argentina_amounts",
     )
-    vat_amount = fields.Monetary(
+    l10n_ar_vat_amount = fields.Monetary(
         compute="_compute_argentina_amounts",
     )
-    other_taxes_amount = fields.Monetary(
+    l10n_ar_other_taxes_amount = fields.Monetary(
         compute="_compute_argentina_amounts",
         string='Other Taxes Amount'
     )
@@ -138,14 +138,14 @@ class AccountInvoice(models.Model):
                     r.tax_id.tax_group_id.l10n_ar_afip_code not in
                     [0, 1, 2]) and r.base)
 
-            vat_amount = sum(vat_taxes.mapped('amount'))
-            rec.vat_tax_ids = vat_taxes
-            rec.vat_taxable_ids = vat_taxables
-            rec.vat_amount = vat_amount
-            # rec.vat_taxable_amount = sum(vat_taxables.mapped('base_amount'))
-            rec.vat_taxable_amount = sum(vat_taxables.mapped('base'))
-            # rec.vat_base_amount = sum(vat_taxes.mapped('base_amount'))
-            rec.vat_base_amount = sum(vat_taxes.mapped('base'))
+            l10n_ar_vat_amount = sum(vat_taxes.mapped('amount'))
+            rec.l10n_ar_vat_tax_ids = vat_taxes
+            rec.l10n_ar_vat_taxable_ids = vat_taxables
+            rec.l10n_ar_vat_amount = l10n_ar_vat_amount
+            # rec.l10n_ar_vat_taxable_amount = sum(vat_taxables.mapped('base_amount'))
+            rec.l10n_ar_vat_taxable_amount = sum(vat_taxables.mapped('base'))
+            # rec.l10n_ar_vat_base_amount = sum(vat_taxes.mapped('base_amount'))
+            rec.l10n_ar_vat_base_amount = sum(vat_taxes.mapped('base'))
 
             # vat exempt values
             # exempt taxes are the ones with code 2
@@ -154,28 +154,28 @@ class AccountInvoice(models.Model):
                     r.tax_id.tax_group_id.l10n_ar_type == 'tax' and
                     r.tax_id.tax_group_id.l10n_ar_tax == 'vat' and
                     r.tax_id.tax_group_id.l10n_ar_afip_code == 2))
-            rec.vat_exempt_base_amount = sum(
+            rec.l10n_ar_vat_exempt_base_amount = sum(
                 vat_exempt_taxes.mapped('base'))
-            # rec.vat_exempt_base_amount = sum(
+            # rec.l10n_ar_vat_exempt_base_amount = sum(
             #     vat_exempt_taxes.mapped('base_amount'))
 
-            # vat_untaxed_base_amount values (no gravado)
+            # l10n_ar_vat_untaxed_base_amount values (no gravado)
             # vat exempt taxes are the ones with code 1
             vat_untaxed_taxes = rec.tax_line_ids.filtered(
                 lambda r: (
                     r.tax_id.tax_group_id.l10n_ar_type == 'tax' and
                     r.tax_id.tax_group_id.l10n_ar_tax == 'vat' and
                     r.tax_id.tax_group_id.l10n_ar_afip_code == 1))
-            rec.vat_untaxed_base_amount = sum(
+            rec.l10n_ar_vat_untaxed_base_amount = sum(
                 vat_untaxed_taxes.mapped('base'))
-            # rec.vat_untaxed_base_amount = sum(
+            # rec.l10n_ar_vat_untaxed_base_amount = sum(
             #     vat_untaxed_taxes.mapped('base_amount'))
 
             # other taxes values
             not_vat_taxes = rec.tax_line_ids - vat_taxes
-            other_taxes_amount = sum(not_vat_taxes.mapped('amount'))
-            rec.not_vat_tax_ids = not_vat_taxes
-            rec.other_taxes_amount = other_taxes_amount
+            l10n_ar_other_taxes_amount = sum(not_vat_taxes.mapped('amount'))
+            rec.l10n_ar_not_vat_tax_ids = not_vat_taxes
+            rec.l10n_ar_other_taxes_amount = l10n_ar_other_taxes_amount
 
     @api.multi
     @api.depends('l10n_latam_document_number', 'number')
@@ -406,7 +406,7 @@ class AccountInvoice(models.Model):
         not_zero_alicuot = argentinian_invoices.filtered(
             lambda x: x.type in ['in_invoice', 'in_refund'] and
             x.document_type_id.purchase_alicuots == 'zero' and
-            any([t.tax_id.tax_group_id.l10n_ar_afip_code != 0 for t in x.vat_tax_ids]))
+            any([t.tax_id.tax_group_id.l10n_ar_afip_code != 0 for t in x.l10n_ar_vat_tax_ids]))
         if not_zero_alicuot:
             raise ValidationError(_(
                 'Las siguientes facturas tienen configurados IVA incorrecto. '
@@ -418,7 +418,7 @@ class AccountInvoice(models.Model):
         zero_alicuot = argentinian_invoices.filtered(
             lambda x: x.type in ['in_invoice', 'in_refund'] and
             x.document_type_id.purchase_alicuots == 'not_zero' and
-            any([t.tax_id.tax_group_id.l10n_ar_afip_code == 0 for t in x.vat_tax_ids]))
+            any([t.tax_id.tax_group_id.l10n_ar_afip_code == 0 for t in x.l10n_ar_vat_tax_ids]))
         if zero_alicuot:
             raise ValidationError(_(
                 'Las siguientes facturas tienen IVA no corresponde pero debe '
