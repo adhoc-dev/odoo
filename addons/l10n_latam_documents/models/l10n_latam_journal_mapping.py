@@ -4,7 +4,7 @@ from odoo import fields, models
 
 class AccountJournalDocumentType(models.Model):
 
-    _name = 'l10n_latam.account.journal.document.type'
+    _name = 'l10n_latam.journal.mapping'
     _description = "Latam Document Mapping"
     _rec_name = 'document_type_id'
     _order = 'document_type_id'

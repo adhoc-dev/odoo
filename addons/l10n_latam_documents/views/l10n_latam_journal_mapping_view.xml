@@ -3,7 +3,7 @@
 
     <record id="view_journal_document_type_tree" model="ir.ui.view">
         <field name="name">Journal Documents Type Mapping Tree</field>
-        <field name="model">l10n_latam.account.journal.document.type</field>
+        <field name="model">l10n_latam.journal.mapping</field>
         <field name="arch" type="xml">
             <tree string="Journal Documents Types" editable="top">
                 <field name="document_type_id"/>
@@ -15,7 +15,7 @@
 
     <record id="view_journal_document_type_form" model="ir.ui.view">
         <field name="name">Journal Documents Type Mapping Form</field>
-        <field name="model">l10n_latam.account.journal.document.type</field>
+        <field name="model">l10n_latam.journal.mapping</field>
         <field name="arch" type="xml">
             <form string="Journal Documents Types">
                 <sheet>

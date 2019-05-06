@@ -6,8 +6,8 @@ from odoo.exceptions import ValidationError
 class AccountJournal(models.Model):
     _inherit = "account.journal"
 
-    l10n_latam_journal_document_type_ids = fields.One2many(
-        'l10n_latam.account.journal.document.type',
+    l10n_latam_journal_mapping_ids = fields.One2many(
+        'l10n_latam.journal.mapping',
         'journal_id',
         'Documents Types',
         auto_join=True,
