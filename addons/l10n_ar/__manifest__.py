@@ -67,18 +67,6 @@ Argentinian accounting chart and tax localization.
         'security/security.xml',
     ],
     'demo': [
-        # 'demo/partner_demo.xml',
-        # TODO this partners depends of the ones defined in l10n_ar_base that we delete so this ones will not work
-        'demo/company_demo.xml',
-        # 'demo/product_product_demo.xml',
-        # 'demo/account_customer_invoice_demo.yml',
-        # 'demo/account_customer_expo_invoice_demo.yml',
-        # 'demo/account_customer_invoice_validate_demo.yml',
-        # 'demo/account_customer_refund_demo.yml',
-        # 'demo/account_supplier_invoice_demo.yml',
-        # 'demo/account_supplier_refund_demo.yml',
-        # 'demo/account_tax_template_demo.xml',
-        # 'demo/account_other_docs_demo.yml',
     ],
     'post_init_hook': 'post_init_hook',
 }
