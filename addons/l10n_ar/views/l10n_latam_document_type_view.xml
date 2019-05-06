@@ -32,6 +32,7 @@
         <field name="arch" type="xml">
             <field name='code' position="after">
                 <field name='l10n_ar_letter'/>
+                <filter string="Argentinian Documents" name="localization" domain="[('country_id.code', '=', 'AR')]"/>
             </field>
             <group>
                 <filter string="Document Letter" name="l10n_ar_letter" context="{'group_by':'l10n_ar_letter'}"/>
@@ -43,7 +44,7 @@
     <record model="ir.actions.act_window" id="action_document_type_argentina">
         <field name="name">Document Types</field>
         <field name="res_model">l10n_latam.document.type</field>
-        <field name="context">{'search_default_localization': 'argentina'}</field>
+        <field name="context">{'search_default_localization': 1}</field>
     </record>
 
     <menuitem action="action_document_type_argentina" id="menu_document_type_argentina" sequence="5" parent="menu_afip_config"/>

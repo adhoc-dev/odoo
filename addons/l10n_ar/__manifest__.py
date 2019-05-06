@@ -21,8 +21,6 @@ Install Argentinian chart of accounts:
         'l10n_ar_base',
     ],
     # TODO review OLD dependencies from l10n_ar_chart
-    # # for afip_code on fiscal position and other tax modifications
-    # 'l10n_ar_account',
     # 'account_withholding',
     # 'account_check',
     'data':[

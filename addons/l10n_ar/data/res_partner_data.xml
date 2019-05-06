@@ -6,7 +6,6 @@
         <!-- <field name="notify_email">none</field> -->
         <field name='l10n_ar_identification_type_id' ref='l10n_ar_base.dt_Sigd'/>
         <field name='l10n_ar_afip_responsability_type'>5</field>
-        <!-- TODO review that Consumidor Fianl has been properply set -->
     </record>
 
     <record model='res.partner' id='par_iibb_pagar'>
@@ -25,7 +24,7 @@
         <field name="supplier" eval="True"/>
         <field name='l10n_ar_identification_type_id' ref="l10n_ar_base.dt_CUIT"/>
         <field name='l10n_ar_id_number'>33693450239</field>
-        <!-- TODO review with Juan-->
+        <!-- TODO review with Juan, we delete this responsability -->
         <!-- <field name='l10n_ar_afip_responsability_type'>3</field> -->
         <!-- add doc despacho y despacho imp serv -->
     </record>
