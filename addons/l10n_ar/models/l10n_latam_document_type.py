@@ -11,7 +11,10 @@ class L10nLatamDocumentType(models.Model):
         ('C', 'C'),
         ('E', 'E'),
         ('M', 'M'),
-        ('T', 'T')],
+        ('T', 'T'),
+        ('R', 'R'),
+        ('X', 'X'),
+    ],
         'Letters',
         help='Letters defined by the AFIP that can be used to identify the'
         ' documents presented to the goverment and that depends on the'

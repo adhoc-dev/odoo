@@ -35,7 +35,8 @@ class AccountFiscalPosition(models.Model):
         """
         if 'partner_afip_responsability' in self._context:
             vat_required = self._context.get(
-                'partner_afip_responsability') not in ['6', '4', '8']
+                'partner_afip_responsability') not in [
+                    '6', '4', '8', '3', '13']
 
         return super()._get_fpos_by_region(
             country_id=country_id, state_id=state_id, zipcode=zipcode,

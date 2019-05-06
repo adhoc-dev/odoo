@@ -58,22 +58,26 @@ class AccountJournal(models.Model):
             'issued': {
                 '1': ['A', 'B', 'E'],
                 '1FM': ['B', 'M'],
+                '3': [],
                 '4': ['C'],
                 '5': [],
                 '6': ['C', 'E'],
                 '8': [],
                 '9': [],
                 '10': [],
+                '13': ['C', 'E'],
             },
             'received': {
                 '1': ['A', 'C', 'M'],
                 '1FM': ['A', 'M'],
-                '4': ['C', 'B'],
+                '3': ['B', 'C'],
+                '4': ['B', 'C'],
                 '5': ['B', 'C'],
                 '6': ['B', 'C'],
                 '8': ['E'],
                 '9': ['E'],
                 '10': ['E'],
+                '13': ['B', 'C'],
             },
         }
         letters = letters_data['issued' if 'sale' else 'received'][

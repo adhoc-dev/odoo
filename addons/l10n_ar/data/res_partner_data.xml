@@ -18,9 +18,7 @@
         <field name="supplier" eval="True"/>
         <field name='l10n_ar_identification_type_id' ref="l10n_ar_base.dt_CUIT"/>
         <field name='l10n_ar_id_number'>33693450239</field>
-        <!-- TODO review with Juan, we delete this responsability -->
-        <!-- <field name='l10n_ar_afip_responsability_type'>3</field> -->
-        <!-- add doc despacho y despacho imp serv -->
+        <field name='l10n_ar_afip_responsability_type'>3</field>
     </record>
 
 </odoo>

@@ -9,12 +9,14 @@ class ResPartner(models.Model):
     _afip_responsabilities = [
         ('1', 'IVA Responsable Inscripto'),
         ('1FM', 'IVA Responsable Inscripto Factura M'),
+        ('3', 'IVA no Responsable'),
         ('4', 'IVA Sujeto Exento'),
         ('5', 'Consumidor Final'),
         ('6', 'Responsable Monotributo'),
         ('8', 'Proveedor del Exterior'),
         ('9', 'Cliente del Exterior'),
         ('10', 'IVA Liberado – Ley Nº 19.640'),
+        ('13', 'Monotributista Social'),
     ]
     l10n_ar_gross_income_number = fields.Char(
         'Gross Income Number',
