@@ -1,7 +1,7 @@
 from odoo import models, api, fields
 
 
-class L10nLtamDocumentType(models.Model):
+class L10nLatamDocumentType(models.Model):
 
     _inherit = 'l10n_latam.document.type'
 
@@ -61,7 +61,7 @@ class L10nLtamDocumentType(models.Model):
 
     @api.multi
     def get_document_sequence_vals(self, journal):
-        vals = super(L10nLtamDocumentType, self).get_document_sequence_vals(
+        vals = super(L10nLatamDocumentType, self).get_document_sequence_vals(
             journal)
         if self.country_id.code == 'AR':
             vals.update({
@@ -82,4 +82,4 @@ class L10nLtamDocumentType(models.Model):
                 [('tax_group_id.l10n_ar_tax', '=', 'vat'),
                  ('tax_group_id.l10n_ar_type', '=', 'tax')])
         else:
-            return super(L10nLtamDocumentType, self).get_taxes_included()
+            return super(L10nLatamDocumentType, self).get_taxes_included()

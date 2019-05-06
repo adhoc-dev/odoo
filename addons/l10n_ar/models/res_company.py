@@ -13,20 +13,23 @@ class ResCompany(models.Model):
     l10n_ar_gross_income_number = fields.Char(
         related='partner_id.l10n_ar_gross_income_number',
         string='Gross Income Number',
+        readonly=False,
     )
     l10n_ar_gross_income_type = fields.Selection(
         related='partner_id.l10n_ar_gross_income_type',
         string='Gross Income',
+        readonly=False,
     )
     l10n_ar_start_date = fields.Date(
         related='partner_id.l10n_ar_start_date',
+        readonly=False,
     )
     l10n_ar_afip_responsability_type = fields.Selection(
         related='partner_id.l10n_ar_afip_responsability_type',
+        readonly=False,
     )
     l10n_ar_company_requires_vat = fields.Boolean(
         compute='_compute_l10n_ar_company_requires_vat',
-        readonly=True,
     )
 
     @api.onchange('country_id')
