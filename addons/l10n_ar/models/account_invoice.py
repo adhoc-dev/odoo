@@ -369,8 +369,8 @@ class AccountInvoice(models.Model):
         if without_responsability:
             raise ValidationError(_(
                 'The following invoices has a partner without AFIP '
-                'responsability:\r\n\r\n'
-                '%s') % ('\r\n'.join(
+                'responsability:\n\n'
+                '%s') % ('\n'.join(
                     ['[%i] %s' % (i.id, i.display_name)
                         for i in without_responsability])))
 

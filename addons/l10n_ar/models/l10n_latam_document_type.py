@@ -31,7 +31,7 @@ class L10nLtamDocumentType(models.Model):
             ('credit_note', 'Credit Notes'),
             ('ticket', 'Ticket'),
             ('receipt_invoice', 'Receipt Invoice'),
-            ('customer_payment', 'Customer Voucer'),
+            ('customer_payment', 'Customer Voucher'),
             ('supplier_payment', 'Supplier Invoice'),
             # ('inbound_payment_voucher', 'Inbound Payment Voucer'),
             # ('outbound_payment_voucher', 'Outbound Payment Voucer'),
