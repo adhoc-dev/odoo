@@ -10,8 +10,7 @@ class AccountChartTemplate(models.Model):
     @api.multi
     def _load_template(
             self, company, code_digits=None, account_ref=None, taxes_ref=None):
-        """
-        Set localization to company when installing chart of account.
+        """ Set localization to company when installing chart of account.
         """
         self.ensure_one()
         self._generate_receiptbooks(company)
@@ -20,8 +19,7 @@ class AccountChartTemplate(models.Model):
 
     @api.model
     def _generate_receiptbooks(self, company):
-        """
-        Overwrite this function so that no journal is created on chart
+        """ Overwrite this function so that no journal is created on chart
         installation
         """
         if company._localization_use_documents():
@@ -32,9 +30,8 @@ class AccountChartTemplate(models.Model):
 
     @api.model
     def _check_created_receiptbooks(self, receiptbook_vals, company):
-        """
-        This method used for checking new receipbooks already created or not.
-        If not then create new receipbook.
+        """ This method used for checking new receipbooks already created or
+        not. If not then create new receipbook.
         """
         receipbook = self.env['l10n_latam.payment.receiptbook'].search([
             ('name', '=', receiptbook_vals['name']),
@@ -45,8 +42,7 @@ class AccountChartTemplate(models.Model):
 
     @api.model
     def _prepare_all_receiptbook_data(self, company):
-        """
-        This method can be inherited by different localizations
+        """ This method can be inherited by different localizations
         """
         receiptbook_data = []
         partner_type_name_map = {
