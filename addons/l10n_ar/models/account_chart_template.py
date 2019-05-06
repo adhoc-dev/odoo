@@ -33,19 +33,15 @@ class AccountChartTemplate(models.Model):
         return res
 
     @api.multi
-    def _prepare_all_journals(
-            self, acc_template_ref, company, journals_dict=None):
+    def _prepare_all_journals(self, acc_template_ref, company,
+                              journals_dict=None):
+        """ If argentinian chart, we don't create sales journal as we need more
+        data to create it properly
         """
-        Inherit this function in order to add use document and other
-        configuration if company use argentinian localization
-        """
-        journal_data = super(
+        res = super(
             AccountChartTemplate, self)._prepare_all_journals(
-            acc_template_ref, company, journals_dict)
+            acc_template_ref, company, journals_dict=journals_dict)
 
-        # if argentinian chart, we dont create sales journal as we need more
-        # data to create it properly
         if company.country_id.code == 'AR':
-            # TODO iterar la lista journal_data y eliminar el diccionario que tiene key type == 'sale'
-            pass
-        return journal_data
+            res = [item for item in res if item.get('type') == 'sale']
+        return res
