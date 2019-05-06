@@ -50,3 +50,11 @@ class ResPartner(models.Model):
         '9 - Cliente del Exterior\n'
         '10 - IVA Liberado – Ley Nº 19.640\n',
     )
+    l10n_ar_special_purchase_document_type_ids = fields.Many2many(
+        'l10n_latam.document.type',
+        'res_partner_document_type_rel',
+        'partner_id', 'document_type_id',
+        string='Other Purchase Documents',
+        help='Set here if this partner can issue other documents further '
+        'than invoices, credit notes and debit notes',
+    )

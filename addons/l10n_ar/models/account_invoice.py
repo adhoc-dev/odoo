@@ -383,6 +383,21 @@ class AccountInvoice(models.Model):
                 if not journal_document_type and journal_document_types:
                     journal_document_type = journal_document_types[0]
 
+        if invoice_type == 'in_invoice':
+            other_document_types = (commercial_partner.l10n_ar_special_purchase_document_type_ids)
+            domain = [
+                ('journal_id', '=', journal.id),
+                ('document_type_id',
+                    'in', other_document_types.ids),
+            ]
+            other_journal_document_types = self.env[
+                'account.journal.document.type'].search(domain)
+
+            journal_document_types += other_journal_document_types
+            # if we have some document sepecific for the partner, we choose it
+            if other_journal_document_types:
+                journal_document_type = other_journal_document_types[0]
+
         return {
             'available_journal_document_types': journal_document_types,
             'journal_document_type': journal_document_type,
