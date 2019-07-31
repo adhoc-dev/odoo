@@ -182,3 +182,44 @@ class AccountMove(models.Model):
             ]
             if rec.search(domain):
                 raise ValidationError(_('Vendor bill number must be unique per vendor and company.'))
+
+    @api.model
+    def _get_default_journal(self):
+        """ Do not show the journals that use documents in receipts """
+        journal = super()._get_default_journal()
+
+        if self.env.context.get('default_type') not in ['out_receipt', 'in_receipt'] or not journal.l10n_latam_use_documents:
+            return journal
+
+        move_type = self._context.get('default_type', 'entry')
+        journal_type = 'general'
+        if move_type in self.get_sale_types(include_receipts=True):
+            journal_type = 'sale'
+        elif move_type in self.get_purchase_types(include_receipts=True):
+            journal_type = 'purchase'
+
+        if self._context.get('default_journal_id'):
+            journal = self.env['account.journal'].browse(self._context['default_journal_id'])
+
+            if move_type != 'entry' and journal.type != journal_type:
+                raise UserError(_("Cannot create an invoice of type %s with a journal having %s as type.") % (move_type, journal_type))
+        else:
+            company_id = self._context.get('default_company_id', self.env.company.id)
+            domain = [('company_id', '=', company_id), ('type', '=', journal_type), ('l10n_latam_use_documents', '=', False)]
+
+            journal = None
+            if self._context.get('default_currency_id'):
+                currency_domain = domain + [('currency_id', '=', self._context['default_currency_id'])]
+                journal = self.env['account.journal'].search(currency_domain, limit=1)
+
+            if not journal:
+                journal = self.env['account.journal'].search(domain, limit=1)
+
+            if not journal:
+                error_msg = _('Please define an accounting miscellaneous journal in your company')
+                if journal_type == 'sale':
+                    error_msg = _('Please define an accounting sale journal in your company')
+                elif journal_type == 'purchase':
+                    error_msg = _('Please define an accounting purchase journal in your company')
+                raise UserError(error_msg)
+        return journal
