@@ -217,7 +217,8 @@ class AccountMove(models.Model):
         for rec in self.filtered(lambda x: x.company_id.country_id == self.env.ref('base.ar') and x.journal_id.type == 'sale'
                                  and x.l10n_latam_use_documents and x.partner_id.l10n_ar_afip_responsability_type_id):
             res_code = rec.partner_id.l10n_ar_afip_responsability_type_id.code
-            domain = [('company_id', '=', rec.company_id.id), ('l10n_latam_use_documents', '=', True), ('type', '=', 'sale')]
+            use_doc = False if self.env.context.get('default_type') in ['out_receipt', 'in_receipt'] else True
+            domain = [('company_id', '=', rec.company_id.id), ('l10n_latam_use_documents', '=', use_doc), ('type', '=', 'sale')]
             journal = self.env['account.journal']
             if res_code in ['8', '9', '10'] and rec.journal_id.l10n_ar_afip_pos_system not in expo_journals:
                 # if partner is foregin and journal is not of expo, we try to change to expo journal
