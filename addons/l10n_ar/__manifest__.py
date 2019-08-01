@@ -53,7 +53,7 @@ Follow the next configuration steps
         'data/account_tax_group.xml',
         'data/account_tax_template_data.xml',
         'data/account_fiscal_template.xml',
-        'data/uom_uom_data.xml',
+        'data/uom.uom.csv',
         'data/l10n_latam.document.type.csv',
         # NOTE: we load as csv but we made them not update True with a hook
         'data/res_partner_data.xml',
