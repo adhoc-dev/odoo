@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
 
-    <!-- Operaciones exentas -->
+    <!-- Exempt Operations -->
         <record model='account.fiscal.position.template' id='fiscal_position_template_operaciones_exentas'>
             <field name='name'>Operaciones exentas</field>
             <field name="auto_apply" eval="True"/>
@@ -29,7 +29,7 @@
             <field name="tax_dest_id" ref="ri_tax_vat_exento_ventas"/>
         </record>
 
-    <!-- IVA no corresponde -->
+    <!-- VAT dont correspond -->
         <record model='account.fiscal.position.template' id='fiscal_position_template_iva_no_corresponde'>
             <field name='name'>IVA no corresponde</field>
             <field name="auto_apply" eval="True"/>

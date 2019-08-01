@@ -296,8 +296,8 @@
         <field name="tax_group_id" ref="l10n_ar.tax_group_percepcion_iibb"/>
     </record>
 
-    <!-- SOLO RI -->
-    <!-- account.tax.template -->
+    <!-- Only for Responsable Inscription account.chart.template -->
+
     <record id="ri_tax_vat_no_corresponde_ventas" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ri_chart_template"/>
         <field name="description">IVA No Corresponde</field>

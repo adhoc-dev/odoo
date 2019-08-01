@@ -101,7 +101,7 @@
         <field name="sequence">15</field>
     </record>
 
-    <!-- Percepciones y retenciones -->
+    <!-- Perceptions and Withholding -->
 
     <record model="account.tax.group" id="tax_group_percepcion_iva">
         <field name="name">Percepción IVA</field>
