@@ -70,32 +70,26 @@ class AccountMove(models.Model):
     def _get_argentina_amounts(self):
         self.ensure_one()
         tax_lines = self.line_ids.filtered('tax_line_id')
-        vat_taxes = tax_lines.filtered(
-            lambda r: r.tax_line_id.tax_group_id.l10n_ar_type == 'tax' and r.tax_line_id.tax_group_id.l10n_ar_tax == 'vat')
+        vat_taxes = tax_lines.filtered(lambda r: r.tax_line_id.tax_group_id.l10n_ar_vat_afip_code)
 
         # we add and "r.base" because only if a there is a base amount it is considered taxable, this is used for
         # eg to validate invoices on afif. Does not include afip_code [0, 1, 2] because their are not taxes
         # themselves: VAT Exempt, VAT Untaxed and VAT Not applicable
-        vat_taxables = vat_taxes.filtered(
-            lambda r: r.tax_line_id.tax_group_id.l10n_ar_afip_code not in ['0', '1', '2'] and r.tax_base_amount)
+        vat_taxables = vat_taxes.filtered(lambda r: r.tax_line_id.tax_group_id.l10n_ar_vat_afip_code not in ['0', '1', '2'] and r.tax_base_amount)
 
         # vat exempt values (are the ones with code 2)
-        vat_exempt_taxes = tax_lines.filtered(
-            lambda r: r.tax_line_id.tax_group_id.l10n_ar_type == 'tax' and r.tax_line_id.tax_group_id.l10n_ar_tax == 'vat' and
-            r.tax_line_id.tax_group_id.l10n_ar_afip_code == '2')
+        vat_exempt_taxes = vat_taxes.filtered(lambda r: r.tax_line_id.tax_group_id.l10n_ar_vat_afip_code == '2')
 
         # vat untaxed values / no gravado (are the ones with code 1)
-        vat_untaxed_taxes = tax_lines.filtered(
-            lambda r: r.tax_line_id.tax_group_id.l10n_ar_type == 'tax' and r.tax_line_id.tax_group_id.l10n_ar_tax == 'vat' and
-            r.tax_line_id.tax_group_id.l10n_ar_afip_code == '1')
+        vat_untaxed_taxes = vat_taxes.filtered(lambda r: r.tax_line_id.tax_group_id.l10n_ar_vat_afip_code == '1')
 
         # other taxes values
         not_vat_taxes = tax_lines - vat_taxes
 
-        iibb_perc = tax_lines.filtered(lambda r: r.tax_line_id.tax_group_id.l10n_ar_type == 'perception' and r.tax_line_id.tax_group_id.l10n_ar_application == 'provincial_taxes')
-        mun_perc = tax_lines.filtered(lambda r: r.tax_line_id.tax_group_id.l10n_ar_type == 'perception' and r.tax_line_id.tax_group_id.l10n_ar_application == 'municipal_taxes')
-        intern_tax = tax_lines.filtered(lambda r: r.tax_line_id.tax_group_id.l10n_ar_application == 'others')
-        national_perc = tax_lines.filtered(lambda r: r.tax_line_id.tax_group_id.l10n_ar_type == 'perception' and r.tax_line_id.tax_group_id.l10n_ar_application == 'national_taxes')
+        iibb_perc = tax_lines.filtered(lambda r: r.tax_line_id.tax_group_id.l10n_ar_tribute_afip_code == '07')
+        mun_perc = tax_lines.filtered(lambda r: r.tax_line_id.tax_group_id.l10n_ar_tribute_afip_code == '08')
+        intern_tax = tax_lines.filtered(lambda r: r.tax_line_id.tax_group_id.l10n_ar_tribute_afip_code == '04')
+        other_perc = tax_lines.filtered(lambda r: r.tax_line_id.tax_group_id.l10n_ar_tribute_afip_code == '09')
 
         return dict(
             vat_tax_ids=vat_taxes,
@@ -109,7 +103,7 @@ class AccountMove(models.Model):
             iibb_perc_amount=sum(iibb_perc.mapped('price_unit')),
             mun_perc_amount=sum(mun_perc.mapped('price_unit')),
             intern_tax_amount=sum(intern_tax.mapped('price_unit')),
-            national_perc_amount=sum(national_perc.mapped('price_unit')),
+            other_perc_amount=sum(other_perc.mapped('price_unit')),
         )
 
     def _get_l10n_latam_documents_domain(self):
@@ -131,7 +125,7 @@ class AccountMove(models.Model):
         # check that there is one and only one vat tax per invoice line
         for inv_line in self.filtered(lambda x: x.company_id.l10n_ar_company_requires_vat).mapped('invoice_line_ids'):
             vat_taxes = inv_line.tax_ids.filtered(
-                lambda x: x.tax_group_id.l10n_ar_tax == 'vat' and x.tax_group_id.l10n_ar_type == 'tax')
+                lambda x: x.tax_group_id.l10n_ar_vat_afip_code)
             if len(vat_taxes) != 1:
                 raise UserError(_(
                     'There must be one and only one VAT tax per line. Verify lines with product') + ' "%s"' % (
@@ -155,7 +149,7 @@ class AccountMove(models.Model):
         # Invoices that should not have any VAT and have
         not_zero_aliquot = self.filtered(
             lambda x: x.type in ['in_invoice', 'in_refund'] and x.l10n_latam_document_type_id.purchase_aliquots == 'zero'
-            and any([t.tax_line_id.tax_group_id.l10n_ar_afip_code != '0'
+            and any([t.tax_line_id.tax_group_id.l10n_ar_vat_afip_code != '0'
                      for t in x._get_argentina_amounts()['vat_tax_ids']]))
         if not_zero_aliquot:
             raise UserError(_(
@@ -166,7 +160,7 @@ class AccountMove(models.Model):
         zero_aliquot = self.filtered(
             lambda x: x.type in ['in_invoice', 'in_refund']
             and x.l10n_latam_document_type_id.purchase_aliquots == 'not_zero' and
-            any([t.tax_line_id.tax_group_id.l10n_ar_afip_code == '0'
+            any([t.tax_line_id.tax_group_id.l10n_ar_vat_afip_code == '0'
                  for t in x._get_argentina_amounts()['vat_tax_ids']]))
         if zero_aliquot:
             raise UserError(_(

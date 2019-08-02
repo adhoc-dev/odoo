@@ -6,29 +6,27 @@ class AccountTaxGroup(models.Model):
 
     _inherit = 'account.tax.group'
 
-    l10n_ar_afip_code = fields.Char('AFIP Code', help='This code will be used on electronic invoice', readonly=True)
-    l10n_ar_type = fields.Selection([
-        ('tax', 'TAX'),
-        ('perception', 'Perception'),
-        ('withholding', 'Withholding'),
-        ('other', 'Other'),
-    ], string='Argentinian Type', index=True, readonly=True)
-    l10n_ar_tax = fields.Selection([
-        ('vat', 'VAT'),
-        ('profits', 'Profits'),
-        ('gross_income', 'Gross Income'),
-        ('other', 'Other')],
-        index=True, string='Argentinian Tax', readonly=True)
-    l10n_ar_application = fields.Selection([
-        ('national_taxes', 'National Taxes'),
-        ('provincial_taxes', 'Provincial Taxes'),
-        ('municipal_taxes', 'Municipal Taxes'),
-        ('internal_taxes', 'Internal Taxes'),
-        ('others', 'Others')], string="Argentinian Application", help='Other Taxes According AFIP', index=True, readonly=True)
-    l10n_ar_application_code = fields.Char('Application Code', compute='_compute_l10n_ar_application_code')
-
-    @api.depends('l10n_ar_application')
-    def _compute_l10n_ar_application_code(self):
-        code = {'national_taxes': '01', 'provincial_taxes': '02', 'municipal_taxes': '03', 'internal_taxes': '04'}
-        for rec in self:
-            rec.l10n_ar_application_code = code.get(rec.l10n_ar_application, '99')
+    # values from http://www.afip.gob.ar/fe/documentos/otros_Tributos.xlsx
+    l10n_ar_tribute_afip_code = fields.Selection([
+        ('01', '01 - Impuestos nacionales'),
+        ('02', '02 - Impuestos provinciales'),
+        ('03', '03 - Impuestos municipales'),
+        ('04', '04 - Impuestos internos'),
+        ('06', '06 - Percepción de IVA'),
+        ('07', '07 - Percepción de IIBB'),
+        ('08', '08 - Percepciones por Impuestos Municipales'),
+        ('09', '09 - Otras Percepciones'),
+        ('99', '99 - Otros'),
+    ], string='Tribute AFIP Code', index=True, readonly=True)
+    # values from http://www.afip.gob.ar/fe/documentos/OperacionCondicionIVA.xls
+    l10n_ar_vat_afip_code = fields.Selection([
+        ('0', 'No Corresponde'),
+        ('1', 'No Gravado'),
+        ('2', 'Exento'),
+        ('3', '0%'),
+        ('4', '10.5%'),
+        ('5', '21%'),
+        ('6', '27%'),
+        ('8', '5%'),
+        ('9', '2,5%'),
+    ], string='VAT AFIP Code', index=True, readonly=True)
