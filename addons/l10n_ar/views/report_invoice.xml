@@ -19,9 +19,9 @@
                 <div name="rigth-upper-side" class="col-5 text-right">
 
                     <!-- (6) Titulo de Documento -->
-                    <h5 t-att-style="'color: %s;' % o.company_id.primary_color"><strong>
+                    <h4 t-att-style="'color: %s;' % o.company_id.primary_color"><strong>
                         <span t-raw="report_name"/>
-                    </strong></h5>
+                    </strong></h4>
 
                 </div>
             </div>
@@ -35,13 +35,14 @@
                         <!-- (3) Domicilio Comercial: -->
                         <!-- (4) Domicilio Fiscal -->
                         <br/>
+                        <div></div>
+                        <!-- we dont use the address widget as it adds a new line on the phone and we want to reduce at maximum lines qty -->
                         <t t-esc="' - '.join([item for item in [
                             ', '.join([item for item in [header_address.street, header_address.street2] if item]),
                             header_address.city,
                             header_address.state_id and header_address.state_id.name,
                             header_address.zip,
-                            header_address.country_id and header_address.country_id.name,
-                            header_address.phone and 'Tel: ' + header_address.phone] if item])"/>
+                            header_address.country_id and header_address.country_id.name] if item])"/> - <span style="white-space: nowrap;" t-raw="'Tel: ' + header_address.phone"/>
                         <br/>
                         <span t-att-style="'color: %s;' % o.company_id.primary_color" t-esc="' - '.join([item for item in [header_address.website, header_address.email] if item])"/>
                     </t>
@@ -86,7 +87,7 @@
             <t t-set="custom_header" t-value="'l10n_ar.custom_header'"/>
             <t t-set="report_date" t-value="o.invoice_date"/>
             <t t-set="report_number" t-value="o.l10n_latam_document_number"/>
-            <t t-set="pre_printed_report" t-value="o.journal_id.l10n_ar_afip_pos_system == 'II_IM'"/>
+            <t t-set="pre_printed_report" t-value="report_type == 'pdf' and o.journal_id.l10n_ar_afip_pos_system == 'II_IM'"/>
             <t t-set="document_letter" t-value="o.l10n_latam_document_type_id.l10n_ar_letter"/>
             <t t-set="document_legend" t-value="o.l10n_latam_document_type_id.code and 'Cod. %02d' % int(o.l10n_latam_document_type_id.code) or ''"/>
             <t t-set="report_name" t-value="o.l10n_latam_document_type_id.report_name"/>
@@ -172,6 +173,7 @@
                         <br/><strong>Source:</strong>
                         <span t-field="o.invoice_origin"/>
                     </t>
+
                     <t t-if="o.ref">
                         <br/><strong>Reference:</strong>
                         <span t-field="o.ref"/>
