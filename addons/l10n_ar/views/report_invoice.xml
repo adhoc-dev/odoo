@@ -213,15 +213,8 @@
 
             </div>
         </div>
-        <!--  we remove the ml auto and also give more space to avoid multiple lines on tax detail -->
-
-        <!-- <div t-attf-class="#{'col-6' if report_type != 'html' else 'col-sm-7 col-md-6'} ml-auto"> -->
-
-        <!-- <div t-attf-class="#{'col-4' if report_type != 'html' else 'col-sm-7 col-md-5'} ml-auto" position="attributes">
-            <attribute name="t-attf-class">#{'col-5' if report_type != 'html' else 'col-sm-7 col-md-5'}</attribute>
-        </div> -->
         <div t-attf-class="#{'col-6' if report_type != 'html' else 'col-sm-7 col-md-6'} ml-auto" position="before">
-            <div t-attf-class="#{'col-7' if report_type != 'html' else 'col-sm-5 col-md-7'}">
+            <div t-attf-class="#{'col-6' if report_type != 'html' else 'col-sm-7 col-md-6'}">
 
                 <t t-if="o.l10n_ar_afip_concept in ['2', '3', '4'] and o.l10n_ar_afip_service_start and o.l10n_ar_afip_service_end">
                     <strong>Invoiced period from: </strong><span t-field="o.l10n_ar_afip_service_start"/> to <span t-field="o.l10n_ar_afip_service_end"/>
@@ -235,6 +228,10 @@
                 </t>
 
             </div>
+        </div>
+        <!--  we remove the ml auto and also give more space to avoid multiple lines on tax detail -->
+        <div t-attf-class="#{'col-6' if report_type != 'html' else 'col-sm-7 col-md-6'} ml-auto" position="attributes">
+            <attribute name="t-attf-class">#{'col-6' if report_type != 'html' else 'col-sm-7 col-md-6'}</attribute>
         </div>
     </template>
 
