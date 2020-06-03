@@ -16,7 +16,7 @@
                         <span style="font-size: x-small;" t-raw="document_legend"/>
                     </span>
                 </div>
-                <div name="rigth-upper-side" class="col-5 text-right">
+                <div name="right-upper-side" class="col-5 text-right">
 
                     <!-- (6) Titulo de Documento -->
                     <h4 t-att-style="'color: %s;' % o.company_id.primary_color"><strong>
