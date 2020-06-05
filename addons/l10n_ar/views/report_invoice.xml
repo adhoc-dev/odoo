@@ -80,7 +80,7 @@
         </div>
     </template>
 
-    <template id="report_invoice_document" inherit_id="account.report_invoice_document" primary="True">
+    <template id="report_invoice_document_with_payments" inherit_id="account.report_invoice_document_with_payments" primary="True">
 
         <!-- custom header and footer -->
         <t t-set="o" position="after">
@@ -233,30 +233,6 @@
         <div t-attf-class="#{'col-6' if report_type != 'html' else 'col-sm-7 col-md-6'} ml-auto" position="attributes">
             <attribute name="t-attf-class">#{'col-6' if report_type != 'html' else 'col-sm-7 col-md-6'}</attribute>
         </div>
-    </template>
-
-    <template id="report_invoice_document_with_payments" inherit_id="l10n_ar.report_invoice_document" primary="True">
-        <xpath expr="//div[@id='total']/div/table" position="inside">
-            <t t-set="payments_vals" t-value="o.sudo()._get_reconciled_info_JSON_values()"/>
-            <t t-foreach="payments_vals" t-as="payment_vals">
-                <tr>
-                    <td>
-                        <i class="oe_form_field text-right oe_payment_label">Paid on <t t-esc="payment_vals['date']" t-options='{"widget": "date"}'/></i>
-                    </td>
-                    <td class="text-right">
-                        <span t-esc="payment_vals['amount']" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
-                    </td>
-                </tr>
-            </t>
-            <t t-if="len(payments_vals) > 0">
-                <tr class="border-black">
-                    <td><strong>Amount Due</strong></td>
-                    <td class="text-right">
-                            <span t-field="o.amount_residual"/>
-                    </td>
-                </tr>
-            </t>
-        </xpath>
     </template>
 
 </odoo>

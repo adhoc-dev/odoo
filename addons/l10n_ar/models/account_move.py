@@ -191,7 +191,6 @@ class AccountMove(models.Model):
         self.ensure_one()
         if self.l10n_latam_use_documents and self.company_id.country_id.code == 'AR':
             custom_report = {
-                'account.report_invoice_document': 'l10n_ar.report_invoice_document',
                 'account.report_invoice_document_with_payments': 'l10n_ar.report_invoice_document_with_payments',
             }
             return custom_report.get(report_xml_id) or report_xml_id
