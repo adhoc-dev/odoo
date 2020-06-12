@@ -670,25 +670,25 @@ msgstr "Ir a Diarios"
 #: model_terms:ir.ui.view,arch_db:l10n_ar.view_company_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar.view_partner_property_form
 msgid "Gross Income"
-msgstr "Ingreso Bruto"
+msgstr "Ingresos Brutos"
 
 #. module: l10n_ar
 #: model:ir.model.fields,field_description:l10n_ar.field_res_company__l10n_ar_gross_income_number
 #: model:ir.model.fields,field_description:l10n_ar.field_res_partner__l10n_ar_gross_income_number
 #: model:ir.model.fields,field_description:l10n_ar.field_res_users__l10n_ar_gross_income_number
 msgid "Gross Income Number"
-msgstr "Número de Ingreso Bruto"
+msgstr "Número de Ingresos Brutos"
 
 #. module: l10n_ar
 #: model:ir.model.fields,field_description:l10n_ar.field_res_partner__l10n_ar_gross_income_type
 #: model:ir.model.fields,field_description:l10n_ar.field_res_users__l10n_ar_gross_income_type
 msgid "Gross Income Type"
-msgstr "Tipo de Ingreso Bruto"
+msgstr "Tipo de Ingresos Brutos"
 
 #. module: l10n_ar
 #: model_terms:ir.ui.view,arch_db:l10n_ar.custom_header
 msgid "Gross Income:"
-msgstr "Ingreso Bruto:"
+msgstr "Ing Brutos:"
 
 #. module: l10n_ar
 #: model:product.product,name:l10n_ar.product_product_servicio_de_guarda
