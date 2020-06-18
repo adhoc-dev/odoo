@@ -186,3 +186,13 @@ class AccountMove(models.Model):
                 'l10n_ar_afip_service_end': move.l10n_ar_afip_service_end,
             })
         return super()._reverse_moves(default_values_list=default_values_list, cancel=cancel)
+
+    def get_custom_report(self, report_xml_id):
+        self.ensure_one()
+        if self.l10n_latam_use_documents and self.company_id.country_id.code == 'AR':
+            custom_report = {
+                'account.report_invoice_document_with_payments': 'l10n_ar.report_invoice_document_with_payments',
+                'account.report_invoice_document': 'l10n_ar.report_invoice_document',
+            }
+            return custom_report.get(report_xml_id) or report_xml_id
+        return super().get_custom_report(report_xml_id)
