@@ -92,74 +92,81 @@ msgstr ""
 
 #. module: l10n_ar
 #: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document
+#: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document_with_payments
 msgid "<br/><strong>CBU for payment: </strong>"
 msgstr ""
 
 #. module: l10n_ar
 #: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document
+#: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document_with_payments
 msgid "<br/><strong>Currency: </strong>"
 msgstr ""
 
 #. module: l10n_ar
 #: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document
+#: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document_with_payments
 msgid "<br/><strong>Exchange rate: </strong>"
 msgstr ""
 
 #. module: l10n_ar
 #: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document
+#: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document_with_payments
 msgid "<br/><strong>Incoterm:</strong>"
 msgstr ""
 
 #. module: l10n_ar
 #: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document
+#: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document_with_payments
 msgid "<br/><strong>Payment Term: </strong>"
 msgstr ""
 
 #. module: l10n_ar
 #: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document
+#: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document_with_payments
 msgid "<br/><strong>Reference:</strong>"
 msgstr ""
 
 #. module: l10n_ar
 #: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document
+#: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document_with_payments
 msgid "<br/><strong>Source:</strong>"
 msgstr ""
 
 #. module: l10n_ar
 #: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document
+#: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document_with_payments
 msgid ""
-"<span groups=\"account.group_show_line_subtotals_tax_included\" position=\"replace\">\n"
-"            <span groups=\"account.group_show_line_subtotals_tax_included\">Amount</span>\n"
-"        </span>"
+"<span "
+"groups=\"account.group_show_line_subtotals_tax_included\">Amount</span>"
 msgstr ""
 
 #. module: l10n_ar
 #: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document
+#: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document_with_payments
 msgid "<span>% VAT</span>"
 msgstr ""
 
 #. module: l10n_ar
-#: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document_with_payments
-msgid "<strong>Amount Due</strong>"
-msgstr ""
-
-#. module: l10n_ar
 #: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document
+#: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document_with_payments
 msgid "<strong>Customer: </strong>"
 msgstr ""
 
 #. module: l10n_ar
 #: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document
+#: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document_with_payments
 msgid "<strong>Due Date: </strong>"
 msgstr ""
 
 #. module: l10n_ar
 #: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document
+#: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document_with_payments
 msgid "<strong>Invoiced period from: </strong>"
 msgstr ""
 
 #. module: l10n_ar
 #: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document
+#: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document_with_payments
 msgid "<strong>VAT Cond: </strong>"
 msgstr ""
 
@@ -924,12 +931,8 @@ msgstr ""
 
 #. module: l10n_ar
 #: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document
-msgid "Page: <span class=\"page\"/> / <span class=\"topage\"/>"
-msgstr ""
-
-#. module: l10n_ar
 #: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document_with_payments
-msgid "Paid on"
+msgid "Page: <span class=\"page\"/> / <span class=\"topage\"/>"
 msgstr ""
 
 #. module: l10n_ar
@@ -1310,6 +1313,8 @@ msgid "is not a valid value for"
 msgstr ""
 
 #. module: l10n_ar
+#: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document
+#: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document_with_payments
 #: model_terms:ir.ui.view,arch_db:l10n_ar.view_move_form
 msgid "to"
 msgstr ""
