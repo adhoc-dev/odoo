@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo noupdate="1">
 
-    <function model="res.users" name="write">
-        <value eval="[ref('base.public_user')]"/>
-        <value eval="{'company_ids': [(4, ref('l10n_ar.company_ri'))]}"/>
-    </function>
+    <record id="public_user_ar" model="res.users">
+        <field name="name">(AR) Public User</field>
+        <field name="login">public-ar</field>
+        <field name="password">public</field>
+        <field name="company_ids" eval="[(6, 0, [ref('l10n_ar.company_ri')])]"/>
+        <field name="company_id" ref="l10n_ar.company_ri"/>
+        <field name="groups_id" eval="[(6, 0, [ref('base.group_public')])]"/>
+    </record>
 
     <record id="portal_ri_user" model="res.users">
         <field name="login">responsable</field>
