@@ -9,7 +9,7 @@ class ResCompany(models.Model):
         """ This is required because when saving the res.config.settings is trying to create a new public user for
         current company using copy() mehtod with is making that the groups be re computed and raise the odoo exception
         related to have both tax groups: included b2c and excluded b2b.
-s
+
         With this change we avoid this and we create a new public user instead of use the copy() method """
         if self.env.company.country_id == self.env.ref('base.ar'):
             # We need sudo to be able to see public users from others companies too
