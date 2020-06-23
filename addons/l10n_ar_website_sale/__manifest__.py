@@ -7,7 +7,7 @@
     'author': 'Odoo, ADHOC SA',
     'description': """
 
-* Be able to see Identification Type and AFIP Responsibility in both portal and shop check address.
+* Be able to see Identification Type and AFIP Responsibility in shop check address.
 * Show shop taxes included/excluded with a new option that depends on the partner responsibility.
 
 """,
