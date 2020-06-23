@@ -11,7 +11,7 @@ class ResCompany(models.Model):
         related to have both tax groups: included b2c and excluded b2b.
 
         With this change we avoid this and we create a new public user instead of use the copy() method """
-        if self.env.company.country_id == self.env.ref('base.ar'):
+        if self.country_id == self.env.ref('base.ar'):
             # We need sudo to be able to see public users from others companies too
             public_users = self.env.ref('base.group_public').sudo().with_context(active_test=False).users
             public_users_for_website = public_users.filtered(lambda user: user.company_id == self)
