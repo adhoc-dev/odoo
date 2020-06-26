@@ -13,6 +13,7 @@
     'data': [
         'data/ir_model_fields.xml',
         'views/templates.xml',
+        'views/res_config_settings_view.xml',
         'demo/res_users_demo.xml',
         'demo/website_demo.xml',
     ],
