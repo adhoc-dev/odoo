@@ -693,8 +693,8 @@ msgstr "Tipo de Ingresos Brutos"
 
 #. module: l10n_ar
 #: model_terms:ir.ui.view,arch_db:l10n_ar.custom_header
-msgid "Gross Income:"
-msgstr "Ing Brutos:"
+msgid "IIBB:"
+msgstr ""
 
 #. module: l10n_ar
 #: model:product.product,name:l10n_ar.product_product_servicio_de_guarda

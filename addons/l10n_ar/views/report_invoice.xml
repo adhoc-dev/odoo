@@ -3,7 +3,7 @@
 
     <!-- this header can be used on any argentinan report, to be usefull some variables should be passed -->
     <template id="custom_header">
-        <div t-att-style="(o.company_id.external_report_layout_id.key in ['web.external_layout_standard', 'web.external_layout_clean'] or not o.company_id.external_report_layout_id) and 'font-size: 15px;'">
+        <div>
             <div class="row" t-if="not pre_printed_report">
                 <div name="left-upper-side" class="col-5">
                     <img t-if="o.company_id.logo" t-att-src="image_data_uri(o.company_id.logo)" style="max-height: 45px;" alt="Logo"/>
@@ -44,10 +44,10 @@
                             header_address.zip,
                             header_address.country_id and header_address.country_id.name] if item])"/><span t-if="header_address.phone"> - </span><span t-if="header_address.phone" style="white-space: nowrap;" t-raw="'Tel: ' + header_address.phone"/>
                         <br/>
-                        <span t-att-style="'color: %s;' % o.company_id.primary_color" t-esc="' - '.join([item for item in [header_address.website, header_address.email] if item])"/>
+                        <span t-att-style="'color: %s;' % o.company_id.primary_color" t-esc="' - '.join([item for item in [header_address.website.replace('https://', '').replace('http://', ''), header_address.email] if item])"/>
                     </t>
                 </div>
-                <div class="col-6 text-right">
+                <div class="col-6 text-right" style="padding-left: 0px;">
 
                     <t t-if="not pre_printed_report">
                         <!-- (7) Numero punto venta - (8) numero de documento -->
@@ -66,15 +66,9 @@
 
                         <!-- (11) IIBB: -->
                         <!-- (12) Inicio de actividades -->
-                        <br/><span t-att-style="'color: %s;' % o.company_id.secondary_color">Gross Income: </span><span t-esc="o.company_id.l10n_ar_gross_income_type == 'exempt' and 'Exento' or o.company_id.l10n_ar_gross_income_number"/><span t-att-style="'color: %s;' % o.company_id.secondary_color"> - Activities start: </span><span t-field="o.company_id.l10n_ar_afip_start_date"/>
+                        <br/><span t-att-style="'color: %s;' % o.company_id.secondary_color">IIBB: </span><span t-esc="o.company_id.l10n_ar_gross_income_type == 'exempt' and 'Exento' or o.company_id.l10n_ar_gross_income_number"/><span t-att-style="'color: %s;' % o.company_id.secondary_color"> - Activities start: </span><span t-field="o.company_id.l10n_ar_afip_start_date"/>
                     </t>
 
-                </div>
-            </div>
-            <!-- TODO ver si solo para algun que otro reporte tmb chequear color-->
-            <div t-if="not pre_printed_report and o.company_id.external_report_layout_id.key in ['web.external_layout_standard', 'web.external_layout_clean']" class="row zero_min_height">
-                <div class="col-12">
-                    <div style="border-bottom: 1px solid #dee2e6;"/>
                 </div>
             </div>
         </div>
@@ -103,6 +97,7 @@
                     </div>
                 </div>
             </t>
+            <t t-set="fiscal_bond" t-value="o.journal_id.l10n_ar_afip_pos_system in ['BFERCEL', 'BFEWS']"/>
         </t>
 
         <!-- remove default partner address -->
@@ -110,6 +105,14 @@
 
         <!-- remove default document title -->
         <h2 position="replace"/>
+
+        <!-- NCM column for fiscal bond -->
+        <th name="th_description" position="after">
+            <th t-if="fiscal_bond" name="th_ncm_code" class="text-left"><span>NCM</span></th>
+        </th>
+        <td name="account_invoice_line_name" position="after">
+            <td t-if="fiscal_bond" name="ncm_code"><span t-field="line.product_id.l10n_ar_ncm_code"/></td>
+        </td>
 
         <!-- use latam prices (to include/exclude VAT) -->
         <xpath expr="//span[@t-field='line.price_unit']" position="attributes">
@@ -267,6 +270,7 @@
                     </div>
                 </div>
             </t>
+            <t t-set="fiscal_bond" t-value="o.journal_id.l10n_ar_afip_pos_system in ['BFERCEL', 'BFEWS']"/>
         </t>
 
         <!-- remove default partner address -->
@@ -274,6 +278,14 @@
 
         <!-- remove default document title -->
         <h2 position="replace"/>
+
+        <!-- NCM column for fiscal bond -->
+        <th name="th_description" position="after">
+            <th t-if="fiscal_bond" name="th_ncm_code" class="text-left"><span>NCM</span></th>
+        </th>
+        <td name="account_invoice_line_name" position="after">
+            <td t-if="fiscal_bond" name="ncm_code"><span t-field="line.product_id.l10n_ar_ncm_code"/></td>
+        </td>
 
         <!-- use latam prices (to include/exclude VAT) -->
         <xpath expr="//span[@t-field='line.price_unit']" position="attributes">

@@ -21,7 +21,9 @@
         <field name='currency_id' ref='base.ARS'/>
         <field name='partner_id' ref='partner_ri'/>
         <field name='name'>(AR) Responsable Inscripto</field>
-        <field name='l10n_ar_gross_income_type'>exempt</field>
+        <field name="l10n_ar_afip_start_date" eval="time.strftime('%Y-01-01')"/>
+        <field name='l10n_ar_gross_income_type'>local</field>
+        <field name='l10n_ar_gross_income_number'>901-21885123</field>
     </record>
 
     <function model="res.users" name="write">
