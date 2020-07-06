@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- this header can be used on any argentinan report, to be usefull some variables should be passed -->
+    <!-- this header can be used on any Argentinean report, to be useful some variables should be passed -->
     <template id="custom_header">
         <div>
             <div class="row" t-if="not pre_printed_report">
