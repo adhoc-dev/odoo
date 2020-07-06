@@ -11,16 +11,16 @@
                 <div name="center-upper" class="col-2 text-center" t-att-style="'color: %s;' % o.company_id.primary_color">
                     <span style="display: inline-block; text-align: center; line-height: 8px;">
                         <h1 style="line-height: 25px;">
-                            <strong><span t-raw="document_letter"/></strong>
+                            <strong><span t-esc="document_letter"/></strong>
                         </h1>
-                        <span style="font-size: x-small;" t-raw="document_legend"/>
+                        <span style="font-size: x-small;" t-esc="document_legend"/>
                     </span>
                 </div>
                 <div name="right-upper-side" class="col-5 text-right">
 
                     <!-- (6) Titulo de Documento -->
                     <h4 t-att-style="'color: %s;' % o.company_id.primary_color"><strong>
-                        <span t-raw="report_name"/>
+                        <span t-esc="report_name"/>
                     </strong></h4>
 
                 </div>
@@ -42,7 +42,7 @@
                             header_address.city,
                             header_address.state_id and header_address.state_id.name,
                             header_address.zip,
-                            header_address.country_id and header_address.country_id.name] if item])"/><span t-if="header_address.phone"> - </span><span t-if="header_address.phone" style="white-space: nowrap;" t-raw="'Tel: ' + header_address.phone"/>
+                            header_address.country_id and header_address.country_id.name] if item])"/><span t-if="header_address.phone"> - </span><span t-if="header_address.phone" style="white-space: nowrap;" t-esc="'Tel: ' + header_address.phone"/>
                         <br/>
                         <span t-att-style="'color: %s;' % o.company_id.primary_color" t-esc="' - '.join([item for item in [header_address.website.replace('https://', '').replace('http://', ''), header_address.email] if item])"/>
                     </t>
@@ -51,12 +51,12 @@
 
                     <t t-if="not pre_printed_report">
                         <!-- (7) Numero punto venta - (8) numero de documento -->
-                        <span t-att-style="'color: %s;' % o.company_id.secondary_color">Nro: </span><span t-raw="report_number"/>
+                        <span t-att-style="'color: %s;' % o.company_id.secondary_color">Nro: </span><span t-esc="report_number"/>
                         <br/>
                     </t>
 
                     <!-- (9) Fecha -->
-                    <span t-att-style="'color: %s;' % o.company_id.secondary_color">Date: </span><span t-raw="report_date" t-options='{"widget": "date"}'/>
+                    <span t-att-style="'color: %s;' % o.company_id.secondary_color">Date: </span><span t-esc="report_date" t-options='{"widget": "date"}'/>
 
                     <t t-if="not pre_printed_report">
                         <!-- (5) Condicion de IVA / Responsabilidad -->
