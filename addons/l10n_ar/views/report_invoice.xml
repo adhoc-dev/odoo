@@ -66,7 +66,7 @@
 
                         <!-- (11) IIBB: -->
                         <!-- (12) Inicio de actividades -->
-                        <br/><span t-att-style="'color: %s;' % o.company_id.secondary_color">IIBB: </span><span t-esc="o.company_id.l10n_ar_gross_income_type == 'exempt' and 'Exento' or o.company_id.l10n_ar_gross_income_number"/><span t-att-style="'color: %s;' % o.company_id.secondary_color"> - Activities start: </span><span t-field="o.company_id.l10n_ar_afip_start_date"/>
+                        <br/><span t-att-style="'color: %s;' % o.company_id.secondary_color">IIBB: </span><span t-esc="o.company_id.l10n_ar_gross_income_type == 'exempt' and 'Exento' or o.company_id.l10n_ar_gross_income_number"/><span t-att-style="'color: %s;' % o.company_id.secondary_color"> - Activities Start: </span><span t-field="o.company_id.l10n_ar_afip_start_date"/>
                     </t>
 
                 </div>

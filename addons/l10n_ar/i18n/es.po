@@ -17,7 +17,7 @@ msgstr ""
 
 #. module: l10n_ar
 #: model_terms:ir.ui.view,arch_db:l10n_ar.custom_header
-msgid "- Activities start:"
+msgid "- Activities Start:"
 msgstr "- Inicio actividades:"
 
 #. module: l10n_ar
@@ -288,7 +288,7 @@ msgstr "Activo"
 
 #. module: l10n_ar
 #: model:ir.model.fields,field_description:l10n_ar.field_res_company__l10n_ar_afip_start_date
-msgid "Activities start"
+msgid "Activities Start"
 msgstr "Inicio actividades"
 
 #. module: l10n_ar
