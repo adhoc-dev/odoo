@@ -11,10 +11,4 @@
         </t>
     </template>
 
-    <template id="report_invoice_with_payments" inherit_id="account.report_invoice_with_payments">
-        <t t-call="account.report_invoice_document_with_payments" position="attributes">
-            <attribute name="t-call">#{ o.get_custom_report('account.report_invoice_document_with_payments') }</attribute>
-        </t>
-    </template>
-
 </odoo>
