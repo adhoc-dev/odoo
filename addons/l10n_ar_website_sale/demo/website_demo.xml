@@ -18,9 +18,9 @@
         <field name="sequence">1</field>
         <field name="currency_id" ref="base.ARS"/>
     </record>
-    <function model="product.product" name="write">
+    <!-- <function model="product.product" name="write">
         <value model="product.product" eval="obj().search([('taxes_id', '=', False)]).ids"/>
         <value model="account.tax" eval="{'taxes_id': (4, obj().search([('type_tax_use', '=', 'sale'), ('tax_group_id', '=', 'VAT 21%')]).id )}"/>
-    </function>
+    </function> -->
 
 </odoo>
