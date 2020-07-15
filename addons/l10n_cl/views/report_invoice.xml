@@ -1,0 +1,401 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- this header can be used on any Chilean report -->
+    <template id="custom_header">
+        <div>
+            <div class="row">
+                <div name="left-upper-side" class="col-8">
+                    <img t-if="o.company_id.logo" t-att-src="image_data_uri(o.company_id.logo)"
+                         style="max-height: 45px;" alt="Logo"/>
+                    <br/>
+                    <strong>
+                        <span t-field="o.company_id.partner_id.name"/>
+                    </strong>
+                    <br/>
+                    <span name="company_activity" class="font-italic" t-field="o.company_id.report_header"/>
+                    <div/>
+                    <t t-esc="' - '.join([item for item in [
+                        ', '.join([item for item in [header_address.street, header_address.street2] if item]),
+                        header_address.city,
+                        header_address.state_id and header_address.state_id.name,
+                        header_address.zip,
+                        header_address.country_id and header_address.country_id.name] if item])"/>
+                    <span t-if="header_address.phone">-</span>
+                    <span t-if="header_address.phone" style="white-space: nowrap;"
+                          t-esc="'Tel: ' + header_address.phone"/>
+                </div>
+                <div name="right-upper-side" class="col-4 text-center border border-dark">
+                    <!-- (6) Titulo de Documento -->
+                    <h6 t-att-style="'color: %s;' % o.company_id.primary_color">
+                        <strong t-att-style="'color: %s;' % o.company_id.primary_color">
+                            <br/>
+                            <span>RUT:</span>
+                            <span t-field="o.company_id.partner_id.vat"/>
+                            <br/><br/>
+                            <span t-esc="report_name"/>
+                            <br/>
+                            <br/>
+                            <span>Nº:</span>
+                            <span t-esc="report_number"/>
+                        </strong>
+                    </h6>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-8" name="other-company-info">
+                    <span t-att-style="'color: %s;' % o.company_id.primary_color"
+                          t-esc="' - '.join([item for item in [header_address.website.replace('https://', '').replace('http://', ''), header_address.email] if item])"/>
+                </div>
+                <div class="col-4 text-center" name="regional-office"/>
+
+            </div>
+
+        </div>
+    </template>
+
+
+    <template id="informations">
+        <div id="informations" class="row mt8 mb8">
+            <div class="col-6">
+                <strong>
+                    <span t-att-style="'color: %s;' % o.company_id.secondary_color">Date:</span>
+                </strong>
+                <span t-esc="report_date" t-options='{"widget": "date"}'/>
+                <br/>
+
+                <!-- (14) Apellido uy Nombre: Denominicacion o Razon Soclial -->
+                <strong>Customer:</strong>
+                <span t-field="o.partner_id.name"/>
+                <br/>
+
+                <t t-if="o.partner_id.vat and o.partner_id.l10n_latam_identification_type_id">
+                    <strong><t
+                            t-esc="o.partner_id.l10n_latam_identification_type_id.name or o.company_id.country_id.vat_label"
+                            id="inv_tax_id_label"/>:
+                    </strong>
+                    <span t-esc="o.partner_id.vat"/>
+                    <br/>
+                </t>
+                <strong>GIRO:</strong>
+                <span t-esc="o.partner_id.industry_id.name or ''"/>
+                <br/>
+            </div>
+            <div class="col-6">
+                <strong>Due Date:</strong>
+                <span t-esc="o.invoice_date_due" t-options='{"widget": "date"}'/>
+                <br/>
+                <strong>Address:</strong>
+                <span t-field="o.partner_id"
+                      t-options="{&quot;widget&quot;: &quot;contact&quot;, &quot;fields&quot;: [&quot;address&quot;], &quot;no_marker&quot;: true, &quot;no_tag_br&quot;: True}"/>
+
+                <strong>Payment Terms:</strong>
+                <span t-esc="o.invoice_payment_term_id.name or ''"/>
+
+
+                <t t-if="o.invoice_incoterm_id">
+                    <br/>
+                    <strong>Incoterm:</strong>
+                    <span t-field="o.invoice_incoterm_id.name"/>
+                </t>
+
+            </div>
+        </div>
+        <div id="references" class="row">
+            <div name="references" class="col-12 text-center">
+                <t t-if="o.invoice_origin">
+                    <br/>
+                    <strong>Source:</strong>
+                    <span t-field="o.invoice_origin"/>
+                </t>
+                <t t-if="o.ref">
+                    <br/>
+                    <strong>Reference:</strong>
+                    <span t-field="o.ref"/>
+                </t>
+            </div>
+        </div>
+    </template>
+
+    <template id="custom_footer">
+
+        <div class="row">
+            <div name="stamp" class="col-4 text-center" style="padding-top:17px;">
+                <div class="col-12 text-center" name="stamp_image">
+                    <span class="text-center" style="font-size:11px;">
+                       Reserved for the electronic stamp.<br />
+                       This document is not valid DTE.<br />
+                    </span>
+                    <!--<img t-if="o.sii_barcode_img"
+                         t-att-src="'data:image/png;base64,%s' % to_text(o.sii_barcode_img)"
+                         class="img-fluid"/>-->
+                </div>
+                <div class="col-12 text-center" name="stamp_legend">
+                    <span class="text-center" style="color:red; font-size:11px;">
+                        <!--Timbre Electrónico SII
+                        <br/>
+                        Resolución
+                        <t t-esc='o.company_id.dte_resolution_number'/>
+                        de
+                        <t t-if="o.company_id.dte_resolution_date"
+                           t-esc='o.company_id.dte_resolution_date.strftime("%Y")'/>
+                        Verifique documento en: www.sii.cl-->
+                    </span>
+                </div>
+            </div>
+            <div name="transferable-table" class="col-4">
+                <t t-if="transferable">
+                    <p style="font-size:11px;"><br />
+                        NOMBRE:......................................................<br/>
+                        RUT: .................................................................<br/>
+                        FECHA: ..........................................................<br/>
+                        RECINTO: .....................................................<br/>
+                        FIRMA: ..........................................................
+                    </p>
+                </t>
+            </div>
+            <div class="col-4 pull-right">
+
+                <t t-if="transferable">
+                    <p style="font-size: 11px;"><br />
+                        El acuse de recibo que se declara en este acto,
+                        de acuerdo a lo dispuesto en la letra b) del Artículo
+                        4°, y la letra c) del Artículo 5° de la Ley 19.983,
+                        acredita que la entrega de mercaderías o servicio(s)
+                        prestado(s) ha(n) sido recibido(s)"</p>
+                    <strong class="text-right" style="color: red;">CEDIBLE</strong>
+                </t>
+
+            </div>
+
+        </div>
+
+        <div name="footer_left_column" class="col-8 text-center"/>
+
+        <!--<div name="footer_right_column" class="col-4 text-right">
+            <div name="pager" t-if="report_type == 'pdf'">
+                <span class="transferable" name="transferable">CEDIBLE</span>
+            </div>
+        </div>-->
+    </template>
+
+    <template id="report_invoice_document" inherit_id="account.report_invoice_document" primary="True">
+        <!-- this is used to print the transferable invoice -->
+        <!-- custom header and footer -->
+        <t t-set="o" position="after">
+            <t t-set="custom_header" t-value="'l10n_cl.custom_header'"/>
+            <t t-set="report_date" t-value="o.invoice_date"/>
+            <t t-set="report_number" t-value="o.l10n_latam_document_number"/>
+            <t t-set="pre_printed_report" t-value="report_type == 'pdf'"/>
+            <t t-set="report_name" t-value="o.l10n_latam_document_type_id.name"/>
+            <!-- in edi we get the address from journal but here from the company -->
+            <t t-set="header_address" t-value="o.company_id.partner_id"/>
+            <t t-set="transferable" t-value="False"/>
+            <t t-set="custom_footer">
+                <t t-call="l10n_cl.custom_footer"/>
+            </t>
+        </t>
+
+
+        <!-- remove default partner address -->
+        <t t-set="address" position="replace"/>
+
+        <!-- remove default document title -->
+        <h2 position="replace"/>
+
+        <!-- use latam prices (to include/exclude VAT) -->
+        <xpath expr="//span[@t-field='line.price_unit']" position="attributes">
+            <attribute name="t-field">line.l10n_latam_price_unit</attribute>
+        </xpath>
+        <!--<xpath expr="//span[@id='line_tax_ids']" position="attributes">
+            <attribute name="t-esc">', '.join(map(lambda x: (x.description or x.name), line.l10n_latam_tax_ids))
+            </attribute>
+        </xpath>-->
+        <xpath expr="//span[@id='line_tax_ids']" position="replace"/>
+
+        <t t-set="current_subtotal" t-value="current_subtotal + line.price_subtotal" position="attributes">
+            <attribute name="t-value">current_subtotal + line.l10n_latam_price_subtotal</attribute>
+        </t>
+        <!-- if b2c we still wants the latam subtotal -->
+        <t t-set="current_subtotal" t-value="current_subtotal + line.price_total" position="attributes">
+            <attribute name="t-value">current_subtotal + line.l10n_latam_price_subtotal</attribute>
+        </t>
+        <!-- label amount for subtotal column on b2b and b2c -->
+        <xpath expr="//th[@name='th_subtotal']/span[@groups='account.group_show_line_subtotals_tax_included']"
+               position="replace">
+            <span groups="account.group_show_line_subtotals_tax_included">Amount</span>
+        </xpath>
+        <span t-field="line.price_subtotal" position="attributes">
+            <attribute name="t-field">line.l10n_latam_price_subtotal</attribute>
+        </span>
+        <!-- if b2c we still wants the latam subtotal -->
+        <span t-field="line.price_total" position="attributes">
+            <attribute name="t-field">line.l10n_latam_price_subtotal</attribute>
+        </span>
+        <span t-field="o.amount_untaxed" position="attributes">
+            <attribute name="t-field">o.l10n_latam_amount_untaxed</attribute>
+        </span>
+
+        <!-- use column vat instead of taxes and only if vat discriminated -->
+        <xpath expr="//th[@name='th_taxes']/span" position="replace"/>
+
+
+        <!--<xpath expr="//th[@name='th_taxes']" position="attributes">
+            <attribute name="t-if">o.amount_by_group</attribute>
+        </xpath>-->
+
+        <!-- use column vat instead of taxes and only list vat taxes-->
+        <!--<xpath expr="//span[@id='line_tax_ids']/.." position="attributes">
+            <attribute name="t-if">o.amount_by_group</attribute>
+        </xpath>
+        <span id="line_tax_ids" position="attributes">
+            <attribute name="t-esc">', '.join(map(lambda x: (x.description or x.name),
+                line.l10n_latam_tax_ids.filtered(lambda x: x.tax_group_id.name)))
+            </attribute>
+        </span>-->
+
+        <!-- remove payment term, this is added on information section -->
+        <p name="payment_term" position="replace"/>
+
+        <!-- remove payment reference that is not used in Argentina -->
+        <xpath expr="//span[@t-field='o.invoice_payment_ref']/../.." position="replace"/>
+
+        <!-- replace information section and usage argentinian style -->
+        <div id="informations" position="replace">
+            <t t-call="l10n_cl.informations"/>
+        </div>
+
+        <!--  we remove the ml auto and also give more space to avoid multiple lines on tax detail -->
+        <xpath expr="//div[@id='total']/div" position="attributes">
+            <attribute name="t-attf-class">#{'col-6' if report_type != 'html' else 'col-sm-7 col-md-6'}</attribute>
+        </xpath>
+
+        <xpath expr="//div[@id='total']/div" position="before">
+            <div t-attf-class="#{'col-6' if report_type != 'html' else 'col-sm-7 col-md-6'}">
+
+                <!--<t t-if="o.l10n_cl_sii_concept in ['2', '3', '4'] and o.l10n_cl_sii_service_start and o.l10n_cl_sii_service_end">
+                    <strong>Invoiced period: </strong><span t-field="o.l10n_cl_sii_service_start"/> to <span t-field="o.l10n_cl_sii_service_end"/>
+                </t>-->
+                <t t-if="o.currency_id != o.company_id.currency_id">
+                    <br/>
+                    <strong>Currency:</strong>
+                    <span t-esc="'%s - %s' % (o.currency_id.name, o.currency_id.currency_unit_label)"/>
+                    <br/>
+                    <strong>Exchange rate:</strong>
+                    <span t-field="o.l10n_cl_currency_rate"/>
+                </t>
+
+            </div>
+        </xpath>
+    </template>
+
+    <template id="report_invoice_document_with_payments" inherit_id="account.report_invoice_document_with_payments"
+              primary="True">
+
+        <!-- custom header and footer -->
+        <t t-set="o" position="after">
+            <t t-set="custom_header" t-value="'l10n_cl.custom_header'"/>
+            <t t-set="report_date" t-value="o.invoice_date"/>
+            <t t-set="report_number" t-value="o.l10n_latam_document_number"/>
+            <t t-set="pre_printed_report" t-value="report_type == 'pdf'"/>
+            <t t-set="report_name" t-value="o.l10n_latam_document_type_id.name"/>
+            <t t-set="header_address" t-value="o.company_id.partner_id"/> <!-- change in edi -->
+            <t t-set="transferable" t-value="True"/>
+            <t t-set="custom_footer">
+                <t t-call="l10n_cl.custom_footer"/>
+            </t>
+        </t>
+
+        <!-- remove default partner address -->
+        <t t-set="address" position="replace"/>
+
+        <!-- remove default document title -->
+        <h2 position="replace"/>
+
+
+        <!-- use latam prices (to include/exclude VAT) -->
+        <xpath expr="//span[@t-field='line.price_unit']" position="attributes">
+            <attribute name="t-field">line.l10n_latam_price_unit</attribute>
+        </xpath>
+        <xpath expr="//span[@id='line_tax_ids']" position="replace"/>
+        <!--<xpath expr="//span[@id='line_tax_ids']" position="attributes">
+            <attribute name="t-esc">', '.join(map(lambda x: (x.description or x.name), line.l10n_latam_tax_ids))
+            </attribute>
+        </xpath>-->
+        <t t-set="current_subtotal" t-value="current_subtotal + line.price_subtotal" position="attributes">
+            <attribute name="t-value">current_subtotal + line.l10n_latam_price_subtotal</attribute>
+        </t>
+        <!-- if b2c we still wants the latam subtotal -->
+        <t t-set="current_subtotal" t-value="current_subtotal + line.price_total" position="attributes">
+            <attribute name="t-value">current_subtotal + line.l10n_latam_price_subtotal</attribute>
+        </t>
+        <!-- label amount for subtotal column on b2b and b2c -->
+        <xpath expr="//th[@name='th_subtotal']/span[@groups='account.group_show_line_subtotals_tax_included']"
+               position="replace">
+            <span groups="account.group_show_line_subtotals_tax_included">Amount</span>
+        </xpath>
+        <span t-field="line.price_subtotal" position="attributes">
+            <attribute name="t-field">line.l10n_latam_price_subtotal</attribute>
+        </span>
+        <!-- if b2c we still wants the latam subtotal -->
+        <span t-field="line.price_total" position="attributes">
+            <attribute name="t-field">line.l10n_latam_price_subtotal</attribute>
+        </span>
+        <span t-field="o.amount_untaxed" position="attributes">
+            <attribute name="t-field">o.l10n_latam_amount_untaxed</attribute>
+        </span>
+
+        <!-- use column vat instead of taxes and only if vat discriminated -->
+        <xpath expr="//th[@name='th_taxes']/span" position="replace"/>
+
+        <!--<xpath expr="//th[@name='th_taxes']" position="attributes">
+            <attribute name="t-if">o.amount_by_group</attribute>
+        </xpath>-->
+
+        <!-- use column vat instead of taxes and only list vat taxes-->
+        <!--<xpath expr="//span[@id='line_tax_ids']/.." position="attributes">
+            <attribute name="t-if">o.amount_by_group</attribute>
+        </xpath>-->
+        <!--<span id="line_tax_ids" position="attributes">
+            <attribute name="t-esc">', '.join(map(lambda x: (x.description or x.name),
+                line.l10n_latam_tax_ids.filtered(lambda
+                x: x.tax_group_id.name)))
+            </attribute>
+        </span>-->
+
+        <!-- remove payment term, this is added on information section -->
+        <p name="payment_term" position="replace"/>
+
+        <!-- remove payment reference that is not used in Argentina -->
+        <xpath expr="//span[@t-field='o.invoice_payment_ref']/../.." position="replace"/>
+
+        <!-- replace information section and usage argentinian style -->
+        <div id="informations" position="replace">
+            <t t-call="l10n_cl.informations"/>
+        </div>
+
+        <!--  we remove the ml auto and also give more space to avoid multiple lines on tax detail -->
+        <xpath expr="//div[@id='total']/div" position="attributes">
+            <attribute name="t-attf-class">#{'col-6' if report_type != 'html' else 'col-sm-7 col-md-6'}</attribute>
+        </xpath>
+
+        <xpath expr="//div[@id='total']/div" position="before">
+            <div t-attf-class="#{'col-6' if report_type != 'html' else 'col-sm-7 col-md-6'}">
+
+                <t t-if="o.currency_id != o.company_id.currency_id">
+                    <br/>
+                    <strong>Currency:</strong>
+                    <span t-esc="'%s - %s' % (o.currency_id.name, o.currency_id.currency_unit_label)"/>
+                    <br/>
+                    <strong>Exchange rate:</strong>
+                    <span t-field="o.l10n_cl_currency_rate"/>
+                </t>
+                <!--<t t-if="o.l10n_latam_document_type_id.code in ['201', '206', '211']">
+                    <br/><strong>CBU for payment: </strong><span t-esc="o.invoice_partner_bank_id.acc_number or '' if o.invoice_partner_bank_id.acc_type == 'cbu' else ''"/>
+                </t>-->
+
+            </div>
+        </xpath>
+    </template>
+
+</odoo>
