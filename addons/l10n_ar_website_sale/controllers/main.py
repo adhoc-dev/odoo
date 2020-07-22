@@ -1,7 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+from odoo import _
 from odoo.addons.website_sale.controllers.main import WebsiteSale
 from odoo.http import request, route
-from odoo.exceptions import ValidationError
 
 
 class L10nARWebsiteSale(WebsiteSale):
@@ -30,3 +30,27 @@ class L10nARWebsiteSale(WebsiteSale):
             res.update({'l10n_latam_identification_type_id': int(data['l10n_latam_identification_type_id'])
                                                              if data.get('l10n_latam_identification_type_id') else False})
         return res
+
+    def checkout_form_validate(self, mode, all_form_values, data):
+        """ We extend the method to add a new validation. If AFIP Resposibility is:
+
+        * Final Consumer or Foreign Customer: then it can select any identification type.
+        * Any other (Monotributista, RI, etc): should select always "CUIT" identification type"""
+        error, error_message = super().checkout_form_validate(mode, all_form_values, data)
+
+        # Identification type and AFIP Responsibility Combination
+        id_type_id = data.get("l10n_latam_identification_type_id")
+        afip_resp_id = data.get("l10n_ar_afip_responsibility_type_id")
+
+        id_type = request.env['l10n_latam.identification.type'].sudo().browse(id_type_id) if id_type_id else False
+        afip_resp = request.env['l10n_ar.afip.responsibility.type'].sudo().browse(afip_resp_id) if afip_resp_id else False
+
+        final_consumer = request.env.ref('l10n_ar.res_CF')
+        foreign_customer = request.env.ref('l10n_ar.res_EXT')
+        cuit_id_type = request.env.ref('l10n_ar.it_cuit')
+
+        if afip_resp != final_consumer and afip_resp != foreign_customer and id_type != cuit_id_type:
+            error["l10n_latam_identification_type_id"] = 'error'
+            error_message.append(_('For the selected AFIP Responsibility you will need to set CUIT Identification Type'))
+
+        return error, error_message
