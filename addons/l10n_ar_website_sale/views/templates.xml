@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <template id="partner_info" name="Argentinan partner">
+    <template id="partner_info" name="Argentinean partner">
 
         <!-- show afip responsibility -->
         <div t-attf-class="form-group #{error.get('l10n_ar_afip_responsibility_type_id') and 'o_has_error' or ''} col-xl-6">
