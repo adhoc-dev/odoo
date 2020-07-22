@@ -158,7 +158,7 @@ class ResPartner(models.Model):
     def fix_eu_vat_number(self, country_id, vat):
         europe = self.env.ref('base.europe')
         country = self.env["res.country"].browse(country_id)
-        if country not in europe.country_ids:
+        if not europe:
             europe = self.env["res.country.group"].search([('name', '=', 'Europe')], limit=1)
         if europe and country and country.id in europe.country_ids.ids:
             vat = re.sub('[^A-Za-z0-9]', '', vat).upper()
