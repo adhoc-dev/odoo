@@ -21,33 +21,29 @@
                         header_address.state_id and header_address.state_id.name,
                         header_address.zip,
                         header_address.country_id and header_address.country_id.name] if item])"/>
-                    <span t-if="header_address.phone">-</span>
+                    <span t-if="header_address.phone"><br /></span>
                     <span t-if="header_address.phone" style="white-space: nowrap;"
                           t-esc="'Tel: ' + header_address.phone"/>
-                </div>
-                <div name="right-upper-side" class="col-4 text-center border border-dark">
-                    <!-- (6) Titulo de Documento -->
-                    <h6 t-att-style="'color: %s;' % o.company_id.primary_color">
-                        <strong t-att-style="'color: %s;' % o.company_id.primary_color">
-                            <br/>
-                            <span>RUT:</span>
-                            <span t-field="o.company_id.partner_id.vat"/>
-                            <br/><br/>
-                            <span t-esc="report_name"/>
-                            <br/>
-                            <br/>
-                            <span>Nº:</span>
-                            <span t-esc="report_number"/>
-                        </strong>
-                    </h6>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-8" name="other-company-info">
+                <span t-if="header_address.website">
                     <span t-att-style="'color: %s;' % o.company_id.primary_color"
-                          t-esc="' - '.join([item for item in [header_address.website.replace('https://', '').replace('http://', ''), header_address.email] if item])"/>
+                          t-esc="'- Web: %s' %' - '.join([item for item in [header_address.website.replace('https://', '').replace('http://', ''), header_address.email] if item])"/>
+                </span>
                 </div>
-                <div class="col-4 text-center" name="regional-office"/>
+                <div name="right-upper-side" class="col-4">
+                    <div class="row">
+                        <div name="right-upper-side" class="col-12 text-center border border-dark">
+                            <!-- (6) Titulo de Documento -->
+                            <h6 t-att-style="'color: %s;' % o.company_id.primary_color">
+                                <strong t-att-style="'color: %s;' % o.company_id.primary_color"><br />
+                                    <span style="line-height: 180%;">RUT: </span><span t-field="o.company_id.partner_id.vat"/><br />
+                                    <span class="text-uppercase" t-esc="report_name"/><br />
+                                    <span>Nº: </span><span style="line-height: 200%;" t-esc="report_number"/>
+                                </strong>
+                            </h6>
+                        </div>
+                        <div class="col-4 text-center" name="regional-office"/>
+                    </div>
+                </div>
 
             </div>
 
@@ -102,81 +98,19 @@
             </div>
         </div>
         <div id="references" class="row">
-            <div name="references" class="col-12 text-center">
-                <t t-if="o.invoice_origin">
-                    <br/>
-                    <strong>Source:</strong>
-                    <span t-field="o.invoice_origin"/>
-                </t>
-                <t t-if="o.ref">
-                    <br/>
-                    <strong>Reference:</strong>
-                    <span t-field="o.ref"/>
-                </t>
-            </div>
+            <div name="references" class="col-12 text-center"/>
         </div>
     </template>
 
     <template id="custom_footer">
 
         <div class="row">
-            <div name="stamp" class="col-4 text-center" style="padding-top:17px;">
-                <div class="col-12 text-center" name="stamp_image">
-                    <span class="text-center" style="font-size:11px;">
-                       Reserved for the electronic stamp.<br />
-                       This document is not valid DTE.<br />
-                    </span>
-                    <!--<img t-if="o.sii_barcode_img"
-                         t-att-src="'data:image/png;base64,%s' % to_text(o.sii_barcode_img)"
-                         class="img-fluid"/>-->
-                </div>
-                <div class="col-12 text-center" name="stamp_legend">
-                    <span class="text-center" style="color:red; font-size:11px;">
-                        <!--Timbre Electrónico SII
-                        <br/>
-                        Resolución
-                        <t t-esc='o.company_id.dte_resolution_number'/>
-                        de
-                        <t t-if="o.company_id.dte_resolution_date"
-                           t-esc='o.company_id.dte_resolution_date.strftime("%Y")'/>
-                        Verifique documento en: www.sii.cl-->
-                    </span>
-                </div>
-            </div>
-            <div name="transferable-table" class="col-4">
-                <t t-if="transferable">
-                    <p style="font-size:11px;"><br />
-                        NOMBRE:......................................................<br/>
-                        RUT: .................................................................<br/>
-                        FECHA: ..........................................................<br/>
-                        RECINTO: .....................................................<br/>
-                        FIRMA: ..........................................................
-                    </p>
-                </t>
-            </div>
-            <div class="col-4 pull-right">
-
-                <t t-if="transferable">
-                    <p style="font-size: 11px;"><br />
-                        El acuse de recibo que se declara en este acto,
-                        de acuerdo a lo dispuesto en la letra b) del Artículo
-                        4°, y la letra c) del Artículo 5° de la Ley 19.983,
-                        acredita que la entrega de mercaderías o servicio(s)
-                        prestado(s) ha(n) sido recibido(s)"</p>
-                    <strong class="text-right" style="color: red;">CEDIBLE</strong>
-                </t>
-
-            </div>
-
+            <div name="stamp" class="col-4 text-center" style="padding-top:17px;"/>
+            <div name="transferable-table" class="col-4"/>
+            <div name="transferable-legend" class="col-4 pull-right"/>
         </div>
-
         <div name="footer_left_column" class="col-8 text-center"/>
 
-        <!--<div name="footer_right_column" class="col-4 text-right">
-            <div name="pager" t-if="report_type == 'pdf'">
-                <span class="transferable" name="transferable">CEDIBLE</span>
-            </div>
-        </div>-->
     </template>
 
     <template id="report_invoice_document" inherit_id="account.report_invoice_document" primary="True">
@@ -185,17 +119,15 @@
         <t t-set="o" position="after">
             <t t-set="custom_header" t-value="'l10n_cl.custom_header'"/>
             <t t-set="report_date" t-value="o.invoice_date"/>
-            <t t-set="report_number" t-value="o.l10n_latam_document_number"/>
+            <t t-set="report_number" t-value="int(o.l10n_latam_document_number)"/>
             <t t-set="pre_printed_report" t-value="report_type == 'pdf'"/>
             <t t-set="report_name" t-value="o.l10n_latam_document_type_id.name"/>
             <!-- in edi we get the address from journal but here from the company -->
             <t t-set="header_address" t-value="o.company_id.partner_id"/>
-            <t t-set="transferable" t-value="False"/>
             <t t-set="custom_footer">
                 <t t-call="l10n_cl.custom_footer"/>
             </t>
         </t>
-
 
         <!-- remove default partner address -->
         <t t-set="address" position="replace"/>
@@ -207,10 +139,7 @@
         <xpath expr="//span[@t-field='line.price_unit']" position="attributes">
             <attribute name="t-field">line.l10n_latam_price_unit</attribute>
         </xpath>
-        <!--<xpath expr="//span[@id='line_tax_ids']" position="attributes">
-            <attribute name="t-esc">', '.join(map(lambda x: (x.description or x.name), line.l10n_latam_tax_ids))
-            </attribute>
-        </xpath>-->
+
         <xpath expr="//span[@id='line_tax_ids']" position="replace"/>
 
         <t t-set="current_subtotal" t-value="current_subtotal + line.price_subtotal" position="attributes">
@@ -239,21 +168,6 @@
         <!-- use column vat instead of taxes and only if vat discriminated -->
         <xpath expr="//th[@name='th_taxes']/span" position="replace"/>
 
-
-        <!--<xpath expr="//th[@name='th_taxes']" position="attributes">
-            <attribute name="t-if">o.amount_by_group</attribute>
-        </xpath>-->
-
-        <!-- use column vat instead of taxes and only list vat taxes-->
-        <!--<xpath expr="//span[@id='line_tax_ids']/.." position="attributes">
-            <attribute name="t-if">o.amount_by_group</attribute>
-        </xpath>
-        <span id="line_tax_ids" position="attributes">
-            <attribute name="t-esc">', '.join(map(lambda x: (x.description or x.name),
-                line.l10n_latam_tax_ids.filtered(lambda x: x.tax_group_id.name)))
-            </attribute>
-        </span>-->
-
         <!-- remove payment term, this is added on information section -->
         <p name="payment_term" position="replace"/>
 
@@ -273,9 +187,6 @@
         <xpath expr="//div[@id='total']/div" position="before">
             <div t-attf-class="#{'col-6' if report_type != 'html' else 'col-sm-7 col-md-6'}">
 
-                <!--<t t-if="o.l10n_cl_sii_concept in ['2', '3', '4'] and o.l10n_cl_sii_service_start and o.l10n_cl_sii_service_end">
-                    <strong>Invoiced period: </strong><span t-field="o.l10n_cl_sii_service_start"/> to <span t-field="o.l10n_cl_sii_service_end"/>
-                </t>-->
                 <t t-if="o.currency_id != o.company_id.currency_id">
                     <br/>
                     <strong>Currency:</strong>
@@ -296,11 +207,10 @@
         <t t-set="o" position="after">
             <t t-set="custom_header" t-value="'l10n_cl.custom_header'"/>
             <t t-set="report_date" t-value="o.invoice_date"/>
-            <t t-set="report_number" t-value="o.l10n_latam_document_number"/>
+            <t t-set="report_number" t-value="int(o.l10n_latam_document_number)"/>
             <t t-set="pre_printed_report" t-value="report_type == 'pdf'"/>
             <t t-set="report_name" t-value="o.l10n_latam_document_type_id.name"/>
             <t t-set="header_address" t-value="o.company_id.partner_id"/> <!-- change in edi -->
-            <t t-set="transferable" t-value="True"/>
             <t t-set="custom_footer">
                 <t t-call="l10n_cl.custom_footer"/>
             </t>
@@ -348,21 +258,6 @@
         <!-- use column vat instead of taxes and only if vat discriminated -->
         <xpath expr="//th[@name='th_taxes']/span" position="replace"/>
 
-        <!--<xpath expr="//th[@name='th_taxes']" position="attributes">
-            <attribute name="t-if">o.amount_by_group</attribute>
-        </xpath>-->
-
-        <!-- use column vat instead of taxes and only list vat taxes-->
-        <!--<xpath expr="//span[@id='line_tax_ids']/.." position="attributes">
-            <attribute name="t-if">o.amount_by_group</attribute>
-        </xpath>-->
-        <!--<span id="line_tax_ids" position="attributes">
-            <attribute name="t-esc">', '.join(map(lambda x: (x.description or x.name),
-                line.l10n_latam_tax_ids.filtered(lambda
-                x: x.tax_group_id.name)))
-            </attribute>
-        </span>-->
-
         <!-- remove payment term, this is added on information section -->
         <p name="payment_term" position="replace"/>
 
@@ -390,9 +285,6 @@
                     <strong>Exchange rate:</strong>
                     <span t-field="o.l10n_cl_currency_rate"/>
                 </t>
-                <!--<t t-if="o.l10n_latam_document_type_id.code in ['201', '206', '211']">
-                    <br/><strong>CBU for payment: </strong><span t-esc="o.invoice_partner_bank_id.acc_number or '' if o.invoice_partner_bank_id.acc_type == 'cbu' else ''"/>
-                </t>-->
 
             </div>
         </xpath>
