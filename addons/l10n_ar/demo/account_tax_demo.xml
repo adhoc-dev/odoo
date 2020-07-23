@@ -39,6 +39,7 @@
         ]"/>
         <field name="type_tax_use">sale</field>
         <field name="tax_group_id" ref="account.tax_group_taxes"/>
+        <field name="company_id" ref="l10n_ar.company_ri"/>
     </record>
 
     <record id="ri_tax_other_taxes_compras" model="account.tax">
@@ -80,6 +81,7 @@
         ]"/>
         <field name="type_tax_use">purchase</field>
         <field name="tax_group_id" ref="account.tax_group_taxes"/>
+        <field name="company_id" ref="l10n_ar.company_ri"/>
     </record>
 
     <!-- for demo data we activate all the taxes related to perception iva iibb and other taxes for the already created demo companies -->
