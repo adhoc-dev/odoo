@@ -18,8 +18,8 @@ class L10nARWebsiteSale(WebsiteSale):
         """Extend to send information about the identification types and AFIP responsibility to show in the address form"""
         response = super().address(**kw)
         if request.website.sudo().company_id.country_id.code == "AR":
-            response.qcontext.update({'identification_types': request.env['l10n_latam.identification.type'].sudo().search([]),
-                                      'responsibility_types': request.env['l10n_ar.afip.responsibility.type'].sudo().search([]),
+            response.qcontext.update({'identification_types': request.env['l10n_latam.identification.type'].search([]),
+                                      'responsibility_types': request.env['l10n_ar.afip.responsibility.type'].search([]),
                                       'identification': kw.get('l10n_latam_identification_type_id'),
                                       'responsibility': kw.get('l10n_ar_afip_responsibility_type_id')})
         return response
@@ -42,8 +42,8 @@ class L10nARWebsiteSale(WebsiteSale):
         id_type_id = data.get("l10n_latam_identification_type_id")
         afip_resp_id = data.get("l10n_ar_afip_responsibility_type_id")
 
-        id_type = request.env['l10n_latam.identification.type'].sudo().browse(id_type_id) if id_type_id else False
-        afip_resp = request.env['l10n_ar.afip.responsibility.type'].sudo().browse(afip_resp_id) if afip_resp_id else False
+        id_type = request.env['l10n_latam.identification.type'].browse(id_type_id) if id_type_id else False
+        afip_resp = request.env['l10n_ar.afip.responsibility.type'].browse(afip_resp_id) if afip_resp_id else False
 
         final_consumer = request.env.ref('l10n_ar.res_CF')
         foreign_customer = request.env.ref('l10n_ar.res_EXT')
