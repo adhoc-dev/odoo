@@ -1,6 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 {
-    'name': 'Argentinian Website',
+    'name': 'Argentinean Website',
     'version': '1.0',
     'category': 'Localization',
     'sequence': 14,
