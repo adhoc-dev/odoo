@@ -57,7 +57,7 @@ Follow the next configuration steps
         'data/l10n_latam.document.type.csv',
         # NOTE: we load as csv but we made them not update True with a hook
         'data/res_partner_data.xml',
-        'data/res_currency_data.xml',
+        'data/res.currency.csv',
         'data/res.country.csv',
         'data/res_country_data.xml',
         'views/account_move_view.xml',

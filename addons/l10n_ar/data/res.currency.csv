@@ -1,0 +1,11 @@
+id,l10n_ar_afip_code,active
+base.ARS,PES,True
+base.EUR,060
+base.USD,DOL
+base.AUD,026
+base.CAD,018
+base.GBP,021
+base.JPY,019
+base.MXN,010
+base.UYU,011
+base.VEF,023
