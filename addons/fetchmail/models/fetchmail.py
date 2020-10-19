@@ -3,6 +3,8 @@
 
 import logging
 import poplib
+import datetime
+import re
 from imaplib import IMAP4, IMAP4_SSL
 from poplib import POP3, POP3_SSL
 
@@ -142,10 +144,12 @@ odoo_mailgate: "|/path/to/odoo-mailgate.py --host=localhost -u %(uid)d -p PASSWO
     @api.model
     def _fetch_mails(self):
         """ Method called by cron to fetch mails from servers """
+        _logger.info('executing _fetch_mails cron')
         return self.search([('state', '=', 'done'), ('server_type', 'in', ['pop', 'imap'])]).fetch_mail()
 
     def fetch_mail(self):
         """ WARNING: meant for cron usage only - will commit() after each email! """
+        _logger.info('executing fetch_mail for servers %s', self.ids)
         additionnal_context = {
             'fetchmail_cron_running': True
         }
@@ -161,8 +165,27 @@ odoo_mailgate: "|/path/to/odoo-mailgate.py --host=localhost -u %(uid)d -p PASSWO
                 try:
                     imap_server = server.connect()
                     imap_server.select()
-                    result, data = imap_server.search(None, '(UNSEEN)')
+
+                    date = (datetime.date.today() - datetime.timedelta(7)).strftime("%d-%b-%Y")
+                    result, data = imap_server.search(None, 'OR UNSEEN (UNKEYWORD "OdooDone" SINCE {0})'.format(date))
+
+                    # result, data = imap_server.search(None, '(UNSEEN)')
                     for num in data[0].split():
+                        result, response = imap_server.fetch(num, '(FLAGS)')
+                        match = re.findall('OdooAttempt[0-9]{1,2}', response[0].decode('utf8'))
+                        lastAttempt = 1
+                        if match:
+                            for fl in match:
+                                imap_server.store(num, '-FLAGS', fl)
+                                la = int(fl.replace('OdooAttempt', ''))
+                                if la > lastAttempt:
+                                    lastAttempt = la
+                            lastAttempt += 1
+                        if lastAttempt > 6:
+                            imap_server.store(num, '+FLAGS', '\\Flagged OdooStuck OdooDone')
+                        else:
+                            imap_server.store(num, '+FLAGS', 'OdooAttempt'+str(lastAttempt))
+
                         res_id = None
                         result, data = imap_server.fetch(num, '(RFC822)')
                         imap_server.store(num, '-FLAGS', '\\Seen')
@@ -173,7 +196,7 @@ odoo_mailgate: "|/path/to/odoo-mailgate.py --host=localhost -u %(uid)d -p PASSWO
                         self._cr.commit()
                         if res_id:
                             # imap_server.store(num, '+FLAGS', '\\Seen')
-                            imap_server.store(num, '+FLAGS', '\\Seen \\Flagged')
+                            imap_server.store(num, '+FLAGS', '\\Seen OdooDone')
                             count += 1
                         else:
                             _logger.warning('Message process returned False processing mail from %s server %s.', server.server_type, server.name, exc_info=True)
