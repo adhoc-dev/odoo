@@ -171,36 +171,36 @@ odoo_mailgate: "|/path/to/odoo-mailgate.py --host=localhost -u %(uid)d -p PASSWO
 
                     # result, data = imap_server.search(None, '(UNSEEN)')
                     for num in data[0].split():
-                        result, response = imap_server.fetch(num, '(FLAGS)')
-                        match = re.findall('OdooAttempt[0-9]{1,2}', response[0].decode('utf8'))
-                        lastAttempt = 1
-                        if match:
-                            for fl in match:
-                                imap_server.store(num, '-FLAGS', fl)
-                                la = int(fl.replace('OdooAttempt', ''))
-                                if la > lastAttempt:
-                                    lastAttempt = la
-                            lastAttempt += 1
-                        if lastAttempt > 6:
-                            imap_server.store(num, '+FLAGS', '\\Flagged OdooStuck OdooDone')
-                        else:
-                            imap_server.store(num, '+FLAGS', 'OdooAttempt'+str(lastAttempt))
+                    #     result, response = imap_server.fetch(num, '(FLAGS)')
+                    #     match = re.findall('OdooAttempt[0-9]{1,2}', response[0].decode('utf8'))
+                    #     lastAttempt = 1
+                    #     if match:
+                    #         for fl in match:
+                    #             imap_server.store(num, '-FLAGS', fl)
+                    #             la = int(fl.replace('OdooAttempt', ''))
+                    #             if la > lastAttempt:
+                    #                 lastAttempt = la
+                    #         lastAttempt += 1
+                    #     if lastAttempt > 6:
+                    #         imap_server.store(num, '+FLAGS', '\\Flagged OdooStuck OdooDone')
+                    #     else:
+                    #         imap_server.store(num, '+FLAGS', 'OdooAttempt'+str(lastAttempt))
 
                         res_id = None
                         result, data = imap_server.fetch(num, '(RFC822)')
                         imap_server.store(num, '-FLAGS', '\\Seen')
                         try:
                             res_id = MailThread.with_context(**additionnal_context).message_process(server.object_id.model, data[0][1], save_original=server.original, strip_attachments=(not server.attach))
+                            if not res_id:
+                                _logger.warning('Message process returned False processing mail from %s server %s.', server.server_type, server.name, exc_info=True)
+                                imap_server.store(num, '+FLAGS', '\\Flagged')
                         except Exception:
                             _logger.warning('Failed to process mail from %s server %s.', server.server_type, server.name, exc_info=True)
-                        self._cr.commit()
-                        if res_id:
-                            # imap_server.store(num, '+FLAGS', '\\Seen')
-                            imap_server.store(num, '+FLAGS', '\\Seen OdooDone')
-                            count += 1
-                        else:
-                            _logger.warning('Message process returned False processing mail from %s server %s.', server.server_type, server.name, exc_info=True)
                             failed += 1
+                            imap_server.store(num, '+FLAGS', '\\Flagged')
+                        self._cr.commit()
+                        imap_server.store(num, '+FLAGS', 'OdooDone')
+                        count += 1
                     _logger.info("Fetched %d email(s) on %s server %s; %d succeeded, %d failed.", count, server.server_type, server.name, (count - failed), failed)
                 except Exception:
                     _logger.warning("General failure when trying to fetch mail from %s server %s.", server.server_type, server.name, exc_info=True)
