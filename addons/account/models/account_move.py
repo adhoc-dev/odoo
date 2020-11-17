@@ -1332,7 +1332,8 @@ class AccountMove(models.Model):
         partials = pay_term_line_ids.mapped('matched_debit_ids') + pay_term_line_ids.mapped('matched_credit_ids')
         for partial in partials:
             counterpart_lines = partial.debit_move_id + partial.credit_move_id
-            counterpart_line = counterpart_lines.filtered(lambda line: line not in self.line_ids)
+            # In case we are in an onchange, line_ids is a NewId, not an integer. By using line_ids.ids we get the correct integer value.
+            counterpart_line = counterpart_lines.filtered(lambda line: line.id not in self.line_ids.ids)
 
             if foreign_currency and partial.currency_id == foreign_currency:
                 amount = partial.amount_currency
@@ -2264,10 +2265,11 @@ class AccountMove(models.Model):
 
         for move in self:
             if not move.partner_id: continue
+            partners = (move.partner_id | move.partner_id.commercial_partner_id)
             if move.type.startswith('out_'):
-                move.partner_id._increase_rank('customer_rank')
+                partners._increase_rank('customer_rank')
             elif move.type.startswith('in_'):
-                move.partner_id._increase_rank('supplier_rank')
+                partners._increase_rank('supplier_rank')
             else:
                 continue
 
@@ -2325,6 +2327,7 @@ class AccountMove(models.Model):
         self.write({'state': 'draft'})
 
     def button_cancel(self):
+        self.mapped('line_ids').remove_move_reconcile()
         self.write({'state': 'cancel'})
 
     def action_invoice_sent(self):
@@ -2804,6 +2807,28 @@ class AccountMoveLine(models.Model):
             return self.product_id.uom_id
         return False
 
+    def _set_price_and_tax_after_fpos(self):
+        self.ensure_one()
+        # Manage the fiscal position after that and adapt the price_unit.
+        # E.g. mapping a price-included-tax to a price-excluded-tax must
+        # remove the tax amount from the price_unit.
+        # However, mapping a price-included tax to another price-included tax must preserve the balance but
+        # adapt the price_unit to the new tax.
+        # E.g. mapping a 10% price-included tax to a 20% price-included tax for a price_unit of 110 should preserve
+        # 100 as balance but set 120 as price_unit.
+        if self.tax_ids and self.move_id.fiscal_position_id:
+            price_subtotal = self._get_price_total_and_subtotal()['price_subtotal']
+            self.tax_ids = self.move_id.fiscal_position_id.map_tax(
+                self.tax_ids._origin,
+                partner=self.move_id.partner_id)
+            accounting_vals = self._get_fields_onchange_subtotal(
+                price_subtotal=price_subtotal,
+                currency=self.move_id.company_currency_id)
+            balance = accounting_vals['debit'] - accounting_vals['credit']
+            business_vals = self._get_fields_onchange_balance(balance=balance)
+            if 'price_unit' in business_vals:
+                self.price_unit = business_vals['price_unit']
+
     def _get_price_total_and_subtotal(self, price_unit=None, quantity=None, discount=None, currency=None, product=None, partner=None, taxes=None, move_type=None):
         self.ensure_one()
         return self._get_price_total_and_subtotal_model(
@@ -2991,7 +3016,7 @@ class AccountMoveLine(models.Model):
     # ONCHANGE METHODS
     # -------------------------------------------------------------------------
 
-    @api.onchange('amount_currency', 'currency_id', 'debit', 'credit', 'tax_ids', 'account_id')
+    @api.onchange('amount_currency', 'currency_id', 'debit', 'credit', 'tax_ids', 'account_id', 'price_unit')
     def _onchange_mark_recompute_taxes(self):
         ''' Recompute the dynamic onchange based on taxes.
         If the edited line is a tax line, don't recompute anything as the user must be able to
@@ -3021,25 +3046,8 @@ class AccountMoveLine(models.Model):
             line.product_uom_id = line._get_computed_uom()
             line.price_unit = line._get_computed_price_unit()
 
-            # Manage the fiscal position after that and adapt the price_unit.
-            # E.g. mapping a price-included-tax to a price-excluded-tax must
-            # remove the tax amount from the price_unit.
-            # However, mapping a price-included tax to another price-included tax must preserve the balance but
-            # adapt the price_unit to the new tax.
-            # E.g. mapping a 10% price-included tax to a 20% price-included tax for a price_unit of 110 should preserve
-            # 100 as balance but set 120 as price_unit.
-            if line.tax_ids and line.move_id.fiscal_position_id:
-                price_subtotal = line._get_price_total_and_subtotal()['price_subtotal']
-                line.tax_ids = line.move_id.fiscal_position_id.map_tax(
-                    line.tax_ids._origin,
-                    partner=line.move_id.partner_id)
-                accounting_vals = line._get_fields_onchange_subtotal(
-                    price_subtotal=price_subtotal,
-                    currency=line.move_id.company_currency_id)
-                balance = accounting_vals['debit'] - accounting_vals['credit']
-                business_vals = line._get_fields_onchange_balance(balance=balance)
-                if 'price_unit' in business_vals:
-                    line.price_unit = business_vals['price_unit']
+            # price_unit and taxes may need to be adapted following Fiscal Position
+            line._set_price_and_tax_after_fpos()
 
             # Convert the unit price to the invoice's currency.
             company = line.move_id.company_id
