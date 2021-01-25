@@ -110,3 +110,14 @@ class ResPartner(models.Model):
                 raise ValidationError(_('Only numbers allowed for "%s"', rec.l10n_latam_identification_type_id.name))
             except Exception as error:
                 raise ValidationError(repr(error))
+
+    @api.model
+    def _get_id_number_sanitize(self):
+        """ Sanitize the identification number. Return tuple id_number and doc_type, both int values """
+        if self.l10n_latam_identification_type_id.l10n_ar_afip_code in ['80', '86']:
+            return stdnum.ar.cuit.compact(self.vat)
+        else:
+            id_number = self.vat.replace('.', '').replace(' ', '')
+            if not id_number.isdigit():
+                raise UserError(_('we were not able to sanitize the identification number'))
+            return int(id_number)
