@@ -2,7 +2,6 @@
 from odoo import fields
 from odoo.tests.common import Form
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
-from odoo.tests.common import SingleTransactionCase
 from dateutil.relativedelta import relativedelta
 import random
 import logging
@@ -11,7 +10,7 @@ import time
 _logger = logging.getLogger(__name__)
 
 
-class TestAr(AccountTestInvoicingCommon, SingleTransactionCase):
+class TestAr(AccountTestInvoicingCommon):
 
     @classmethod
     def setUpClass(cls, chart_template_ref='l10n_ar.l10nar_ri_chart_template'):
@@ -25,7 +24,6 @@ class TestAr(AccountTestInvoicingCommon, SingleTransactionCase):
             "l10n_ar_afip_start_date": time.strftime('%Y-01-01'),
             'l10n_ar_gross_income_type': 'local',
             'l10n_ar_gross_income_number': '901-21885123',
-            'l10n_ar_afip_ws_environment': 'testing',
         })
         cls.company_ri = cls.company_data['company']
 
@@ -53,7 +51,6 @@ class TestAr(AccountTestInvoicingCommon, SingleTransactionCase):
             'name': '(AR) Monotributista (Unit Tests)',
             "l10n_ar_afip_start_date": time.strftime('%Y-01-01'),
             'l10n_ar_gross_income_type': 'exempt',
-            'l10n_ar_afip_ws_environment': 'testing',
         })
         cls.company_mono = cls.company_data_2['company']
 
@@ -323,7 +320,6 @@ class TestAr(AccountTestInvoicingCommon, SingleTransactionCase):
 
         # ==== Invoices ====
         cls.demo_invoices = {}
-        # cls._create_test_invoices_like_demo(cls)
 
     def _create_test_invoices_like_demo(self):
         """ Create in the unit tests the same invoices created in demo data """
@@ -334,8 +330,8 @@ class TestAr(AccountTestInvoicingCommon, SingleTransactionCase):
 
         # TODO check invoices dates
         invoices_to_create = {
-            'demo_invoice_1': {
-                "ref": "demo_invoice_1: Invoice to gritti support service, vat 21",
+            'test_invoice_1': {
+                "ref": "test_invoice_1: Invoice to gritti support service, vat 21",
                 "partner_id": self.res_partner_gritti_mono,
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
@@ -346,8 +342,8 @@ class TestAr(AccountTestInvoicingCommon, SingleTransactionCase):
                     {'product_id': self.service_iva_21}
                 ],
             },
-            'demo_invoice_2': {
-                "ref": "demo_invoice_2: Invoice to CMR with vat 21, 27 and 10,5",
+            'test_invoice_2': {
+                "ref": "test_invoice_2: Invoice to CMR with vat 21, 27 and 10,5",
                 "partner_id": self.res_partner_cmr,
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
@@ -360,8 +356,8 @@ class TestAr(AccountTestInvoicingCommon, SingleTransactionCase):
                     {'product_id': self.product_iva_105_perc, 'price_unit': 3245.0, 'quantity': 2}
                 ],
             },
-            'demo_invoice_3': {
-                "ref": "demo_invoice_3: Invoice to ADHOC with vat cero and 21",
+            'test_invoice_3': {
+                "ref": "test_invoice_3: Invoice to ADHOC with vat cero and 21",
                 "partner_id": self.res_partner_adhoc,
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
@@ -373,8 +369,8 @@ class TestAr(AccountTestInvoicingCommon, SingleTransactionCase):
                     {'product_id': self.product_iva_cero, 'price_unit': 200.0, 'quantity': 1}
                 ],
             },
-            'demo_invoice_4': {
-                'ref': 'demo_invoice_4: Invoice to ADHOC with vat exempt and 21',
+            'test_invoice_4': {
+                'ref': 'test_invoice_4: Invoice to ADHOC with vat exempt and 21',
                 "partner_id": self.res_partner_adhoc,
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
@@ -386,8 +382,8 @@ class TestAr(AccountTestInvoicingCommon, SingleTransactionCase):
                     {'product_id': self.product_iva_exento, 'price_unit': 100.0, 'quantity': 1},
                 ],
             },
-            'demo_invoice_5': {
-                'ref': 'demo_invoice_5: Invoice to ADHOC with all type of taxes',
+            'test_invoice_5': {
+                'ref': 'test_invoice_5: Invoice to ADHOC with all type of taxes',
                 "partner_id": self.res_partner_adhoc,
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
@@ -403,8 +399,8 @@ class TestAr(AccountTestInvoicingCommon, SingleTransactionCase):
                     {'product_id': self.product_iva_exento, 'price_unit': 100.0, 'quantity': 1}
                 ],
             },
-            'demo_invoice_6': {
-                'ref': 'demo_invoice_6: Invoice to cerro castor, fiscal position changes taxes to exempt',
+            'test_invoice_6': {
+                'ref': 'test_invoice_6: Invoice to cerro castor, fiscal position changes taxes to exempt',
                 "partner_id": self.res_partner_cerrocastor,
                 "journal_id": self.sale_expo_journal_ri,
                 "invoice_user_id": invoice_user_id,
@@ -422,8 +418,8 @@ class TestAr(AccountTestInvoicingCommon, SingleTransactionCase):
                     {'product_id': self.product_iva_exento, 'price_unit': 100.0, 'quantity': 1},
                 ],
             },
-            'demo_invoice_7': {
-                'ref': 'demo_invoice_7: Export invoice to expresso, fiscal position changes tax to exempt (type 4 because it have services)',
+            'test_invoice_7': {
+                'ref': 'test_invoice_7: Export invoice to expresso, fiscal position changes tax to exempt (type 4 because it have services)',
                 "partner_id": self.res_partner_expresso,
                 "journal_id": self.sale_expo_journal_ri,
                 "invoice_user_id": invoice_user_id,
@@ -441,8 +437,8 @@ class TestAr(AccountTestInvoicingCommon, SingleTransactionCase):
                     {'product_id': self.product_iva_exento, 'price_unit': 100.0, 'quantity': 1},
                 ],
             },
-            'demo_invoice_8': {
-                'ref': 'demo_invoice_8: Invoice to consumidor final',
+            'test_invoice_8': {
+                'ref': 'test_invoice_8: Invoice to consumidor final',
                 "partner_id": self.partner_cf,
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
@@ -453,8 +449,8 @@ class TestAr(AccountTestInvoicingCommon, SingleTransactionCase):
                     {'product_id': self.service_iva_21, 'price_unit': 642.0, 'quantity': 1},
                 ],
             },
-            'demo_invoice_10': {
-                'ref': 'demo_invoice_10; Invoice to ADHOC in USD and vat 21',
+            'test_invoice_10': {
+                'ref': 'test_invoice_10; Invoice to ADHOC in USD and vat 21',
                 "partner_id": self.res_partner_adhoc,
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
@@ -466,8 +462,8 @@ class TestAr(AccountTestInvoicingCommon, SingleTransactionCase):
                 ],
                 "currency_id": self.env.ref("base.USD"),
             },
-            'demo_invoice_11': {
-                'ref': 'demo_invoice_11: Invoice to ADHOC with many lines in order to prove rounding error, with 4 decimals of precision for the currency and 2 decimals for the product the error apperar',
+            'test_invoice_11': {
+                'ref': 'test_invoice_11: Invoice to ADHOC with many lines in order to prove rounding error, with 4 decimals of precision for the currency and 2 decimals for the product the error apperar',
                 "partner_id": self.res_partner_adhoc,
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
@@ -481,8 +477,8 @@ class TestAr(AccountTestInvoicingCommon, SingleTransactionCase):
                     {'product_id': self.service_iva_21, 'price_unit': 1.12, 'quantity': 1, 'name': 'Support Services 4'},
                 ],
             },
-            'demo_invoice_12': {
-                'ref': 'demo_invoice_12: Invoice to ADHOC with many lines in order to test rounding error, it is required to use a 4 decimal precision in prodct in order to the error occur',
+            'test_invoice_12': {
+                'ref': 'test_invoice_12: Invoice to ADHOC with many lines in order to test rounding error, it is required to use a 4 decimal precision in prodct in order to the error occur',
                 "partner_id": self.res_partner_adhoc,
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
@@ -496,8 +492,8 @@ class TestAr(AccountTestInvoicingCommon, SingleTransactionCase):
                     {'product_id': self.service_iva_21, 'price_unit': 1.6376, 'quantity': 2, 'name': 'Support Services 4'},
                 ],
             },
-            'demo_invoice_13': {
-                'ref': 'demo_invoice_13: Invoice to ADHOC with many lines in order to test zero amount invoices y rounding error. it is required to set the product decimal precision to 4 and change 260.59 for 260.60 in order to reproduce the error',
+            'test_invoice_13': {
+                'ref': 'test_invoice_13: Invoice to ADHOC with many lines in order to test zero amount invoices y rounding error. it is required to set the product decimal precision to 4 and change 260.59 for 260.60 in order to reproduce the error',
                 "partner_id": self.res_partner_adhoc,
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
@@ -517,8 +513,8 @@ class TestAr(AccountTestInvoicingCommon, SingleTransactionCase):
                     {'product_id': self.service_iva_21, 'price_unit': 12.0625, 'quantity': 2, 'name': 'Support Services 8'},
                 ],
             },
-            'demo_invoice_14': {
-                'ref': 'demo_invoice_14: Export invoice to expresso, fiscal position changes tax to exempt (type 1 because only products)',
+            'test_invoice_14': {
+                'ref': 'test_invoice_14: Export invoice to expresso, fiscal position changes tax to exempt (type 1 because only products)',
                 "partner_id": self.res_partner_expresso,
                 "journal_id": self.sale_expo_journal_ri,
                 "invoice_user_id": invoice_user_id,
@@ -531,8 +527,8 @@ class TestAr(AccountTestInvoicingCommon, SingleTransactionCase):
                     {'product_id': self.product_iva_105, 'price_unit': 642.0, 'quantity': 5},
                 ],
             },
-            'demo_invoice_15': {
-                'ref': 'demo_invoice_15: Export invoice to expresso, fiscal position changes tax to exempt (type 2 because only service)',
+            'test_invoice_15': {
+                'ref': 'test_invoice_15: Export invoice to expresso, fiscal position changes tax to exempt (type 2 because only service)',
                 "partner_id": self.res_partner_expresso,
                 "journal_id": self.sale_expo_journal_ri,
                 "invoice_user_id": invoice_user_id,
@@ -545,8 +541,8 @@ class TestAr(AccountTestInvoicingCommon, SingleTransactionCase):
                     {'product_id': self.service_iva_27, 'price_unit': 250.0, 'quantity': 1},
                 ],
             },
-            'demo_invoice_16': {
-                'ref': 'demo_invoice_16: Export invoice to expresso, fiscal position changes tax to exempt (type 1 because it have products only, used to test refund of expo)',
+            'test_invoice_16': {
+                'ref': 'test_invoice_16: Export invoice to expresso, fiscal position changes tax to exempt (type 1 because it have products only, used to test refund of expo)',
                 "partner_id": self.res_partner_expresso,
                 "journal_id": self.sale_expo_journal_ri,
                 "invoice_user_id": invoice_user_id,
@@ -559,8 +555,8 @@ class TestAr(AccountTestInvoicingCommon, SingleTransactionCase):
                     {'product_id': self.product_iva_105, 'price_unit': 642.0, 'quantity': 5},
                 ],
             },
-            'demo_invoice_17': {
-                'ref': 'demo_invoice_17: Invoice to ADHOC with 100% of discount',
+            'test_invoice_17': {
+                'ref': 'test_invoice_17: Invoice to ADHOC with 100% of discount',
                 "partner_id": self.res_partner_adhoc,
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
@@ -571,8 +567,8 @@ class TestAr(AccountTestInvoicingCommon, SingleTransactionCase):
                     {'product_id': self.service_iva_21, 'price_unit': 24.3, 'quantity': 3, 'name': 'Support Services 8', 'discount': 100},
                 ],
             },
-            'demo_invoice_18': {
-                'ref': 'demo_invoice_18: Invoice to ADHOC with 100% of discount and with different VAT aliquots',
+            'test_invoice_18': {
+                'ref': 'test_invoice_18: Invoice to ADHOC with 100% of discount and with different VAT aliquots',
                 "partner_id": self.res_partner_adhoc,
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
@@ -585,8 +581,8 @@ class TestAr(AccountTestInvoicingCommon, SingleTransactionCase):
                     {'product_id': self.product_iva_105_perc, 'price_unit': 3245.0, 'quantity': 1},
                 ],
             },
-            'demo_invoice_19': {
-                'ref': 'demo_invoice_19: Invoice to ADHOC with multiple taxes and perceptions',
+            'test_invoice_19': {
+                'ref': 'test_invoice_19: Invoice to ADHOC with multiple taxes and perceptions',
                 "partner_id": self.res_partner_adhoc,
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
@@ -1003,8 +999,7 @@ class TestAr(AccountTestInvoicingCommon, SingleTransactionCase):
     def _test_demo_cases(self, cases):
         for inv, test_case in cases.items():
             _logger.info('  * running test %s: %s' % (inv, test_case))
-            invoice = self.demo_invoices[inv]
-            self._edi_validate_and_review(invoice, error_msg=test_case)
+            self._validate_and_review(self.demo_invoices[inv], error_msg=test_case)
 
     # Helpers
 
@@ -1118,3 +1113,32 @@ class TestAr(AccountTestInvoicingCommon, SingleTransactionCase):
 
     def _search_fp(self, name):
         return self.env['account.fiscal.position'].search([('company_id', '=', self.env.company.id), ('name', '=', name)])
+
+    def _post(self, invoice):
+        invoice.action_post()
+
+    def _validate_and_review(self, invoice, expected_result=None, error_msg=None):
+        """ Validate an invoice and review that the invoice has been properly posted. """
+        expected_result = expected_result or 'A'
+        error_msg = error_msg or 'This test return a result different from the expected (%s)' % expected_result
+        self._post(invoice)
+
+        self.assertEqual(invoice.state, 'posted', error_msg)
+
+    def _prepare_multicurrency_values(self):
+        # Enable multi currency
+        self.env.user.write({'groups_id': [(4, self.env.ref('base.group_multi_currency').id)]})
+        # Set ARS as main currency
+        self._set_today_rate(self.env.ref('base.ARS'), 1.0)
+        # Set Rates for USD currency
+        self._set_today_rate(self.env.ref('base.USD'), 1.0 / 162.013)
+
+    def _set_today_rate(self, currency, value):
+        rate_obj = self.env['res.currency.rate']
+        rate = rate_obj.search([('currency_id', '=', currency.id), ('name', '=', fields.Date.to_string(fields.Date.today())),
+                                ('company_id', '=', self.env.company.id)])
+        if rate:
+            rate.rate = value
+        else:
+            rate_obj.create({'company_id': self.env.company.id, 'currency_id': currency.id, 'rate': value})
+        _logger.log(25, 'Using %s rate %s' % (currency.name, currency.rate))
