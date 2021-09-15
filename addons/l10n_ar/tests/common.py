@@ -45,15 +45,14 @@ class TestAr(AccountTestInvoicingCommon):
 
         # TODO: move to TestMono class?
         # ==== Company MONO ====
-        cls.company_data_2['company'].write({
+        cls.company_mono = cls.setup_company_data('(AR) Monotributista (Unit Tests)', chart_template=cls.env.ref('l10n_ar.l10nar_base_chart_template'))['company']
+        cls.company_mono.write({
             'parent_id': cls.env.ref('base.main_company').id,
             'currency_id': cls.env.ref('base.ARS').id,
             'name': '(AR) Monotributista (Unit Tests)',
             "l10n_ar_afip_start_date": time.strftime('%Y-01-01'),
             'l10n_ar_gross_income_type': 'exempt',
         })
-        cls.company_mono = cls.company_data_2['company']
-
         cls.company_mono.partner_id.write({
             'name': '(AR) Monotributista (Unit Tests)',
             'l10n_ar_afip_responsibility_type_id': cls.env.ref("l10n_ar.res_RM").id,
