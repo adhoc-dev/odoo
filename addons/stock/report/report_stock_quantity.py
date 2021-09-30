@@ -76,7 +76,7 @@ FROM (
         wh.id as warehouse_id
     FROM
         GENERATE_SERIES((now() at time zone 'utc')::date - interval '3month',
-        (now() at time zone 'utc')::date + interval '3 month', '1 day'::interval) date,
+        (now() at time zone 'utc')::date + interval '2 year', '1 day'::interval) date,
         stock_quant q
     LEFT JOIN stock_location l on (l.id=q.location_id)
     LEFT JOIN stock_warehouse wh ON l.parent_path like concat('%/', wh.view_location_id, '/%')
@@ -93,7 +93,7 @@ FROM (
             ELSE m.date_expected::date
         END,
         CASE
-            WHEN m.state != 'done' THEN (now() at time zone 'utc')::date + interval '3 month'
+            WHEN m.state != 'done' THEN (now() at time zone 'utc')::date + interval '2 year'
             ELSE m.date::date - interval '1 day'
         END, '1 day'::interval)::date date,
         CASE
