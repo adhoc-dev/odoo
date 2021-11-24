@@ -76,8 +76,8 @@ class TestAr(AccountTestInvoicingCommon):
             'company_id': cls.company_ri.id,
         })
 
-
         # ==== Partners / Customers ====
+        cls.partner_afip = cls.env.ref("l10n_ar.partner_afip")
         cls.res_partner_adhoc = cls.env['res.partner'].create({
             "name": "ADHOC SA",
             "is_company": 1,
@@ -181,6 +181,9 @@ class TestAr(AccountTestInvoicingCommon):
         cls.tax_no_gravado = cls._search_tax(cls, 'iva_no_gravado')
         cls.tax_perc_iibb = cls._search_tax(cls, 'percepcion_iibb_ba')
         cls.tax_iva_exento = cls._search_tax(cls, 'iva_exento')
+
+        cls.tax_21_purchase = cls._search_tax(cls, 'iva_21', type_tax_use='purchase')
+        cls.tax_no_gravado_purchase = cls._search_tax(cls, 'iva_no_gravado', type_tax_use='purchase')
 
         # ==== Products ====
         # TODO review not sure if we need to define the next values
@@ -291,6 +294,23 @@ class TestAr(AccountTestInvoicingCommon):
             'default_code': 'EXENTO',
             'taxes_id': [(6, 0, (cls.tax_iva_exento).ids)],
         })
+        cls.service_wo_tax = cls.env['product.product'].create({
+            # demo product_product_quote_despacho
+            'name': 'Service WO TAX',
+            'type': 'service',
+            'uom_id': uom_unit.id,
+            'uom_po_id': uom_unit.id,
+            'default_code': 'AFIP_DESPACHO',
+        })
+        cls.service_iva_no_gravado = cls.env['product.product'].create({
+            # demo product_product_arancel
+            'name': 'Server VAT Untaxed',
+            'type': 'service',
+            'uom_id': uom_unit.id,
+            'uom_po_id': uom_unit.id,
+            'default_code': 'AFIP_ARANCEL',
+            "supplier_taxes_id": [(6, 0, (cls.tax_no_gravado_purchase).ids)],
+        })
 
         # # Document Types
         cls.document_type = {
@@ -319,6 +339,8 @@ class TestAr(AccountTestInvoicingCommon):
 
         # ==== Invoices ====
         cls.demo_invoices = {}
+        cls.demo_credit_notes = {}
+        cls.demo_bills = {}
 
     def _create_test_invoices_like_demo(self):
         """ Create in the unit tests the same invoices created in demo data """
@@ -327,7 +349,9 @@ class TestAr(AccountTestInvoicingCommon):
         incoterm = self.env.ref("account.incoterm_EXW")
         today = fields.Date.today()
 
-        # TODO check invoices dates
+        # TODO KZ add the logic of the  invoices dates
+        # should be frozen somehow. It is in freezegun and the decorator @freeze_time('yyyy-mm-dd')
+        # Need to see however how the test web service reacts to this.
         invoices_to_create = {
             'test_invoice_1': {
                 "ref": "test_invoice_1: Invoice to gritti support service, vat 21",
@@ -589,9 +613,15 @@ class TestAr(AccountTestInvoicingCommon):
                 # "invoice_date": today + relativedelta(day=13),
                 "company_id": self.company_ri,
                 "invoice_line_ids": [
-                    {'product_id': self.service_iva_21, 'price_unit': 24.3, 'quantity': 3, 'name': 'Support Services 8'},
-                    {'product_id': self.service_iva_27, 'price_unit': 250.0, 'quantity': 1},
-                    {'product_id': self.product_iva_105_perc, 'price_unit': 3245.0, 'quantity': 1},
+                    {'product_id': self.service_iva_21, 'price_unit': 24.3, 'quantity': 3, 'name': 'Support Services 8',
+                    #  'tax_ids': self._search_tax('taxes')
+                     },
+                    {'product_id': self.service_iva_27, 'price_unit': 250.0, 'quantity': 1,
+                    #  'tax_ids': self._search_tax('percepcion_iva')
+                     },
+                    {'product_id': self.product_iva_105_perc, 'price_unit': 3245.0, 'quantity': 1,
+                    #  'tax_ids': self._search_tax('percepcion_iibb_caba')
+                     },
                 ],
             }
         }
@@ -612,409 +642,13 @@ class TestAr(AccountTestInvoicingCommon):
                         line_form.product_id = line.get('product_id')
                         line_form.price_unit = line.get('price_unit')
                         line_form.quantity = line.get('quantity')
+                        if line.get('tax_ids'):
+                            line_form.tax_ids = line.get('tax_ids')
                         # TODO: check this lines, should not be necessary to add
                         line_form.name = 'xxxx'
                         line_form.account_id = self.company_data['default_account_revenue']
             invoice = invoice_form.save()
             self.demo_invoices[key] = invoice
-
-    # TODO: add this move lines to invoice 19
-    # <function model="account.move.line" name="write" context="{'check_move_validity': False, 'active_test': False}">
-    #     <value model="account.move.line" search="[('move_id', '=', ref('demo_invoice_19')), ('product_id', '=', ref('product.product_product_2'))]"/>
-    #     <value model="account.tax" eval="{'tax_ids': [(4, obj().search([('company_id', '=', ref('company_ri')), ('type_tax_use', '=', 'sale'), ('tax_group_id.l10n_ar_tribute_afip_code', '=', '06')], limit=1).id)]}"/>
-    # </function>
-
-    # <function model="account.move.line" name="write" context="{'check_move_validity': False, 'active_test': False}">
-    #     <value model="account.move.line" search="[('move_id', '=', ref('demo_invoice_19')), ('product_id', '=', ref('product_product_telefonia'))]"/>
-    #     <value model="account.tax" eval="{'tax_ids': [(4, obj().search([('company_id', '=', ref('company_ri')), ('type_tax_use', '=', 'sale'), ('tax_group_id.l10n_ar_tribute_afip_code', '=', '07')], limit=1).id)]}"/>
-    # </function>
-
-    # <function model="account.move.line" name="write" context="{'check_move_validity': False, 'active_test': False}">
-    #     <value model="account.move.line" search="[('move_id', '=', ref('demo_invoice_19')), ('product_id', '=', ref('product.product_product_25'))]"/>
-    #     <value model="account.tax" eval="{'tax_ids': [(4, obj().search([('company_id', '=', ref('company_ri')), ('type_tax_use', '=', 'sale'), ('tax_group_id.l10n_ar_tribute_afip_code', '=', '99')], limit=1).id)]}"/>
-    # </function>
-
-    # Re used unit tests methods
-
-    # TODO: add credit notes for l10n_ar_report tests
-    def _create_test_credit_notes_like_demo(self):
-        # TODO test it
-        """ Create in the unit tests the same credit notes created in demo data """
-        reversal_moves = {
-            "demo_refund_invoice_3": {
-                "ref": "demo_refund_invoice_3: Create draft refund for invoice 3",
-                "reason": "Mercadería defectuosa",
-                "refund_method": "refund",
-                "move_ids": [(4, self.demo_invoices['demo_invoice_3'])],
-                "date": time.strftime('%Y-%m') + '-01',
-            },
-            "demo_refund_invoice_4": {
-                "ref": "demo_refund_invoice_4: Create draft refund for invoice 4",
-                "reason": "Venta cancelada",
-                "refund_method": "cancel",
-                "move_ids": [(4, self.demo_invoices['demo_invoice_4'])],
-                "date": time.strftime('%Y-%m') + '-01',
-            },
-            "demo_refund_invoice_16": {
-                "ref": "demo_refund_invoice_16: Create cancel refund for expo invoice 16 (las nc/nd expo invoice no requiere parametro permiso existennte, por eso agregamos este ejemplo)",
-                "reason": "Venta cancelada",
-                "refund_method": "cancel",
-                "move_ids":  [(4, self.demo_invoices['demo_invoice_16'])],
-                "date": time.strftime('%Y-%m') + '-01',
-            }
-        }
-
-        for item in reversal_moves:
-            rec = self.env["account.move.reversal"].create(item)
-            rec.reverse_moves()
-
-    # # TODO: add supplier invoices for l10n_ar_report tests
-    # def _create_test_vendor_bill_invoice_demo(self):
-    #     # TODO test it
-    #     """ Create in the unit tests the same vendor bills created in demo data """
-    #     # TODO review the date of the invoices
-    #     pass
-    #     payment_term_id = self.env.ref("account.account_payment_term_end_following_month")
-    #     invoice_user_id = self.env.user
-
-    #     supplier_invoices = {
-    #         "test_vendor_bill_1": {
-    #             "ref": "demo_sup_invoice_1: Invoice from Gritti support service, auto fiscal position set VAT Not Applicable",
-    #             "partner_id": self.res_partner_gritti_mono.id,
-    #             "invoice_user_id": invoice_user_id.id,
-    #             "invoice_payment_term_id": payment_term_id.id,
-    #             "move_type": "in_invoice",
-    #             "invoice_date": time.strftime('%Y-%m') + '-01',
-    #             "company_id": self.env.company.id,
-    #             "invoice_line_ids": [
-    #                 (0, 0, {'product_id': ref('product.product_product_2'), 'price_unit': 642.0, 'quantity': 1}),
-    #                 (0, 0, {'product_id': ref('product.product_product_27'), 'price_unit': 642.0, 'quantity': 5}),
-    #                 (0, 0, {'product_id': ref('product_product_telefonia'), 'price_unit': 250.0, 'quantity': 1}),
-    #                 (0, 0, {'product_id': ref('product_product_no_gravado'), 'price_unit': 50.0, 'quantity': 10}),
-    #                 (0, 0, {'product_id': ref('product_product_cero'), 'price_unit': 200.0, 'quantity': 1}),
-    #                 (0, 0, {'product_id': ref('product_product_exento'), 'price_unit': 100.0, 'quantity': 1}),
-    #             ],
-    #         },
-    #     }
-
-    #     cls.service_iva_27 = cls.env['product.product'].create({
-    #         # demo 'product_product_telefonia'
-    #         'name': 'Telephone service (VAT 27)',
-
-
-    #     """
-    #     cls.product_iva_105 = demo 'product.product_product_27'
-
-
-    #             cls.product_iva_105 = cls.env['product.product'].create({
-
-
-    #     'product_id': ref('product.product_product_2'), 'price_unit': 642.0, 'quantity': 1}),
-    #     'product_id': ref('product.product_product_27'), 'price_unit': 642.0, 'quantity': 5}),
-    #     'product_id': ref('product_product_telefonia'), 'price_unit': 250.0, 'quantity': 1}),
-    #     'product_id': ref('product_product_no_gravado'), 'price_unit': 50.0, 'quantity': 10}),
-    #     'product_id': ref('product_product_cero'), 'price_unit': 200.0, 'quantity': 1}),
-    #     'product_id': ref('product_product_exento'), 'price_unit': 100.0, 'quantity': 1}),
-
-
-    #             "invoice_line_ids": [
-    #                 {'product_id': self.service_iva_21, 'price_unit': 24.3, 'quantity': 3, 'name': 'Support Services 8'},
-    #                 {'product_id': self.service_iva_27, 'price_unit': 250.0, 'quantity': 1},
-    #                 {'product_id': self.product_iva_105_perc, 'price_unit': 3245.0, 'quantity': 1},
-    #             ],
-
-
-    # <!-- we add l10n_latam_document_number on on a separete line because we need l10n_latam_document_type_id to be auto assigned so that account.move.name can be computed with the _inverse_l10n_latam_document_number -->
-
-    # <!-- Invoice from Foreign with vat 21, 27 and 10,5 -->
-    # <record id="demo_sup_invoice_2" model="account.move">
-    #     <field name="partner_id" ref="res_partner_foreign"/>
-    #     <field name="invoice_user_id" ref="base.user_demo"/>
-    #     <field name="invoice_payment_term_id" ref="account.account_payment_term_end_following_month"/>
-    #     <field name="move_type">in_invoice</field>
-    #     <field name="invoice_date" eval="time.strftime('%Y-%m')+'-01'"/>
-    #     <field name="company_id" ref="company_ri"/>
-    #     <field name="invoice_line_ids" eval="[
-    #         (0, 0, {'product_id': ref('product.product_product_27'), 'price_unit': 642.0, 'quantity': 5}),
-    #         (0, 0, {'product_id': ref('product_product_telefonia'), 'price_unit': 250.0, 'quantity': 1}),
-    #         (0, 0, {'product_id': ref('product.product_product_25'), 'price_unit': 3245.0, 'quantity': 2}),
-    #     ]"/>
-    # </record>
-
-    # <!-- Invoice from Foreign with vat zero and 21 -->
-    # <record id="demo_sup_invoice_3" model="account.move">
-    #     <field name="partner_id" ref="res_partner_foreign"/>
-    #     <field name="invoice_user_id" ref="base.user_demo"/>
-    #     <field name="invoice_payment_term_id" ref="account.account_payment_term_end_following_month"/>
-    #     <field name="move_type">in_invoice</field>
-    #     <field name="invoice_date" eval="time.strftime('%Y-%m')+'-11'"/>
-    #     <field name="company_id" ref="company_ri"/>
-    #     <field name="invoice_line_ids" eval="[
-    #         (0, 0, {'product_id': ref('product.product_product_27'), 'price_unit': 642.0, 'quantity': 5}),
-    #         (0, 0, {'product_id': ref('product_product_cero'), 'price_unit': 200.0, 'quantity': 1}),
-    #     ]"/>
-    # </record>
-
-    # <!-- Invoice to Foreign with vat exempt and 21 -->
-    # <record id="demo_sup_invoice_4" model="account.move">
-    #     <field name="partner_id" ref="res_partner_foreign"/>
-    #     <field name="invoice_user_id" ref="base.user_demo"/>
-    #     <field name="invoice_payment_term_id" ref="account.account_payment_term_end_following_month"/>
-    #     <field name="move_type">in_invoice</field>
-    #     <field name="invoice_date" eval="time.strftime('%Y-%m')+'-15'"/>
-    #     <field name="company_id" ref="company_ri"/>
-    #     <field name="invoice_line_ids" eval="[
-    #         (0, 0, {'product_id': ref('product.product_product_27'), 'price_unit': 642.0, 'quantity': 5}),
-    #         (0, 0, {'product_id': ref('product_product_exento'), 'price_unit': 100.0, 'quantity': 1}),
-    #     ]"/>
-    # </record>
-
-    # <!-- Invoice to Foreign with all type of taxes  -->
-    # <record id="demo_sup_invoice_5" model="account.move">
-    #     <field name="partner_id" ref="res_partner_foreign"/>
-    #     <field name="invoice_user_id" ref="base.user_demo"/>
-    #     <field name="invoice_payment_term_id" ref="account.account_payment_term_end_following_month"/>
-    #     <field name="move_type">in_invoice</field>
-    #     <field name="invoice_date" eval="time.strftime('%Y-%m')+'-18'"/>
-    #     <field name="company_id" ref="company_ri"/>
-    #     <field name="invoice_line_ids" eval="[
-    #         (0, 0, {'product_id': ref('product.product_product_27'), 'price_unit': 642.0, 'quantity': 5}),
-    #         (0, 0, {'product_id': ref('product_product_telefonia'), 'price_unit': 250.0, 'quantity': 1}),
-    #         (0, 0, {'product_id': ref('product.product_product_25'), 'price_unit': 3245.0, 'quantity': 2}),
-    #         (0, 0, {'product_id': ref('product_product_no_gravado'), 'price_unit': 50.0, 'quantity': 10}),
-    #         (0, 0, {'product_id': ref('product_product_cero'), 'price_unit': 200.0, 'quantity': 1}),
-    #         (0, 0, {'product_id': ref('product_product_exento'), 'price_unit': 100.0, 'quantity': 1}),
-    #     ]"/>
-    # </record>
-
-    # <!-- Service Import to Odoo, fiscal position changes tax not correspond -->
-    # <record id="demo_sup_invoice_6" model="account.move">
-    #     <field name="partner_id" ref="res_partner_odoo"/>
-    #     <field name="invoice_user_id" ref="base.user_demo"/>
-    #     <field name="invoice_payment_term_id" ref="account.account_payment_term_end_following_month"/>
-    #     <field name="move_type">in_invoice</field>
-    #     <field name="invoice_date" eval="time.strftime('%Y-%m')+'-26'"/>
-    #     <field name="company_id" ref="company_ri"/>
-    #     <field name="invoice_line_ids" eval="[
-    #         (0, 0, {'product_id': ref('product.product_product_2'), 'price_unit': 1642.0, 'quantity': 1}),
-    #     ]"/>
-    # </record>
-
-    # <!-- Similar to last one but with line that have tax not correspond with negative amount -->
-    # <record id="demo_sup_invoice_7" model="account.move">
-    #     <field name="partner_id" ref="res_partner_odoo"/>
-    #     <field name="invoice_user_id" ref="base.user_demo"/>
-    #     <field name="invoice_payment_term_id" ref="account.account_payment_term_end_following_month"/>
-    #     <field name="move_type">in_invoice</field>
-    #     <field name="invoice_date" eval="time.strftime('%Y-%m')+'-27'"/>
-    #     <field name="company_id" ref="company_ri"/>
-    #     <field name="invoice_line_ids" eval="[
-    #         (0, 0, {'product_id': ref('product.product_product_2'), 'price_unit': 1642.0, 'quantity': 1}),
-    #         (0, 0, {'product_id': ref('product_product_no_gravado'), 'price_unit': -50.0, 'quantity': 10}),
-    #     ]"/>
-    # </record>
-
-    # <!-- Invoice to ADHOC with multiple taxes and perceptions -->
-    # <record id="demo_sup_invoice_8" model="account.move">
-    #     <field name="partner_id" ref="l10n_ar.res_partner_adhoc"/>
-    #     <field name="invoice_user_id" ref="base.user_demo"/>
-    #     <field name="invoice_payment_term_id" ref="account.account_payment_term_end_following_month"/>
-    #     <field name="move_type">in_invoice</field>
-    #     <field name="invoice_date" eval="time.strftime('%Y-%m')+'-01'"/>
-    #     <field name="company_id" ref="company_ri"/>
-    #     <field name="invoice_line_ids" eval="[
-    #         (0, 0, {'product_id': ref('product.product_product_27'), 'price_unit': 642.0, 'quantity': 5}),
-    #         (0, 0, {'product_id': ref('product_product_telefonia'), 'price_unit': 250.0, 'quantity': 1}),
-    #         (0, 0, {'product_id': ref('product.product_product_25'), 'price_unit': 3245.0, 'quantity': 2}),
-    #     ]"/>
-    # </record>
-
-    # <!-- Import Cleareance -->
-    # <record id="demo_despacho_1" model="account.move">
-    #     <field name="partner_id" ref="l10n_ar.partner_afip"/>
-    #     <field name="invoice_user_id" ref="base.user_demo"/>
-    #     <field name="invoice_payment_term_id" ref="account.account_payment_term_end_following_month"/>
-    #     <field name="move_type">in_invoice</field>
-    #     <!-- as we create lines separatelly we need to set journal, if not, misc journal is selected -->
-    #     <field name="journal_id" model="account.journal" search="[('type', '=', 'purchase'), ('company_id', '=', obj().env.company.id)]"/>
-    #     <field name="invoice_date" eval="time.strftime('%Y-%m')+'-13'"/>
-    #     <field name="company_id" ref="company_ri"/>
-    # </record>
-    # <!-- create this lines manually to set taxes and prices -->
-    # <record id="demo_despacho_1_line_1" model="account.move.line" context="{'check_move_validity': False}">
-    #     <field name="move_id" ref="demo_despacho_1"/>
-    #     <field name="price_unit">5064.98</field>
-    #     <field name="name">[AFIP_DESPACHO] Despacho de importación</field>
-    #     <field name="quantity">1</field>
-    #     <field name="product_id" ref="l10n_ar.product_product_quote_despacho"/>
-    #     <field name="product_uom_id" ref="uom.product_uom_unit"/>
-    #     <field name="tax_ids" model="account.tax" eval="[(6, 0, obj().search([('company_id', '=', obj().env.ref('l10n_ar.company_ri').id), ('name', '=', 'IVA 21%'), ('type_tax_use', '=', 'purchase')], limit=1).ids)]"/>
-    #     <field name="account_id" model="account.move.line" eval="obj().env.ref('l10n_ar.product_product_quote_despacho').categ_id.property_account_income_categ_id.id"/>
-    # </record>
-    # <record id="demo_despacho_1_line_2" model="account.move.line" context="{'check_move_validity': False}">
-    #     <field name="move_id" ref="demo_despacho_1"/>
-    #     <field name="price_unit">152.08</field>
-    #     <field name="name">[AFIP_TASA_EST] Tasa Estadística</field>
-    #     <field name="quantity">1</field>
-    #     <field name="product_id" ref="l10n_ar.product_product_tasa_estadistica"/>
-    #     <field name="product_uom_id" ref="uom.product_uom_unit"/>
-    #     <field name="tax_ids" model="account.tax" eval="[(6, 0, obj().search([('company_id', '=', obj().env.ref('l10n_ar.company_ri').id), ('name', '=', 'IVA 21%'), ('type_tax_use', '=', 'purchase')], limit=1).ids)]"/>
-    #     <field name="account_id" model="account.move.line" eval="obj().env.ref('l10n_ar.product_product_tasa_estadistica').categ_id.property_account_income_categ_id.id"/>
-    # </record>
-    # <record id="demo_despacho_1_line_3" model="account.move.line" context="{'check_move_validity': False}">
-    #     <field name="move_id" ref="demo_despacho_1"/>
-    #     <field name="price_unit">10.0</field>
-    #     <field name="name">[AFIP_ARANCEL] Arancel</field>
-    #     <field name="quantity">1</field>
-    #     <field name="product_id" ref="l10n_ar.product_product_arancel"/>
-    #     <field name="product_uom_id" ref="uom.product_uom_unit"/>
-    #     <field name="tax_ids" model="account.tax" eval="[(6, 0, obj().search([('company_id', '=', obj().env.ref('l10n_ar.company_ri').id), ('name', '=', 'IVA No Gravado'), ('type_tax_use', '=', 'purchase')], limit=1).ids)]"/>
-    #     <field name="account_id" model="account.move.line" eval="obj().env.ref('l10n_ar.product_product_arancel').categ_id.property_account_income_categ_id.id"/>
-    # </record>
-    # <record id="demo_despacho_1_line_4" model="account.move.line" context="{'check_move_validity': False}">
-    #     <field name="move_id" ref="demo_despacho_1"/>
-    #     <field name="price_unit">28.00</field>
-    #     <field name="name">[AFIP_SERV_GUARDA] Servicio de Guarda</field>
-    #     <field name="quantity">1</field>
-    #     <field name="product_id" ref="l10n_ar.product_product_servicio_de_guarda"/>
-    #     <field name="product_uom_id" ref="uom.product_uom_unit"/>
-    #     <field name="tax_ids" model="account.tax" eval="[(6, 0, obj().search([('company_id', '=', obj().env.ref('l10n_ar.company_ri').id), ('name', '=', 'IVA No Gravado'), ('type_tax_use', '=', 'purchase')], limit=1).ids)]"/>
-    #     <field name="account_id" model="account.move.line" eval="obj().env.ref('l10n_ar.product_product_servicio_de_guarda').categ_id.property_account_income_categ_id.id"/>
-    # </record>
-    # <record id="demo_despacho_1_line_5" model="account.move.line" context="{'check_move_validity': False}">
-    #     <field name="name">FOB Total</field>
-    #     <field name="move_id" ref="demo_despacho_1"/>
-    #     <field name="price_unit">28936.06</field>
-    #     <field name="quantity">1</field>
-    #     <field name="product_uom_id" ref="uom.product_uom_unit"/>
-    #     <field name="tax_ids" model="account.tax" eval="[(6, 0, obj().search([('company_id', '=', obj().env.ref('l10n_ar.company_ri').id), ('name', '=', 'IVA 21%'), ('type_tax_use', '=', 'purchase')], limit=1).ids)]"/>
-    #     <field name="account_id" model="account.move.line" eval="obj().env.ref('product.product_category_all').property_account_income_categ_id.id"/>
-    # </record>
-    # <record id="demo_despacho_1_line_6" model="account.move.line" context="{'check_move_validity': False}">
-    #     <field name="name">Flete</field>
-    #     <field name="move_id" ref="demo_despacho_1"/>
-    #     <field name="price_unit">1350.00</field>
-    #     <field name="quantity">1</field>
-    #     <field name="product_uom_id" ref="uom.product_uom_unit"/>
-    #     <field name="tax_ids" model="account.tax" eval="[(6, 0, obj().search([('company_id', '=', obj().env.ref('l10n_ar.company_ri').id), ('name', '=', 'IVA 21%'), ('type_tax_use', '=', 'purchase')], limit=1).ids)]"/>
-    #     <field name="account_id" model="account.move.line" eval="obj().env.ref('product.product_category_all').property_account_income_categ_id.id"/>
-    # </record>
-    # <record id="demo_despacho_1_line_7" model="account.move.line" context="{'check_move_validity': False}">
-    #     <field name="name">Seguro</field>
-    #     <field name="move_id" ref="demo_despacho_1"/>
-    #     <field name="price_unit">130.21</field>
-    #     <field name="quantity">1</field>
-    #     <field name="product_uom_id" ref="uom.product_uom_unit"/>
-    #     <field name="tax_ids" model="account.tax" eval="[(6, 0, obj().search([('company_id', '=', obj().env.ref('l10n_ar.company_ri').id), ('name', '=', 'IVA 21%'), ('type_tax_use', '=', 'purchase')], limit=1).ids)]"/>
-    #     <field name="account_id" model="account.move.line" eval="obj().env.ref('product.product_category_all').property_account_income_categ_id.id"/>
-    # </record>
-    # <record id="demo_despacho_1_line_8" model="account.move.line" context="{'check_move_validity': False}">
-    #     <field name="name">-FOB Total</field>
-    #     <field name="move_id" ref="demo_despacho_1"/>
-    #     <field name="price_unit">-28936.06</field>
-    #     <field name="quantity">1</field>
-    #     <field name="product_uom_id" ref="uom.product_uom_unit"/>
-    #     <field name="tax_ids" model="account.tax" eval="[(6, 0, obj().search([('company_id', '=', obj().env.ref('l10n_ar.company_ri').id), ('name', '=', 'IVA No Gravado'), ('type_tax_use', '=', 'purchase')], limit=1).ids)]"/>
-    #     <field name="account_id" model="account.move.line" eval="obj().env.ref('product.product_category_all').property_account_income_categ_id.id"/>
-    # </record>
-    # <record id="demo_despacho_1_line_9" model="account.move.line" context="{'check_move_validity': False}">
-    #     <field name="name">-Flete</field>
-    #     <field name="move_id" ref="demo_despacho_1"/>
-    #     <field name="price_unit">-1350.00</field>
-    #     <field name="quantity">1</field>
-    #     <field name="product_uom_id" ref="uom.product_uom_unit"/>
-    #     <field name="tax_ids" model="account.tax" eval="[(6, 0, obj().search([('company_id', '=', obj().env.ref('l10n_ar.company_ri').id), ('name', '=', 'IVA No Gravado'), ('type_tax_use', '=', 'purchase')], limit=1).ids)]"/>
-    #     <field name="account_id" model="account.move.line" eval="obj().env.ref('product.product_category_all').property_account_income_categ_id.id"/>
-    # </record>
-    # <record id="demo_despacho_1_line_10" model="account.move.line" context="{'check_move_validity': False}">
-    #     <field name="name">-Seguro</field>
-    #     <field name="move_id" ref="demo_despacho_1"/>
-    #     <field name="price_unit">-130.21</field>
-    #     <field name="quantity">1</field>
-    #     <field name="product_uom_id" ref="uom.product_uom_unit"/>
-    #     <field name="tax_ids" model="account.tax" eval="[(6, 0, obj().search([('company_id', '=', obj().env.ref('l10n_ar.company_ri').id), ('name', '=', 'IVA No Gravado'), ('type_tax_use', '=', 'purchase')], limit=1).ids)]"/>
-    #     <field name="account_id" model="account.move.line" eval="obj().env.ref('product.product_category_all').property_account_income_categ_id.id"/>
-    # </record>
-
-    # <record id="demo_sup_invoice_1" model="account.move">
-    #     <field name="l10n_latam_document_number">0001-00000008</field>
-    # </record>
-    # <record id="demo_sup_invoice_2" model="account.move">
-    #     <field name="l10n_latam_document_number">0002-00000123</field>
-    # </record>
-    # <record id="demo_sup_invoice_3" model="account.move">
-    #     <field name="l10n_latam_document_number">0003-00000312</field>
-    # </record>
-    # <record id="demo_sup_invoice_4" model="account.move">
-    #     <field name="l10n_latam_document_number">0001-00000200</field>
-    # </record>
-    # <record id="demo_sup_invoice_5" model="account.move">
-    #     <field name="l10n_latam_document_number">0001-00000222</field>
-    # </record>
-    # <record id="demo_sup_invoice_6" model="account.move">
-    #     <field name="l10n_latam_document_number">0001-00000333</field>
-    # </record>
-    # <record id="demo_sup_invoice_7" model="account.move">
-    #     <field name="l10n_latam_document_number">0001-00000334</field>
-    # </record>
-    # <record id="demo_sup_invoice_8" model="account.move">
-    #     <field name="l10n_latam_document_number">0001-00000335</field>
-    # </record>
-    # <record id="demo_despacho_1" model="account.move">
-    #     <field name="l10n_latam_document_number">16052IC04000605L</field>
-    # </record>
-
-    # <function model="account.move" name="_onchange_partner_id" context="{'check_move_validity': False}">
-    #     <value eval="[ref('demo_sup_invoice_1')]"/>
-    # </function>
-    # <function model="account.move" name="_onchange_partner_id" context="{'check_move_validity': False}">
-    #     <value eval="[ref('demo_sup_invoice_2')]"/>
-    # </function>
-    # <function model="account.move" name="_onchange_partner_id" context="{'check_move_validity': False}">
-    #     <value eval="[ref('demo_sup_invoice_3')]"/>
-    # </function>
-    # <function model="account.move" name="_onchange_partner_id" context="{'check_move_validity': False}">
-    #     <value eval="[ref('demo_sup_invoice_4')]"/>
-    # </function>
-    # <function model="account.move" name="_onchange_partner_id" context="{'check_move_validity': False}">
-    #     <value eval="[ref('demo_sup_invoice_5')]"/>
-    # </function>
-    # <function model="account.move" name="_onchange_partner_id" context="{'check_move_validity': False}">
-    #     <value eval="[ref('demo_sup_invoice_6')]"/>
-    # </function>
-    # <function model="account.move" name="_onchange_partner_id" context="{'check_move_validity': False}">
-    #     <value eval="[ref('demo_sup_invoice_7')]"/>
-    # </function>
-    # <function model="account.move" name="_onchange_partner_id" context="{'check_move_validity': False}">
-    #     <value eval="[ref('demo_despacho_1')]"/>
-    # </function>
-
-    # <function model="account.move.line" name="_onchange_product_id" context="{'check_move_validity': False}">
-    #     <value model="account.move.line" eval="obj().search([('move_id', 'in', [ref('demo_sup_invoice_1'), ref('demo_sup_invoice_2'), ref('demo_sup_invoice_3'), ref('demo_sup_invoice_4'), ref('demo_sup_invoice_5'), ref('demo_sup_invoice_6'), ref('demo_sup_invoice_7'), ref('demo_sup_invoice_8')])]).ids"/>
-    # </function>
-
-    # <function model="account.move.line" name="write" context="{'check_move_validity': False, 'active_test': False}">
-    #     <value model="account.move.line" search="[('move_id', '=', ref('demo_sup_invoice_8')), ('product_id', '=', ref('product.product_product_27'))]"/>
-    #     <value model="account.tax" eval="{'tax_ids': [(4, obj().search([('company_id', '=', ref('company_ri')), ('type_tax_use', '=', 'purchase'), ('tax_group_id.l10n_ar_tribute_afip_code', '=', '06')], limit=1).id)]}"/>
-    # </function>
-
-    # <function model="account.move.line" name="write" context="{'check_move_validity': False, 'active_test': False}">
-    #     <value model="account.move.line" search="[('move_id', '=', ref('demo_sup_invoice_8')), ('product_id', '=', ref('product_product_telefonia'))]"/>
-    #     <value model="account.tax" eval="{'tax_ids': [(4, obj().search([('company_id', '=', ref('company_ri')), ('type_tax_use', '=', 'purchase'), ('tax_group_id.l10n_ar_tribute_afip_code', '=', '07')], limit=1).id)]}"/>
-    # </function>
-
-    # <function model="account.move.line" name="write" context="{'check_move_validity': False, 'active_test': False}">
-    #     <value model="account.move.line" search="[('move_id', '=', ref('demo_sup_invoice_8')), ('product_id', '=', ref('product.product_product_25'))]"/>
-    #     <value model="account.tax" eval="{'tax_ids': [(4, obj().search([('company_id', '=', ref('company_ri')), ('type_tax_use', '=', 'purchase'), ('tax_group_id.l10n_ar_tribute_afip_code', '=', '99')], limit=1).id)]}"/>
-    # </function>
-
-    # <function model="account.move" name="_recompute_dynamic_lines" context="{'check_move_validity': False}">
-    #     <value eval="[ref('demo_sup_invoice_1'), ref('demo_sup_invoice_2'), ref('demo_sup_invoice_3'), ref('demo_sup_invoice_4'), ref('demo_sup_invoice_5'), ref('demo_sup_invoice_6'), ref('demo_sup_invoice_7'), ref('demo_sup_invoice_8'), ref('demo_despacho_1')]"/>
-    #     <value eval="True"/>
-    # </function>
-
-    # <function model="account.move" name="action_post">
-    #     <value eval="[ref('demo_sup_invoice_1'), ref('demo_sup_invoice_2'), ref('demo_sup_invoice_3'), ref('demo_sup_invoice_4'), ref('demo_sup_invoice_5'), ref('demo_sup_invoice_6'), ref('demo_sup_invoice_7'), ref('demo_sup_invoice_8'), ref('demo_despacho_1')]"/>
 
     # TODO improve used to set the values easier
     def _test_demo_cases(self, cases):
@@ -1124,9 +758,9 @@ class TestAr(AccountTestInvoicingCommon):
         debit_note = self.env['account.move'].browse(res['res_id'])
         return debit_note
 
-    def _search_tax(self, tax_type):
+    def _search_tax(self, tax_type, type_tax_use='sale'):
         res = self.env['account.tax'].with_context(active_test=False).search([
-            ('type_tax_use', '=', 'sale'),
+            ('type_tax_use', '=', type_tax_use),
             ('company_id', '=', self.env.company.id),
             ('tax_group_id', '=', self.env.ref('l10n_ar.tax_group_' + tax_type).id)], limit=1)
         self.assertTrue(res, '%s Tax was not found' % (tax_type))
@@ -1137,14 +771,14 @@ class TestAr(AccountTestInvoicingCommon):
 
     def _post(self, invoice):
         invoice.action_post()
+        self.assertEqual(invoice.state, 'posted')
 
     def _validate_and_review(self, invoice, expected_result=None, error_msg=None):
         """ Validate an invoice and review that the invoice has been properly posted. """
         expected_result = expected_result or 'A'
         error_msg = error_msg or 'This test return a result different from the expected (%s)' % expected_result
         self._post(invoice)
-
-        self.assertEqual(invoice.state, 'posted', error_msg)
+        self.assertEqual(invoice.state, 'posted')
 
     def _prepare_multicurrency_values(self):
         # Enable multi currency
