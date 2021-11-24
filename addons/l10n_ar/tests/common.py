@@ -2,7 +2,6 @@
 from odoo import fields
 from odoo.tests.common import Form
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
-from dateutil.relativedelta import relativedelta
 import random
 import logging
 import time
@@ -342,12 +341,11 @@ class TestAr(AccountTestInvoicingCommon):
         cls.demo_credit_notes = {}
         cls.demo_bills = {}
 
-    def _create_test_invoices_like_demo(self):
+    def _create_test_invoices_like_demo(self, use_current_date=True):
         """ Create in the unit tests the same invoices created in demo data """
         payment_term_id = self.env.ref("account.account_payment_term_end_following_month")
         invoice_user_id = self.env.user
         incoterm = self.env.ref("account.incoterm_EXW")
-        today = fields.Date.today()
 
         # TODO KZ add the logic of the  invoices dates
         # should be frozen somehow. It is in freezegun and the decorator @freeze_time('yyyy-mm-dd')
@@ -359,7 +357,7 @@ class TestAr(AccountTestInvoicingCommon):
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
                 "move_type": "out_invoice",
-                # "invoice_date": fields.Date.start_of(today),
+                "invoice_date": "2021-03-01",
                 "company_id": self.company_ri,
                 "invoice_line_ids": [
                     {'product_id': self.service_iva_21}
@@ -371,7 +369,7 @@ class TestAr(AccountTestInvoicingCommon):
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
                 "move_type": "out_invoice",
-                # "invoice_date": today + relativedelta(day=5),
+                "invoice_date": "2021-03-05",
                 "company_id": self.company_ri,
                 "invoice_line_ids": [
                     {'product_id': self.product_iva_105, 'price_unit': 642.0, 'quantity': 5},
@@ -385,7 +383,7 @@ class TestAr(AccountTestInvoicingCommon):
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
                 "move_type": 'out_invoice',
-                # "invoice_date": fields.Date.start_of(today, 'month'),
+                "invoice_date": "2021-03-01",
                 "company_id": self.company_ri,
                 "invoice_line_ids": [
                     {'product_id': self.product_iva_105, 'price_unit': 642.0, 'quantity': 5},
@@ -398,7 +396,7 @@ class TestAr(AccountTestInvoicingCommon):
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
                 "move_type": 'out_invoice',
-                # "invoice_date": fields.Date.start_of(today, "month"),
+                "invoice_date": "2021-03-01",
                 "company_id": self.company_ri,
                 "invoice_line_ids": [
                     {'product_id': self.product_iva_105, 'price_unit': 642.0, 'quantity': 5},
@@ -411,7 +409,7 @@ class TestAr(AccountTestInvoicingCommon):
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
                 "move_type": 'out_invoice',
-                # "invoice_date": today + relativedelta(day=13),
+                "invoice_date": "2021-03-13",
                 "company_id": self.company_ri,
                 "invoice_line_ids": [
                     {'product_id': self.product_iva_105, 'price_unit': 642.0, 'quantity': 5},
@@ -429,7 +427,7 @@ class TestAr(AccountTestInvoicingCommon):
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
                 "move_type": 'out_invoice',
-                # "invoice_date": today + relativedelta(day=3),
+                "invoice_date": "2021-03-03",
                 "company_id": self.company_ri,
                 "invoice_incoterm_id": incoterm,
                 "invoice_line_ids": [
@@ -448,7 +446,7 @@ class TestAr(AccountTestInvoicingCommon):
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
                 "move_type": 'out_invoice',
-                # "invoice_date": today + relativedelta(day=3),
+                "invoice_date": "2021-03-03",
                 "company_id": self.company_ri,
                 "invoice_incoterm_id": incoterm,
                 "invoice_line_ids": [
@@ -466,7 +464,7 @@ class TestAr(AccountTestInvoicingCommon):
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
                 "move_type": 'out_invoice',
-                # "invoice_date": today + relativedelta(day=13),
+                "invoice_date": "2021-03-13",
                 "company_id": self.company_ri,
                 "invoice_line_ids": [
                     {'product_id': self.service_iva_21, 'price_unit': 642.0, 'quantity': 1},
@@ -478,7 +476,7 @@ class TestAr(AccountTestInvoicingCommon):
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
                 "move_type": 'out_invoice',
-                # "invoice_date": today + relativedelta(day=13),
+                "invoice_date": "2021-03-13",
                 "company_id": self.company_ri,
                 "invoice_line_ids": [
                     {'product_id': self.product_iva_105, 'price_unit': 1000.0, 'quantity': 5},
@@ -491,7 +489,7 @@ class TestAr(AccountTestInvoicingCommon):
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
                 "move_type": 'out_invoice',
-                # "invoice_date": today + relativedelta(day=13),
+                "invoice_date": "2021-03-13",
                 "company_id": self.company_ri,
                 "invoice_line_ids": [
                     {'product_id': self.service_iva_21, 'price_unit': 1.12, 'quantity': 1, 'name': 'Support Services 1'},
@@ -506,7 +504,7 @@ class TestAr(AccountTestInvoicingCommon):
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
                 "move_type": 'out_invoice',
-                # "invoice_date": today + relativedelta(day=13),
+                "invoice_date": "2021-03-13",
                 "company_id": self.company_ri,
                 "invoice_line_ids": [
                     {'product_id': self.service_iva_21, 'price_unit': 15.7076, 'quantity': 1, 'name': 'Support Services 1'},
@@ -521,7 +519,7 @@ class TestAr(AccountTestInvoicingCommon):
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
                 "move_type": 'out_invoice',
-                # "invoice_date": today + relativedelta(day=13),
+                "invoice_date": "2021-03-13",
                 "company_id": self.company_ri,
                 "invoice_line_ids": [
                     {'product_id': self.service_iva_21, 'price_unit': 24.3, 'quantity': 3, 'name': 'Support Services 1'},
@@ -543,7 +541,7 @@ class TestAr(AccountTestInvoicingCommon):
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
                 "move_type": 'out_invoice',
-                # "invoice_date": today + relativedelta(day=20),
+                "invoice_date": "2021-03-20",
                 "company_id": self.company_ri,
                 "invoice_incoterm_id": incoterm,
                 "invoice_line_ids": [
@@ -557,7 +555,7 @@ class TestAr(AccountTestInvoicingCommon):
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
                 "move_type": 'out_invoice',
-                # "invoice_date": today + relativedelta(day=20),
+                "invoice_date": "2021-03-20",
                 "company_id": self.company_ri,
                 "invoice_incoterm_id": incoterm,
                 "invoice_line_ids": [
@@ -571,7 +569,7 @@ class TestAr(AccountTestInvoicingCommon):
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
                 "move_type": 'out_invoice',
-                # "invoice_date": today + relativedelta(day=22),
+                "invoice_date": "2021-03-22",
                 "company_id": self.company_ri,
                 "invoice_incoterm_id": incoterm,
                 "invoice_line_ids": [
@@ -579,24 +577,24 @@ class TestAr(AccountTestInvoicingCommon):
                 ],
             },
             'test_invoice_17': {
-                'ref': 'test_invoice_17: Invoice to ADHOC with 100% of discount',
+                'ref': 'test_invoice_17: Invoice to ADHOC with 100%% of discount',
                 "partner_id": self.res_partner_adhoc,
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
                 "move_type": 'out_invoice',
-                # "invoice_date": today + relativedelta(day=13),
+                "invoice_date": "2021-03-13",
                 "company_id": self.company_ri,
                 "invoice_line_ids": [
                     {'product_id': self.service_iva_21, 'price_unit': 24.3, 'quantity': 3, 'name': 'Support Services 8', 'discount': 100},
                 ],
             },
             'test_invoice_18': {
-                'ref': 'test_invoice_18: Invoice to ADHOC with 100% of discount and with different VAT aliquots',
+                'ref': 'test_invoice_18: Invoice to ADHOC with 100%% of discount and with different VAT aliquots',
                 "partner_id": self.res_partner_adhoc,
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
                 "move_type": 'out_invoice',
-                # "invoice_date": today + relativedelta(day=13),
+                "invoice_date": "2021-03-13",
                 "company_id": self.company_ri,
                 "invoice_line_ids": [
                     {'product_id': self.service_iva_21, 'price_unit': 24.3, 'quantity': 3, 'name': 'Support Services 8', 'discount': 100},
@@ -610,7 +608,7 @@ class TestAr(AccountTestInvoicingCommon):
                 "invoice_user_id": invoice_user_id,
                 "invoice_payment_term_id": payment_term_id,
                 "move_type": 'out_invoice',
-                # "invoice_date": today + relativedelta(day=13),
+                "invoice_date": "2021-03-13",
                 "company_id": self.company_ri,
                 "invoice_line_ids": [
                     {'product_id': self.service_iva_21, 'price_unit': 24.3, 'quantity': 3, 'name': 'Support Services 8',
@@ -633,7 +631,8 @@ class TestAr(AccountTestInvoicingCommon):
                 invoice_form.partner_id = values['partner_id']
                 invoice_form.invoice_user_id = values['invoice_user_id']
                 invoice_form.invoice_payment_term_id = values['invoice_payment_term_id']
-                # invoice_form.invoice_date = values['invoice_date']
+                if not use_current_date:
+                    invoice_form.invoice_date = values['invoice_date']
                 invoice_form.company_id = values['company_id']
                 if values.get('invoice_incoterm_id'):
                     invoice_form.invoice_incoterm_id = values['invoice_incoterm_id']
