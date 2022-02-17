@@ -86,6 +86,7 @@
     </record>
 
     <record id="product.product_product_2" model="product.product">
+        <field name="name">Virtual Home Staging (VAT 21)</field>
         <field name="standard_price">45.5</field>
     </record>
 

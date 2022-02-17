@@ -271,10 +271,29 @@
         ]"/>
     </record>
 
+    <!-- Liquido Producto document invoice -->
+    <record id="demo_invoice_20" model="account.move" context="{'allowed_company_ids': [ref('company_ri')]}">
+        <field name="ref">test_invoice_20: invoice document type code 186</field>
+        <field name="l10n_latam_document_type_id" ref="l10n_ar.dc_liq_cd_sp_a"/>
+        <field name="l10n_latam_document_number">00001-00000066</field>
+        <field name="partner_id" ref="l10n_ar.res_partner_adhoc"/>
+        <field name="invoice_user_id" ref="base.user_demo"/>
+        <field name="invoice_payment_term_id" ref="account.account_payment_term_end_following_month"/>
+        <field name="move_type">out_invoice</field>
+        <field name="invoice_date" eval="time.strftime('%Y-%m')+'-25'"/>
+      <field name="invoice_line_ids" eval="[
+            (0, 0, {'product_id': ref('product.product_product_2'), 'price_unit': 5064.98, 'quantity': 1}),
+            (0, 0, {'product_id': ref('product.product_product_2'), 'price_unit': 152.08, 'quantity': 1}),
+            (0, 0, {'product_id': ref('product_product_no_gravado'), 'price_unit': 10.0, 'quantity': 1}),
+        ]"/>
+    </record>
+
+    <!-- Run onchange in order to auto set the invoice lines taxes -->
     <function model="account.move.line" name="_onchange_product_id" context="{'check_move_validity': False}">
-        <value model="account.move.line" eval="obj().search([('move_id', 'in', [ref('demo_invoice_1'), ref('demo_invoice_2'), ref('demo_invoice_3'), ref('demo_invoice_4'), ref('demo_invoice_5'), ref('demo_invoice_6'), ref('demo_invoice_7'), ref('demo_invoice_8'), ref('demo_invoice_10'), ref('demo_invoice_11'), ref('demo_invoice_12'), ref('demo_invoice_13'), ref('demo_invoice_14'), ref('demo_invoice_15'), ref('demo_invoice_16'), ref('demo_invoice_17'), ref('demo_invoice_18'), ref('demo_invoice_19')])]).ids"/>
+        <value model="account.move.line" eval="obj().search([('move_id', 'in', [ref('demo_invoice_1'), ref('demo_invoice_2'), ref('demo_invoice_3'), ref('demo_invoice_4'), ref('demo_invoice_5'), ref('demo_invoice_6'), ref('demo_invoice_7'), ref('demo_invoice_8'), ref('demo_invoice_10'), ref('demo_invoice_11'), ref('demo_invoice_12'), ref('demo_invoice_13'), ref('demo_invoice_14'), ref('demo_invoice_15'), ref('demo_invoice_16'), ref('demo_invoice_17'), ref('demo_invoice_18'), ref('demo_invoice_19'), ref('demo_invoice_20')])]).ids"/>
     </function>
 
+    <!-- Run onchange in order to automatically change the document types depending on the partner -->
     <function model="account.move" name="_onchange_partner_id" context="{'check_move_validity': False}">
         <value eval="[ref('demo_invoice_6')]"/>
     </function>
@@ -291,6 +310,7 @@
         <value eval="[ref('demo_invoice_16')]"/>
     </function>
 
+    <!-- Add specific taxes (for example withholdings) to variuos demo data for demo invocice demo_invoice_19  -->
     <function model="account.move.line" name="write" context="{'check_move_validity': False, 'active_test': False}">
         <value model="account.move.line" search="[('move_id', '=', ref('demo_invoice_19')), ('product_id', '=', ref('product.product_product_2'))]"/>
         <value model="account.tax" eval="{'tax_ids': [(4, obj().search([('company_id', '=', ref('company_ri')), ('type_tax_use', '=', 'sale'), ('tax_group_id.l10n_ar_tribute_afip_code', '=', '06')], limit=1).id)]}"/>
@@ -306,13 +326,15 @@
         <value model="account.tax" eval="{'tax_ids': [(4, obj().search([('company_id', '=', ref('company_ri')), ('type_tax_use', '=', 'sale'), ('tax_group_id.l10n_ar_tribute_afip_code', '=', '99')], limit=1).id)]}"/>
     </function>
 
+    <!-- Properly compute the account move lines to create a valid balance invoice / move  -->
     <function model="account.move" name="_recompute_dynamic_lines" context="{'check_move_validity': False}">
-        <value eval="[ref('demo_invoice_1'), ref('demo_invoice_2'), ref('demo_invoice_3'), ref('demo_invoice_4'), ref('demo_invoice_5'), ref('demo_invoice_6'), ref('demo_invoice_7'), ref('demo_invoice_8'), ref('demo_invoice_10'), ref('demo_invoice_11'), ref('demo_invoice_12'), ref('demo_invoice_13'), ref('demo_invoice_14'), ref('demo_invoice_15'), ref('demo_invoice_16'), ref('demo_invoice_17'), ref('demo_invoice_18'), ref('demo_invoice_19')]"/>
+        <value eval="[ref('demo_invoice_1'), ref('demo_invoice_2'), ref('demo_invoice_3'), ref('demo_invoice_4'), ref('demo_invoice_5'), ref('demo_invoice_6'), ref('demo_invoice_7'), ref('demo_invoice_8'), ref('demo_invoice_10'), ref('demo_invoice_11'), ref('demo_invoice_12'), ref('demo_invoice_13'), ref('demo_invoice_14'), ref('demo_invoice_15'), ref('demo_invoice_16'), ref('demo_invoice_17'), ref('demo_invoice_18'), ref('demo_invoice_19'), ref('demo_invoice_20')]"/>
         <value eval="True"/>
     </function>
 
+    <!-- Post the demo invoices -->
     <function model="account.move" name="action_post">
-        <value eval="[ref('demo_invoice_1'), ref('demo_invoice_2'), ref('demo_invoice_3'), ref('demo_invoice_4'), ref('demo_invoice_5'), ref('demo_invoice_6'), ref('demo_invoice_7'), ref('demo_invoice_8'), ref('demo_invoice_10'), ref('demo_invoice_11'), ref('demo_invoice_12'), ref('demo_invoice_13'), ref('demo_invoice_14'), ref('demo_invoice_15'), ref('demo_invoice_16'), ref('demo_invoice_17'), ref('demo_invoice_18'), ref('demo_invoice_19')]"/>
+        <value eval="[ref('demo_invoice_1'), ref('demo_invoice_2'), ref('demo_invoice_3'), ref('demo_invoice_4'), ref('demo_invoice_5'), ref('demo_invoice_6'), ref('demo_invoice_7'), ref('demo_invoice_8'), ref('demo_invoice_10'), ref('demo_invoice_11'), ref('demo_invoice_12'), ref('demo_invoice_13'), ref('demo_invoice_14'), ref('demo_invoice_15'), ref('demo_invoice_16'), ref('demo_invoice_17'), ref('demo_invoice_18'), ref('demo_invoice_19'), ref('demo_invoice_20')]"/>
     </function>
 
 </odoo>
