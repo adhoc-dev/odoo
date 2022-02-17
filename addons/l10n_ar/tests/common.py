@@ -296,6 +296,7 @@ class TestAr(AccountTestInvoicingCommon):
             'invoice_e': cls.env.ref('l10n_ar.dc_e_f'),
             'invoice_mipyme_a': cls.env.ref('l10n_ar.dc_fce_a_f'),
             'invoice_mipyme_b': cls.env.ref('l10n_ar.dc_fce_b_f'),
+            'liq_pro_doc': cls.env.ref('l10n_ar.dc_liq_cd_sp_a'),
         }
 
         # ==== Journals ====
@@ -322,6 +323,13 @@ class TestAr(AccountTestInvoicingCommon):
         invoice_user_id = self.env.user
         incoterm = self.env.ref("account.incoterm_EXW")
 
+        preprinted_journal = self.env['account.journal'].search([
+            ('type', '=', 'sale'), ('company_id', '=', self.env.company.id),
+            ('l10n_ar_afip_pos_system', '=', 'II_IM')], limit=1)
+        if not preprinted_journal:
+            preprinted_journal = self._create_journal(self, 'preprinted')
+
+        # TODO KZ improve move invoices_to_create to a new method _get_invoice_data(self):
         invoices_to_create = {
             'test_invoice_1': {
                 "ref": "test_invoice_1: Invoice to gritti support service, vat 21",
@@ -585,6 +593,22 @@ class TestAr(AccountTestInvoicingCommon):
                     {'product_id': self.service_iva_27, 'price_unit': 250.0, 'quantity': 1},
                     {'product_id': self.product_iva_105_perc, 'price_unit': 3245.0, 'quantity': 1},
                 ],
+            },
+            "test_invoice_20": {
+                "ref": "demo_invoice_20: invoice document type code 186",
+                "l10n_latam_document_type_id": self.document_type['liq_pro_doc'],
+                "l10n_latam_document_number": "{pos_number}-00000066",
+                "journal_id": preprinted_journal,
+                "partner_id": self.res_partner_adhoc,
+                "invoice_user_id": invoice_user_id,
+                "invoice_payment_term_id": payment_term_id,
+                "move_type": "out_invoice",
+                "invoice_date": '2021-03-25',
+                "invoice_line_ids": [
+                    {'product_id': self.service_wo_tax, 'price_unit': 5064.98, 'quantity': 1},
+                    {'product_id': self.service_wo_tax, 'price_unit': 152.08, 'quantity': 1},
+                    {'product_id': self.service_iva_no_gravado, 'price_unit': 10.0, 'quantity': 1},
+                ],
             }
         }
 
@@ -596,8 +620,15 @@ class TestAr(AccountTestInvoicingCommon):
                 invoice_form.invoice_payment_term_id = values['invoice_payment_term_id']
                 if not use_current_date:
                     invoice_form.invoice_date = values['invoice_date']
+                if values.get('journal_id'):
+                    invoice_form.journal_id = values['journal_id']
                 if values.get('invoice_incoterm_id'):
                     invoice_form.invoice_incoterm_id = values['invoice_incoterm_id']
+                if values.get('l10n_latam_document_type_id'):
+                    invoice_form.l10n_latam_document_type_id = values['l10n_latam_document_type_id']
+                if values.get('l10n_latam_document_number'):
+                    invoice_form.l10n_latam_document_number = values['l10n_latam_document_number'].format(pos_number=self.journal.l10n_ar_afip_pos_number)
+
                 for line in values['invoice_line_ids']:
                     with invoice_form.invoice_line_ids.new() as line_form:
                         line_form.product_id = line.get('product_id')
