@@ -6,7 +6,7 @@ class AccountJournal(models.Model):
     _inherit = 'account.journal'
 
     l10n_latam_use_checkbooks = fields.Boolean(
-        string='Use checkbooks?',
+        string='Use checkbooks',
         copy=False,
         help="Check this option if you want to have a checkbook control and/or need to use deferred checks.\n"
         "This option disables the printing functionality."
