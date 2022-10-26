@@ -65,10 +65,8 @@ class AccountPaymentRegister(models.TransientModel):
         new_third_party_checks = self.filtered(lambda x: x.payment_method_line_id.code == 'new_third_party_checks')
         (self - new_third_party_checks).update({'l10n_latam_check_bank_id': False, 'l10n_latam_check_issuer_vat': False})
         for rec in new_third_party_checks:
-            rec.update({
-                'l10n_latam_check_bank_id': rec.partner_id.bank_ids and rec.partner_id.bank_ids[0].bank_id or False,
-                'l10n_latam_check_issuer_vat': rec.partner_id.vat,
-            })
+            rec.l10n_latam_check_bank_id = rec.partner_id.bank_ids[:1].bank_id
+            rec.l10n_latam_check_issuer_vat = rec.partner_id.vat
 
     @api.onchange('l10n_latam_check_id')
     def _onchange_amount(self):
