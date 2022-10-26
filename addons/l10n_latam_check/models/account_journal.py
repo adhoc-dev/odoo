@@ -22,7 +22,7 @@ class AccountJournal(models.Model):
         """ Protect from setting check_manual_sequencing (Manual Numbering) + checkbooks for these reasons
         * Printing checks on checkbooks is not implemented and using a "check printing" option together with checkbooks is confusing
         * The next check number field shown when choosing "Manual Numbering" don't have any meaning when using checkbooks
-        * Some methods of account_check_printing module behavis differently if "Manual Numbering" is configured
+        * Some methods of account_check_printing module behave differently if "Manual Numbering" is configured
         """
         recs = self.filtered(
             lambda x: x.check_manual_sequencing and x.l10n_latam_use_checkbooks)
