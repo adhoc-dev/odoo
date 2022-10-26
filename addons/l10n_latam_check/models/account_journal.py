@@ -29,4 +29,4 @@ class AccountJournal(models.Model):
         if recs:
             raise UserError(_(
                 "Checkbooks can't be used together with check manual sequencing (check printing functionality), "
-                "please choose one or the other. Journal ids: %s", recs.ids))
+                "please choose one or the other. Journal ids: %s", ",".join(recs.mapped("name"))))
