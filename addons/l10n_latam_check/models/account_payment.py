@@ -1,9 +1,11 @@
+import logging
 import stdnum
+
 from odoo import fields, models, _, api
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools.misc import format_date
 from odoo.osv import expression
-import logging
+from odoo.tools.misc import format_date
+
 _logger = logging.getLogger(__name__)
 
 
