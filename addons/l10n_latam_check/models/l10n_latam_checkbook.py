@@ -26,6 +26,7 @@ class L10nLatamCheckbook(models.Model):
         string='Check type',
         default='deferred',
         required=True,
+        helper="* Current checkbook: checks that can be collected from the date that is created (no Check Payment Date needed)\n* Deferred: checks that can be collected on or after the Check Payment Date\n* Electronic: can be both, and it will depend on the check payment date > if check payment date = today() is current if check payment date > today() deferred"
     )
     journal_id = fields.Many2one(
         comodel_name='account.journal',
