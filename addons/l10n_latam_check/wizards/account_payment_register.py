@@ -34,7 +34,7 @@ class AccountPaymentRegister(models.TransientModel):
         readonly=False,
     )
     l10n_latam_check_payment_date = fields.Date(
-        string='Check Payment Date',
+        string='Cash-In Date', help="Date from when you can cash in the check, turn the check into cash",
     )
 
     @api.depends('payment_method_line_id.code', 'journal_id.l10n_latam_use_checkbooks')

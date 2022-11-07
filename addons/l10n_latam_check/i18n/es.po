@@ -155,7 +155,7 @@ msgstr "Operaciones del Cheque"
 #: model:ir.model.fields,field_description:l10n_latam_check.field_account_payment__l10n_latam_check_payment_date
 #: model:ir.model.fields,field_description:l10n_latam_check.field_account_payment_register__l10n_latam_check_payment_date
 #: model_terms:ir.ui.view,arch_db:l10n_latam_check.view_account_payment_search
-msgid "Check Payment Date"
+msgid "Cash-In Date"
 msgstr "Fecha de Pago del Cheque"
 
 #. module: l10n_latam_check

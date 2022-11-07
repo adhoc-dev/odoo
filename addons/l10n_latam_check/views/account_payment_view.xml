@@ -32,7 +32,7 @@
                     context="{'group_by': 'l10n_latam_check_current_journal_id'}"/>
             </filter>
             <filter name="groupby_date" position="after">
-                <filter string="Check Payment Date"
+                <filter string="Cash-In Date"
                     name="groupby_l10n_latam_check_payment_date"
                     context="{'group_by': 'l10n_latam_check_payment_date'}"/>
             </filter>
