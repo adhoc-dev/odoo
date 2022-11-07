@@ -24,6 +24,10 @@ class TestThirdChecks(L10nLatamCheckTest):
         return payment
 
     def test_01_get_paid_with_multiple_checks(self):
+        """ This a generic test to check that we are able to paid with checks
+
+        We paid directly with multiple checks insteaf of one just check, just to ensure the create multi
+        is properly working (we have a bug before because it was failing) """
         vals_list = [{
             'partner_id': self.partner_a.id,
             'amount': '00000001',
