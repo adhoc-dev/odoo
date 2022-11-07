@@ -54,6 +54,8 @@ class AccountPayment(models.Model):
         readonly=True, states={'draft': [('readonly', False)]},
     )
     # Check book
+
+    # This is a technical field for the view only
     l10n_latam_use_checkbooks = fields.Boolean(
         related='journal_id.l10n_latam_use_checkbooks',
     )
