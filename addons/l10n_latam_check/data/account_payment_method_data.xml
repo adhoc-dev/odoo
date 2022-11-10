@@ -9,13 +9,13 @@
     </record>
 
     <record id="account_payment_method_in_third_party_checks" model="account.payment.method">
-        <field name="name">Third party checks</field>
+        <field name="name">Existing Third party checks</field>
         <field name="code">in_third_party_checks</field>
         <field name="payment_type">inbound</field>
     </record>
 
     <record id="account_payment_method_out_third_party_checks" model="account.payment.method">
-        <field name="name">Third party checks</field>
+        <field name="name">Existing Third party checks</field>
         <field name="code">out_third_party_checks</field>
         <field name="payment_type">outbound</field>
     </record>

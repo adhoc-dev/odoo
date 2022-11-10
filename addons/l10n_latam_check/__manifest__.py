@@ -29,7 +29,7 @@ There are 2 main Payment Methods additions:
    * allow the user create a check on the fly from a payment
    * create a third party check from a customer payment
 
-* Third party check:
+* Existing Third party check:
 
    * allow the user to reuse a Third party check already created
    * pay a vendor bill using an existing Third party check
