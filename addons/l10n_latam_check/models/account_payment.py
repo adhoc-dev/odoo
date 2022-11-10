@@ -155,8 +155,8 @@ class AccountPayment(models.Model):
 
     def _get_blocking_l10n_latam_warning_msg(self):
         msgs = []
-        for rec in self:
-            if rec.l10n_latam_check_id and not rec.currency_id.is_zero(rec.l10n_latam_check_id.amount - rec.amount):
+        for rec in self.filtered('l10n_latam_check_id'):
+            if not rec.currency_id.is_zero(rec.l10n_latam_check_id.amount - rec.amount):
                 msgs.append(_(
                     'The amount of the payment (%s) does not match the amount of the selected check (%s). '
                     'Please try to deselect and select check again.', rec.amount, rec.l10n_latam_check_id.amount))
