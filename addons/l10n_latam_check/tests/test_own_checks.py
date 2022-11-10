@@ -40,6 +40,3 @@ class TestOwnChecks(L10nLatamCheckTest):
             payment = payments[i]
             self.assertEqual(payment.state, 'posted', 'Check %s was not created properly' % payment.check_number)
             self.assertTrue(payment.is_move_sent, 'Check %s was not set sent' % payment.check_number)
-            self.assertEqual(
-                payment.l10n_latam_checkbook_id.next_number, check_number + 1,
-                'Next sequence was not updated properly on checkbook %s' % payment.check_number)
