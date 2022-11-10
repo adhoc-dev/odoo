@@ -262,6 +262,11 @@ class AccountPayment(models.Model):
         self.filtered('l10n_latam_use_checkbooks').write({'is_move_sent': True})
         return res
 
+    @api.model
+    def _get_trigger_fields_to_synchronize(self):
+        res = super()._get_trigger_fields_to_synchronize()
+        return res + ('l10n_latam_check_number',)
+
     def _prepare_move_line_default_vals(self, write_off_line_vals=None):
         """ Add check name and operation on liquidity line """
         res = super()._prepare_move_line_default_vals(write_off_line_vals=write_off_line_vals)
