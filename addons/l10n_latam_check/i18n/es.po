@@ -517,8 +517,8 @@ msgstr "Desmarcar enviado no está implementado para cheques que usan chequeras"
 #: model:ir.model.fields,field_description:l10n_latam_check.field_account_journal__l10n_latam_use_checkbooks
 #: model:ir.model.fields,field_description:l10n_latam_check.field_account_payment__l10n_latam_use_checkbooks
 #: model:ir.model.fields,field_description:l10n_latam_check.field_account_payment_register__l10n_latam_use_checkbooks
-msgid "Use checkbooks?"
-msgstr "Usa chequeras?"
+msgid "Use electronic and deferred checks"
+msgstr "Usa cheques electronicos o diferidos"
 
 #. module: l10n_latam_check
 #: model_terms:ir.ui.view,arch_db:l10n_latam_check.view_account_payment_register_form

@@ -6,9 +6,8 @@ class AccountJournal(models.Model):
     _inherit = 'account.journal'
 
     l10n_latam_use_checkbooks = fields.Boolean(
-        string='Use checkbooks',
-        help="Check this option if you want to have a checkbook control and/or need to use deferred checks.\n"
-        "This option disables the printing functionality."
+        string='Use electronic and deferred checks',
+        help="* Printing is disabled\n* You're allowed to put numbers manually\n* New field for payment date (Cash-In Date)"
     )
 
     @api.constrains('l10n_latam_use_checkbooks', 'check_manual_sequencing')
