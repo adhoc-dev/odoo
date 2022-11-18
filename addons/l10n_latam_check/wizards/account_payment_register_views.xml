@@ -7,13 +7,13 @@
         <field name="inherit_id" ref="account.view_account_payment_register_form"/>
         <field name="arch" type="xml">
             <field name="payment_method_line_id" position="after">
-                <field name="l10n_latam_manual_checkbooks" invisible="1"/>
+                <field name="l10n_latam_manual_checks" invisible="1"/>
                 <field name="payment_method_code" invisible="1"/>
                 <field name="l10n_latam_check_number"
                     attrs="{
-                        'invisible': [('payment_method_code', '!=', 'new_third_party_checks'), '|', ('l10n_latam_manual_checkbooks', '=', False), ('payment_method_code', '!=', 'check_printing')],
+                        'invisible': [('payment_method_code', '!=', 'new_third_party_checks'), '|', ('l10n_latam_manual_checks', '=', False), ('payment_method_code', '!=', 'check_printing')],
                         'required': [
-                            '|', '&amp;', ('payment_method_code', '=', 'check_printing'), ('l10n_latam_manual_checkbooks', '!=', False), ('payment_method_code', '=', 'new_third_party_checks'),
+                            '|', '&amp;', ('payment_method_code', '=', 'check_printing'), ('l10n_latam_manual_checks', '!=', False), ('payment_method_code', '=', 'new_third_party_checks'),
                         ]}"/>
 
                 <div class="o_row"
@@ -29,7 +29,7 @@
                                 [('payment_method_code', '=', 'new_third_party_checks'), ('l10n_latam_check_current_journal_id', '=', False), ('state', '=', 'posted')]"
                             options="{'no_create': True}"/>
                         <field name="l10n_latam_check_payment_date"
-                            attrs="{'invisible': [('payment_method_code', '!=', 'new_third_party_checks'), '|', ('l10n_latam_manual_checkbooks', '=', False), ('payment_method_code', '!=', 'check_printing')]}"/>
+                            attrs="{'invisible': [('payment_method_code', '!=', 'new_third_party_checks'), '|', ('l10n_latam_manual_checks', '=', False), ('payment_method_code', '!=', 'check_printing')]}"/>
                         <field name="l10n_latam_check_bank_id" string="Check Bank"
                             attrs="{'invisible': [('payment_method_code', '!=', 'new_third_party_checks')]}"/>
                         <field name="l10n_latam_check_issuer_vat" string="Check Issuer Vat"

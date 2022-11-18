@@ -18,7 +18,7 @@ class L10nLatamCheckTest(AccountTestInvoicingCommon):
 
         cls.bank_journal = cls.company_data_3['default_journal_bank']
         # enable checkbooks on bank journal
-        cls.bank_journal.l10n_latam_manual_checkbooks = True
+        cls.bank_journal.l10n_latam_manual_checks = True
         third_party_checks_journals = cls.env['account.journal'].search([('outbound_payment_method_line_ids.code', '=', 'new_third_party_checks'), ('inbound_payment_method_line_ids.code', '=', 'out_third_party_checks'), ('inbound_payment_method_line_ids.code', '=', 'new_third_party_checks')])
         cls.third_party_check_journal = third_party_checks_journals[0]
         cls.rejected_check_journal = third_party_checks_journals[1]
