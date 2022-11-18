@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-10 13:59+0000\n"
-"PO-Revision-Date: 2022-11-10 13:59+0000\n"
+"POT-Creation-Date: 2022-11-18 16:20+0000\n"
+"PO-Revision-Date: 2022-11-18 16:20+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -19,6 +19,16 @@ msgstr ""
 #: code:addons/l10n_latam_check/models/account_payment.py:0
 #, python-format
 msgid "(Check %s)"
+msgstr ""
+
+#. module: l10n_latam_check
+#: model:ir.model.fields,help:l10n_latam_check.field_account_journal__l10n_latam_manual_checks
+#: model:ir.model.fields,help:l10n_latam_check.field_account_payment__l10n_latam_manual_checks
+#: model:ir.model.fields,help:l10n_latam_check.field_account_payment_register__l10n_latam_manual_checks
+msgid ""
+"* Printing is disabled\n"
+"* You're allowed to put numbers manually\n"
+"* New field for payment date (Check Cash-In Date)"
 msgstr ""
 
 #. module: l10n_latam_check
@@ -53,13 +63,6 @@ msgstr ""
 #. module: l10n_latam_check
 #: model_terms:ir.ui.view,arch_db:l10n_latam_check.view_l10n_latam_payment_mass_transfer_form
 msgid "Cancel"
-msgstr ""
-
-#. module: l10n_latam_check
-#: model:ir.model.fields,field_description:l10n_latam_check.field_account_payment__l10n_latam_check_payment_date
-#: model:ir.model.fields,field_description:l10n_latam_check.field_account_payment_register__l10n_latam_check_payment_date
-#: model_terms:ir.ui.view,arch_db:l10n_latam_check.view_account_payment_search
-msgid "Check Cash-In Date"
 msgstr ""
 
 #. module: l10n_latam_check
@@ -103,6 +106,13 @@ msgid "Check Bank"
 msgstr ""
 
 #. module: l10n_latam_check
+#: model:ir.model.fields,field_description:l10n_latam_check.field_account_payment__l10n_latam_check_payment_date
+#: model:ir.model.fields,field_description:l10n_latam_check.field_account_payment_register__l10n_latam_check_payment_date
+#: model_terms:ir.ui.view,arch_db:l10n_latam_check.view_account_payment_search
+msgid "Check Cash-In Date"
+msgstr ""
+
+#. module: l10n_latam_check
 #: model:ir.model.fields,field_description:l10n_latam_check.field_account_payment__l10n_latam_check_current_journal_id
 #: model_terms:ir.ui.view,arch_db:l10n_latam_check.view_account_payment_form_inherited
 msgid "Check Current Journal"
@@ -136,15 +146,6 @@ msgstr ""
 #. module: l10n_latam_check
 #: model:ir.actions.act_window,name:l10n_latam_check.action_view_l10n_latam_payment_mass_transfer
 msgid "Check Transfer"
-msgstr ""
-
-#. module: l10n_latam_check
-#: model:ir.model.fields,help:l10n_latam_check.field_account_journal__l10n_latam_manual_checkbooks
-#: model:ir.model.fields,help:l10n_latam_check.field_account_payment__l10n_latam_manual_checkbooks
-#: model:ir.model.fields,help:l10n_latam_check.field_account_payment_register__l10n_latam_manual_checkbooks
-msgid ""
-"Check this option if you want to have a checkbook control and/or need to use deferred checks.\n"
-"This option disables the printing functionality."
 msgstr ""
 
 #. module: l10n_latam_check
@@ -232,7 +233,7 @@ msgstr ""
 #. module: l10n_latam_check
 #: model:account.payment.method,name:l10n_latam_check.account_payment_method_in_third_party_checks
 #: model:account.payment.method,name:l10n_latam_check.account_payment_method_out_third_party_checks
-msgid "Existing Third party checks"
+msgid "Existing Third Party Checks"
 msgstr ""
 
 #. module: l10n_latam_check
@@ -287,7 +288,7 @@ msgstr ""
 
 #. module: l10n_latam_check
 #: model:account.payment.method,name:l10n_latam_check.account_payment_method_new_third_party_checks
-msgid "New Third party checks"
+msgid "New Third Party Checks"
 msgstr ""
 
 #. module: l10n_latam_check
@@ -307,7 +308,6 @@ msgstr ""
 
 #. module: l10n_latam_check
 #: model:ir.model.fields,field_description:l10n_latam_check.field_l10n_latam_payment_mass_transfer__payment_date
-#: model_terms:ir.ui.view,arch_db:l10n_latam_check.view_account_own_check_tree
 msgid "Payment Date"
 msgstr ""
 
@@ -331,7 +331,7 @@ msgstr ""
 #. module: l10n_latam_check
 #: code:addons/l10n_latam_check/models/account_chart_template.py:0
 #, python-format
-msgid "Rejected Third party checks"
+msgid "Rejected Third Party Checks"
 msgstr ""
 
 #. module: l10n_latam_check
@@ -364,16 +364,16 @@ msgid ""
 msgstr ""
 
 #. module: l10n_latam_check
-#: model_terms:ir.ui.view,arch_db:l10n_latam_check.view_account_payment_search
-msgid "Third party check Current Journal"
-msgstr ""
-
-#. module: l10n_latam_check
 #: code:addons/l10n_latam_check/models/account_chart_template.py:0
 #: model:ir.actions.act_window,name:l10n_latam_check.action_third_party_check
 #: model:ir.ui.menu,name:l10n_latam_check.menu_third_party_check
 #, python-format
-msgid "Third party checks"
+msgid "Third Party Checks"
+msgstr ""
+
+#. module: l10n_latam_check
+#: model_terms:ir.ui.view,arch_db:l10n_latam_check.view_account_payment_search
+msgid "Third party check Current Journal"
 msgstr ""
 
 #. module: l10n_latam_check
@@ -383,10 +383,10 @@ msgid "Unmark sent is not implemented for checks that use checkbooks"
 msgstr ""
 
 #. module: l10n_latam_check
-#: model:ir.model.fields,field_description:l10n_latam_check.field_account_journal__l10n_latam_manual_checkbooks
-#: model:ir.model.fields,field_description:l10n_latam_check.field_account_payment__l10n_latam_manual_checkbooks
-#: model:ir.model.fields,field_description:l10n_latam_check.field_account_payment_register__l10n_latam_manual_checkbooks
-msgid "Use checkbooks"
+#: model:ir.model.fields,field_description:l10n_latam_check.field_account_journal__l10n_latam_manual_checks
+#: model:ir.model.fields,field_description:l10n_latam_check.field_account_payment__l10n_latam_manual_checks
+#: model:ir.model.fields,field_description:l10n_latam_check.field_account_payment_register__l10n_latam_manual_checks
+msgid "Use electronic and deferred checks"
 msgstr ""
 
 #. module: l10n_latam_check
