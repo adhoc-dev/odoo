@@ -57,8 +57,8 @@ class AccountPayment(models.Model):
     # Check book
 
     # This is a technical field for the view only
-    l10n_latam_use_checkbooks = fields.Boolean(
-        related='journal_id.l10n_latam_use_checkbooks',
+    l10n_latam_manual_checkbooks = fields.Boolean(
+        related='journal_id.l10n_latam_manual_checkbooks',
     )  # TODO: should be a computed based on the payment method?
 
     @api.depends('check_number')
@@ -81,14 +81,14 @@ class AccountPayment(models.Model):
         For third party checks don't call super so that number is not cleaned"""
         latam_checks = self.filtered(
             lambda x: x.payment_method_line_id.code == 'new_third_party_checks' or
-            (x.payment_method_line_id.code == 'check_printing' and x.l10n_latam_use_checkbooks))
+            (x.payment_method_line_id.code == 'check_printing' and x.l10n_latam_manual_checkbooks))
         return super(AccountPayment, self - latam_checks)._compute_check_number()
 
     def _inverse_check_number(self):
         """ On third party checks or own checks with checkbooks, avoid calling super because is not needed to write the
         sequence for these use case. """
         avoid_inverse = self.filtered(
-            lambda x: x.l10n_latam_use_checkbooks or x.payment_method_line_id.code == 'new_third_party_checks')
+            lambda x: x.l10n_latam_manual_checkbooks or x.payment_method_line_id.code == 'new_third_party_checks')
         return super(AccountPayment, self - avoid_inverse)._inverse_check_number()
 
     @api.depends('payment_method_line_id.code', 'partner_id')
@@ -119,7 +119,7 @@ class AccountPayment(models.Model):
         """ Compute warning message for latam checks checks """
         self.l10n_latam_check_warning_msg = False
         latam_draft_checks = self.filtered(
-            lambda x: x.state == 'draft' and (x.l10n_latam_use_checkbooks or x.payment_method_line_id.code in [
+            lambda x: x.state == 'draft' and (x.l10n_latam_manual_checkbooks or x.payment_method_line_id.code in [
                 'in_third_party_checks', 'out_third_party_checks', 'new_third_party_checks']))
         for rec in latam_draft_checks:
             msgs = rec._get_blocking_l10n_latam_warning_msg()
@@ -207,11 +207,11 @@ class AccountPayment(models.Model):
             else:
                 rec.l10n_latam_check_current_journal_id = False
 
-    @api.depends('l10n_latam_use_checkbooks')
+    @api.depends('l10n_latam_manual_checkbooks')
     def _compute_show_check_number(self):
         latam_checks = self.filtered(
             lambda x: x.payment_method_line_id.code == 'new_third_party_checks' or
-            (x.payment_method_line_id.code == 'check_printing' and x.l10n_latam_use_checkbooks))
+            (x.payment_method_line_id.code == 'check_printing' and x.l10n_latam_manual_checkbooks))
         latam_checks.show_check_number = False
         super(AccountPayment, self - latam_checks)._compute_show_check_number()
 
@@ -247,7 +247,7 @@ class AccountPayment(models.Model):
     def action_unmark_sent(self):
         """ Unmarking as sent for check with checkbooks would give the option to print and re-number check but
         it's not implemented yet for this kind of checks"""
-        if self.filtered('l10n_latam_use_checkbooks'):
+        if self.filtered('l10n_latam_manual_checkbooks'):
             raise UserError(_('Unmark sent is not implemented for checks that use checkbooks'))
         return super().action_unmark_sent()
 
@@ -259,7 +259,7 @@ class AccountPayment(models.Model):
         res = super().action_post()
 
         # mark own checks that are not printed as sent
-        self.filtered('l10n_latam_use_checkbooks').write({'is_move_sent': True})
+        self.filtered('l10n_latam_manual_checkbooks').write({'is_move_sent': True})
         return res
 
     @api.model
@@ -270,7 +270,7 @@ class AccountPayment(models.Model):
     def _prepare_move_line_default_vals(self, write_off_line_vals=None):
         """ Add check name and operation on liquidity line """
         res = super()._prepare_move_line_default_vals(write_off_line_vals=write_off_line_vals)
-        check = self if (self.payment_method_line_id.code == 'new_third_party_checks' or self.l10n_latam_use_checkbooks) \
+        check = self if (self.payment_method_line_id.code == 'new_third_party_checks' or self.l10n_latam_manual_checkbooks) \
             else self.l10n_latam_check_id
         if check:
             document_name = (_('Check %s received') if self.payment_type == 'inbound' else _('Check %s delivered')) % (

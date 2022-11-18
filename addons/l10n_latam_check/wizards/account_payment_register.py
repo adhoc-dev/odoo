@@ -20,8 +20,8 @@ class AccountPaymentRegister(models.TransientModel):
     l10n_latam_check_number = fields.Char(
         string="Check Number",
     )
-    l10n_latam_use_checkbooks = fields.Boolean(
-        related='journal_id.l10n_latam_use_checkbooks',
+    l10n_latam_manual_checkbooks = fields.Boolean(
+        related='journal_id.l10n_latam_manual_checkbooks',
     )
     l10n_latam_check_payment_date = fields.Date(
         string='Check Cash-In Date', help="Date from when you can cash in the check, turn the check into cash",
