@@ -14,7 +14,7 @@ Extends 'Check Printing Base' module to manage own checks with more features:
 * allow to use deferred or electronic checks
   * printing is disabled
   * check number is set manually by the user
-* add an optional "payment date" for post-dated checks (deferred payments)
+* add an optional "Check Cash-In Date" for post-dated checks (deferred payments)
 * add a menu to track own checks
 
 Third Party Checks Management
