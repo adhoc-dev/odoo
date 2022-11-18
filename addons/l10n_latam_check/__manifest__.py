@@ -12,7 +12,7 @@ Extends 'Check Printing Base' module to manage own checks with more features:
 
 * allow using own checks that are not printed but filled manually by the user
 * allow to use deferred or electronic checks
-  * printing is disable
+  * printing is disabled
   * check number is set manually by the user
 * add an optional "payment date" for post-dated checks (deferred payments)
 * add a menu to track own checks
