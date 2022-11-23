@@ -40,17 +40,6 @@ class AccountPaymentRegister(models.TransientModel):
         for rec in self.filtered('l10n_latam_check_id'):
             rec.amount = rec.l10n_latam_check_id.amount
 
-    def _create_payment_vals_from_wizard(self, batch_result):
-        vals = super()._create_payment_vals_from_wizard(batch_result)
-        vals.update({
-            'l10n_latam_check_id': self.l10n_latam_check_id.id,
-            'l10n_latam_check_bank_id': self.l10n_latam_check_bank_id.id,
-            'l10n_latam_check_issuer_vat': self.l10n_latam_check_issuer_vat,
-            'check_number': self.l10n_latam_check_number,
-            'l10n_latam_check_payment_date': self.l10n_latam_check_payment_date,
-        })
-        return vals
-
     @api.onchange('l10n_latam_check_number')
     def _onchange_l10n_latam_check_number(self):
         for rec in self.filtered(lambda x: x.journal_id.company_id.country_id.code == "AR" and x.l10n_latam_check_number
@@ -61,3 +50,14 @@ class AccountPaymentRegister(models.TransientModel):
     def _onchange_to_reset_check_ids(self):
         """ If any of this fields changes the domain of the selectable checks could change """
         self.l10n_latam_check_id = False
+
+    def _create_payment_vals_from_wizard(self, batch_result):
+        vals = super()._create_payment_vals_from_wizard(batch_result)
+        vals.update({
+            'l10n_latam_check_id': self.l10n_latam_check_id.id,
+            'l10n_latam_check_bank_id': self.l10n_latam_check_bank_id.id,
+            'l10n_latam_check_issuer_vat': self.l10n_latam_check_issuer_vat,
+            'check_number': self.l10n_latam_check_number,
+            'l10n_latam_check_payment_date': self.l10n_latam_check_payment_date,
+        })
+        return vals
