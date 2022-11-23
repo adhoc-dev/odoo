@@ -12,7 +12,7 @@ class AccountChartTemplate(models.Model):
     def _get_third_party_checks_country_codes(self):
         """ Return the list of country codes for the countries where third party checks journals should be created
         when installing the COA"""
-        return ["AR"]
+        return []
 
     def _create_bank_journals(self, company, acc_template_ref):
         res = super()._create_bank_journals(company, acc_template_ref)
