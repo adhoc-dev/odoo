@@ -327,17 +327,21 @@ class AccountPayment(models.Model):
         2. On the paired transfer set the l10n_latam_check_id field, this field is needed for the
         l10n_latam_check_operation_ids and also for some warnings and constrains.
         """
-        for rec in self.filtered(
-            lambda x: x.payment_method_line_id.code in ['in_third_party_checks', 'out_third_party_checks']):
+        third_party_checks = self.filtered(lambda x: x.payment_method_line_id.code in [
+            'in_third_party_checks',
+            'out_third_party_checks'
+        ])
+        for rec in third_party_checks:
             dest_payment_method_code = 'in_third_party_checks' if rec.payment_type == 'outbound' else 'out_third_party_checks'
             dest_payment_method = rec.destination_journal_id.inbound_payment_method_line_ids.filtered(
                 lambda x: x.code == dest_payment_method_code)
             if dest_payment_method:
                 super(AccountPayment, rec.with_context(
                     default_payment_method_line_id=dest_payment_method.id,
-                    default_l10n_latam_check_id=rec.l10n_latam_check_id))._create_paired_internal_transfer_payment()
+                    default_l10n_latam_check_id=rec.l10n_latam_check_id,
+                ))._create_paired_internal_transfer_payment()
             else:
                 super(AccountPayment, rec.with_context(
-                    default_l10n_latam_check_id=rec.l10n_latam_check_id))._create_paired_internal_transfer_payment()
-            self -= rec
-        super(AccountPayment, self)._create_paired_internal_transfer_payment()
+                    default_l10n_latam_check_id=rec.l10n_latam_check_id,
+                ))._create_paired_internal_transfer_payment()
+        super(AccountPayment, self - third_party_checks)._create_paired_internal_transfer_payment()
