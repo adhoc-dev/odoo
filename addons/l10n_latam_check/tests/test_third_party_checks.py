@@ -63,7 +63,7 @@ class TestThirdChecks(L10nLatamCheckTest):
         }
         delivery = self.env['account.payment'].create(vals)
         delivery.action_post()
-        self.assertEqual(delivery.state, 'posted', 'Check %s was not delivery properly' % check.check_number)
+        self.assertEqual(delivery.state, 'posted', 'Check %s was not delivered properly' % check.check_number)
         self.assertFalse(check.l10n_latam_check_current_journal_id, 'Current journal was not computed properly on delivery')
         # check dont delivery twice
         with self.assertRaises(ValidationError), self.cr.savepoint():
@@ -105,7 +105,7 @@ class TestThirdChecks(L10nLatamCheckTest):
 
         operations = self.env['account.payment'].search([('l10n_latam_check_id', '=', check.id), ('state', '=', 'posted')], order="date desc, id desc")
         self.assertEqual(len(operations), 3, 'There should be 3 operations on the check')
-        self.assertEqual(operations[0], customer_return, 'Las operation should be customer return')
+        self.assertEqual(operations[0], customer_return, 'Last operation should be customer return')
         self.assertEqual(operations[1], supplier_return, 'Previous operation should be supplier return')
         self.assertEqual(operations[2], delivery, 'First operation should be customer delivery')
 
