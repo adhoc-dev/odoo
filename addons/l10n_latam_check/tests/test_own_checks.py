@@ -8,8 +8,8 @@ from odoo.tests.common import tagged
 class TestOwnChecks(L10nLatamCheckTest):
 
     def test_01_pay_with_multiple_checks(self):
-        """ Create one check with each checkbook, first check should choose deferred check by default. On current
-        check force a different number than next one"""
+        """ Create one chec first check should choose deferred check by default. On current check force a different
+        number than next one """
         vals_list = [{
             'ref': 'Deferred check',
             'partner_id': self.partner_a.id,

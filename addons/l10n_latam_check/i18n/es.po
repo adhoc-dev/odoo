@@ -156,14 +156,6 @@ msgid "Check Transfer"
 msgstr "Transferir Cheque"
 
 #. module: l10n_latam_check
-#: code:addons/l10n_latam_check/models/account_journal.py:0
-#, python-format
-msgid ""
-"Checkbooks can't be used together with check manual sequencing (check "
-"printing functionality), please choose one or the other. Journal ids: %s"
-msgstr ""
-
-#. module: l10n_latam_check
 #: model_terms:ir.ui.view,arch_db:l10n_latam_check.view_account_journal_tree
 msgid "Checks Management"
 msgstr "Manejo de Cheques"
@@ -294,6 +286,14 @@ msgstr "Última Actualización por"
 #: model:ir.model.fields,field_description:l10n_latam_check.field_l10n_latam_payment_mass_transfer__write_date
 msgid "Last Updated on"
 msgstr "Última Actualización el"
+
+#. module: l10n_latam_check
+#: code:addons/l10n_latam_check/models/account_journal.py:0
+#, python-format
+msgid ""
+"Manual checks (electronic/deferred) can't be used together with check manual sequencing (check "
+"printing functionality), please choose one or the other. Journal ids: %s"
+msgstr ""
 
 #. module: l10n_latam_check
 #: model:ir.model.fields,field_description:l10n_latam_check.field_l10n_latam_payment_mass_transfer__communication

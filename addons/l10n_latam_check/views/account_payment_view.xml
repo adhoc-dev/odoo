@@ -67,7 +67,6 @@
                 />
             </field>
             <field name="payment_method_line_id" position="after">
-                <!-- Checkbooks -->
                 <field name="l10n_latam_manual_checks" invisible="1"/>
                 <field name="l10n_latam_check_number"
                     string='Check Number'

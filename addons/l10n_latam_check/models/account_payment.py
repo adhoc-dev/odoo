@@ -78,16 +78,15 @@ class AccountPayment(models.Model):
 
     def _compute_check_number(self):
         """ Override from account_check_printing.
-        For own checks with checkbooks get next number from the checkbook
-        For third party checks don't call super so that number is not cleaned"""
+        For electronic/deferred own checks or third party checks, don't call super so that number is not cleaned """
         latam_checks = self.filtered(
             lambda x: x.payment_method_line_id.code == 'new_third_party_checks' or
             (x.payment_method_line_id.code == 'check_printing' and x.l10n_latam_manual_checks))
         return super(AccountPayment, self - latam_checks)._compute_check_number()
 
     def _inverse_check_number(self):
-        """ On third party checks or own checks with checkbooks, avoid calling super because is not needed to write the
-        sequence for these use case. """
+        """ On third party checks or electronic/deferred own checks, avoid calling super because is not needed to write
+        the sequence for these use case. """
         avoid_inverse = self.filtered(
             lambda x: x.l10n_latam_manual_checks or x.payment_method_line_id.code == 'new_third_party_checks')
         return super(AccountPayment, self - avoid_inverse)._inverse_check_number()
@@ -246,7 +245,7 @@ class AccountPayment(models.Model):
         return res
 
     def action_unmark_sent(self):
-        """ Unmarking as sent for check with checkbooks would give the option to print and re-number check but
+        """ Unmarking as sent for electronic/deferred check would give the option to print and re-number check but
         it's not implemented yet for this kind of checks"""
         if self.filtered('l10n_latam_manual_checks'):
             raise UserError(_('Unmark sent is not implemented for electronic or deferred checks'))
