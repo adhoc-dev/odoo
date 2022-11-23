@@ -401,9 +401,9 @@ msgstr "Actual Diario de Cheques de Terceros"
 #. module: l10n_latam_check
 #: code:addons/l10n_latam_check/models/account_payment.py:0
 #, python-format
-msgid "Unmark sent is not implemented for checks that use checkbooks"
+msgid "Unmark sent is not implemented for electronic or deferred checks"
 msgstr ""
-"Desmarcar enviado no está implementado para cheques que usan chequeras"
+"Desmarcar enviado no está implementado para cheques electronicos y diferidos"
 
 #. module: l10n_latam_check
 #: model:ir.model.fields,field_description:l10n_latam_check.field_account_journal__l10n_latam_manual_checks

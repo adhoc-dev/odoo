@@ -249,7 +249,7 @@ class AccountPayment(models.Model):
         """ Unmarking as sent for check with checkbooks would give the option to print and re-number check but
         it's not implemented yet for this kind of checks"""
         if self.filtered('l10n_latam_manual_checks'):
-            raise UserError(_('Unmark sent is not implemented for checks that use checkbooks'))
+            raise UserError(_('Unmark sent is not implemented for electronic or deferred checks'))
         return super().action_unmark_sent()
 
     def action_post(self):
