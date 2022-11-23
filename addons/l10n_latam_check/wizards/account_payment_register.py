@@ -48,7 +48,7 @@ class AccountPaymentRegister(models.TransientModel):
 
     @api.onchange('payment_method_line_id', 'journal_id')
     def _onchange_to_reset_check_ids(self):
-        """ If any of this fields changes the domain of the selectable checks could change """
+        # If any of these fields change, the domain of the selectable checks could change
         self.l10n_latam_check_id = False
 
     def _create_payment_vals_from_wizard(self, batch_result):
