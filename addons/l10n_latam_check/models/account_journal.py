@@ -7,7 +7,9 @@ class AccountJournal(models.Model):
 
     l10n_latam_manual_checks = fields.Boolean(
         string='Use electronic and deferred checks',
-        help="* Printing is disabled\n* You're allowed to put numbers manually\n* New field for payment date (Check Cash-In Date)"
+        help="* Allows putting numbers manually\n"
+             "* Enables Check Cash-In Date feature\n"
+             "* Disables printing"
     )
 
     @api.constrains('l10n_latam_manual_checks', 'check_manual_sequencing')
