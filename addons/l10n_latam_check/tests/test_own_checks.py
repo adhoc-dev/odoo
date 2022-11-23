@@ -21,8 +21,7 @@ class TestOwnChecks(L10nLatamCheckTest):
         }]
         payment = self.env['account.payment'].create(vals_list)
         payment.action_post()
-        self.assertTrue(payment, 'Checks where not created properly')
         self.assertRecordValues(payment, [{
             'state': 'posted',
             'is_move_sent': True,
-        }])
+        }], 'Checks where not created properly')
