@@ -22,3 +22,6 @@ class L10nLatamCheckTest(AccountTestInvoicingCommon):
         third_party_checks_journals = cls.env['account.journal'].search([('outbound_payment_method_line_ids.code', '=', 'new_third_party_checks'), ('inbound_payment_method_line_ids.code', '=', 'out_third_party_checks'), ('inbound_payment_method_line_ids.code', '=', 'new_third_party_checks')])
         cls.third_party_check_journal = third_party_checks_journals[0]
         cls.rejected_check_journal = third_party_checks_journals[1]
+
+        cls.assertTrue(cls.third_party_check_journal, 'Third party check journal was not created so we can run the tests')
+        cls.assertTrue(cls.rejected_check_journal, 'Rejected check journal was not created so we can run the tests')
