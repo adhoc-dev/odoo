@@ -240,7 +240,7 @@ class AccountPayment(models.Model):
             rec.l10n_latam_check_number = '%08d' % int(rec.l10n_latam_check_number)
 
     def _get_payment_method_codes_to_exclude(self):
-        res = super(AccountPayment, self)._get_payment_method_codes_to_exclude()
+        res = super()._get_payment_method_codes_to_exclude()
         if self.is_internal_transfer:
             res.append('new_third_party_checks')
         return res
