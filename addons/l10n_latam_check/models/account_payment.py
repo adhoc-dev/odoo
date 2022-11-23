@@ -11,6 +11,7 @@ _logger = logging.getLogger(__name__)
 
 class AccountPayment(models.Model):
     _inherit = 'account.payment'
+    _rec_names_search = ['name', 'check_number']
 
     # Third party check operation links
     l10n_latam_check_id = fields.Many2one(
@@ -287,17 +288,6 @@ class AccountPayment(models.Model):
             if rec.check_number and rec.payment_method_line_id.code == 'new_third_party_checks':
                 res_names[i] = (res_name[0], "%s %s" % (res_name[1], _("(Check %s)", rec.check_number)))
         return res_names
-
-    @api.model
-    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
-        """ Allow to search by check_number """
-        args = args or []
-        if operator == 'ilike' and not (name or '').strip():
-            domain = []
-        else:
-            connector = '&' if operator in expression.NEGATIVE_TERM_OPERATORS else '|'
-            domain = [connector, ('check_number', operator, name), ('name', operator, name)]
-        return self._search(expression.AND([domain, args]), limit=limit, access_rights_uid=name_get_uid)
 
     def button_open_check_operations(self):
         ''' Redirect the user to the invoice(s) paid by this payment.
