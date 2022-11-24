@@ -26,17 +26,19 @@ There are 2 main Payment Methods additions:
 
 * New Third Party Checks:
 
-   * allow the user create a check on the fly from a payment
-   * create a third party check from a customer payment
+  * Payments of this payment method represent the check you get from a customer when getting paid (from an invoice or a manual payment)
 
-* Existing Third party check:
+* Existing Third Party check.
 
-   * allow the user to reuse a Third party check already created
-   * pay a vendor bill using an existing Third party check
-   * move an existing checks between journals (i.e. move to Rejected)
-   * Send/Receive again a check already used in a Vendor Bill/Customer INV
-   * allow the user to do mass check transfers
+  * Payments of this payment method are to track moves of the check, for eg:
 
+    * Use a check to pay a vendor
+    * Deposit the check on the bank
+    * Get the check back from the bank (rejection)
+    * Get the check back from the vendor (a rejection or return)
+    * Transfer the check from one third party check journal to the other (one shop to another)
+
+  * Those operations can be done with multiple checks at once
 """,
     'author': 'ADHOC SA',
     'license': 'LGPL-3',
