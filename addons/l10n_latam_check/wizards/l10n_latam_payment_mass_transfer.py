@@ -41,7 +41,6 @@ class L10nLatamPaymentMassTransfer(models.TransientModel):
             raise UserError(_("All the selected checks must be posted"))
         if len(journal_id) != 1:
             raise UserError(_("All selected checks must be on the same journal"))
-        self.filtered(lambda x: x.payment_method_line_id.code in ['in_third_party_checks', 'out_third_party_checks'])
         if not journal_id.inbound_payment_method_line_ids.filtered(
                 lambda x: x.code == 'in_third_party_checks'):
             raise UserError(_("Checks must be on a third party checks journal to be transfered by this wizard"))
