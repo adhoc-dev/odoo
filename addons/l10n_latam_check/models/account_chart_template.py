@@ -1,8 +1,4 @@
-import logging
-
 from odoo import models, Command, api, _
-
-_logger = logging.getLogger(__name__)
 
 
 class AccountChartTemplate(models.Model):

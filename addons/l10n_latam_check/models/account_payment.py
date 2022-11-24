@@ -1,12 +1,8 @@
-import logging
 import stdnum
 
 from odoo import fields, models, _, api
 from odoo.exceptions import UserError, ValidationError
-from odoo.osv import expression
 from odoo.tools.misc import format_date
-
-_logger = logging.getLogger(__name__)
 
 
 class AccountPayment(models.Model):
