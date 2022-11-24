@@ -360,7 +360,7 @@ msgstr ""
 #: code:addons/l10n_latam_check/wizards/l10n_latam_payment_mass_transfer.py:0
 #, python-format
 msgid ""
-"There is no 'out_third_party_checks' payment method configured on journal %s"
+"There is no 'Existing Third Party Checks' payment method configured on journal %s"
 msgstr ""
 
 #. module: l10n_latam_check
