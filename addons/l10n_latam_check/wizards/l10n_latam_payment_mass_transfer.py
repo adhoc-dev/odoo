@@ -37,8 +37,12 @@ class L10nLatamPaymentMassTransfer(models.TransientModel):
             raise UserError(_("The register payment wizard should only be called on account.payment records."))
         payments = self.env['account.payment'].browse(self._context.get('active_ids', []))
         res['payment_ids'] = payments.ids
+
         checks = payments.filtered(lambda x: x.payment_method_line_id.code == 'new_third_party_checks')
         journal_id = checks.l10n_latam_check_current_journal_id
+        pay_method_line = journal_id._get_available_payment_method_lines('outbound').filtered(
+            lambda x: x.code == 'out_third_party_checks')
+
         if not all(check.state == 'posted' for check in checks):
             raise UserError(_("All the selected checks must be posted"))
         if len(journal_id) != 1:
@@ -46,6 +50,10 @@ class L10nLatamPaymentMassTransfer(models.TransientModel):
         if not journal_id.inbound_payment_method_line_ids.filtered(
                 lambda x: x.code == 'in_third_party_checks'):
             raise UserError(_("Checks must be on a third party checks journal to be transfered by this wizard"))
+        if not pay_method_line:
+            raise UserError(_("There is no 'Existing Third Party Checks' payment method configured on journal %s",
+                            journal_id.name))
+
         res['journal_id'] = journal_id.id
         return res
 
@@ -58,9 +66,6 @@ class L10nLatamPaymentMassTransfer(models.TransientModel):
 
         pay_method_line = self.journal_id._get_available_payment_method_lines('outbound').filtered(
             lambda x: x.code == 'out_third_party_checks')
-        if not pay_method_line:
-            raise UserError(_("There is no 'Existing Third Party Checks' payment method configured on journal %s",
-                            self.journal_id.name))
 
         for check in checks:
             payment_vals_list.append({
