@@ -24,8 +24,9 @@ class L10nLatamPaymentMassTransfer(models.TransientModel):
     communication = fields.Char(
         string="Memo",
     )
-    journal_id = fields.Many2one(
-        comodel_name='account.journal',
+    journal_id = fields.Many2one(related='payment_ids.journal_id')
+    payment_ids = fields.Many2one(
+        'account.payment',
         readonly=False,
     )
 
@@ -35,6 +36,7 @@ class L10nLatamPaymentMassTransfer(models.TransientModel):
         if self._context.get('active_model') != 'account.payment':
             raise UserError(_("The register payment wizard should only be called on account.payment records."))
         payments = self.env['account.payment'].browse(self._context.get('active_ids', []))
+        res['payment_ids'] = payments.ids
         checks = payments.filtered(lambda x: x.payment_method_line_id.code == 'new_third_party_checks')
         journal_id = checks.l10n_latam_check_current_journal_id
         if not all(check.state == 'posted' for check in checks):
@@ -49,8 +51,7 @@ class L10nLatamPaymentMassTransfer(models.TransientModel):
 
     def _create_payments(self):
         self.ensure_one()
-        payments = self.env['account.payment'].browse(self._context.get('active_ids', []))
-        checks = payments.filtered(lambda x: x.payment_method_line_id.code == 'new_third_party_checks')
+        checks = self.payment_ids.filtered(lambda x: x.payment_method_line_id.code == 'new_third_party_checks')
         payment_vals_list = []
 
         pay_method_line = self.journal_id._get_available_payment_method_lines('outbound').filtered(
@@ -72,9 +73,9 @@ class L10nLatamPaymentMassTransfer(models.TransientModel):
                 'payment_method_line_id': pay_method_line.id,
                 'destination_journal_id': self.destination_journal_id.id,
             })
-        payments = self.env['account.payment'].create(payment_vals_list)
-        payments.action_post()
-        return payments
+        self.payment_ids = self.env['account.payment'].create(payment_vals_list)
+        self.payment_ids.action_post()
+        return self.payment_ids
 
     def action_create_payments(self):
         payments = self._create_payments()
