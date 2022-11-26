@@ -50,6 +50,8 @@ class L10nLatamPaymentMassTransfer(models.TransientModel):
         return res
 
     def _create_payments(self):
+        """ This is nedeed because we would like to create a payment of type internal transfer for each check with the
+        counterpart journal and then, when posting a second payment will be created automatically """
         self.ensure_one()
         checks = self.payment_ids.filtered(lambda x: x.payment_method_line_id.code == 'new_third_party_checks')
         payment_vals_list = []
