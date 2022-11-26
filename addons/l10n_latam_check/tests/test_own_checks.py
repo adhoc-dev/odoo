@@ -13,15 +13,14 @@ class TestOwnChecks(L10nLatamCheckTest):
         vals_list = [{
             'ref': 'Deferred check',
             'partner_id': self.partner_a.id,
-            'amount': '00000001',
-            'check_number': '50',
+            'amount': '50',
+            'check_number': '00000001',
             'payment_type': 'outbound',
             'journal_id': self.bank_journal.id,
             'payment_method_line_id': self.bank_journal._get_available_payment_method_lines('outbound').filtered(lambda x: x.code == 'check_printing').id,
         }]
         payment = self.env['account.payment'].create(vals_list)
         payment.action_post()
-        # Checks where not created properly
         self.assertRecordValues(payment, [{
             'state': 'posted',
             'is_move_sent': True,
