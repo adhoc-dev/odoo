@@ -8,10 +8,10 @@
                 <field name="journal_id" invisible="1"/>
                 <field name="company_id" invisible="1"/>
                 <group>
-                    <group name="group1">
+                    <group name="destination_journal_group">
                         <field name="destination_journal_id" options="{'no_open': True, 'no_create': True}" required="1"/>
                     </group>
-                    <group name="group2">
+                    <group name="other_check_info">
                         <field name="payment_date"/>
                         <field name="communication"/>
                     </group>
