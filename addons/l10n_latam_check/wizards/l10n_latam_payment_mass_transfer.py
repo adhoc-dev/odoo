@@ -19,7 +19,6 @@ class L10nLatamPaymentMassTransfer(models.TransientModel):
         domain="[('type', 'in', ('bank', 'cash')), ('company_id', '=', company_id), ('id', '!=', journal_id)]",
     )
     company_id = fields.Many2one(
-        related='journal_id.company_id',
     )
     communication = fields.Char(
         string="Memo",
@@ -53,6 +52,9 @@ class L10nLatamPaymentMassTransfer(models.TransientModel):
             elif not all(check.state == 'posted' for check in checks):
                 raise UserError(_("All the selected checks must be posted"))
             res['check_ids'] = checks.ids
+            if len(checks.mapped("company_id")) != 1:
+                raise UserError(_("All the checks should be the same company"))
+            res['company_id'] = checks.company_id
         return res
 
     def _create_payments(self):
