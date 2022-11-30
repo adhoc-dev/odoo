@@ -13,7 +13,7 @@ class TestOwnChecks(L10nLatamCheckTest):
         vals_list = [{
             'ref': 'Deferred check',
             'partner_id': self.partner_a.id,
-            'amount': '50',
+            'amount': 50,
             'check_number': '00000001',
             'payment_type': 'outbound',
             'journal_id': self.bank_journal.id,

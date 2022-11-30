@@ -13,7 +13,7 @@ class TestThirdChecks(L10nLatamCheckTest):
             journal = self.third_party_check_journal
         vals = {
             'partner_id': self.partner_a.id,
-            'amount': '00000001',
+            'amount': 1,
             'check_number': '00000001',
             'payment_type': 'inbound',
             'journal_id': journal.id,
@@ -29,14 +29,14 @@ class TestThirdChecks(L10nLatamCheckTest):
         is properly working. """
         vals_list = [{
             'partner_id': self.partner_a.id,
-            'amount': '00000001',
+            'amount': 1,
             'check_number': '00000001',
             'payment_type': 'inbound',
             'journal_id': self.third_party_check_journal.id,
             'payment_method_line_id': self.third_party_check_journal._get_available_payment_method_lines('inbound').filtered(lambda x: x.code == 'new_third_party_checks').id,
         }, {
             'partner_id': self.partner_a.id,
-            'amount': '00000002',
+            'amount': 2,
             'check_number': '00000002',
             'payment_type': 'inbound',
             'journal_id': self.third_party_check_journal.id,
@@ -55,7 +55,7 @@ class TestThirdChecks(L10nLatamCheckTest):
         # Check Delivery
         vals = {
             'l10n_latam_check_id': check.id,
-            'amount': '00000001',
+            'amount': 1,
             'partner_id': self.partner_a.id,
             'payment_type': 'outbound',
             'journal_id': self.third_party_check_journal.id,
@@ -72,7 +72,7 @@ class TestThirdChecks(L10nLatamCheckTest):
         # Check Return / Rejection
         vals = {
             'l10n_latam_check_id': check.id,
-            'amount': '00000001',
+            'amount': 1,
             'partner_id': self.partner_a.id,
             'payment_type': 'inbound',
             'journal_id': self.rejected_check_journal.id,
@@ -89,7 +89,7 @@ class TestThirdChecks(L10nLatamCheckTest):
         # Check Claim/Return to customer
         vals = {
             'l10n_latam_check_id': check.id,
-            'amount': '00000001',
+            'amount': 1,
             'partner_id': self.partner_a.id,
             'payment_type': 'outbound',
             'journal_id': self.rejected_check_journal.id,
@@ -127,7 +127,7 @@ class TestThirdChecks(L10nLatamCheckTest):
         # Check Rejection
         vals = {
             'l10n_latam_check_id': check.id,
-            'amount': '00000001',
+            'amount': 1,
             'payment_type': 'inbound',
             'journal_id': self.rejected_check_journal.id,
             'is_internal_transfer': True,
@@ -145,7 +145,7 @@ class TestThirdChecks(L10nLatamCheckTest):
         # Check Claim/Return to customer
         vals = {
             'l10n_latam_check_id': check.id,
-            'amount': '00000001',
+            'amount': 1,
             'partner_id': self.partner_a.id,
             'payment_type': 'outbound',
             'journal_id': self.rejected_check_journal.id,
