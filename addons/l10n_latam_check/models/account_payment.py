@@ -51,12 +51,11 @@ class AccountPayment(models.Model):
         help="Date from when you can cash in the check, turn the check into cash",
         readonly=True, states={'draft': [('readonly', False)]},
     )
-    # Check book
 
     # This is a technical field for the view only
     l10n_latam_manual_checks = fields.Boolean(
         related='journal_id.l10n_latam_manual_checks',
-    )  # TODO: should be a computed based on the payment method?
+    )
 
     @api.depends('check_number')
     def _compute_l10n_latam_check_number(self):
