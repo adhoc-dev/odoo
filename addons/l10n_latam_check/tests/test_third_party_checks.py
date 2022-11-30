@@ -105,10 +105,7 @@ class TestThirdChecks(L10nLatamCheckTest):
 
         operations = self.env['account.payment'].search([('l10n_latam_check_id', '=', check.id), ('state', '=', 'posted')], order="date desc, id desc")
         self.assertEqual(len(operations), 3, 'There should be 3 operations on the check')
-        self.assertEqual(operations, customer_return | supplier_return | delivery,
-                         "0: customer_return - Last operation should be customer return\n"
-                         "1: supplier_return - Previous operation should be supplier return\n"
-                         "2: delivery - First operation should be customer delivery")
+        self.assertEqual(operations, customer_return | supplier_return | delivery)
 
     def test_03_check_deposit(self):
         check = self.create_third_party_check()
