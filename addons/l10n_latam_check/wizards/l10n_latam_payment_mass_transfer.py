@@ -24,11 +24,22 @@ class L10nLatamPaymentMassTransfer(models.TransientModel):
     communication = fields.Char(
         string="Memo",
     )
-    journal_id = fields.Many2one(related='check_ids.journal_id')
+    journal_id = fields.Many2one(compute='_compute_journal')
     check_ids = fields.Many2many(
         'account.payment',
         readonly=False,
     )
+
+    @api.depends('check_ids')
+    def _compute_journal(self):
+        journal = self.check_ids.mapped("l10n_latam_check_current_journal_id")
+        if len(journal) != 1:
+            raise UserError(_("All selected checks must be on the same journal and on hand"))
+        outbound_pay_method_line = journal._get_available_payment_method_lines('outbound').filtered(
+            lambda x: x.code == 'out_third_party_checks')
+        if not outbound_pay_method_line:
+            raise UserError(_("The journal '%s' don't the payment method to transfer checks"))
+        self.journal_id = journal
 
     @api.model
     def default_get(self, fields_list):
