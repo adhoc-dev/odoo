@@ -24,8 +24,8 @@ class L10nLatamPaymentMassTransfer(models.TransientModel):
     communication = fields.Char(
         string="Memo",
     )
-    journal_id = fields.Many2one(related='payment_ids.journal_id')
-    payment_ids = fields.Many2one(
+    journal_id = fields.Many2one(related='check_ids.journal_id')
+    check_ids = fields.Many2many(
         'account.payment',
         readonly=False,
     )
@@ -36,7 +36,7 @@ class L10nLatamPaymentMassTransfer(models.TransientModel):
         if self._context.get('active_model') != 'account.payment':
             raise UserError(_("The register payment wizard should only be called on account.payment records."))
         payments = self.env['account.payment'].browse(self._context.get('active_ids', []))
-        res['payment_ids'] = payments.ids
+        res['check_ids'] = payments.ids
 
         checks = payments.filtered(lambda x: x.payment_method_line_id.code == 'new_third_party_checks')
         journal_id = checks.l10n_latam_check_current_journal_id
@@ -61,7 +61,7 @@ class L10nLatamPaymentMassTransfer(models.TransientModel):
         """ This is nedeed because we would like to create a payment of type internal transfer for each check with the
         counterpart journal and then, when posting a second payment will be created automatically """
         self.ensure_one()
-        checks = self.payment_ids.filtered(lambda x: x.payment_method_line_id.code == 'new_third_party_checks')
+        checks = self.check_ids.filtered(lambda x: x.payment_method_line_id.code == 'new_third_party_checks')
         payment_vals_list = []
 
         pay_method_line = self.journal_id._get_available_payment_method_lines('outbound').filtered(
