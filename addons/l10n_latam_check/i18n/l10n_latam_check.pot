@@ -239,7 +239,7 @@ msgstr ""
 msgid ""
 "It seems you're trying to move a check with a date (%s) prior to last "
 "operation done with the check (%s). This may be wrong, please double check "
-"it. If continue, the last operation on the check will remain being %s"
+"it. By continue, the last operation on the check will remain being %s"
 msgstr ""
 
 #. module: l10n_latam_check
@@ -345,7 +345,7 @@ msgstr ""
 #, python-format
 msgid ""
 "The amount of the payment (%s) does not match the amount of the selected "
-"check (%s). Please try to deselect and select check again."
+"check (%s). Please try to deselect and select the check again."
 msgstr ""
 
 #. module: l10n_latam_check

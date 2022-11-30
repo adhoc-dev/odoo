@@ -136,7 +136,7 @@ class AccountPayment(models.Model):
                 if last_operation and last_operation[0].date > date:
                     msgs.append(_(
                         "It seems you're trying to move a check with a date (%s) prior to last operation done with "
-                        "the check (%s). This may be wrong, please double check it. If continue, the last operation on "
+                        "the check (%s). This may be wrong, please double check it. By continue, the last operation on "
                         "the check will remain being %s",
                         format_date(self.env, date), last_operation.display_name, last_operation.display_name))
             # new third party check
@@ -161,7 +161,7 @@ class AccountPayment(models.Model):
             if not rec.currency_id.is_zero(rec.l10n_latam_check_id.amount - rec.amount):
                 msgs.append(_(
                     'The amount of the payment (%s) does not match the amount of the selected check (%s). '
-                    'Please try to deselect and select check again.', rec.amount, rec.l10n_latam_check_id.amount))
+                    'Please try to deselect and select the check again.', rec.amount, rec.l10n_latam_check_id.amount))
             if rec.payment_method_line_id.code in ['in_third_party_checks', 'out_third_party_checks']:
                 if rec.l10n_latam_check_id.state != 'posted':
                     msgs.append(_('Selected check "%s" is not posted', rec.l10n_latam_check_id.display_name))
