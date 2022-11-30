@@ -36,7 +36,5 @@
         <field name="res_model">l10n_latam.payment.mass.transfer</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
-        <field name="binding_model_id" ref="account.model_account_payment"/>
-        <field name="binding_view_types">list,form</field>
     </record>
 </odoo>

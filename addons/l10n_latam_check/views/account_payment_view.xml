@@ -192,6 +192,11 @@
             <tree position="attributes">
                 <attribute name="create">false</attribute>
             </tree>
+            <tree position="inside">
+                <header>
+                    <button name="%(action_view_l10n_latam_payment_mass_transfer)d" type="action" string="Check Transfer" groups="account.group_account_user"/>
+                </header>
+            </tree>
         </field>
     </record>
 
