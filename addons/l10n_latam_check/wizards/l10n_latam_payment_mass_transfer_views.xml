@@ -5,6 +5,7 @@
         <field name="model">l10n_latam.payment.mass.transfer</field>
         <field name="arch" type="xml">
             <form>
+                <field name="check_ids" invisible="1"/>
                 <field name="journal_id" invisible="1"/>
                 <field name="company_id" invisible="1"/>
                 <group>

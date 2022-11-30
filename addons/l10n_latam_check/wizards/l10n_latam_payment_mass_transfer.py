@@ -26,7 +26,6 @@ class L10nLatamPaymentMassTransfer(models.TransientModel):
     journal_id = fields.Many2one(compute='_compute_journal')
     check_ids = fields.Many2many(
         'account.payment',
-        readonly=False,
     )
 
     @api.depends('check_ids')
