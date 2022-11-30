@@ -80,9 +80,9 @@ class L10nLatamPaymentMassTransfer(models.TransientModel):
                 'payment_method_line_id': pay_method_line.id,
                 'destination_journal_id': self.destination_journal_id.id,
             })
-        self.payment_ids = self.env['account.payment'].create(payment_vals_list)
-        self.payment_ids.action_post()
-        return self.payment_ids
+        payments = self.env['account.payment'].create(payment_vals_list)
+        payments.action_post()
+        return payments
 
     def action_create_payments(self):
         payments = self._create_payments()
