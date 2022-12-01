@@ -157,7 +157,7 @@ class TestThirdChecks(L10nLatamCheckTest):
             self.env['account.payment'].create(vals).action_post()
 
         operations = self.env['account.payment'].search([('l10n_latam_check_id', '=', check.id), ('state', '=', 'posted')], order="date desc, id desc")
-        self.assertEqual(len(operations), 5, 'There should be 3 operations on the check')
+        self.assertEqual(len(operations), 5, 'There should be 5 operations on the check')
         self.assertEqual(operations[0], customer_return, 'Last operation should be customer return')
         self.assertEqual(operations[2], bank_rejection, 'Previous operation should be supplier return')
         self.assertEqual(operations[4], deposit, 'First operation should be customer delivery')
