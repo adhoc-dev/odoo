@@ -41,7 +41,9 @@ class L10nLatamPaymentMassTransfer(models.TransientModel):
         outbound_pay_method_line = journal._get_available_payment_method_lines('outbound').filtered(
             lambda x: x.code == 'out_third_party_checks')
         if not outbound_pay_method_line:
-            raise UserError(_("The journal '%s' don't the payment method to transfer checks"))
+            raise UserError(_(
+                "The journal '%s' don't have the payment method to transfer checks. Please add 'Existing Third Party "
+                "Checks' as an outbound payment method."))
         self.journal_id = journal
         self.company_id = journal.company_id.id
 
