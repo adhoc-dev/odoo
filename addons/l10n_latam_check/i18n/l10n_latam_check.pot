@@ -159,14 +159,6 @@ msgid "Checks Mass Transfers"
 msgstr ""
 
 #. module: l10n_latam_check
-#: code:addons/l10n_latam_check/wizards/l10n_latam_payment_mass_transfer.py:0
-#, python-format
-msgid ""
-"Checks must be on a third party checks journal to be transfered by this "
-"wizard"
-msgstr ""
-
-#. module: l10n_latam_check
 #: model_terms:ir.ui.view,arch_db:l10n_latam_check.view_account_payment_search
 msgid "Checks on hand"
 msgstr ""
