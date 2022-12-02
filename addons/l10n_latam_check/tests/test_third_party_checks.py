@@ -117,7 +117,8 @@ class TestThirdChecks(L10nLatamCheckTest):
         self.assertEqual(deposit.state, 'posted', 'Check %s was not deposited properly' % check.check_number)
         self.assertEqual(check.l10n_latam_check_current_journal_id, bank_journal, 'Current journal was not computed properly on delivery')
         # check dont deposit twice
-        with self.assertRaisesRegex(UserError, "Checks must be on a third party checks journal to be transfered by this wizard"), self.cr.savepoint():
+        # TODO KZ review this
+        with self.assertRaisesRegex(UserError, "Please define a payment method line on your payment"), self.cr.savepoint():
             self.env['l10n_latam.payment.mass.transfer'].with_context(
                 active_model='account.payment', active_ids=[check.id]).create({'destination_journal_id': bank_journal.id})._create_payments()
 
