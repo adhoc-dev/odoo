@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-18 16:20+0000\n"
-"PO-Revision-Date: 2022-11-18 16:20+0000\n"
+"POT-Creation-Date: 2022-12-02 08:23+0000\n"
+"PO-Revision-Date: 2022-12-02 08:23+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,6 +16,7 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: l10n_latam_check
+#. odoo-python
 #: code:addons/l10n_latam_check/models/account_payment.py:0
 #, python-format
 msgid "(Check %s)"
@@ -26,9 +27,9 @@ msgstr ""
 #: model:ir.model.fields,help:l10n_latam_check.field_account_payment__l10n_latam_manual_checks
 #: model:ir.model.fields,help:l10n_latam_check.field_account_payment_register__l10n_latam_manual_checks
 msgid ""
-"* Printing is disabled\n"
-"* You're allowed to put numbers manually\n"
-"* New field for payment date (Check Cash-In Date)"
+"* Allows putting numbers manually\n"
+"* Enables Check Cash-In Date feature\n"
+"* Disables printing"
 msgstr ""
 
 #. module: l10n_latam_check
@@ -44,12 +45,14 @@ msgid "Account Chart Template"
 msgstr ""
 
 #. module: l10n_latam_check
+#. odoo-python
 #: code:addons/l10n_latam_check/wizards/l10n_latam_payment_mass_transfer.py:0
 #, python-format
-msgid "All selected checks must be on the same journal"
+msgid "All selected checks must be on the same journal and on hand"
 msgstr ""
 
 #. module: l10n_latam_check
+#. odoo-python
 #: code:addons/l10n_latam_check/wizards/l10n_latam_payment_mass_transfer.py:0
 #, python-format
 msgid "All the selected checks must be posted"
@@ -68,10 +71,12 @@ msgstr ""
 #. module: l10n_latam_check
 #: model:ir.model.fields,field_description:l10n_latam_check.field_account_payment__l10n_latam_check_id
 #: model:ir.model.fields,field_description:l10n_latam_check.field_account_payment_register__l10n_latam_check_id
+#: model:ir.model.fields,field_description:l10n_latam_check.field_l10n_latam_payment_mass_transfer__check_ids
 msgid "Check"
 msgstr ""
 
 #. module: l10n_latam_check
+#. odoo-python
 #: code:addons/l10n_latam_check/models/account_payment.py:0
 #, python-format
 msgid ""
@@ -80,18 +85,21 @@ msgid ""
 msgstr ""
 
 #. module: l10n_latam_check
+#. odoo-python
 #: code:addons/l10n_latam_check/models/account_payment.py:0
 #, python-format
 msgid "Check %s delivered"
 msgstr ""
 
 #. module: l10n_latam_check
+#. odoo-python
 #: code:addons/l10n_latam_check/models/account_payment.py:0
 #, python-format
 msgid "Check %s received"
 msgstr ""
 
 #. module: l10n_latam_check
+#. odoo-python
 #: code:addons/l10n_latam_check/models/account_payment.py:0
 #, python-format
 msgid "Check '%s' is on journal '%s', it can't be received it again"
@@ -137,6 +145,7 @@ msgid "Check Number"
 msgstr ""
 
 #. module: l10n_latam_check
+#. odoo-python
 #: code:addons/l10n_latam_check/models/account_payment.py:0
 #: model:ir.model.fields,field_description:l10n_latam_check.field_account_payment__l10n_latam_check_operation_ids
 #, python-format
@@ -145,6 +154,7 @@ msgstr ""
 
 #. module: l10n_latam_check
 #: model:ir.actions.act_window,name:l10n_latam_check.action_view_l10n_latam_payment_mass_transfer
+#: model_terms:ir.ui.view,arch_db:l10n_latam_check.view_account_third_party_check_tree
 msgid "Check Transfer"
 msgstr ""
 
@@ -166,11 +176,6 @@ msgstr ""
 #. module: l10n_latam_check
 #: model:ir.model.fields,field_description:l10n_latam_check.field_l10n_latam_payment_mass_transfer__company_id
 msgid "Company"
-msgstr ""
-
-#. module: l10n_latam_check
-#: model:ir.model.fields,help:l10n_latam_check.field_l10n_latam_payment_mass_transfer__company_id
-msgid "Company related to this journal"
 msgstr ""
 
 #. module: l10n_latam_check
@@ -226,6 +231,7 @@ msgid "ID"
 msgstr ""
 
 #. module: l10n_latam_check
+#. odoo-python
 #: code:addons/l10n_latam_check/models/account_payment.py:0
 #, python-format
 msgid ""
@@ -266,11 +272,13 @@ msgid "Last Updated on"
 msgstr ""
 
 #. module: l10n_latam_check
+#. odoo-python
 #: code:addons/l10n_latam_check/models/account_journal.py:0
 #, python-format
 msgid ""
-"Manual checks (electronic/deferred) can't be used together with check manual sequencing (check "
-"printing functionality), please choose one or the other. Journal ids: %s"
+"Manual checks (electronic/deferred) can't be used together with check manual"
+" sequencing (check printing functionality), please choose one or the other. "
+"Journals: %s"
 msgstr ""
 
 #. module: l10n_latam_check
@@ -284,6 +292,7 @@ msgid "New Third Party Checks"
 msgstr ""
 
 #. module: l10n_latam_check
+#. odoo-python
 #: code:addons/l10n_latam_check/models/account_payment.py:0
 #, python-format
 msgid ""
@@ -309,6 +318,7 @@ msgid "Payment Methods"
 msgstr ""
 
 #. module: l10n_latam_check
+#. odoo-python
 #: code:addons/l10n_latam_check/wizards/l10n_latam_payment_mass_transfer.py:0
 #: model:ir.model,name:l10n_latam_check.model_account_payment
 #, python-format
@@ -321,18 +331,21 @@ msgid "Register Payment"
 msgstr ""
 
 #. module: l10n_latam_check
+#. odoo-python
 #: code:addons/l10n_latam_check/models/account_chart_template.py:0
 #, python-format
 msgid "Rejected Third Party Checks"
 msgstr ""
 
 #. module: l10n_latam_check
+#. odoo-python
 #: code:addons/l10n_latam_check/models/account_payment.py:0
 #, python-format
 msgid "Selected check \"%s\" is not posted"
 msgstr ""
 
 #. module: l10n_latam_check
+#. odoo-python
 #: code:addons/l10n_latam_check/models/account_payment.py:0
 #, python-format
 msgid ""
@@ -341,6 +354,7 @@ msgid ""
 msgstr ""
 
 #. module: l10n_latam_check
+#. odoo-python
 #: code:addons/l10n_latam_check/wizards/l10n_latam_payment_mass_transfer.py:0
 #, python-format
 msgid ""
@@ -349,13 +363,7 @@ msgid ""
 msgstr ""
 
 #. module: l10n_latam_check
-#: code:addons/l10n_latam_check/wizards/l10n_latam_payment_mass_transfer.py:0
-#, python-format
-msgid ""
-"There is no 'Existing Third Party Checks' payment method configured on journal %s"
-msgstr ""
-
-#. module: l10n_latam_check
+#. odoo-python
 #: code:addons/l10n_latam_check/models/account_chart_template.py:0
 #: model:ir.actions.act_window,name:l10n_latam_check.action_third_party_check
 #: model:ir.ui.menu,name:l10n_latam_check.menu_third_party_check
@@ -369,6 +377,7 @@ msgid "Third party check Current Journal"
 msgstr ""
 
 #. module: l10n_latam_check
+#. odoo-python
 #: code:addons/l10n_latam_check/models/account_payment.py:0
 #, python-format
 msgid "Unmark sent is not implemented for electronic or deferred checks"

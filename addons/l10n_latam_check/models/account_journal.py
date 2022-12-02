@@ -25,4 +25,4 @@ class AccountJournal(models.Model):
         if recs:
             raise UserError(_(
                 "Manual checks (electronic/deferred) can't be used together with check manual sequencing (check printing functionality), "
-                "please choose one or the other. Journal ids: %s", ",".join(recs.mapped("name"))))
+                "please choose one or the other. Journals: %s", ",".join(recs.mapped("name"))))
