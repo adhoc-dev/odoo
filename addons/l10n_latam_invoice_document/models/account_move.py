@@ -165,10 +165,11 @@ class AccountMove(models.Model):
         for rec in self.filtered('l10n_latam_document_type_id.internal_type'):
             internal_type = rec.l10n_latam_document_type_id.internal_type
             invoice_type = rec.type
+            show_info = '"%s" (%s)' % (rec.l10n_latam_document_type_id.display_name, internal_type)
             if internal_type in ['debit_note', 'invoice'] and invoice_type in ['out_refund', 'in_refund']:
-                raise ValidationError(_('You can not use a %s document type with a refund invoice') % internal_type)
+                raise ValidationError(_('You can not use a %s document type with a refund invoice') % show_info)
             elif internal_type == 'credit_note' and invoice_type in ['out_invoice', 'in_invoice']:
-                raise ValidationError(_('You can not use a %s document type with a invoice') % (internal_type))
+                raise ValidationError(_('You can not use a %s document type with a invoice') % (show_info))
 
     def _get_name_invoice_report(self, report_xml_id):
         """ method to be inherit by latam localizations that have an custom invoice reports """
