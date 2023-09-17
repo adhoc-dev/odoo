@@ -1,0 +1,52 @@
+id,code,name,internal_type,doc_code_prefix,country_id/id
+dc_inv,0,INVOICE,invoice,FC,base.uy
+dc_boleta_venta_contado,0,BOLETA,invoice,BO,base.uy
+dc_cn_inv,0,CREDIT NOTE,credit_note,NC,base.uy
+dc_dn_inv,0,DEBIT NOTE,debit_note,ND,base.uy
+dc_recibo_cobranza,0,COLLECTION RECEIPT,invoice,RC,base.uy
+dc_inv_expo,0,EXPORT INVOICE,invoice,FCE,base.uy
+dc_nc_expo,0,EXPORT CREDIT NOTE,credit_note,NCE,base.uy
+dc_nd_expo,0,EXPORT DEBIT NOTE,debit_note,NDE,base.uy
+dc_remito,0,MAILING,stock_picking,REM,base.uy
+dc_e_ticket,101,E-TICKET,invoice,E-TK,base.uy
+dc_cn_e_ticket,102,E-TICKET CREDIT NOTE,credit_note,E-NCTK,base.uy
+dc_dn_e_ticket,103,E-TICKET DEBIT NOTE,debit_note,E-NDTK,base.uy
+dc_e_inv,111,E-INVOICE,invoice,E-FC,base.uy
+dc_cn_e_inv,112,E-INVOICE CREDIT NOTE,credit_note,E-NC,base.uy
+dc_dn_e_inv,113,E-INVOICE CREDIT NOTE,debit_note,E-ND,base.uy
+dc_e_inv_exp,121,EXPORT E-INVOICE,invoice,E-FCE,base.uy
+dc_cn_e_inv_exp,122,EXPORT E-INVOICE CREDIT NOTE,credit_note,E-NCE,base.uy
+dc_dn_e_inv_exp,123,EXPORT E-INVOICE DEBIT NOTE,debit_note,E-NDE,base.uy
+dc_e_remito_expo,124,EXPORT E-MAILING,stock_picking,E-REME,base.uy
+dc_e_ticket_venta_por_cuenta_ajena,131,Contingency Sale by Third Party e-Ticket,invoice,E-TK-CA,base.uy
+dc_nota_de_credito_e_ticket_venta_por_cuenta_ajena,132,Sale by Third Party e-Ticket Credit Note,credit_note,E-NCTK-CA,base.uy
+dc_nota_de_debito_e_ticket_venta_por_cuenta_ajena,133,Sale by Third Party e-Ticket Debit Note,debit_note,E-NDTK-CA,base.uy
+dc_e_factura_venta_por_cuenta_ajena,141,Sale by Third Party E-Invoice,invoice,E-FC-CA,base.uy
+dc_nota_de_credito_e_factura_venta_por_cuenta_ajena,142,Sale by Third Party e-Invoice Credit Note,credit_note,E-NC-CA,base.uy
+dc_nota_de_debito_e_factura_venta_por_cuenta_ajena,143,Sale by Third Party e-Invoice Debit Note,debit_note,E-ND-CA,base.uy
+dc_e_boleta,151,e-Boleta,invoice,E-BO,base.uy
+dc_nota_de_credito_e_boleta,152,Credit Note e-Boleta,credit_note,E-BO-NC,base.uy
+dc_nota_de_debito_e_boleta,153,Debit Note e-Boleta,debit_note,E-BO-ND,base.uy
+dc_e_remito,181,E-MAILING,stock_picking,E-REM,base.uy
+dc_e_resguardo,182,E-RESGUARDO,,E-RES,base.uy
+dc_e_ticket_cont,201,CONTINGENCY E-TICKET,invoice,E-TK-C,base.uy
+dc_cn_e_ticket_cont,202,CONTINGENCY E-TICKET CREDIT NOTE,credit_note,E-NCTK-C,base.uy
+dc_dn_e_ticket_cont,203,CONTINGENCY E-TICKET DEBIT NOTE,debit_note,E-NDTK-C,base.uy
+dc_e_factura_contingencia,211,Contingency e-Invoice,invoice,E-FC-C,base.uy
+dc_nota_de_crédito_de_e_factura_contingencia,212,Contingency e-Invoice Credit Note,credit_note,E-NC-C,base.uy
+dc_nota_de_débito_de_e_factura_contingencia,213,Contingency e-Invoice Debit Note,debit_note,E-ND-C,base.uy
+dc_e_factura_exportación_contingencia,221,Contingency Export e-Invoice,invoice,E-FCE-C,base.uy
+dc_nota_de_crédito_de_e_factura_exportación_contingencia,222,Contingency Export e-Invoice Credit Note,credit_note,E-NCE-C,base.uy
+dc_nota_de_débito_de_e_factura_exportación_contingencia,223,Contingency Export e-Invoice Debit Note,debit_note,E-NDE-C,base.uy
+dc_e_remito_de_exportación_contingencia,224,Contingency Export e-Mailing,stock_picking,E-REME-C,base.uy
+dc_e_ticket_venta_por_cuenta_ajena_contingencia,231,Contingency Sale By Third Party e-Ticket Debit Note,invoice,E-TK-CAC,base.uy
+dc_nota_de_crédito_de_e_ticket_venta_por_cuenta_ajena_contingencia,232,Sale By Third Party Contingency e-Ticket Credit Note,credit_note,E-NCTK-CAC,base.uy
+dc_nota_de_débito_de_e_ticket_venta_por_cuenta_ajena_contingencia,233,Contingency Sale By Third Party e-Ticket Debit Note,debit_note,E-NDTK-CAC,base.uy
+dc_e_factura_venta_por_cuenta_ajena_contingencia,241,Contingency Sale By Third Party e-Invoice,invoice,E-FC-CAC,base.uy
+dc_nota_de_crédito_de_e_factura_venta_por_cuenta_ajena_contingencia,242,Sale By Third Party Contingency e-Invoice Credit Note,credit_note,E-NC-CAC,base.uy
+dc_nota_de_débito_de_e_factura_venta_por_cuenta_ajena_contingencia,243,Contingency Sale By Third Party e-Invoice Debit Note,debit_note,E-ND-CAC,base.uy
+dc_e_boleta_contingencia,251,Contingency e-Boleta,invoice,E-BO,base.uy
+dc_nota_de_credito_e_boleta_contingencia,252,Contingency Credit Note e-Boleta,credit_note,E-BO-NC,base.uy
+dc_nota_de_debito_e_boleta_contingencia,253,Contingency Debit Note e-Boleta,debit_note,E-BO-ND,base.uy
+dc_e_remito_contingencia,281,Contingency e-Mailing,stock_picking,E-REM-C,base.uy
+dc_e_resguardo_contingencia,282,Contingency e-Resguardo,,E-RES-C,base.uy

@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo noupdate="1">
+
+    <record forcecreate="0" id="rateUYU" model="res.currency.rate">
+        <field name="currency_id" ref="base.UYU"/>
+        <field name="name">2023-09-13</field>
+        <field name="rate">1.0</field>
+    </record>
+
+    <record id="rateUYI" model="res.currency.rate">
+        <field name="rate">5.7778</field>
+        <field name="currency_id" ref="base.UYI"/>
+        <field eval="time.strftime('2023-09-13')" name="name"/>
+    </record>
+
+</odoo>

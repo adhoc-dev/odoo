@@ -4,74 +4,578 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.1alpha1+e\n"
+"Project-Id-Version: Odoo Server 16.5alpha1+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-01-10 08:47+0000\n"
-"PO-Revision-Date: 2023-01-10 09:30+0000\n"
+"POT-Creation-Date: 2023-09-21 14:04+0000\n"
+"PO-Revision-Date: 2023-09-21 14:04+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
 
 #. module: l10n_uy
+#: model:ir.model,name:l10n_uy.model_account_chart_template
+msgid "Account Chart Template"
+msgstr "Plantilla de Plan de Cuentas"
+
+#. module: l10n_uy
+#: model:ir.model.fields,help:l10n_uy.field_l10n_latam_document_type__internal_type
+msgid ""
+"Analog to odoo account.move.move_type but with more options allowing to "
+"identify the kind of document we are working with. (not only related to "
+"account.move, could be for documents of other models like stock.picking)"
+msgstr ""
+"Análogo a account.move.type de Odoo pero con más opciones, permitiendo "
+"identificar el tipo de documento sobre el que estamos trabajando. (no "
+"solamente relativo a account.move, podría ser relativo a otros modelos, como"
+" por ejemplo stock.picking)"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_boleta_venta_contado
+msgid "BOLETA"
+msgstr ""
+
+#. module: l10n_uy
 #: model:account.report.column,name:l10n_uy.tax_report_balance
 msgid "Balance"
-msgstr "Saldo"
+msgstr ""
 
 #. module: l10n_uy
 #: model:account.report.line,name:l10n_uy.account_tax_report_base_impb_cmprs_0
 msgid "Base Purchases 0%"
-msgstr "Base Compras 0%"
+msgstr "Base 0% Compras"
 
 #. module: l10n_uy
 #: model:account.report.line,name:l10n_uy.account_tax_report_base_impb_cmprs_10
 msgid "Base Purchases 10%"
-msgstr "Base Compras 10%"
+msgstr "Base 10% Compras"
 
 #. module: l10n_uy
 #: model:account.report.line,name:l10n_uy.account_tax_report_base_impb_cmprs_22
 msgid "Base Purchases 22%"
-msgstr "Base Compras 22%"
+msgstr "Base 22% Compras"
 
 #. module: l10n_uy
-#: model:account.report.line,name:l10n_uy.account_tax_report_base_impb
-msgid "Taxable income"
-msgstr "Base Imponible"
+#: model:account.report.line,name:l10n_uy.account_tax_report_base_impb_vnts_0
+msgid "Base Sales 0%"
+msgstr "Base 0% Ventas"
+
+#. module: l10n_uy
+#: model:account.report.line,name:l10n_uy.account_tax_report_base_impb_vnts_10
+msgid "Base Sales 10%"
+msgstr "Base 10% Ventas"
+
+#. module: l10n_uy
+#: model:account.report.line,name:l10n_uy.account_tax_report_base_impb_vnts_22
+msgid "Base Sales 22%"
+msgstr "Base 22% Ventas"
+
+#. module: l10n_uy
+#: model:ir.model.fields,field_description:l10n_uy.field_account_bank_statement_line__l10n_uy_payment_type
+#: model:ir.model.fields,field_description:l10n_uy.field_account_move__l10n_uy_payment_type
+#: model:ir.model.fields,field_description:l10n_uy.field_account_payment__l10n_uy_payment_type
+msgid "CFE Payment Type"
+msgstr "Forma de Pago"
+
+#. module: l10n_uy
+#: model:l10n_latam.identification.type,name:l10n_uy.it_ci
+msgid "CI"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_recibo_cobranza
+msgid "COLLECTION RECEIPT"
+msgstr "RECIBO COBRANZA"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_ticket_cont
+msgid "CONTINGENCY E-TICKET"
+msgstr "E-TICKET CONTINGENCIA"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_cn_e_ticket_cont
+msgid "CONTINGENCY E-TICKET CREDIT NOTE"
+msgstr "NOTA DE CRÉDITO DE E-TICKET CONTINGENCIA"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_dn_e_ticket_cont
+msgid "CONTINGENCY E-TICKET DEBIT NOTE"
+msgstr "NOTA DE DÉBITO DE E-TICKET CONTINGENCIA"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_cn_inv
+msgid "CREDIT NOTE"
+msgstr "NOTA DE CRÉDITO"
+
+#. module: l10n_uy
+#: model:ir.model.fields.selection,name:l10n_uy.selection__account_move__l10n_uy_payment_type__cash
+msgid "Cash"
+msgstr "Contado"
+
+#. module: l10n_uy
+#: model:ir.model,name:l10n_uy.model_res_company
+msgid "Companies"
+msgstr "Compañías"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_credito_e_boleta_contingencia
+msgid "Contingency Credit Note e-Boleta"
+msgstr "Nota de Crédito de e-Boleta Contingencia"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_debito_e_boleta_contingencia
+msgid "Contingency Debit Note e-Boleta"
+msgstr "Nota de Dédito de e-Boleta Contingencia"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_factura_exportación_contingencia
+msgid "Contingency Export e-Invoice"
+msgstr "e-Factura Exportación Contingencia"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_crédito_de_e_factura_exportación_contingencia
+msgid "Contingency Export e-Invoice Credit Note"
+msgstr "Nota de Crédito de e-Factura Exportación Contingencia"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_débito_de_e_factura_exportación_contingencia
+msgid "Contingency Export e-Invoice Debit Note"
+msgstr "Nota de Débito de e-Factura Exportación Contingencia"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_remito_de_exportación_contingencia
+msgid "Contingency Export e-Mailing"
+msgstr "e-Remito de Exportación Contingencia"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_factura_venta_por_cuenta_ajena_contingencia
+msgid "Contingency Sale By Third Party e-Invoice"
+msgstr "e-Factura Venta por Cuenta Ajena Contingencia"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_débito_de_e_factura_venta_por_cuenta_ajena_contingencia
+msgid "Contingency Sale By Third Party e-Invoice Debit Note"
+msgstr "Nota de Débito de e-Factura Venta por Cuenta Ajena Contingencia"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_ticket_venta_por_cuenta_ajena_contingencia
+#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_débito_de_e_ticket_venta_por_cuenta_ajena_contingencia
+msgid "Contingency Sale By Third Party e-Ticket Debit Note"
+msgstr "Nota de Débito de e-Ticket Venta por Cuenta Ajena Contingencia"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_ticket_venta_por_cuenta_ajena
+msgid "Contingency Sale by Third Party e-Ticket"
+msgstr "e-Ticket Venta por Cuenta Ajena Contingencia"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_boleta_contingencia
+msgid "Contingency e-Boleta"
+msgstr "e-Boleta Contingencia"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_factura_contingencia
+msgid "Contingency e-Invoice"
+msgstr "E-Factura Contingencia"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_crédito_de_e_factura_contingencia
+msgid "Contingency e-Invoice Credit Note"
+msgstr "Nota de Crédito de e-Factura Contingencia"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_débito_de_e_factura_contingencia
+msgid "Contingency e-Invoice Debit Note"
+msgstr "Nota de Débito de e-Factura Contingencia"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_remito_contingencia
+msgid "Contingency e-Mailing"
+msgstr "e-Remito Contingencia"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_resguardo_contingencia
+msgid "Contingency e-Resguardo"
+msgstr "e-Resguardo Contingencia"
+
+#. module: l10n_uy
+#: model:ir.model.fields.selection,name:l10n_uy.selection__account_move__l10n_uy_payment_type__credit
+msgid "Credit"
+msgstr "Crédito"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_credito_e_boleta
+msgid "Credit Note e-Boleta"
+msgstr "Nota de Crédito de e-Boleta"
+
+#. module: l10n_uy
+#: model:ir.model.fields,field_description:l10n_uy.field_account_bank_statement_line__l10n_uy_currency_rate
+#: model:ir.model.fields,field_description:l10n_uy.field_account_move__l10n_uy_currency_rate
+#: model:ir.model.fields,field_description:l10n_uy.field_account_payment__l10n_uy_currency_rate
+msgid "Currency Rate (UY)"
+msgstr "Tasa de Cambio (UY)"
+
+#. module: l10n_uy
+#. odoo-python
+#: code:addons/l10n_uy/models/template_uy.py:0
+#, python-format
+msgid "Customer Invoices"
+msgstr "Facturas de Clientes"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_dn_inv
+msgid "DEBIT NOTE"
+msgstr "NOTA DE DÉBITO"
+
+#. module: l10n_uy
+#: model:ir.ui.menu,name:l10n_uy.menu_dgi_config
+msgid "DGI"
+msgstr ""
+
+#. module: l10n_uy
+#: model:ir.model.fields,field_description:l10n_uy.field_l10n_latam_identification_type__l10n_uy_dgi_code
+msgid "DGI Code"
+msgstr "Código DGI"
+
+#. module: l10n_uy
+#: model:l10n_latam.identification.type,name:l10n_uy.it_dni
+msgid "DNI"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_debito_e_boleta
+msgid "Debit Note e-Boleta"
+msgstr "Nota de Dédito de e-Boleta"
+
+#. module: l10n_uy
+#: model:ir.actions.act_window,name:l10n_uy.action_document_type_uruguay
+#: model:ir.ui.menu,name:l10n_uy.menu_document_type_uruguay
+msgid "Document Types"
+msgstr "Tipos de Documentos"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_inv
+msgid "E-INVOICE"
+msgstr "E-FACTURA"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_cn_e_inv
+#: model:l10n_latam.document.type,name:l10n_uy.dc_dn_e_inv
+msgid "E-INVOICE CREDIT NOTE"
+msgstr "NOTA DE CRÉDITO E-FACTURA"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_remito
+msgid "E-MAILING"
+msgstr "E-REMITO"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_resguardo
+msgid "E-RESGUARDO"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_ticket
+msgid "E-TICKET"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_cn_e_ticket
+msgid "E-TICKET CREDIT NOTE"
+msgstr "NOTA DE CRÉDITO DE E-TICKET"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_dn_e_ticket
+msgid "E-TICKET DEBIT NOTE"
+msgstr "NOTA DE DÉBITO DE E-TICKET"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_nc_expo
+msgid "EXPORT CREDIT NOTE"
+msgstr "NOTA DE CREDITO DE EXPORTACION"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_nd_expo
+msgid "EXPORT DEBIT NOTE"
+msgstr "NOTA DE DÉBITO DE EXPORTACIÓN"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_inv_exp
+msgid "EXPORT E-INVOICE"
+msgstr "E-FACTURA DE EXPORTACIÓN"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_cn_e_inv_exp
+msgid "EXPORT E-INVOICE CREDIT NOTE"
+msgstr "NOTA DE CRÉDITO DE E-FACTURA EXPORTACIÓN"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_dn_e_inv_exp
+msgid "EXPORT E-INVOICE DEBIT NOTE"
+msgstr "NOTA DE DEBITO DE E-FACTURA EXPORTACION"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_remito_expo
+msgid "EXPORT E-MAILING"
+msgstr "E-REMITO EXPORTACION"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_inv_expo
+msgid "EXPORT INVOICE"
+msgstr "FACTURA EXPORTACIÓN"
+
+#. module: l10n_uy
+#: model:ir.model.fields.selection,name:l10n_uy.selection__account_tax_group__l10n_uy_vat_code__vat_exempt
+msgid "Exempt"
+msgstr "Exento"
+
+#. module: l10n_uy
+#: model:l10n_latam.identification.type,description:l10n_uy.it_nife
+msgid "Foreign tax identification number"
+msgstr "Número de identificación fiscal extranjero"
+
+#. module: l10n_uy
+#: model:l10n_latam.identification.type,description:l10n_uy.it_nie
+msgid "Foreigner Identity Number"
+msgstr "Número de Identidad de Extranjero"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_inv
+msgid "INVOICE"
+msgstr "FACTURA"
+
+#. module: l10n_uy
+#: model:l10n_latam.identification.type,description:l10n_uy.it_ci
+msgid "Identification Card"
+msgstr "Cédula de Identidad"
+
+#. module: l10n_uy
+#: model:ir.model,name:l10n_uy.model_l10n_latam_identification_type
+msgid "Identification Types"
+msgstr "Tipos de Identificación"
+
+#. module: l10n_uy
+#: model:ir.model.fields,field_description:l10n_uy.field_l10n_latam_document_type__internal_type
+msgid "Internal Type"
+msgstr "Tipo interno"
+
+#. module: l10n_uy
+#: model:ir.model,name:l10n_uy.model_account_journal
+msgid "Journal"
+msgstr "Diario"
+
+#. module: l10n_uy
+#: model:ir.model,name:l10n_uy.model_account_move
+msgid "Journal Entry"
+msgstr "Asiento contable"
+
+#. module: l10n_uy
+#: model:ir.model,name:l10n_uy.model_l10n_latam_document_type
+msgid "Latam Document Type"
+msgstr "Tipo de Documento Latam"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_remito
+msgid "MAILING"
+msgstr "REMITO"
+
+#. module: l10n_uy
+#: model:ir.model.fields.selection,name:l10n_uy.selection__l10n_latam_document_type__internal_type__stock_picking
+msgid "Mailing"
+msgstr "Remito"
+
+#. module: l10n_uy
+#: model:l10n_latam.identification.type,name:l10n_uy.it_nie
+msgid "NIE"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.identification.type,name:l10n_uy.it_nife
+msgid "NIFE"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.identification.type,description:l10n_uy.it_dni
+msgid "National identity document of Argentina, Brazil, Chile or Paraguay"
+msgstr ""
+"Documento Nacional de identidad de Argentina, Brasil, Chile o Paraguay"
+
+#. module: l10n_uy
+#: model:l10n_latam.identification.type,name:l10n_uy.it_other
+msgid "OTR"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.identification.type,description:l10n_uy.it_other
+msgid "Others"
+msgstr "Otros"
+
+#. module: l10n_uy
+#: model:l10n_latam.identification.type,name:l10n_uy.it_pass
+msgid "PAS"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.identification.type,description:l10n_uy.it_pass
+msgid "Passport (all countries)"
+msgstr "Pasaporte (todos los paises)"
+
+#. module: l10n_uy
+#. odoo-python
+#: code:addons/l10n_uy/models/template_uy.py:0
+#, python-format
+msgid "Purchases"
+msgstr "Compras"
+
+#. module: l10n_uy
+#: model:account.report.line,name:l10n_uy.account_tax_report_cmprs_exnto_iva
+msgid "Purchases Exempt from VAT"
+msgstr "Compras IVA Exentas"
+
+#. module: l10n_uy
+#: model:l10n_latam.identification.type,name:l10n_uy.it_rut
+msgid "RUT / RUC"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_crédito_de_e_factura_venta_por_cuenta_ajena_contingencia
+msgid "Sale By Third Party Contingency e-Invoice Credit Note"
+msgstr "Nota de Crédito de e-Factura Venta por Cuenta Ajena Contingencia"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_crédito_de_e_ticket_venta_por_cuenta_ajena_contingencia
+msgid "Sale By Third Party Contingency e-Ticket Credit Note"
+msgstr "Nota de Crédito de e-Ticket Venta por Cuenta Ajena Contingencia"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_factura_venta_por_cuenta_ajena
+msgid "Sale by Third Party E-Invoice"
+msgstr "e-Factura Venta por Cuenta Ajena"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_credito_e_factura_venta_por_cuenta_ajena
+msgid "Sale by Third Party e-Invoice Credit Note"
+msgstr "Nota de credito e-Factura Venta por Cuenta Ajena"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_debito_e_factura_venta_por_cuenta_ajena
+msgid "Sale by Third Party e-Invoice Debit Note"
+msgstr "Nota de debito e-Factura Venta por Cuenta Ajena"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_credito_e_ticket_venta_por_cuenta_ajena
+msgid "Sale by Third Party e-Ticket Credit Note"
+msgstr "Nota de credito e-Ticket Venta por Cuenta Ajena"
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_debito_e_ticket_venta_por_cuenta_ajena
+msgid "Sale by Third Party e-Ticket Debit Note"
+msgstr "Nota de debito e-Ticket Venta por Cuenta Ajena"
+
+#. module: l10n_uy
+#: model:account.report.line,name:l10n_uy.account_tax_report_iva_vnts_10
+msgid "Sales VAT 10%"
+msgstr "IVA Ventas 10%"
+
+#. module: l10n_uy
+#: model:account.report.line,name:l10n_uy.account_tax_report_iva_vnts_22
+msgid "Sales VAT 22%"
+msgstr "IVA Ventas 22%"
+
+#. module: l10n_uy
+#: model:account.report.line,name:l10n_uy.account_tax_report_vnts_iva
+msgid "Sales VAT exempt"
+msgstr "Ventas exentas de IVA"
+
+#. module: l10n_uy
+#. odoo-python
+#: code:addons/l10n_uy/models/account_move.py:0
+#, python-format
+msgid ""
+"Should be one and only one VAT tax per line. Verify lines with product "
+"\"%s\" (Id Invoice: %s)"
+msgstr ""
+"Debe haber un único y solo un impuesto de IVA por línea. Revise la línea con"
+" el producto \"%s\" (Id Factura: %s)"
+
+#. module: l10n_uy
+#. odoo-python
+#: code:addons/l10n_uy/models/account_move.py:0
+#, python-format
+msgid "Should not be any VAT tax in the export cfe line \"%s\" (Id Invoice: %s)"
+msgstr ""
+"No debe haber ningún impuesto de IVA en la línea del cfe de exportación "
+"\"%s\"  (Id Factura: %s)"
 
 #. module: l10n_uy
 #: model:account.report.line,name:l10n_uy.account_tax_report_base_impb_cmprs
 #: model:account.report.line,name:l10n_uy.account_tax_report_impb_cmprs
 msgid "Tax Base Purchases"
-msgstr "Base Imponible Compras"
+msgstr "Compras de base imponible"
+
+#. module: l10n_uy
+#: model:ir.model,name:l10n_uy.model_account_tax_group
+msgid "Tax Group"
+msgstr "Grupo de impuestos"
+
+#. module: l10n_uy
+#: model:account.report,name:l10n_uy.tax_report
+msgid "Tax Report"
+msgstr "Reporte de Impuestos"
 
 #. module: l10n_uy
 #: model:account.report.line,name:l10n_uy.account_tax_report_base_impb_vnts
 #: model:account.report.line,name:l10n_uy.account_tax_report_impb_vnts
 msgid "Taxable Sales Base"
-msgstr "Base Imponible Ventas"
+msgstr "Base imponible de ventas"
 
 #. module: l10n_uy
-#: model:account.report.line,name:l10n_uy.account_tax_report_base_impb_vnts_0
-msgid "Base Sales 0%"
-msgstr "Base Ventas 0%"
+#: model:account.report.line,name:l10n_uy.account_tax_report_base_impb
+msgid "Taxable income"
+msgstr "Ingreso Imponible"
 
 #. module: l10n_uy
-#: model:account.report.line,name:l10n_uy.account_tax_report_base_impb_vnts_10
-msgid "Base Sales 10%"
-msgstr "Base Ventas 10%"
+#: model:ir.model.fields,help:l10n_uy.field_account_tax_group__l10n_uy_vat_code
+msgid ""
+"Tehcnical field used to identify the VAT taxes to print on the VAT book "
+"report"
+msgstr ""
+"Campo técnico usado para identificar los impuestos de IVA a imprimir en el "
+"reporte del libro de IVA"
 
 #. module: l10n_uy
-#: model:account.report.line,name:l10n_uy.account_tax_report_base_impb_vnts_22
-msgid "Base Sales 22%"
-msgstr "Base Ventas 22%"
+#: model:l10n_latam.identification.type,description:l10n_uy.it_rut
+msgid "Unique Tax Registry / Unique Taxpayer Registry"
+msgstr "Registro Único Tributario / Registro Único de Contribuyente"
 
 #. module: l10n_uy
-#: model:account.report.line,name:l10n_uy.account_tax_report_cmprs_exnto_iva
-msgid "Purchases Exempt from VAT"
-msgstr "Compras Exento IVA"
+#: model_terms:ir.ui.view,arch_db:l10n_uy.view_document_type_filter
+msgid "Uruguayan Documents"
+msgstr "Documentos Uruguayos"
+
+#. module: l10n_uy
+#. odoo-python
+#: code:addons/l10n_uy/models/template_uy.py:0
+#, python-format
+msgid "Uruguayan Generic Chart of Accounts"
+msgstr "Plan Contable Genérico Uruguayo"
+
+#. module: l10n_uy
+#: model:ir.model.fields.selection,name:l10n_uy.selection__account_tax_group__l10n_uy_vat_code__vat_10
+msgid "VAT 10%"
+msgstr "IVA 10%"
+
+#. module: l10n_uy
+#: model:ir.model.fields.selection,name:l10n_uy.selection__account_tax_group__l10n_uy_vat_code__vat_22
+msgid "VAT 22%"
+msgstr "IVA 22%"
+
+#. module: l10n_uy
+#: model:ir.model.fields,field_description:l10n_uy.field_account_tax_group__l10n_uy_vat_code
+msgid "VAT Code (UY)"
+msgstr "Codigo IVA (UY)"
 
 #. module: l10n_uy
 #: model:account.report.line,name:l10n_uy.account_tax_report_cmprs_pagdo
@@ -93,29 +597,14 @@ msgstr "IVA Compras 22%"
 #: model:account.report.line,name:l10n_uy.account_tax_report_iva_vnts_prcbdo
 #: model:account.report.line,name:l10n_uy.account_tax_report_vnts_prcbdo
 msgid "VAT Sales - received"
-msgstr "IVA Ventas - percibido"
-
-#. module: l10n_uy
-#: model:account.report.line,name:l10n_uy.account_tax_report_iva_vnts_10
-msgid "Sales VAT 10%"
-msgstr "IVA ventas 10%"
-
-#. module: l10n_uy
-#: model:account.report.line,name:l10n_uy.account_tax_report_iva_vnts_22
-msgid "Sales VAT 22%"
-msgstr "IVA ventas 22%"
+msgstr "IVA Venas - recibido"
 
 #. module: l10n_uy
 #: model:account.report.line,name:l10n_uy.account_tax_report_sldo_iva
 msgid "VAT balance"
-msgstr "Saldo de IVA"
+msgstr "Balance IVA"
 
 #. module: l10n_uy
-#: model:account.report,name:l10n_uy.tax_report
-msgid "Tax Report"
-msgstr "Informe fiscal"
-
-#. module: l10n_uy
-#: model:account.report.line,name:l10n_uy.account_tax_report_vnts_iva
-msgid "Sales VAT exempt"
-msgstr "Ventas Exento IVA"
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_boleta
+msgid "e-Boleta"
+msgstr ""
