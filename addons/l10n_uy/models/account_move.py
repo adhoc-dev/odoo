@@ -9,6 +9,9 @@ class AccountMove(models.Model):
 
     l10n_uy_currency_rate = fields.Float(copy=False, digits=(16, 4), string="Currency Rate (UY)")
 
+    def _get_uruguayan_vat_taxes(self):
+        return self.env.ref('l10n_uy.tax_group_iva_10') | self.env.ref('l10n_uy.tax_group_iva_22') | self.env.ref('l10n_uy.tax_group_exenton')
+
     def _check_uruguayan_invoices(self):
         """ Check that the UY invoices are vaid
         * the partner of the invoice should have a valid identification type
@@ -20,7 +23,7 @@ class AccountMove(models.Model):
             return True
         uy_invs.mapped('partner_id').check_vat()
 
-        uruguayan_vat_taxes = self.env['account.tax.group'].search([('country_code', '=', 'UY'), ('l10n_uy_vat_code', 'in', ['vat_22', 'vat_10', 'vat_exempt'])])
+        uruguayan_vat_taxes = self._get_uruguayan_vat_taxes()
 
         # Check that we do not send any tax in export invoices
         expo_cfes = uy_invs.filtered(

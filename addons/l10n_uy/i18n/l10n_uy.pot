@@ -306,11 +306,6 @@ msgid "EXPORT INVOICE"
 msgstr ""
 
 #. module: l10n_uy
-#: model:ir.model.fields.selection,name:l10n_uy.selection__account_tax_group__l10n_uy_vat_code__vat_exempt
-msgid "Exempt"
-msgstr ""
-
-#. module: l10n_uy
 #: model:l10n_latam.identification.type,description:l10n_uy.it_nife
 msgid "Foreign tax identification number"
 msgstr ""
@@ -511,13 +506,6 @@ msgid "Taxable income"
 msgstr ""
 
 #. module: l10n_uy
-#: model:ir.model.fields,help:l10n_uy.field_account_tax_group__l10n_uy_vat_code
-msgid ""
-"Tehcnical field used to identify the VAT taxes to print on the VAT book "
-"report"
-msgstr ""
-
-#. module: l10n_uy
 #: model:l10n_latam.identification.type,description:l10n_uy.it_rut
 msgid "Unique Tax Registry / Unique Taxpayer Registry"
 msgstr ""
@@ -532,21 +520,6 @@ msgstr ""
 #: code:addons/l10n_uy/models/template_uy.py:0
 #, python-format
 msgid "Uruguayan Generic Chart of Accounts"
-msgstr ""
-
-#. module: l10n_uy
-#: model:ir.model.fields.selection,name:l10n_uy.selection__account_tax_group__l10n_uy_vat_code__vat_10
-msgid "VAT 10%"
-msgstr ""
-
-#. module: l10n_uy
-#: model:ir.model.fields.selection,name:l10n_uy.selection__account_tax_group__l10n_uy_vat_code__vat_22
-msgid "VAT 22%"
-msgstr ""
-
-#. module: l10n_uy
-#: model:ir.model.fields,field_description:l10n_uy.field_account_tax_group__l10n_uy_vat_code
-msgid "VAT Code (UY)"
 msgstr ""
 
 #. module: l10n_uy

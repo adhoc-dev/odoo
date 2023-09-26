@@ -31,7 +31,8 @@ class TestManual(AccountTestInvoicingCommon):
         cls.partner_uy = cls.company_uy.partner_id
         cls.tax_22 = cls.env['account.tax'].with_context(active_test=False).search(
             [('country_code', '=', 'UY'), ('amount', '=', 22.0), ('type_tax_use', '=', 'sale'),
-             ('tax_group_id.l10n_uy_vat_code', '=', 'vat_22'), ('company_id', '=', cls.company_uy.id)], limit=1)
+             ('tax_group_id', '=', cls.env.ref('l10n_uy.tax_group_iva_22').id),
+             ('company_id', '=', cls.company_uy.id)], limit=1)
         cls.service_vat_22 = cls.env['product.product'].create({
             'name': 'Virtual Home Staging (VAT 22)',
             'list_price': 38.25,
