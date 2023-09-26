@@ -69,13 +69,6 @@ msgid "Base Sales 22%"
 msgstr ""
 
 #. module: l10n_uy
-#: model:ir.model.fields,field_description:l10n_uy.field_account_bank_statement_line__l10n_uy_payment_type
-#: model:ir.model.fields,field_description:l10n_uy.field_account_move__l10n_uy_payment_type
-#: model:ir.model.fields,field_description:l10n_uy.field_account_payment__l10n_uy_payment_type
-msgid "CFE Payment Type"
-msgstr ""
-
-#. module: l10n_uy
 #: model:l10n_latam.identification.type,name:l10n_uy.it_ci
 msgid "CI"
 msgstr ""
@@ -103,11 +96,6 @@ msgstr ""
 #. module: l10n_uy
 #: model:l10n_latam.document.type,name:l10n_uy.dc_cn_inv
 msgid "CREDIT NOTE"
-msgstr ""
-
-#. module: l10n_uy
-#: model:ir.model.fields.selection,name:l10n_uy.selection__account_move__l10n_uy_payment_type__cash
-msgid "Cash"
 msgstr ""
 
 #. module: l10n_uy
@@ -194,11 +182,6 @@ msgstr ""
 #. module: l10n_uy
 #: model:l10n_latam.document.type,name:l10n_uy.dc_e_resguardo_contingencia
 msgid "Contingency e-Resguardo"
-msgstr ""
-
-#. module: l10n_uy
-#: model:ir.model.fields.selection,name:l10n_uy.selection__account_move__l10n_uy_payment_type__credit
-msgid "Credit"
 msgstr ""
 
 #. module: l10n_uy

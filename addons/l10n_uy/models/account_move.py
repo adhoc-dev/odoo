@@ -7,8 +7,6 @@ class AccountMove(models.Model):
 
     _inherit = 'account.move'
 
-    l10n_uy_payment_type = fields.Selection([('cash', 'Cash'), ('credit', 'Credit')], 'CFE Payment Type', default='cash')
-
     l10n_uy_currency_rate = fields.Float(copy=False, digits=(16, 4), string="Currency Rate (UY)")
 
     def _check_uruguayan_invoices(self):

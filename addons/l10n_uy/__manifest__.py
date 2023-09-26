@@ -57,7 +57,6 @@ Demo data for testing:
         'data/l10n_latam_identification_type_data.xml',
         'data/res_partner_data.xml',
         'views/l10n_latam_document_type_views.xml',
-        'views/account_move_views.xml',
         'views/account_journal_view.xml',
         'data/res_currency_data.xml',
         'data/res_currency_rate_data.xml',
