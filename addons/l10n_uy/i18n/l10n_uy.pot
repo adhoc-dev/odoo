@@ -190,13 +190,6 @@ msgid "Credit Note e-Boleta"
 msgstr ""
 
 #. module: l10n_uy
-#: model:ir.model.fields,field_description:l10n_uy.field_account_bank_statement_line__l10n_uy_currency_rate
-#: model:ir.model.fields,field_description:l10n_uy.field_account_move__l10n_uy_currency_rate
-#: model:ir.model.fields,field_description:l10n_uy.field_account_payment__l10n_uy_currency_rate
-msgid "Currency Rate (UY)"
-msgstr ""
-
-#. module: l10n_uy
 #. odoo-python
 #: code:addons/l10n_uy/models/template_uy.py:0
 #, python-format

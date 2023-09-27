@@ -7,8 +7,6 @@ class AccountMove(models.Model):
 
     _inherit = 'account.move'
 
-    l10n_uy_currency_rate = fields.Float(copy=False, digits=(16, 4), string="Currency Rate (UY)")
-
     def _get_uruguayan_vat_taxes(self):
         return self.env.ref('l10n_uy.tax_group_iva_10') | self.env.ref('l10n_uy.tax_group_iva_22') | self.env.ref('l10n_uy.tax_group_exenton')
 
