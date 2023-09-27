@@ -1,9 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
 <odoo noupdate="1">
 
+    <!-- It is an official Uruguayan unit of value, which is readjusted according
+    to inflation, measured by the Consumer Price Index (CPI). -->
     <record id="base.UYI" model="res.currency">
         <field name="symbol">UYI</field>
-        <field name="rounding">0.01</field>
+        <field name="rounding">0.0001</field>
         <field name="active" eval="True"/>
     </record>
 
