@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.5alpha1+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-09-27 15:53+0000\n"
-"PO-Revision-Date: 2023-09-27 15:53+0000\n"
+"POT-Creation-Date: 2023-09-29 18:26+0000\n"
+"PO-Revision-Date: 2023-09-29 18:26+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -26,11 +26,6 @@ msgid ""
 "Analog to odoo account.move.move_type but with more options allowing to "
 "identify the kind of document we are working with. (not only related to "
 "account.move, could be for documents of other models like stock.picking)"
-msgstr ""
-
-#. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_boleta_venta_contado
-msgid "BOLETA"
 msgstr ""
 
 #. module: l10n_uy
@@ -69,33 +64,18 @@ msgid "Base Sales 22%"
 msgstr ""
 
 #. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_boleta_venta_contado
+msgid "Boleta"
+msgstr ""
+
+#. module: l10n_uy
 #: model:l10n_latam.identification.type,name:l10n_uy.it_ci
 msgid "CI"
 msgstr ""
 
 #. module: l10n_uy
 #: model:l10n_latam.document.type,name:l10n_uy.dc_recibo_cobranza
-msgid "COLLECTION RECEIPT"
-msgstr ""
-
-#. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_e_ticket_cont
-msgid "CONTINGENCY E-TICKET"
-msgstr ""
-
-#. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_cn_e_ticket_cont
-msgid "CONTINGENCY E-TICKET CREDIT NOTE"
-msgstr ""
-
-#. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_dn_e_ticket_cont
-msgid "CONTINGENCY E-TICKET DEBIT NOTE"
-msgstr ""
-
-#. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_cn_inv
-msgid "CREDIT NOTE"
+msgid "Collection Receipt"
 msgstr ""
 
 #. module: l10n_uy
@@ -104,13 +84,8 @@ msgid "Companies"
 msgstr ""
 
 #. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_credito_e_boleta_contingencia
-msgid "Contingency Credit Note e-Boleta"
-msgstr ""
-
-#. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_debito_e_boleta_contingencia
-msgid "Contingency Debit Note e-Boleta"
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_remito_de_exportación_contingencia
+msgid "Contingency Export e-Delivery Guide"
 msgstr ""
 
 #. module: l10n_uy
@@ -129,34 +104,23 @@ msgid "Contingency Export e-Invoice Debit Note"
 msgstr ""
 
 #. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_e_remito_de_exportación_contingencia
-msgid "Contingency Export e-Mailing"
-msgstr ""
-
-#. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_e_factura_venta_por_cuenta_ajena_contingencia
-msgid "Contingency Sale By Third Party e-Invoice"
-msgstr ""
-
-#. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_débito_de_e_factura_venta_por_cuenta_ajena_contingencia
-msgid "Contingency Sale By Third Party e-Invoice Debit Note"
-msgstr ""
-
-#. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_e_ticket_venta_por_cuenta_ajena_contingencia
-#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_débito_de_e_ticket_venta_por_cuenta_ajena_contingencia
-msgid "Contingency Sale By Third Party e-Ticket Debit Note"
-msgstr ""
-
-#. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_e_ticket_venta_por_cuenta_ajena
-msgid "Contingency Sale by Third Party e-Ticket"
-msgstr ""
-
-#. module: l10n_uy
 #: model:l10n_latam.document.type,name:l10n_uy.dc_e_boleta_contingencia
 msgid "Contingency e-Boleta"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_credito_e_boleta_contingencia
+msgid "Contingency e-Boleta Credit Note"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_debito_e_boleta_contingencia
+msgid "Contingency e-Boleta Debit Note"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_remito_contingencia
+msgid "Contingency e-Delivery Guide"
 msgstr ""
 
 #. module: l10n_uy
@@ -175,13 +139,58 @@ msgid "Contingency e-Invoice Debit Note"
 msgstr ""
 
 #. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_e_remito_contingencia
-msgid "Contingency e-Mailing"
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_factura_venta_por_cuenta_ajena_contingencia
+msgid "Contingency e-Invoice Sale By Third Party"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_crédito_de_e_factura_venta_por_cuenta_ajena_contingencia
+msgid "Contingency e-Invoice Sale By Third Party Credit Note"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_débito_de_e_factura_venta_por_cuenta_ajena_contingencia
+msgid "Contingency e-Invoice Sale By Third Party Debit Note"
 msgstr ""
 
 #. module: l10n_uy
 #: model:l10n_latam.document.type,name:l10n_uy.dc_e_resguardo_contingencia
 msgid "Contingency e-Resguardo"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_ticket_cont
+msgid "Contingency e-Ticket"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_cn_e_ticket_cont
+msgid "Contingency e-Ticket Credit Note"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_dn_e_ticket_cont
+msgid "Contingency e-Ticket Debit Note"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_ticket_venta_por_cuenta_ajena_contingencia
+msgid "Contingency e-Ticket Sale By Third Party"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_crédito_de_e_ticket_venta_por_cuenta_ajena_contingencia
+msgid "Contingency e-Ticket Sale By Third Party Credit Note"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_débito_de_e_ticket_venta_por_cuenta_ajena_contingencia
+msgid "Contingency e-Ticket Sale By Third Party Debit Note"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_cn_inv
+msgid "Credit Note"
 msgstr ""
 
 #. module: l10n_uy
@@ -194,11 +203,6 @@ msgstr ""
 #: code:addons/l10n_uy/models/template_uy.py:0
 #, python-format
 msgid "Customer Invoices"
-msgstr ""
-
-#. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_dn_inv
-msgid "DEBIT NOTE"
 msgstr ""
 
 #. module: l10n_uy
@@ -217,8 +221,19 @@ msgid "DNI"
 msgstr ""
 
 #. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_dn_inv
+msgid "Debit Note"
+msgstr ""
+
+#. module: l10n_uy
 #: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_debito_e_boleta
 msgid "Debit Note e-Boleta"
+msgstr ""
+
+#. module: l10n_uy
+#: model:ir.model.fields.selection,name:l10n_uy.selection__l10n_latam_document_type__internal_type__stock_picking
+#: model:l10n_latam.document.type,name:l10n_uy.dc_remito
+msgid "Delivery Guide"
 msgstr ""
 
 #. module: l10n_uy
@@ -228,74 +243,38 @@ msgid "Document Types"
 msgstr ""
 
 #. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_e_inv
-msgid "E-INVOICE"
-msgstr ""
-
-#. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_cn_e_inv
-#: model:l10n_latam.document.type,name:l10n_uy.dc_dn_e_inv
-msgid "E-INVOICE CREDIT NOTE"
-msgstr ""
-
-#. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_e_remito
-msgid "E-MAILING"
-msgstr ""
-
-#. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_e_resguardo
-msgid "E-RESGUARDO"
-msgstr ""
-
-#. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_e_ticket
-msgid "E-TICKET"
-msgstr ""
-
-#. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_cn_e_ticket
-msgid "E-TICKET CREDIT NOTE"
-msgstr ""
-
-#. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_dn_e_ticket
-msgid "E-TICKET DEBIT NOTE"
-msgstr ""
-
-#. module: l10n_uy
 #: model:l10n_latam.document.type,name:l10n_uy.dc_nc_expo
-msgid "EXPORT CREDIT NOTE"
+msgid "Export Credit Note"
 msgstr ""
 
 #. module: l10n_uy
 #: model:l10n_latam.document.type,name:l10n_uy.dc_nd_expo
-msgid "EXPORT DEBIT NOTE"
-msgstr ""
-
-#. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_e_inv_exp
-msgid "EXPORT E-INVOICE"
-msgstr ""
-
-#. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_cn_e_inv_exp
-msgid "EXPORT E-INVOICE CREDIT NOTE"
-msgstr ""
-
-#. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_dn_e_inv_exp
-msgid "EXPORT E-INVOICE DEBIT NOTE"
-msgstr ""
-
-#. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_e_remito_expo
-msgid "EXPORT E-MAILING"
+msgid "Export Debit Note"
 msgstr ""
 
 #. module: l10n_uy
 #: model:l10n_latam.document.type,name:l10n_uy.dc_inv_expo
-msgid "EXPORT INVOICE"
+msgid "Export Invoice"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_remito_expo
+msgid "Export e-Delivery Guide"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_inv_exp
+msgid "Export e-Invoice"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_cn_e_inv_exp
+msgid "Export e-Invoice Credit Note"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_dn_e_inv_exp
+msgid "Export e-Invoice Debit Note"
 msgstr ""
 
 #. module: l10n_uy
@@ -306,11 +285,6 @@ msgstr ""
 #. module: l10n_uy
 #: model:l10n_latam.identification.type,description:l10n_uy.it_nie
 msgid "Foreigner Identity Number"
-msgstr ""
-
-#. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_inv
-msgid "INVOICE"
 msgstr ""
 
 #. module: l10n_uy
@@ -329,6 +303,11 @@ msgid "Internal Type"
 msgstr ""
 
 #. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_inv
+msgid "Invoice"
+msgstr ""
+
+#. module: l10n_uy
 #: model:ir.model,name:l10n_uy.model_account_journal
 msgid "Journal"
 msgstr ""
@@ -341,16 +320,6 @@ msgstr ""
 #. module: l10n_uy
 #: model:ir.model,name:l10n_uy.model_l10n_latam_document_type
 msgid "Latam Document Type"
-msgstr ""
-
-#. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_remito
-msgid "MAILING"
-msgstr ""
-
-#. module: l10n_uy
-#: model:ir.model.fields.selection,name:l10n_uy.selection__l10n_latam_document_type__internal_type__stock_picking
-msgid "Mailing"
 msgstr ""
 
 #. module: l10n_uy
@@ -403,41 +372,6 @@ msgstr ""
 #. module: l10n_uy
 #: model:l10n_latam.identification.type,name:l10n_uy.it_rut
 msgid "RUT / RUC"
-msgstr ""
-
-#. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_crédito_de_e_factura_venta_por_cuenta_ajena_contingencia
-msgid "Sale By Third Party Contingency e-Invoice Credit Note"
-msgstr ""
-
-#. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_crédito_de_e_ticket_venta_por_cuenta_ajena_contingencia
-msgid "Sale By Third Party Contingency e-Ticket Credit Note"
-msgstr ""
-
-#. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_e_factura_venta_por_cuenta_ajena
-msgid "Sale by Third Party E-Invoice"
-msgstr ""
-
-#. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_credito_e_factura_venta_por_cuenta_ajena
-msgid "Sale by Third Party e-Invoice Credit Note"
-msgstr ""
-
-#. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_debito_e_factura_venta_por_cuenta_ajena
-msgid "Sale by Third Party e-Invoice Debit Note"
-msgstr ""
-
-#. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_credito_e_ticket_venta_por_cuenta_ajena
-msgid "Sale by Third Party e-Ticket Credit Note"
-msgstr ""
-
-#. module: l10n_uy
-#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_debito_e_ticket_venta_por_cuenta_ajena
-msgid "Sale by Third Party e-Ticket Debit Note"
 msgstr ""
 
 #. module: l10n_uy
@@ -540,4 +474,74 @@ msgstr ""
 #. module: l10n_uy
 #: model:l10n_latam.document.type,name:l10n_uy.dc_e_boleta
 msgid "e-Boleta"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_remito
+msgid "e-Delivery Guide"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_inv
+msgid "e-Invoice"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_cn_e_inv
+msgid "e-Invoice Credit Note"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_dn_e_inv
+msgid "e-Invoice Debit Note"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_factura_venta_por_cuenta_ajena
+msgid "e-Invoice Sale By Third Party"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_credito_e_factura_venta_por_cuenta_ajena
+msgid "e-Invoice Sale By Third Party Credit Note"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_debito_e_factura_venta_por_cuenta_ajena
+msgid "e-Invoice Sale By Third Party Debit Note"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_resguardo
+msgid "e-Resguardo"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_ticket
+msgid "e-Ticket"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_cn_e_ticket
+msgid "e-Ticket Credit Note"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_dn_e_ticket
+msgid "e-Ticket Debit Note"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_e_ticket_venta_por_cuenta_ajena
+msgid "e-Ticket Sale By Third Party"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_credito_e_ticket_venta_por_cuenta_ajena
+msgid "e-Ticket Sale By Third Party Credit Note"
+msgstr ""
+
+#. module: l10n_uy
+#: model:l10n_latam.document.type,name:l10n_uy.dc_nota_de_debito_e_ticket_venta_por_cuenta_ajena
+msgid "e-Ticket Sale By Third Party Debit Note"
 msgstr ""

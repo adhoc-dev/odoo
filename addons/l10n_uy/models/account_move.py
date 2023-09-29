@@ -1,5 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from odoo import models, fields, _
+from odoo import models, _
 from odoo.exceptions import ValidationError
 
 
@@ -9,7 +9,7 @@ class AccountMove(models.Model):
 
     def _get_uruguayan_vat_taxes(self):
         """ Found the VAT tax groups defined in Uruguay """
-        data_records = self.env['ir.model.data'].search([
+        data_records = self.sudo().env['ir.model.data'].search([
             ('module', '=', 'account'),
             ('model', '=', 'account.tax.group'),
             '|', '|',
