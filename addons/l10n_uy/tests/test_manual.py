@@ -28,10 +28,11 @@ class TestManual(AccountTestInvoicingCommon):
             "email": 'info@example.com',
             "website": 'www.example.com',
         })
+
         cls.partner_uy = cls.company_uy.partner_id
         cls.tax_22 = cls.env['account.tax'].with_context(active_test=False).search(
             [('country_code', '=', 'UY'), ('amount', '=', 22.0), ('type_tax_use', '=', 'sale'),
-             ('tax_group_id', '=', cls.env.ref('l10n_uy.tax_group_iva_22').id),
+             ('tax_group_id', '=', cls._find_company_tax(cls, 'tax_group_iva_22').id),
              ('company_id', '=', cls.company_uy.id)], limit=1)
         cls.service_vat_22 = cls.env['product.product'].create({
             'name': 'Virtual Home Staging (VAT 22)',
@@ -41,6 +42,17 @@ class TestManual(AccountTestInvoicingCommon):
             'default_code': 'VAT 22',
             'taxes_id': [(6, 0, cls.tax_22.ids)],
         })
+
+    def _find_company_tax(self, tax_id):
+        data_records = self.env['ir.model.data'].search([
+            ('module', '=', 'account'),
+            ('model', '=', 'account.tax.group'),
+            ('name', 'ilike', tax_id),
+        ])
+        tax_group = self.env['account.tax.group'].search([
+            ('id', 'in', data_records.mapped('res_id')),
+            ('company_id', '=', self.company_uy.id)])
+        return tax_group
 
     def _create_invoice(self, data=None, invoice_type='out_invoice'):
         data = {}
