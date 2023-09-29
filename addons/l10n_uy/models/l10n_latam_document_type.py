@@ -9,9 +9,7 @@ class L10nAccountDocumentType(models.Model):
     internal_type = fields.Selection(selection_add=[('stock_picking', 'Mailing')])
 
     def _format_document_number(self, document_number):
-        """ Formated version of document number. In a future we will also use this
-        method as to validate if the given document number is a valid one (for the
-        cases when the user need to set the document number manually) """
+        """ As of now, format the document_number only, in the future, validate the document_number """
         self.ensure_one()
         if self.country_id.code != "UY":
             return super()._format_document_number(document_number)
