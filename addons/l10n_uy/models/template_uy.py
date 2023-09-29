@@ -1,5 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from odoo import models
+from odoo import models, _
 from odoo.addons.account.models.chart_template import template
 
 
@@ -11,9 +11,12 @@ class AccountChartTemplate(models.AbstractModel):
         return {
             'property_account_receivable_id': 'uy_code_11300',
             'property_account_payable_id': 'uy_code_21100',
-            'property_account_income_categ_id': 'uy_code_4100',
+            'property_account_income_categ_id': 'uy_code_4102',
             'property_account_expense_categ_id': 'uy_code_5100',
             'code_digits': '6',
+            'property_tax_payable_account_id': 'base_default_vat',
+            'property_tax_receivable_account_id': 'base_default_vat',
+            'name': _('Uruguayan Generic Chart of Accounts'),
         }
 
     @template('uy', 'res.company')
@@ -33,3 +36,28 @@ class AccountChartTemplate(models.AbstractModel):
                 'account_purchase_tax_id': 'vat4',
             },
         }
+
+    @template('uy', 'account.journal')
+    def _get_uy_account_journal(self):
+        return {
+            'sale': {
+                "name": _("Customer Invoices"),
+                "code": "0001",
+                "l10n_latam_use_documents": True,
+                "refund_sequence": False,
+            },
+            'purchase': {
+                "name": _("Vendor Bills"),
+                "code": "0002",
+                "l10n_latam_use_documents": True,
+                "refund_sequence": False,
+            },
+        }
+
+    def _load(self, template_code, company, install_demo):
+        """ Set companies country by default after install the chart of account,
+        also set the rut as the company identification type because this one is the uruguayan vat """
+        res = super()._load(template_code, company, install_demo)
+        if template_code == 'uy':
+            company.partner_id.l10n_latam_identification_type_id = self.env.ref('l10n_uy.it_rut')
+        return res
