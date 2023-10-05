@@ -1,4 +1,4 @@
-"id","name","country_id","name@es"
-"tax_group_iva_10","VAT 10%","base.uy","IVA 10%"
-"tax_group_iva_22","VAT 22%","base.uy","IVA 22%"
-"tax_group_exenton","EXEMPT","base.uy","EXENTOS"
+"id","name","l10n_uy_tax_category","country_id","name@es"
+"tax_group_iva_10","VAT 10%","vat","base.uy","IVA 10%"
+"tax_group_iva_22","VAT 22%","vat","base.uy","IVA 22%"
+"tax_group_exenton","EXEMPT","vat","base.uy","EXENTOS"

@@ -58,6 +58,7 @@ Demo data for testing:
         'data/res_partner_data.xml',
         'views/l10n_latam_document_type_views.xml',
         'views/account_journal_view.xml',
+        'views/account_tax_group_views.xml',
         'data/res_currency_data.xml',
     ],
     'demo': [

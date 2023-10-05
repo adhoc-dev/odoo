@@ -7,21 +7,6 @@ class AccountMove(models.Model):
 
     _inherit = 'account.move'
 
-    def _get_uruguayan_vat_taxes(self):
-        """ Found the VAT tax groups defined in Uruguay """
-        data_records = self.sudo().env['ir.model.data'].search([
-            ('module', '=', 'account'),
-            ('model', '=', 'account.tax.group'),
-            '|', '|',
-            ('name', 'ilike', 'tax_group_iva_10'),
-            ('name', 'ilike', 'tax_group_iva_22'),
-            ('name', 'ilike', 'tax_group_exenton'),
-        ])
-        group_taxes = self.env['account.tax.group'].search([
-            ('id', 'in', data_records.mapped('res_id')),
-            ('country_id', '=', self.env.ref('base.uy').id)])
-        return group_taxes
-
     def _check_uruguayan_invoices(self):
         """ Check that the UY invoices are vaid
         * the partner of the invoice should have a valid identification type
@@ -33,7 +18,7 @@ class AccountMove(models.Model):
             return True
         uy_invs.mapped('partner_id').check_vat()
 
-        uruguayan_vat_taxes = self._get_uruguayan_vat_taxes()
+        uruguayan_vat_taxes = self.env['account.tax.group'].search([('l10n_uy_tax_category', '=', 'vat')])
 
         # Check that we do not send any tax in export invoices
         expo_cfes = uy_invs.filtered(
