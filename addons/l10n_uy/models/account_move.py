@@ -79,11 +79,3 @@ class AccountMove(models.Model):
             where_string += " AND l10n_latam_document_type_id = %(l10n_latam_document_type_id)s"
             param['l10n_latam_document_type_id'] = self.l10n_latam_document_type_id.id or 0
         return where_string, param
-
-    def _is_manual_document_number(self):
-        """ Document number should be manual input by user when the journal use documents
-        and is of type purchase """
-        if self.country_code != 'UY':
-            return super()._is_manual_document_number()
-
-        return self.l10n_latam_use_documents and self.journal_id.type == 'purchase'
