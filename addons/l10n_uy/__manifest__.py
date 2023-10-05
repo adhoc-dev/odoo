@@ -59,11 +59,11 @@ Demo data for testing:
         'views/l10n_latam_document_type_views.xml',
         'views/account_journal_view.xml',
         'data/res_currency_data.xml',
-        'data/res_currency_rate_data.xml',
     ],
     'demo': [
         'demo/demo_company.xml',
         'demo/res_partner_demo.xml',
+        'demo/res_currency_rate_data.xml',
     ],
     'license': 'LGPL-3',
     'installable': True,
