@@ -15,7 +15,7 @@ class AccountJournal(models.Model):
         internal_types = ['invoice', 'debit_note', 'credit_note']
         doc_types = self.env['l10n_latam.document.type'].search([
             ('internal_type', 'in', internal_types),
-            ('country_id', '=', self.env.ref('base.uy').id)])
+            ('country_id.code', '=', 'UY')])
         available_types = doc_types.mapped('code')
 
         return available_types
