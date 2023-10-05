@@ -46,7 +46,7 @@ class AccountChartTemplate(models.AbstractModel):
                 "refund_sequence": False,
             },
             'purchase': {
-                "name": _("Purchases"),
+                "name": _("Vendor Bills"),
                 "code": "0002",
                 "l10n_latam_use_documents": True,
                 "refund_sequence": False,
