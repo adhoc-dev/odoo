@@ -76,7 +76,6 @@ _ref_vat = {
     'sk': 'SK2022749619',
     'sm': 'SM24165',
     'tr': 'TR1234567890 (VERGINO) or TR17291716060 (TCKIMLIKNO)',  # Levent Karakas @ Eska Yazilim A.S.
-    'uy': '215521750017',
     've': 'V-12345678-1, V123456781, V-12.345.678-1',
     'xi': 'XI123456782',
     'sa': '310175397400003 [Fifteen digits, first and last digits should be "3"]'
@@ -252,7 +251,7 @@ class ResPartner(models.Model):
         if country_code and company.country_id and country_code == company.country_id.code.lower():
             vat_label = company.country_id.vat_label
 
-        expected_format = _ref_vat.get(country_code, "'##' (##=VAT Number)")
+        expected_format = _ref_vat.get(country_code, "'CC##' (CC=Country Code, ##=VAT Number)")
 
         # Catch use case where the record label is about the public user (name: False)
         if 'False' not in record_label:
