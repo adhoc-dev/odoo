@@ -66,5 +66,4 @@ Demo data for testing:
         'demo/res_currency_rate_data.xml',
     ],
     'license': 'LGPL-3',
-    'installable': True,
 }
