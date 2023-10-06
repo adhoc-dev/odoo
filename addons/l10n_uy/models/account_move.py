@@ -40,7 +40,7 @@ class AccountMove(models.Model):
         if self.journal_id.company_id.account_fiscal_country_id.code == "UY":
             codes = self._l10n_uy_get_journal_codes()
             if codes:
-                domain.extend([('code', 'in', codes), ('active', '=', True)])
+                domain.extend([('code', 'in', codes)])
         return domain
 
     def _l10n_uy_get_journal_codes(self):
