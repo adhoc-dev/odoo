@@ -27,23 +27,13 @@ NOTE: This module adds both models and fields that will eventually be used for t
 Configuration
 -------------
 
-Follow the steps below to configure in production after installing the module:
-
-1. Company Configuration. Go to the Company menu and create or configure the Uruguayan Company. set the RUT number (vat)
-2. Install Chart of Accounts: Go to the Accounting / Configuration / Settings menu, under the Accounting / Fiscal Localization section, select the package "Uruguayan Generic Chart of Accounts" and then click Save.
-
-    IMPORTANT:
-
-    1. This option will only appear if the company where you are currently working does not yet have a chart of accounts installed. Once the chart of accounts is installed and invoices have been generated, it cannot be changed.
-    2. This configuration is company-specific, so make sure you are in the correct company where you want the chart of accounts to be installed.
-
 Demo data for testing:
 
 * Uruguayan company named "UY Company" with the Uruguayan chart of accounts already installed, pre configured taxes, document types and identification types.
 * Uruguayan contacts for testing:
 
    * IEB Internacional
-   * Consumidor Final Anónimo.
+   * Consumidor Final Anónimo Uruguayo.
 
 """,
     'depends': [
