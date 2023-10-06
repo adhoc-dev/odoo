@@ -51,7 +51,6 @@ Demo data for testing:
     'demo': [
         'demo/demo_company.xml',
         'demo/res_partner_demo.xml',
-        'demo/res_currency_rate_data.xml',
     ],
     'license': 'LGPL-3',
 }
