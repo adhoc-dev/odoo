@@ -8,8 +8,6 @@ class L10nAccountDocumentType(models.Model):
 
     _inherit = 'l10n_latam.document.type'
 
-    internal_type = fields.Selection(selection_add=[('stock_picking', 'Delivery Guide')])
-
     def _format_document_number(self, document_number):
         """ format and validate the document_number"""
         self.ensure_one()
