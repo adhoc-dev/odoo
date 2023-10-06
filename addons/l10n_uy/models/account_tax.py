@@ -2,9 +2,9 @@
 from odoo import fields, models
 
 
-class AccountTaxGroup(models.Model):
+class AccountTax(models.Model):
 
-    _inherit = "account.tax.group"
+    _inherit = "account.tax"
 
     l10n_uy_tax_category = fields.Selection([
         ('vat', 'VAT'),

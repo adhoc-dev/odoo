@@ -18,8 +18,6 @@ class AccountMove(models.Model):
             return True
         uy_invs.mapped('partner_id').check_vat()
 
-        uruguayan_vat_taxes = self.env['account.tax.group'].search([('l10n_uy_tax_category', '=', 'vat')])
-
         # Check that we do not send any tax in export invoices
         expo_cfes = uy_invs.filtered(
             lambda x: int(x.l10n_latam_document_type_id.code) in [121, 122, 123])
@@ -27,7 +25,7 @@ class AccountMove(models.Model):
         # We check that there is one and only one vat tax per line
         for line in (uy_invs - expo_cfes).mapped('invoice_line_ids').filtered(
                 lambda x: x.display_type not in ('line_section', 'line_note')):
-            vat_taxes = line.tax_ids.filtered(lambda x: x.tax_group_id in uruguayan_vat_taxes)
+            vat_taxes = line.tax_ids.filtered(lambda x: x.l10n_uy_tax_category == 'vat')
             if len(vat_taxes) != 1:
                 raise ValidationError(_('Should be one and only one VAT tax per line. Verify lines with product "%s" (Id Invoice: %s)',
                                       line.product_id.name, line.move_id.id))
