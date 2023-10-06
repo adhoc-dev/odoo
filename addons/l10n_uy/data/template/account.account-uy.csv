@@ -4,6 +4,7 @@
 "uy_code_11304","Notes Receivable ME","11304","asset_current","True","Documentos a Cobrar ME"
 "uy_code_11305","Checks in portfolio MN","11305","asset_current","True","Cheques en Cartera MN"
 "uy_code_11306","Checks in ME Portfolio","11306","asset_current","True","Cheques en Cartera ME"
+"uy_code_11307","Sundry Debtors (PoS)","11307","asset_receivable","True","Deudores Varios (PoS)"
 "uy_code_11311","Allowance for Uncollectible Accounts Receivable","11311","asset_current","True","Prevision para Deudores Incobrables"
 "uy_code_11312","Provisions for expenses and bonuses","11312","asset_current","True","Prevision p/dtos y Bonificaciones"
 "uy_code_11313","Interest received in advance","11313","asset_current","True","Intereses percibidos por adelantado"
