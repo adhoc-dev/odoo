@@ -7,7 +7,6 @@
         <field name="street"/>
         <field name="city">Montevideo</field>
         <field name="country_id" ref="base.uy"/>
-        
         <field name="zip">12800</field>
         <field name="phone">+598 94 231 234</field>
         <field name="email">info@company.uyexample.com</field>
@@ -16,7 +15,6 @@
 
     <record id="demo_company_uy" model="res.company">
         <field name="name">UY Company</field>
-        <field name='currency_id' ref='base.UYU'/>
         <field name="partner_id" ref="partner_demo_company_uy"/>
     </record>
 
