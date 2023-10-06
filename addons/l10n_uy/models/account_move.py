@@ -43,13 +43,6 @@ class AccountMove(models.Model):
                 domain.extend([('code', 'in', codes), ('active', '=', True)])
         return domain
 
-    def unlink(self):
-        """ When using documents on vendor bills the document_number is set manually by the number given from the vendor
-        so the odoo sequence is not used. In this case we allow to delete vendor bills with document_number/name """
-        self.filtered(lambda x: x.move_type in x.get_purchase_types() and x.state in ('draft', 'cancel') and
-                      x.l10n_latam_use_documents).write({'name': '/'})
-        return super().unlink()
-
     def _post(self, soft=True):
         """ We make validations here and not with a constraint because we want a validation before sending
         electronic data on l10n_uy_edi
