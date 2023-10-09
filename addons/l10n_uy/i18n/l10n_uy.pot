@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.5alpha1+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-06 21:17+0000\n"
-"PO-Revision-Date: 2023-10-06 21:17+0000\n"
+"POT-Creation-Date: 2023-10-09 17:46+0000\n"
+"PO-Revision-Date: 2023-10-09 17:46+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -332,8 +332,7 @@ msgstr ""
 #: code:addons/l10n_uy/models/l10n_latam_document_type.py:0
 #, python-format
 msgid ""
-"Please introduce a valid Document number: 2 letters and 7 digits "
-"(XX0000001)"
+"Please introduce a valid Document number: 2 letters and 7 digits (XX0000001)"
 msgstr ""
 
 #. module: l10n_uy
@@ -391,6 +390,12 @@ msgstr ""
 #. module: l10n_uy
 #: model:account.report.line,name:l10n_uy.account_tax_report_base_impb
 msgid "Taxable income"
+msgstr ""
+
+#. module: l10n_uy
+#: model:ir.model.fields,help:l10n_uy.field_account_tax__l10n_uy_tax_category
+msgid ""
+"UY: Use to group the transactions in the Financial Reports required by DGI"
 msgstr ""
 
 #. module: l10n_uy
