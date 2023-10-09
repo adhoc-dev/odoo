@@ -22,8 +22,6 @@ Among the functionalities are:
 * Configuration and activation of Uruguayan Currencies  (UYU, UYI - Unidad Indexada Uruguaya).
 * Frequently used default contacts already configured: DGI, Consumidor Final Uruguayo.
 
-NOTE: This module adds both models and fields that will eventually be used for the electronic invoicing module.
-
 Configuration
 -------------
 
