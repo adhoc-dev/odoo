@@ -6,30 +6,6 @@ class AccountMove(models.Model):
 
     _inherit = 'account.move'
 
-    def _get_l10n_latam_documents_domain(self):
-        """ We overwrite original domain to only show available active uruguayan document types
-        """
-        self.ensure_one()
-        domain = super()._get_l10n_latam_documents_domain()
-        if self.journal_id.company_id.account_fiscal_country_id.code == "UY":
-            codes = self._l10n_uy_get_journal_codes()
-            if codes:
-                domain.extend([('code', 'in', codes)])
-        return domain
-
-    def _l10n_uy_get_journal_codes(self):
-        """ Return list of the available document type codes for Uruguayan Sales Journals """
-        self.ensure_one()
-        if self.journal_id.type != 'sale':
-            return []
-        internal_types = ['invoice', 'debit_note', 'credit_note']
-        doc_types = self.env['l10n_latam.document.type'].search([
-            ('internal_type', 'in', internal_types),
-            ('country_id.code', '=', 'UY')])
-        available_types = doc_types.mapped('code')
-
-        return available_types
-
     def _get_starting_sequence(self):
         """ If use documents then will create a new starting sequence using the document type code prefix and the
         journal document number with a 8 padding number """
