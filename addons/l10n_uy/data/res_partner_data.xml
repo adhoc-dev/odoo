@@ -1,7 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <odoo>
 
-
     <!-- DGI Is the Fiscal office on UY: Direccion General Impositiva -->
     <record id="partner_dgi" model="res.partner">
         <field name="name">DGI</field>
