@@ -13,7 +13,6 @@ class AccountChartTemplate(models.AbstractModel):
         if company.account_fiscal_country_id.code == 'UY':
             number = 0
             for move in move_data.values():
-                # vendor bills and refund must be manually numbered (l10n_br uses the standard AccountMove._is_manual_document_number())
                 if move['move_type'] in ('in_invoice', 'in_refund'):
                     move['l10n_latam_document_number'] = 'A' + f'{number:07d}'
                     number += 1
