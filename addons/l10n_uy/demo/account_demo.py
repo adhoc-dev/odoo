@@ -11,7 +11,7 @@ class AccountChartTemplate(models.AbstractModel):
         """ Set the l10n_latam_document_number on demo invoices """
         move_data = super()._get_demo_data_move(company)
         if company.account_fiscal_country_id.code == 'UY':
-            number = 0
+            number = 1
             for move in move_data.values():
                 if move['move_type'] in ('in_invoice', 'in_refund'):
                     move['l10n_latam_document_number'] = 'A' + f'{number:07d}'
