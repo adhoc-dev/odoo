@@ -334,8 +334,8 @@ msgstr "Pasaporte (todos los paises)"
 #, python-format
 msgid ""
 "Please introduce a valid Document number: 2 letters and 7 digits "
-"(XX-0000001)"
-msgstr "Por favor ingrese un Número de documento válido: 2 letras y 7 dígitos (XX-0000001)"
+"(XX0000001)"
+msgstr "Por favor ingrese un Número de documento válido: 2 letras y 7 dígitos (XX0000001)"
 
 #. module: l10n_uy
 #: model:account.report.line,name:l10n_uy.account_tax_report_cmprs_exnto_iva
