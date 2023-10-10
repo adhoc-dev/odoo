@@ -44,6 +44,7 @@ Demo data for testing:
         'data/l10n_latam.document.type.csv',
         'data/l10n_latam_identification_type_data.xml',
         'data/res_partner_data.xml',
+        'data/res.currency.csv',
         'views/account_tax_views.xml',
     ],
     'demo': [
