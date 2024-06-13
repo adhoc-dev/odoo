@@ -26,7 +26,10 @@ class Paymentprovider(models.Model):
         required_if_provider='mercado_pago',
         groups='base.group_system',
     )
-
+    mercado_pago_use_instalment = fields.Boolean(
+        string="Use mercado pago instalment",
+        help="If you activate this option, the customer will be able to choose between the installments that you configure on the Mercado Pago website.",
+    )
     # === BUSINESS METHODS === #
 
     @api.model

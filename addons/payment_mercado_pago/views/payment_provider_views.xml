@@ -12,6 +12,7 @@
                            string="Access Token"
                            attrs="{'required': [('code', '=', 'mercado_pago'), ('state', '!=', 'disabled')]}"
                            password="True"/>
+                    <field name="mercado_pago_use_instalment"/>
                 </group>
             </group>
         </field>

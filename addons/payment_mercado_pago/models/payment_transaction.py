@@ -73,7 +73,7 @@ class PaymentTransaction(models.Model):
                 ))
             unit_price = rounded_unit_price
 
-        return {
+        preference_payload = {
             'auto_return': 'all',
             'back_urls': {
                 'success': return_url,
@@ -99,10 +99,15 @@ class PaymentTransaction(models.Model):
                     'street_name': self.partner_address,
                 },
             },
-            'payment_methods': {
-                'installments': 1,  # Prevent MP from proposing several installments for a payment.
-            },
         }
+        if not self.provider_id.mercado_pago_use_instalment:
+            # Prevent MP from proposing several installments for a payment.
+            preference_payload.update({
+                'payment_methods': {
+                    'installments': 1,
+                }
+            })
+        return preference_payload
 
     def _get_tx_from_notification_data(self, provider_code, notification_data):
         """ Override of `payment` to find the transaction based on Mercado Pago data.
