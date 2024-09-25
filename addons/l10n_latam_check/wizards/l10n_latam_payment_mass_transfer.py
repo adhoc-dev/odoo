@@ -55,8 +55,8 @@ class L10nLatamPaymentMassTransfer(models.TransientModel):
             checks = self.env['l10n_latam.check'].browse(self._context.get('active_ids', []))
             if checks.filtered(lambda x: x.payment_method_line_id.code != 'new_third_party_checks'):
                 raise 'You have select some payments that are not checks. Please call this action from the Third Party Checks menu'
-            elif not all(check.payment_id.state == 'in_process' for check in checks):
-                raise UserError(_("All the selected checks must be posted"))
+            elif not all(check.payment_id.state == 'paid' for check in checks):
+                raise UserError(_("All the selected checks must be paid"))
             currency_ids = checks.mapped('currency_id')
             if any(x != currency_ids[0] for x in currency_ids):
                 raise UserError(_("All the selected checks must use the same currency"))
@@ -72,7 +72,7 @@ class L10nLatamPaymentMassTransfer(models.TransientModel):
 
         pay_method_line = self.journal_id._get_available_payment_method_lines('outbound').filtered(
             lambda x: x.code == 'out_third_party_checks')
-        payment_vals = {
+        payment_vals = [{
                         'date': self.payment_date,
                         'amount': sum(checks.mapped('amount')),
                         'payment_type': 'outbound',
@@ -81,8 +81,17 @@ class L10nLatamPaymentMassTransfer(models.TransientModel):
                         'currency_id': currency_id.id,
                         'payment_method_line_id': pay_method_line.id,
                         'l10n_latam_move_check_ids': [Command.link(x.id) for x in checks]
-                    }
-
+                    },
+                    {
+                        'date': self.payment_date,
+                        'amount': sum(checks.mapped('amount')),
+                        'payment_type': 'inbound',
+                        'memo': self.communication,
+                        'journal_id': self.destination_journal_id.id,
+                        'currency_id': currency_id.id,
+                        #'payment_method_line_id': pay_method_line.id,
+                        'l10n_latam_move_check_ids': [Command.link(x.id) for x in checks]
+                    }]
         payments = self.env['account.payment'].create(payment_vals)
         payments.action_post()
         return payments

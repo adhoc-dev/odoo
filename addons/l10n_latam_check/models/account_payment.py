@@ -36,6 +36,13 @@ class AccountPayment(models.Model):
             codes = ['in_third_party_checks', 'out_third_party_checks', 'new_third_party_checks', 'own_checks']
         return self.payment_method_code in codes
 
+    def action_validate(self):
+        msgs = self._get_blocking_l10n_latam_warning_msg()
+        if msgs:
+            raise ValidationError('* %s' % '\n* '.join(msgs))
+        super().action_validate()
+        self._l10n_latam_check_split_move()
+
     def action_post(self):
         # unlink checks if payment method code is not for checks. We do it on post and not when changing payment
         # method so that the user don't loose checks data in case of changing payment method and coming back again
@@ -48,7 +55,8 @@ class AccountPayment(models.Model):
         if msgs:
             raise ValidationError('* %s' % '\n* '.join(msgs))
         super().action_post()
-        self._l10n_latam_check_split_move()
+        latam_check_payment = self.filtered(lambda x: x._is_latam_check_payment())
+        latam_check_payment.action_validate()
 
     def _get_latam_checks(self):
         self.ensure_one()
@@ -71,9 +79,9 @@ class AccountPayment(models.Model):
                 )
             # checks being moved
             if rec._is_latam_check_payment(check_subtype='move_check'):
-                if any(check.payment_id.state != 'in_process' for check in rec.l10n_latam_move_check_ids):
+                if any(check.payment_id.state != 'paid' for check in rec.l10n_latam_move_check_ids):
                     msgs.append(
-                        _('Selected checks "%s" are not posted', rec.l10n_latam_move_check_ids.filtered(lambda x: x.payment_id.state != 'in_process').mapped('display_name'))
+                        _('Selected checks "%s" are not paid', rec.l10n_latam_move_check_ids.filtered(lambda x: x.payment_id.state != 'paid').mapped('display_name'))
                     )
                 elif rec.payment_type == 'outbound' and any(check.current_journal_id != rec.journal_id for check in rec.l10n_latam_move_check_ids):
                     # check outbound payment and transfer or inbound transfer
@@ -214,7 +222,7 @@ class AccountPayment(models.Model):
                         ('bank_id', '=', check.bank_id.id),
                         ('issuer_vat', '=', check.issuer_vat),
                         ('name', '=', check.name),
-                        ('payment_id.state', '=', 'in_process'),
+                        ('payment_id.state', '=', 'paid'),
                         ('id', '!=', check._origin.id)], limit=1)
                 if same_checks:
                     msgs.append(
