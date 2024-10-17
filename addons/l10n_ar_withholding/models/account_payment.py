@@ -15,7 +15,7 @@ class AccountPayment(models.Model):
         if not any(field_name in changed_fields for field_name in self._get_trigger_fields_to_synchronize()):
             return
         for pay in self:
-            pay.line_ids.filtered(
+            pay.move_id.line_ids.filtered(
                 lambda x:
                 x.account_id == pay.company_id.l10n_ar_tax_base_account_id or
                 x.tax_line_id.l10n_ar_withholding_payment_type
