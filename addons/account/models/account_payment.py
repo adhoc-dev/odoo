@@ -4,7 +4,7 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.tools.misc import format_date, formatLang
 from odoo.tools import create_index
 from odoo.tools import SQL
-
+from itertools import zip_longest
 
 class AccountPayment(models.Model):
     _name = "account.payment"
@@ -236,26 +236,25 @@ class AccountPayment(models.Model):
         '''
         self.ensure_one()
 
-        # liquidity_lines, counterpart_lines, writeoff_lines
-        lines = [self.env['account.move.line'] for _dummy in range(3)]
+        liquidity_lines, counterpart_lines, writeoff_lines = self.env['account.move.line']
         valid_account_types = self._get_valid_payment_account_types()
         for line in self.move_id.line_ids:
             if line.account_id in self._get_valid_liquidity_accounts():
-                lines[0] += line  # liquidity_lines
+                liquidity_lines += line  # liquidity_lines
             elif line.account_id.account_type in valid_account_types or line.account_id == line.company_id.transfer_account_id:
-                lines[1] += line  # counterpart_lines
+                counterpart_lines += line  # counterpart_lines
             else:
-                lines[2] += line  # writeoff_lines
+                writeoff_lines += line  # writeoff_lines
 
         # In some case, there is no liquidity or counterpart line (after changing an outstanding account on the journal for example)
         # In that case, and if there is one writeoff line, we take this line and set it as liquidity/counterpart line
-        if len(lines[2]) == 1:
-            for i in (0, 1):
-                if not lines[i]:
-                    lines[i] = lines[2]
-                    lines[2] -= lines[2]
+        if len(writeoff_lines) == 1:
+            for line in (liquidity_lines, counterpart_lines):
+                if line:
+                    line = writeoff_lines
+                    writeoff_lines -= writeoff_lines
 
-        return lines
+        return [liquidity_lines, counterpart_lines, writeoff_lines]
 
     def _get_valid_liquidity_accounts(self):
         return (
@@ -949,6 +948,8 @@ class AccountPayment(models.Model):
             # Make sure to preserve the write-off amount.
             # This allows to create a new payment with custom 'line_ids'.
             write_off_line_vals = []
+            valid_account_types = pay._get_valid_payment_account_types()
+
             if liquidity_lines and counterpart_lines and writeoff_lines:
                 write_off_line_vals.append({
                     'name': writeoff_lines[0].name,
@@ -959,10 +960,21 @@ class AccountPayment(models.Model):
                     'balance': sum(writeoff_lines.mapped('balance')),
                 })
             line_vals_list = pay._prepare_move_line_default_vals(write_off_line_vals=write_off_line_vals)
-            line_ids_commands = [
-                Command.update(liquidity_lines.id, line_vals_list[0]) if liquidity_lines else Command.create(line_vals_list[0]),
-                Command.update(counterpart_lines.id, line_vals_list[1]) if counterpart_lines else Command.create(line_vals_list[1])
-            ]
+            line_ids_commands = []
+            liquidity_lines_vals = [x for x in line_vals_list if x['account_id'] == self.outstanding_account_id.id]
+            for liquidity_line, newline_val in zip_longest(liquidity_lines, liquidity_lines_vals):
+                if liquidity_line and newline_val:
+                    line_ids_commands.append(Command.update(liquidity_line.id, newline_val))
+                elif not liquidity_line and newline_val:
+                    line_ids_commands.append(Command.create(newline_val))
+                elif liquidity_line and not newline_val:
+                    line_ids_commands.append(Command.unlink(liquidity_line.id))
+
+            counterpart_line_vals = [x for x in line_vals_list if x['account_id'] == pay.company_id.transfer_account_id.id or self.env['account.account'].browse(x['account_id']).type in valid_account_types]
+            line_ids_commands.append(
+                Command.update(counterpart_lines.id, counterpart_line_vals[0]) if counterpart_lines else Command.create(counterpart_line_vals[0])
+            )
+
             for line in writeoff_lines:
                 line_ids_commands.append((2, line.id))
             for extra_line_vals in line_vals_list[2:]:
