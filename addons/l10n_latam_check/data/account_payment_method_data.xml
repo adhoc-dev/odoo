@@ -8,6 +8,13 @@
         <field name="payment_type">outbound</field>
     </record>
 
+    <record id="account_payment_method_deferred_checks" model="account.payment.method">
+        <field name="name">Deferred Checks</field>
+        <field name="name@es_419">Cheques diferidos</field>
+        <field name="code">deferred_checks</field>
+        <field name="payment_type">outbound</field>
+    </record>
+
     <!-- third party checks -->
     <record id="account_payment_method_new_third_party_checks" model="account.payment.method">
         <field name="name">New Third Party Checks</field>

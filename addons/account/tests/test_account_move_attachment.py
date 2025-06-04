@@ -15,7 +15,7 @@ class TestAccountMoveAttachment(HttpCase):
         self.assertFalse(invoice.attachment_ids)
         response = self.url_open("/mail/attachment/upload",
             {
-                "csrf_token": http.Request.csrf_token(self),
+                "csrf_token": http.Request(self),
                 "thread_id": invoice.id,
                 "thread_model": "account.move",
             },

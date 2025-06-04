@@ -236,6 +236,13 @@ class AccountPayment(models.Model):
                     )
             rec.l10n_latam_check_warning_msg = msgs and '* %s' % '\n* '.join(msgs) or False
 
+    @api.depends('payment_method_code')
+    def _compute_outstanding_account_id(self):
+        deferred_checks = self.filtered(lambda x: x.payment_method_code == 'deferred_checks')
+        for pay in deferred_checks:
+            pay.outstanding_account_id = pay.company_id.deferred_checks_account_id
+        super(AccountPayment, self - deferred_checks)._compute_outstanding_account_id()
+
     @api.model
     def _get_trigger_fields_to_synchronize(self):
         res = super()._get_trigger_fields_to_synchronize()
