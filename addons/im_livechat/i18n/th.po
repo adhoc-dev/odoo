@@ -1,24 +1,27 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* im_livechat
-# 
+# * im_livechat
+#
 # Translators:
 # Wil Odoo, 2024
 # Rasareeyar Lappiam, 2024
-# 
+#
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Rasareeyar Lappiam, 2024\n"
-"Language-Team: Thai (https://app.transifex.com/odoo/teams/41243/th/)\n"
+"POT-Creation-Date: 2025-12-29 18:37+0000\n"
+"PO-Revision-Date: 2025-11-12 12:38+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Thai <https://translate.odoo.com/projects/odoo-18/im_livechat/"
+"th/>\n"
+"Language: th\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: th\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 5.12.2\n"
 
 #. module: im_livechat
 #. odoo-python
@@ -64,25 +67,20 @@ msgstr "%s (สำเนา)"
 
 #. module: im_livechat
 #. odoo-python
-#: code:addons/im_livechat/models/chatbot_script_step.py:0
-msgid "%s has joined"
-msgstr "%s ได้เข้าร่วม"
-
-#. module: im_livechat
-#. odoo-python
 #: code:addons/im_livechat/models/chatbot_script.py:0
 #: code:addons/im_livechat/models/discuss_channel.py:0
 msgid ""
-"'%(input_email)s' does not look like a valid email. Can you please try "
-"again?"
+"'%(input_email)s' does not look like a valid email. Can you please try again?"
 msgstr "อีเมล '%(input_email)s' ไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง"
 
 #. module: im_livechat
 #: model:ir.model.fields,help:im_livechat.field_im_livechat_channel_rule__action
 msgid ""
 "* 'Show' displays the chat button on the pages.\n"
-"* 'Show with notification' is 'Show' in addition to a floating text just next to the button.\n"
-"* 'Open automatically' displays the button and automatically opens the conversation pane.\n"
+"* 'Show with notification' is 'Show' in addition to a floating text just "
+"next to the button.\n"
+"* 'Open automatically' displays the button and automatically opens the "
+"conversation pane.\n"
 "* 'Hide' hides the chat button on the pages.\n"
 msgstr ""
 "* 'แสดง' แสดงปุ่มแชทบนเพจ\n"
@@ -107,8 +105,7 @@ msgid ""
 "ratings\" role=\"img\" aria-label=\"Happy face\"/>"
 msgstr ""
 "<i class=\"fa fa-smile-o text-success\" "
-"title=\"เปอร์เซ็นต์ของการให้คะแนนที่น่าพอใจ\" role=\"รูปภาพ\" aria-"
-"label=\"หน้ายิ้ม\"/>"
+"title=\"เปอร์เซ็นต์ของการให้คะแนนที่น่าพอใจ\" role=\"รูปภาพ\" aria-label=\"หน้ายิ้ม\"/>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_test_script_page
@@ -143,40 +140,41 @@ msgstr "<span>เรียน</span><br/>นี่คือสำเนากา
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_step_view_form
 msgid ""
-"<span>Reminder: This step will only be played if no operator is "
-"available.</span>"
-msgstr ""
-"<span>คำเตือน: "
-"ขั้นตอนนี้จะสามารถใช้ได้ก็ต่อเมื่อไม่มีตัวดำเนินการที่พร้อมใช้งาน</span>"
-
-#. module: im_livechat
-#: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_view_form
-msgid ""
-"<span>Tip: At least one interaction (Question, Email, ...) is needed before the Bot can perform more complex actions (Forward to an Operator, ...). </span>\n"
-"                    <span>Use Channel Rules if you want the Bot to interact with visitors only when no operator is available.</span>"
-msgstr ""
-"<span>เคล็ดลับ: จำเป็นต้องมีการโต้ตอบอย่างน้อยหนึ่งครั้ง (คำถาม อีเมล ...) ก่อนที่บอทจะสามารถดำเนินการที่ซับซ้อนมากขึ้นได้ (ส่งต่อไปยังผู้ปฏิบัติงาน ...) </span>\n"
-"                    <span>ใช้กฎของช่องหากคุณต้องการให้บอทโต้ตอบกับผู้เยี่ยมชมเฉพาะเมื่อไม่มีผู้ดำเนินการเท่านั้น</span>"
+"<span>Reminder: This step will only be played if no operator is available.</"
+"span>"
+msgstr "<span>คำเตือน: ขั้นตอนนี้จะสามารถใช้ได้ก็ต่อเมื่อไม่มีตัวดำเนินการที่พร้อมใช้งาน</span>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_view_form
 msgid ""
 "<span>Tip: At least one interaction (Question, Email, ...) is needed before "
-"the Bot can perform more complex actions (Forward to an Operator, "
-"...).</span>"
+"the Bot can perform more complex actions (Forward to an Operator, ...). </"
+"span>\n"
+"                    <span>Use Channel Rules if you want the Bot to interact "
+"with visitors only when no operator is available.</span>"
 msgstr ""
 "<span>เคล็ดลับ: จำเป็นต้องมีการโต้ตอบอย่างน้อยหนึ่งครั้ง (คำถาม อีเมล ...) "
-"ก่อนที่บอทจะสามารถดำเนินการที่ซับซ้อนมากขึ้นได้ (ส่งต่อไปยังผู้ปฏิบัติงาน "
-"...)</span>"
+"ก่อนที่บอทจะสามารถดำเนินการที่ซับซ้อนมากขึ้นได้ (ส่งต่อไปยังผู้ปฏิบัติงาน ...) </span>\n"
+"                    <span>ใช้กฎของช่องหากคุณต้องการให้บอทโต้ตอบกับผู้เยี่ยมชมเฉพาะเมื่อไม่มีผู้ดำเนินการเท่านั้น</"
+"span>"
+
+#. module: im_livechat
+#: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_view_form
+msgid ""
+"<span>Tip: At least one interaction (Question, Email, ...) is needed before "
+"the Bot can perform more complex actions (Forward to an Operator, ...).</"
+"span>"
+msgstr ""
+"<span>เคล็ดลับ: จำเป็นต้องมีการโต้ตอบอย่างน้อยหนึ่งครั้ง (คำถาม อีเมล ...) "
+"ก่อนที่บอทจะสามารถดำเนินการที่ซับซ้อนมากขึ้นได้ (ส่งต่อไปยังผู้ปฏิบัติงาน ...)</span>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_step_view_form
 msgid ""
-"<span>Tip: Plan further steps for the Bot in case no operator is "
-"available.</span>"
+"<span>Tip: Plan further steps for the Bot in case no operator is available.</"
+"span>"
 msgstr ""
-"<span>เคล็ดลับ: "
-"วางแผนขั้นตอนเพิ่มเติมสำหรับบอทในกรณีที่ไม่มีผู้ปฏิบัติงานที่พร้อมใช้งาน</span>"
+"<span>เคล็ดลับ: วางแผนขั้นตอนเพิ่มเติมสำหรับบอทในกรณีที่ไม่มีผู้ปฏิบัติงานที่พร้อมใช้งาน</span>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_test_script_page
@@ -192,10 +190,12 @@ msgstr "mail.message สามารถเชื่อมโยงกับข�
 #: model:ir.model.fields,help:im_livechat.field_im_livechat_report_channel__is_without_answer
 msgid ""
 "A session is without answer if the operator did not answer. \n"
-"                                       If the visitor is also the operator, the session will always be answered."
+"                                       If the visitor is also the operator, "
+"the session will always be answered."
 msgstr ""
 "เซสชั่นจะไม่มีการตอบกลับหากผู้ปฏิบัติงานไม่ตอบกลับ\n"
-"                                       หากผู้เยี่ยมชมเป็นผู้ดำเนินการด้วย เซสชั่นจะได้รับการตอบเสมอ"
+"                                       หากผู้เยี่ยมชมเป็นผู้ดำเนินการด้วย "
+"เซสชั่นจะได้รับการตอบเสมอ"
 
 #. module: im_livechat
 #: model:ir.model.fields,field_description:im_livechat.field_discuss_channel__message_needaction
@@ -208,9 +208,20 @@ msgid "Active"
 msgstr "เปิดใช้งาน"
 
 #. module: im_livechat
+#: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
+msgid "Add the following code to the &lt;head&gt; section of your website:"
+msgstr ""
+
+#. module: im_livechat
 #: model:res.groups,name:im_livechat.im_livechat_group_manager
 msgid "Administrator"
 msgstr "ผู้ดูแลระบบ"
+
+#. module: im_livechat
+#: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
+msgid ""
+"Alternatively, share this URL with your customers or suppliers via email:"
+msgstr ""
 
 #. module: im_livechat
 #. odoo-javascript
@@ -384,12 +395,11 @@ msgstr "ตัวยึดตำแหน่งการป้อนข้อม
 #. module: im_livechat
 #: model:ir.model.fields,help:im_livechat.field_discuss_channel__channel_type
 msgid ""
-"Chat is private and unique between 2 persons. Group is private among invited"
-" persons. Channel can be freely joined (depending on its configuration)."
+"Chat is private and unique between 2 persons. Group is private among invited "
+"persons. Channel can be freely joined (depending on its configuration)."
 msgstr ""
-"การแชทเป็นแบบส่วนตัวและไม่ซ้ำกันระหว่าง 2 คน "
-"กลุ่มเป็นแบบส่วนตัวในกลุ่มผู้ได้รับเชิญ สามารถเข้าร่วมช่องได้อย่างอิสระ "
-"(ขึ้นอยู่กับการกำหนดค่า)"
+"การแชทเป็นแบบส่วนตัวและไม่ซ้ำกันระหว่าง 2 คน กลุ่มเป็นแบบส่วนตัวในกลุ่มผู้ได้รับเชิญ "
+"สามารถเข้าร่วมช่องได้อย่างอิสระ (ขึ้นอยู่กับการกำหนดค่า)"
 
 #. module: im_livechat
 #: model:ir.actions.act_window,name:im_livechat.chatbot_script_action
@@ -447,6 +457,11 @@ msgid "Chatbots"
 msgstr "แชทบอท"
 
 #. module: im_livechat
+#: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
+msgid "Choose the live chat channel you want to display on your website."
+msgstr ""
+
+#. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_test_script_page
 msgid "Close"
 msgstr "ปิด"
@@ -501,12 +516,6 @@ msgstr "สนทนากับ %s"
 #: model:ir.model.fields,field_description:im_livechat.field_digest_digest__kpi_livechat_conversations
 msgid "Conversations handled"
 msgstr "การสนทนาได้รับการจัดการแล้ว"
-
-#. module: im_livechat
-#: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
-msgid ""
-"Copy and paste this code into your website, within the &lt;head&gt; tag:"
-msgstr "คัดลอกและวางโค้ดนี้ลงในเว็บไซต์ของคุณ ภายในส่วน &lt;head&gt; แท็ก:"
 
 #. module: im_livechat
 #: model:ir.model.fields,field_description:im_livechat.field_discuss_channel__country_id
@@ -625,9 +634,9 @@ msgid ""
 "installed on your server, otherwise, the countries of the rule will not be "
 "taken into account."
 msgstr ""
-"กำหนดกฎสำหรับช่องทางการช่วยเหลือแบบไลฟ์ของคุณ คุณสามารถใช้การดำเนินการกับ "
-"URL ที่กำหนดและต่อประเทศได้ <br/> ในการระบุประเทศ จะต้องติดตั้ง GeoIP "
-"บนเซิร์ฟเวอร์ของคุณ ไม่เช่นนั้น ประเทศของกฎจะไม่ถูกนำมาพิจารณา"
+"กำหนดกฎสำหรับช่องทางการช่วยเหลือแบบไลฟ์ของคุณ คุณสามารถใช้การดำเนินการกับ URL "
+"ที่กำหนดและต่อประเทศได้ <br/> ในการระบุประเทศ จะต้องติดตั้ง GeoIP บนเซิร์ฟเวอร์ของคุณ "
+"ไม่เช่นนั้น ประเทศของกฎจะไม่ถูกนำมาพิจารณา"
 
 #. module: im_livechat
 #: model:ir.model.fields,help:im_livechat.field_im_livechat_channel_rule__auto_popup_timer
@@ -637,8 +646,7 @@ msgid ""
 "not be taken into account."
 msgstr ""
 "การล่าช้า (เป็นวินาที) เพื่อเปิดหน้าต่างการสนทนาโดยอัตโนมัติ หมายเหตุ: "
-"การกระทำที่เลือกจะต้องเป็น 'เปิดอัตโนมัติ' ไม่เช่นนั้น "
-"พารามิเตอร์นี้จะไม่ถูกนำมาพิจารณา"
+"การกระทำที่เลือกจะต้องเป็น 'เปิดอัตโนมัติ' ไม่เช่นนั้น พารามิเตอร์นี้จะไม่ถูกนำมาพิจารณา"
 
 #. module: im_livechat
 #. odoo-javascript
@@ -731,9 +739,14 @@ msgid "Explain your note"
 msgstr "อธิบายหมายเหตุของคุณ"
 
 #. module: im_livechat
-#: model:ir.model,name:im_livechat.model_ir_binary
-msgid "File streaming helper model for controllers"
-msgstr "โมเดลตัวช่วยการสตรีมไฟล์สำหรับคอนโทรลเลอร์"
+#: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
+msgid "FOR OTHER WEBSITES"
+msgstr ""
+
+#. module: im_livechat
+#: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
+msgid "FOR WEBSITES BUILT WITH ODOO"
+msgstr ""
 
 #. module: im_livechat
 #: model:ir.model.fields.selection,name:im_livechat.selection__chatbot_script__first_step_warning__first_step_invalid
@@ -761,17 +774,6 @@ msgid "Followers (Partners)"
 msgstr "ผู้ติดตาม (พาร์ทเนอร์)"
 
 #. module: im_livechat
-#: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
-msgid ""
-"For websites built with the Odoo CMS, go to Website &gt; Configuration &gt; "
-"Settings and select the Website Live Chat Channel you want to add to your "
-"website."
-msgstr ""
-"สำหรับเว็บไซต์ที่สร้างด้วย Odoo CMS ให้ไปที่เว็บไซต์ &gt; การกำหนดค่า &gt; "
-"การตั้งค่า "
-"และเลือกช่องไลฟ์แชทของเว็บไซต์ที่คุณต้องการเพิ่มลงในเว็บไซต์ของคุณ"
-
-#. module: im_livechat
 #: model:ir.model.fields.selection,name:im_livechat.selection__chatbot_script_step__step_type__forward_operator
 msgid "Forward to Operator"
 msgstr "ส่งต่อไปยังตัวดำเนินการ"
@@ -792,8 +794,16 @@ msgid ""
 "Given the order to find a matching rule. If 2 rules are matching for the "
 "given url/country, the one with the lowest sequence will be chosen."
 msgstr ""
-"ได้รับคำสั่งให้หากฎเกณฑ์ที่ตรงกัน หากมี 2 กฎที่ตรงกันสำหรับ "
-"URL/ประเทศที่กำหนด ระบบจะเลือกกฎที่มีลำดับต่ำสุด"
+"ได้รับคำสั่งให้หากฎเกณฑ์ที่ตรงกัน หากมี 2 กฎที่ตรงกันสำหรับ URL/ประเทศที่กำหนด "
+"ระบบจะเลือกกฎที่มีลำดับต่ำสุด"
+
+#. module: im_livechat
+#: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
+msgid ""
+"Go to <strong>Website</strong> &gt; <strong>Configuration</strong> &gt; "
+"<strong>Settings</strong> &gt; <strong>Email</strong> &amp; "
+"<strong>Marketing.</strong>"
+msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.discuss_channel_view_search
@@ -849,8 +859,7 @@ msgstr "ประวัติ"
 #: model:chatbot.script.step,message:im_livechat.chatbot_script_welcome_step_pricing
 msgid ""
 "Hmmm, let me check if I can find someone that could help you with that..."
-msgstr ""
-"อืมมม...ให้ฉันตรวจสอบว่าฉันสามารถหาคนที่สามารถช่วยคุณในเรื่องนั้นได้หรือไม่..."
+msgstr "อืมมม...ให้ฉันตรวจสอบว่าฉันสามารถหาคนที่สามารถช่วยคุณในเรื่องนั้นได้หรือไม่..."
 
 #. module: im_livechat
 #: model:ir.model.fields,field_description:im_livechat.field_im_livechat_report_channel__start_date_hour
@@ -862,11 +871,6 @@ msgstr "ชั่วโมงที่เริ่มต้น วันที�
 #: code:addons/im_livechat/models/im_livechat_channel.py:0
 msgid "How may I help you?"
 msgstr "ฉันจะช่วยคุณได้อย่างไร?"
-
-#. module: im_livechat
-#: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
-msgid "How to use the Website Live Chat widget?"
-msgstr "จะใช้วิดเจ็ตไลฟ์แชทของเว็บไซต์ได้อย่างไร?"
 
 #. module: im_livechat
 #: model:chatbot.script.step,message:im_livechat.chatbot_script_welcome_step_pricing_noone_available
@@ -1027,6 +1031,14 @@ msgid "Last Updated on"
 msgstr "อัปเดตครั้งล่าสุดเมื่อ"
 
 #. module: im_livechat
+#: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
+msgid ""
+"Learn how to display a live chat bubble on your website and start chatting "
+"with visitors in a few easy steps."
+msgstr ""
+"เรียนรู้วิธีแสดงกล่องแชทสดบนเว็บไซต์ของคุณ และเริ่มพูดคุยกับผู้เยี่ยมชมได้ง่าย ๆ เพียงไม่กี่ขั้นตอน"
+
+#. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
 msgid "Leave"
 msgstr "ลา"
@@ -1127,8 +1139,8 @@ msgid ""
 "your company livechat session performance. Extract information about the "
 "missed sessions, the audience, the duration of a session, etc."
 msgstr ""
-"สถิติช่องทางการช่วยเหลือของไลฟ์แชทจะช่วยให้คุณสามารถตรวจสอบและวิเคราะห์ประสิทธิภาพเซสชั่นไลฟ์แชทของบริษัทของคุณได้อย่างง่ายดาย"
-" แยกข้อมูลเกี่ยวกับเซสชันที่ไม่ได้รับ ผู้ชม ระยะเวลาของเซสชัน ฯลฯ"
+"สถิติช่องทางการช่วยเหลือของไลฟ์แชทจะช่วยให้คุณสามารถตรวจสอบและวิเคราะห์ประสิทธิภาพเซสชั่นไลฟ์แชทของบริษัทของคุณได้อย่างง่ายดาย "
+"แยกข้อมูลเกี่ยวกับเซสชันที่ไม่ได้รับ ผู้ชม ระยะเวลาของเซสชัน ฯลฯ"
 
 #. module: im_livechat
 #: model:ir.model,name:im_livechat.model_im_livechat_report_operator
@@ -1338,8 +1350,7 @@ msgid ""
 "Operators that do not show any activity In Odoo for more than 30 minutes "
 "will be considered as disconnected."
 msgstr ""
-"ตัวดำเนินการที่ไม่แสดงกิจกรรมใดใน Odoo เป็นเวลานานกว่า 30 "
-"นาทีจะถือว่าถูกตัดการเชื่อมต่อ"
+"ตัวดำเนินการที่ไม่แสดงกิจกรรมใดใน Odoo เป็นเวลานานกว่า 30 นาทีจะถือว่าถูกตัดการเชื่อมต่อ"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_answer_view_tree
@@ -1682,6 +1693,12 @@ msgid "Step Type"
 msgstr "ประเภทขั้นตอน"
 
 #. module: im_livechat
+#. odoo-python
+#: code:addons/im_livechat/models/chatbot_script.py:0
+msgid "Step of type 'Question' must have answers."
+msgstr ""
+
+#. module: im_livechat
 #. odoo-javascript
 #: code:addons/im_livechat/static/src/core/web/composer_patch.js:0
 #: code:addons/im_livechat/static/src/core/web/composer_patch.xml:0
@@ -1730,13 +1747,12 @@ msgstr "การสนทนาถูกส่งไปแล้ว"
 msgid ""
 "The rule will only be applied for these countries. Example: if you select "
 "'Belgium' and 'United States' and that you set the action to 'Hide', the "
-"chat button will be hidden on the specified URL from the visitors located in"
-" these 2 countries. This feature requires GeoIP installed on your server."
+"chat button will be hidden on the specified URL from the visitors located in "
+"these 2 countries. This feature requires GeoIP installed on your server."
 msgstr ""
-"กฎนี้จะใช้กับประเทศเหล่านี้เท่านั้น ตัวอย่าง: หากคุณเลือก 'ประเทศเบลเยียม' "
-"และ 'สหรัฐอเมริกา' และคุณตั้งค่าการดำเนินการเป็น 'ซ่อน' "
-"ปุ่มแชทจะถูกซ่อนไว้ใน URL ที่ระบุจากผู้เยี่ยมชมที่อยู่ใน 2 ประเทศนี้ "
-"ฟีเจอร์นี้ต้องติดตั้ง GeoIP บนเซิร์ฟเวอร์ของคุณ"
+"กฎนี้จะใช้กับประเทศเหล่านี้เท่านั้น ตัวอย่าง: หากคุณเลือก 'ประเทศเบลเยียม' และ 'สหรัฐอเมริกา' "
+"และคุณตั้งค่าการดำเนินการเป็น 'ซ่อน' ปุ่มแชทจะถูกซ่อนไว้ใน URL ที่ระบุจากผู้เยี่ยมชมที่อยู่ใน 2 "
+"ประเทศนี้ ฟีเจอร์นี้ต้องติดตั้ง GeoIP บนเซิร์ฟเวอร์ของคุณ"
 
 #. module: im_livechat
 #: model:res.groups,comment:im_livechat.im_livechat_group_manager
@@ -1768,8 +1784,7 @@ msgid ""
 "These languages, in addition to your main language, will be used to assign "
 "you to Live Chat sessions."
 msgstr ""
-"ภาษาเหล่านี้ นอกเหนือจากภาษาหลักของคุณ "
-"จะถูกนำมาใช้เพื่อกำหนดให้คุณเข้าร่วมเซสชันไลฟ์แชท"
+"ภาษาเหล่านี้ นอกเหนือจากภาษาหลักของคุณ จะถูกนำมาใช้เพื่อกำหนดให้คุณเข้าร่วมเซสชันไลฟ์แชท"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_report_operator_view_search
@@ -1788,9 +1803,7 @@ msgstr "สัปดาห์นี้"
 msgid ""
 "This is an automated 'welcome' message that your visitor will see when they "
 "initiate a new conversation."
-msgstr ""
-"นี่คือข้อความ 'ยินดีต้อนรับ' "
-"อัตโนมัติที่ผู้เยี่ยมชมของคุณจะเห็นเมื่อพวกเขาเริ่มต้นการสนทนาใหม่"
+msgstr "นี่คือข้อความ 'ยินดีต้อนรับ' อัตโนมัติที่ผู้เยี่ยมชมของคุณจะเห็นเมื่อพวกเขาเริ่มต้นการสนทนาใหม่"
 
 #. module: im_livechat
 #: model:ir.model.fields,help:im_livechat.field_res_users_settings__livechat_username
@@ -1830,6 +1843,11 @@ msgid "Treated sessions"
 msgstr "เซสชันที่ได้รับการช่วยเหลือแล้ว"
 
 #. module: im_livechat
+#: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
+msgid "Turn on the <strong>Live Chat</strong> feature."
+msgstr ""
+
+#. module: im_livechat
 #: model:ir.model.fields,field_description:im_livechat.field_im_livechat_channel_rule__regex_url
 msgid "URL Regex"
 msgstr "URL Regex"
@@ -1854,9 +1872,8 @@ msgstr "ไม่ได้รับคะแนน"
 #. module: im_livechat
 #: model_terms:digest.tip,tip_description:im_livechat.digest_tip_im_livechat_0
 msgid ""
-"Use canned responses to define templates of messages in the livechat app. To"
-" load a canned response, start your sentence with ':' and select the "
-"template."
+"Use canned responses to define templates of messages in the livechat app. To "
+"load a canned response, start your sentence with ':' and select the template."
 msgstr ""
 "ใช้การตอบกลับสำเร็จรูปเพื่อกำหนดเทมเพลตของข้อความในแอปไลฟ์แชท "
 "หากต้องการโหลดคำตอบสำเร็จรูป ให้เริ่มประโยคของคุณด้วย ':' และเลือกเทมเพลต"
@@ -1982,14 +1999,14 @@ msgstr "คุณไม่ได้รับอนุญาตให้อัป
 msgid ""
 "You can create a new Chatbot with a defined script to speak to your website "
 "visitors."
-msgstr ""
-"คุณสามารถสร้างแชทบอทใหม่พร้อมสคริปต์ที่กำหนดไว้เพื่อพูดคุยกับผู้เยี่ยมชมเว็บไซต์ของคุณ"
+msgstr "คุณสามารถสร้างแชทบอทใหม่พร้อมสคริปต์ที่กำหนดไว้เพื่อพูดคุยกับผู้เยี่ยมชมเว็บไซต์ของคุณ"
 
 #. module: im_livechat
 #: model_terms:ir.actions.act_window,help:im_livechat.im_livechat_channel_action
 msgid ""
 "You can create channels for each website on which you want\n"
-"                to integrate the website live chat widget, allowing your website\n"
+"                to integrate the website live chat widget, allowing your "
+"website\n"
 "                visitors to talk in real time with your operators."
 msgstr ""
 "คุณสามารถสร้างช่องทางสำหรับแต่ละเว็บไซต์ที่คุณต้องการ\n"
@@ -2055,11 +2072,6 @@ msgstr "เช่น YourWebsite.com"
 #: code:addons/im_livechat/static/src/embed/common/feedback_panel/transcript_sender.xml:0
 msgid "mail@example.com"
 msgstr "mail@example.com"
-
-#. module: im_livechat
-#: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
-msgid "or copy this url and send it by email to your customers or suppliers:"
-msgstr "หรือคัดลอก URL นี้และส่งทางอีเมลไปยังลูกค้าหรือซัพพลายเออร์ของคุณ:"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_rule_view_form

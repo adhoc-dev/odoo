@@ -5,6 +5,7 @@
         outline: $border-width solid rgba($border-color, .35);
         outline-offset: -$border-width;
         background-color: $o-view-background-color;
+        --border-opacity: .5;
     }
 
     &.o-highlighted {
@@ -20,10 +21,6 @@
 
 .o-mail-Message-date {
     opacity: 50%;
-}
-
-.o-mail-Message-edited {
-    display: none;
 }
 
 .o-mail-Message-seenContainer {
@@ -81,7 +78,7 @@
         }
     }
 
-    & > p {
+    & > p:last-child, .o-mail-Message-richBody > p:last-child {
         margin-bottom: 0 !important;
     }
 
@@ -145,6 +142,7 @@
 
         &:hover, &.focus, &.show {
             opacity: 100%;
+            color: var(--mail-Message-actionIconHoveredColor, black);
         }
     }
 }

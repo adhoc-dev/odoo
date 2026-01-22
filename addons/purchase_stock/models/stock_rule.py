@@ -54,12 +54,13 @@ class StockRule(models.Model):
             procurement_date_planned = fields.Datetime.from_string(procurement.values['date_planned'])
 
             supplier = False
+            company_id = rule.company_id or procurement.company_id
             if procurement.values.get('supplierinfo_id'):
                 supplier = procurement.values['supplierinfo_id']
             elif procurement.values.get('orderpoint_id') and procurement.values['orderpoint_id'].supplier_id:
                 supplier = procurement.values['orderpoint_id'].supplier_id
             else:
-                supplier = procurement.product_id.with_company(procurement.company_id.id)._select_seller(
+                supplier = procurement.product_id.with_company(company_id.id)._select_seller(
                     partner_id=self._get_partner_id(procurement.values, rule),
                     quantity=procurement.product_qty,
                     date=max(procurement_date_planned.date(), fields.Date.today()),
@@ -68,7 +69,7 @@ class StockRule(models.Model):
             # Fall back on a supplier for which no price may be defined. Not ideal, but better than
             # blocking the user.
             supplier = supplier or procurement.product_id._prepare_sellers(False).filtered(
-                lambda s: not s.company_id or s.company_id == procurement.company_id
+                lambda s: not s.company_id or s.company_id == company_id
             )[:1]
 
             if not supplier:
@@ -80,7 +81,7 @@ class StockRule(models.Model):
             procurement.values['supplier'] = supplier
             procurement.values['propagate_cancel'] = rule.propagate_cancel
 
-            domain = rule._make_po_get_domain(procurement.company_id, procurement.values, partner)
+            domain = rule._make_po_get_domain(company_id, procurement.values, partner)
             procurements_by_po_domain[domain].append((procurement, rule))
 
         if errors:
@@ -93,10 +94,10 @@ class StockRule(models.Model):
             procurements, rules = zip(*procurements_rules)
 
             # Get the set of procurement origin for the current domain.
-            origins = set([p.origin for p in procurements])
+            origins = set([p.origin for p in procurements if p.origin])
             # Check if a PO exists for the current domain.
             po = self.env['purchase.order'].sudo().search([dom for dom in domain], limit=1)
-            company_id = procurements[0].company_id
+            company_id = rules[0].company_id or procurements[0].company_id
             if not po:
                 positive_values = [p.values for p in procurements if float_compare(p.product_qty, 0.0, precision_rounding=p.product_uom.rounding) >= 0]
                 if positive_values:
@@ -163,7 +164,13 @@ class StockRule(models.Model):
         bypass_delay_description = self.env.context.get('bypass_delay_description')
         buy_rule = self.filtered(lambda r: r.action == 'buy')
         seller = 'supplierinfo' in values and values['supplierinfo'] or product.with_company(buy_rule.company_id)._select_seller(quantity=None)
-        if not buy_rule or not seller:
+        if not buy_rule:
+            return delays, delay_description
+        if not seller:
+            delays['total_delay'] += 365
+            delays['no_vendor_found_delay'] += 365
+            if not bypass_delay_description:
+                delay_description.append((_('No Vendor Found'), _('+ %s day(s)', 365)))
             return delays, delay_description
         buy_rule.ensure_one()
         if not self.env.context.get('ignore_vendor_lead_time'):
@@ -278,6 +285,7 @@ class StockRule(models.Model):
         # arbitrary procurement. In this case the first.
         values = values[0]
         partner = values['supplier'].partner_id
+        currency = values['supplier'].currency_id
 
         fpos = self.env['account.fiscal.position'].with_company(company_id)._get_fiscal_position(partner)
 
@@ -290,7 +298,7 @@ class StockRule(models.Model):
             'user_id': partner.buyer_id.id,
             'picking_type_id': self.picking_type_id.id,
             'company_id': company_id.id,
-            'currency_id': partner.with_company(company_id).property_purchase_currency_id.id or company_id.currency_id.id,
+            'currency_id': currency.id or partner.with_company(company_id).property_purchase_currency_id.id or company_id.currency_id.id,
             'dest_address_id': values.get('partner_id', False),
             'origin': ', '.join(origins),
             'payment_term_id': partner.with_company(company_id).property_supplier_payment_term_id.id,
@@ -303,6 +311,9 @@ class StockRule(models.Model):
         gpo = self.group_propagation_option
         group = (gpo == 'fixed' and self.group_id) or \
                 (gpo == 'propagate' and 'group_id' in values and values['group_id']) or False
+        currency = ('supplier' in values and values['supplier'].currency_id) or \
+                   partner.with_company(company_id).property_purchase_currency_id or \
+                   company_id.currency_id
 
         domain = (
             ('partner_id', '=', partner.id),
@@ -310,6 +321,7 @@ class StockRule(models.Model):
             ('picking_type_id', '=', self.picking_type_id.id),
             ('company_id', '=', company_id.id),
             ('user_id', '=', partner.buyer_id.id),
+            ('currency_id', '=', currency.id),
         )
         delta_days = self.env['ir.config_parameter'].sudo().get_param('purchase_stock.delta_days_merge')
         if values.get('orderpoint_id') and delta_days is not False:
@@ -318,6 +330,11 @@ class StockRule(models.Model):
             domain += (
                 ('date_order', '<=', datetime.combine(procurement_date + relativedelta(days=delta_days), datetime.max.time())),
                 ('date_order', '>=', datetime.combine(procurement_date - relativedelta(days=delta_days), datetime.min.time()))
+            )
+        strict_partner_dest = self.env['ir.config_parameter'].sudo().get_param('purchase_stock.split_po')
+        if strict_partner_dest:
+            domain += (
+                ('dest_address_id', '=', values.get('partner_id', False)),
             )
         if group:
             domain += (('group_id', '=', group.id),)

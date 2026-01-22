@@ -19,11 +19,11 @@ class AccountMove(models.Model):
             ('03', '03 To other VAT Collectors other than the Treasurer'),
             ('04', '04 Other Value of VAT Imposition Base'),
             ('05', '05 Specified Amount (Article 9A Paragraph (1) VAT Law)'),
-            ('06', '06 Other Deliveries'),
+            ('06', '06 to individuals holding foreign passports'),
             ('07', '07 Deliveries that the VAT is not Collected'),
             ('08', '08 Deliveries that the VAT is Exempted'),
             ('09', '09 Deliveries of Assets (Article 16D of VAT Law)'),
-        ], string='Tax Transaction Code', help='The first 2 digits of tax number',
+        ], string='Kode Transaksi', help='Dua digit pertama nomor pajak',
         readonly=False, copy=False,
         compute="_compute_kode_transaksi", store=True)
     l10n_id_efaktur_range = fields.Many2one("l10n_id_efaktur.efaktur.range", string="E-faktur Range", copy=False, domain="[('company_id', '=', company_id), ('available', '>', 0)]")
@@ -82,17 +82,6 @@ class AccountMove(models.Model):
                 and move.move_type == 'out_invoice'
                 and move.country_code == 'ID'
             )
-
-    @api.constrains('l10n_id_kode_transaksi', 'line_ids', 'partner_id')
-    def _constraint_kode_ppn(self):
-        ppn_tag = self.env.ref('l10n_id.ppn_tag')
-        for move in self.filtered(lambda m: m.l10n_id_need_kode_transaksi and m.l10n_id_kode_transaksi != '08'):
-            if any(ppn_tag.id in line.tax_tag_ids.ids for line in move.line_ids if line.display_type == 'product') \
-                    and any(ppn_tag.id not in line.tax_tag_ids.ids for line in move.line_ids if line.display_type == 'product'):
-                raise UserError(_('Cannot mix VAT subject and Non-VAT subject items in the same invoice with this kode transaksi.'))
-        for move in self.filtered(lambda m: m.l10n_id_need_kode_transaksi and m.l10n_id_kode_transaksi == '08'):
-            if any(ppn_tag.id in line.tax_tag_ids.ids for line in move.line_ids if line.display_type == 'product'):
-                raise UserError('Kode transaksi 08 is only for non VAT subject items.')
 
     @api.constrains('l10n_id_tax_number')
     def _constrains_l10n_id_tax_number(self):

@@ -600,6 +600,13 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         self.registry.setup_models(self.cr)
         self.assertEqual(self.registry.field_depends[Model.full_name], ('name1', 'name2'))
 
+    def test_12_one2many_reference_domain(self):
+        model = self.env['test_new_api.inverse_m2o_ref']
+        o2m_field = model._fields['model_ids']
+        self.assertEqual(o2m_field.get_domain_list(model), [('res_model', '=', model._name)])
+        o2m_field = model._fields['model_computed_ids']
+        self.assertEqual(o2m_field.get_domain_list(model), [])
+
     def test_13_inverse(self):
         """ test inverse computation of fields """
         Category = self.env['test_new_api.category']
@@ -931,6 +938,52 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         self.assertEqual(user1.group_count, 1)
         self.assertEqual(user2.group_count, 1)
 
+    def test_18_flush_all(self):
+        """ check that env.flush_all() effectively recomputes all fields. """
+        self.env.invalidate_all()
+        self.assertFalse(self.env['test_new_api.compute.created'].search_count([('name', '=', 'foo')]))
+
+        # the computation of field 'created_id' should create a new record with
+        # a stored computed field
+        record = self.env['test_new_api.compute.creator'].create({'name': 'foo'})
+        self.assertIn(record._fields['created_id'], self.env.fields_to_compute())
+
+        # now recompute and flush all fields; make sure there is no leftover
+        self.env.flush_all()
+        self.assertFalse(self.env.fields_to_compute())
+
+        # check the computed field of the created record
+        self.env.invalidate_all()
+        self.assertEqual(record.created_id.value, 3)
+
+    def test_18_flush_precommit(self):
+        """ check that cr.flush() runs precommits as many times as needed. """
+        cr = self.env.cr
+        record = self.env['test_new_api.compute.created'].create({'name': 'foo'})
+        # The hook triggers a compute of the value (stored-computed) field
+        # which triggers the hook again, limited to 4 calls.
+        # Choosing a number < 10 (which is the max number of iterations).
+        count = 4
+
+        def hook():
+            nonlocal count
+            if count <= 0:
+                return
+            count -= 1
+            record.name = 'x'
+
+        def compute_value(self):
+            self.value = 10 + count
+            self.env.cr.precommit.add(hook)
+
+        self.patch(self.registry[record._name], '_compute_value', compute_value)
+
+        # run the pre-commit hook
+        hook()
+        cr.flush()
+        self.assertEqual(count, 0, "Precommit not ran enough times")
+        self.assertEqual(record.value, 10, "Flush not triggered correctly")
+
     def test_20_float(self):
         """ test rounding of float fields """
         record = self.env['test_new_api.mixed'].create({})
@@ -1074,6 +1127,12 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         record.name = False
         self.assertFalse(record.filtered_domain([('name', 'like', 'F')]))
         self.assertFalse(record.filtered_domain([('name', 'ilike', 'f')]))
+
+    def test_20_like_multiline(self):
+        """ test filtered_domain() on multiline fields. """
+        record = self.env['test_new_api.mixed'].create({'comment1': 'Foo\nBar'})
+        self.assertTrue(record.filtered_domain([('comment1', 'like', 'Bar')]))
+        self.assertTrue(record.filtered_domain([('comment1', 'ilike', 'bar')]))
 
     def test_21_date(self):
         """ test date fields """
@@ -1647,6 +1706,26 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
             self.assertEqual(record_company.truth, False)
             self.assertEqual(record_company.count, 0)
             self.assertEqual(record_company.phi, 0.0)
+    
+    def test_27_company_dependent_missing_many2one(self):
+        """ Test ORM can handle missing records for many2one company dependent fields """
+        company0 = self.env.ref('base.main_company')
+        company1 = self.env['res.company'].create({'name': 'A'})
+        Model = self.env['test_new_api.company']
+        record = Model.create({})
+        record.tag_id = 1000  # non-existing record id
+        record.invalidate_recordset()
+
+        self.env.cr.execute(
+            'SELECT id FROM test_new_api_company WHERE id = %s and (tag_id->%s)::int = %s',
+            [record.id, str(self.env.company.id), 1000],
+        )
+        self.assertEqual(self.env.cr.rowcount, 1)
+        self.assertFalse(record.tag_id)
+        self.assertEqual(
+            record.search([('id', '=', record.id), ('tag_id', '=', False)]),
+            record,
+        )
 
     def test_28_company_dependent_search(self):
         """ Test the search on company-dependent fields in all corner cases.
@@ -3179,6 +3258,10 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
             for index, record in enumerate(records):
                 record.write({'harry': index + 2})
 
+    def test_related_column_type(self):
+        related_float_field = self.env['test_new_api.related']._fields['foo_float_id']
+        self.assertEqual(related_float_field.column_type[1], 'numeric')
+
 
 class TestX2many(TransactionExpressionCase):
 
@@ -3800,15 +3883,15 @@ class TestHtmlField(TransactionCase):
             'comment2': '<p>comment</p>',
         })
 
-        # in a perfect world this should be 1, but at the moment the value is
-        # sanitized more than once during creation of the record
+        # the new value is sanitized upon insertion in db,
+        # but not put in cache, therefore not sanitized a second time
+        self.assertEqual(patch.call_count, 1)
+
+        # new value sanitized for insertion in cache
+        record.comment2 = '<p>comment</p>'
         self.assertEqual(patch.call_count, 2)
 
-        # new value needs to be validated, so it is sanitized once more
-        record.comment2 = '<p>comment</p>'
-        self.assertEqual(patch.call_count, 3)
-
-        # the value is already sanitized for flushing
+        # the value in cache is dirty -> sanitize for db insertion while flushing
         record.flush_recordset()
         self.assertEqual(patch.call_count, 3)
 
@@ -4558,6 +4641,20 @@ class TestComputeQueries(TransactionCase):
             record = model.create({'foo': 'Foo', 'bar': 'Bar'})
         self.assertEqual(record.foo, 'Bar')
         self.assertEqual(record.bar, 'Bar')
+
+    def test_x2many_computed_inverse(self):
+        record = self.env['test_new_api.compute.inverse'].create(
+            {'child_ids': [Command.create({'foo': 'child'})]},
+        )
+        self.assertEqual(
+            len(record.child_ids), 1,
+            f"Should be a single record: {record.child_ids!r}",
+        )
+        self.assertTrue(
+            record.child_ids.id,
+            f"Should be database records: {record.child_ids!r}",
+        )
+        self.assertEqual(record.foo, 'has one child')
 
     def test_multi_create(self):
         model = self.env['test_new_api.foo']

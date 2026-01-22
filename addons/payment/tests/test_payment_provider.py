@@ -48,6 +48,26 @@ class TestPaymentProvider(PaymentCommon):
                 self.provider.state = 'disabled'
                 self.assertFalse(self.payment_methods.active)
 
+    def test_enabling_provider_activates_processing_cron(self):
+        """ Test that the post-processing cron is activated when a provider is enabled. """
+        self.env['payment.provider'].search([]).state = 'disabled'  # Reset providers' state.
+        post_processing_cron = self.env.ref('payment.cron_post_process_payment_tx')
+        for enabled_state in ('enabled', 'test'):
+            post_processing_cron.active = False  # Reset the cron's active field.
+            self.provider.state = 'disabled'  # Prepare the dummy provider for enabling.
+            self.provider.state = enabled_state
+            self.assertTrue(post_processing_cron.active)
+
+    def test_disabling_provider_deactivates_processing_cron(self):
+        """ Test that the post-processing cron is deactivated when a provider is disabled. """
+        self.env['payment.provider'].search([]).state = 'disabled'  # Reset providers' state.
+        post_processing_cron = self.env.ref('payment.cron_post_process_payment_tx')
+        for enabled_state in ('enabled', 'test'):
+            post_processing_cron.active = True  # Reset the cron's active field.
+            self.provider.state = enabled_state  # Prepare the dummy provider for disabling.
+            self.provider.state = 'disabled'
+            self.assertFalse(post_processing_cron.active)
+
     def test_published_provider_compatible_with_all_users(self):
         """ Test that a published provider is always available to all users. """
         for user in (self.public_user, self.portal_user):
@@ -77,6 +97,17 @@ class TestPaymentProvider(PaymentCommon):
                 self.company.id, self.partner.id, self.amount
             )
             self.assertNotIn(self.provider, compatible_providers)
+
+    def test_provider_compatible_with_branch_companies(self):
+        """ Test that the provider is available to branch companies. """
+        branch_company = self.env['res.company'].create({
+            'name': "Provider Branch Company",
+            'parent_id': self.provider.company_id.id,
+        })
+        compatible_providers = self.provider._get_compatible_providers(
+            branch_company.id, self.partner.id, self.amount,
+        )
+        self.assertIn(self.provider, compatible_providers)
 
     def test_provider_compatible_with_available_countries(self):
         """ Test that the provider is compatible with its available countries. """

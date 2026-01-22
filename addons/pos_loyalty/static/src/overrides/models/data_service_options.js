@@ -9,10 +9,21 @@ patch(DataServiceOptions.prototype, {
                 key: "id",
                 condition: (record) => {
                     return record["<-pos.order.line.coupon_id"].find(
-                        (l) => l.order_id?.finalized && typeof l.order_id.id === "number"
+                        (l) => !(l.order_id?.finalized && typeof l.order_id.id === "number")
                     );
+                },
+                getRecordsBasedOnLines: (orderlines) => {
+                    return orderlines.map((line) => line.coupon_id).filter((c) => c);
                 },
             },
         };
+    },
+    get pohibitedAutoLoadedModels() {
+        return [
+            ...super.pohibitedAutoLoadedModels,
+            "loyalty.program",
+            "loyalty.rule",
+            "loyalty.reward",
+        ];
     },
 });

@@ -2,10 +2,11 @@ import { Plugin } from "@html_editor/plugin";
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
 import { parseHTML } from "@html_editor/utils/html";
 import { describe, expect, test } from "@odoo/hoot";
-import { click, pointerDown, pointerUp, press, queryOne } from "@odoo/hoot-dom";
+import { click, pointerDown, pointerUp, press, queryOne, microTick } from "@odoo/hoot-dom";
 import { animationFrame, mockUserAgent, tick } from "@odoo/hoot-mock";
 import { setupEditor, testEditor } from "./_helpers/editor";
 import { getContent, setSelection } from "./_helpers/selection";
+import { expectElementCount } from "./_helpers/ui_expectations";
 import { addStep, deleteBackward, insertText, redo, undo } from "./_helpers/user_actions";
 import { execCommand } from "./_helpers/userCommands";
 
@@ -35,7 +36,7 @@ describe("reset", () => {
         await insertText(editor, "/tab");
         await press("enter");
         await animationFrame();
-        expect(".o-we-tablepicker").toHaveCount(1);
+        await expectElementCount(".o-we-tablepicker", 1);
         expect(getContent(el)).toBe(
             `<p placeholder='Type "/" for commands' class="o-we-hint">[]</p>`
         );
@@ -44,7 +45,7 @@ describe("reset", () => {
 
         await click(".odoo-editor-editable p");
         await animationFrame();
-        expect(".o-we-tablepicker").toHaveCount(0);
+        await expectElementCount(".o-we-tablepicker", 0);
         expect(historyPlugin.currentStep.mutations.length).toBe(0);
     });
 });
@@ -320,6 +321,14 @@ describe("prevent system classes to be set from history", () => {
 
         expect(getContent(el)).toBe(`<p class="y">a</p>`);
     });
+
+    test("should not copy system classes when changing a tag name", async () => {
+        const { el, editor } = await setupEditor(`<p class="x">a[]</p>`, { config: { Plugins } });
+        editor.shared.dom.setTag({
+            tagName: "h1",
+        });
+        expect(getContent(el)).toBe(`<h1>a[]</h1>`);
+    });
 });
 
 describe("makeSavePoint", () => {
@@ -541,9 +550,10 @@ describe("shortcut", () => {
         expect.verifySteps([]);
         await insertText(editor, "a");
         expect.verifySteps([
+            // mutations for "a" insertion register new records for the current step
             "handleNewRecords",
             "contentUpdated",
-            "handleNewRecords",
+            // mutations for the hint removal are filtered out (no registered record)
             "contentUpdated",
             "onchange",
         ]);
@@ -574,18 +584,57 @@ describe("destroy", () => {
             }
             destroy() {
                 this.dependencies.dom.insert(
-                    parseHTML(this.document, `<div class="test">destroyed</div>`)
+                    parseHTML(this.document, `<div class="test oe_unbreakable">destroyed</div>`)
                 );
             }
         }
         const Plugins = [...MAIN_PLUGINS, TestPlugin];
-        const { editor } = await setupEditor(`<div>a[]b</div>`, { config: { Plugins } });
+        const { editor } = await setupEditor(`<div class="oe_unbreakable">a[]b</div>`, {
+            config: { Plugins },
+        });
         // Ensure dispatch when plugins are alive.
-        editor.shared.dom.insert(parseHTML(editor.document, `<div class="test">destroyed</div>`));
+        editor.shared.dom.insert(
+            parseHTML(editor.document, `<div class="test oe_unbreakable">destroyed</div>`)
+        );
         await animationFrame();
         expect.verifySteps(["dispatch"]);
         editor.destroy();
         await animationFrame();
         expect.verifySteps([]);
+    });
+});
+
+describe("serialization", () => {
+    test("node serialization should not duplicate nodes", async () => {
+        const { editor, el, plugins } = await setupEditor("<p>hello</p>");
+        const p = el.querySelector("p");
+        const textNode = p.firstChild;
+        // Mutation: add strong to p
+        const strong = editor.document.createElement("strong");
+        p.append(strong);
+        // Mutation: remove textNode
+        textNode.remove();
+        // Mutation: add textNode to strong
+        strong.append(textNode);
+
+        await microTick();
+
+        const historyPlugin = plugins.get("history");
+        const mutations = historyPlugin.currentStep.mutations;
+        const idToNode = (id) => historyPlugin.idToNodeMap.get(id);
+
+        expect(mutations.length).toBe(3);
+
+        // Serialized node should not have textNode as child, even though it
+        // current has it as child (otherwise it would duplicate it on unserialization)
+        let { nodeId, children } = mutations[0].node;
+        expect(idToNode(nodeId)).toBe(strong);
+        expect(children.length).toBe(0);
+
+        // 2nd and 3rd mutations: textNode is moved into strong
+        ({ nodeId } = mutations[1].node);
+        expect(idToNode(nodeId)).toBe(textNode);
+        ({ nodeId } = mutations[2].node);
+        expect(idToNode(nodeId)).toBe(textNode);
     });
 });

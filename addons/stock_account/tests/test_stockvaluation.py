@@ -105,7 +105,7 @@ class TestStockValuationBase(TransactionCase):
             ('account_id', '=', self.stock_valuation_account.id),
         ], order='date, id')
 
-    def _make_in_move(self, product, quantity, unit_cost=None):
+    def _make_in_move(self, product, quantity, unit_cost=None, location_dest_id=False, picking_type_id=False):
         """ Helper to create and validate a receipt move.
         """
         unit_cost = unit_cost or product.standard_price
@@ -113,11 +113,11 @@ class TestStockValuationBase(TransactionCase):
             'name': 'in %s units @ %s per unit' % (str(quantity), str(unit_cost)),
             'product_id': product.id,
             'location_id': self.env.ref('stock.stock_location_suppliers').id,
-            'location_dest_id': self.env.ref('stock.stock_location_stock').id,
+            'location_dest_id': location_dest_id or self.env.ref('stock.stock_location_stock').id,
             'product_uom': self.env.ref('uom.product_uom_unit').id,
             'product_uom_qty': quantity,
             'price_unit': unit_cost,
-            'picking_type_id': self.env.ref('stock.picking_type_in').id,
+            'picking_type_id': picking_type_id or self.env.ref('stock.picking_type_in').id,
         })
 
         in_move._action_confirm()
@@ -1549,9 +1549,8 @@ class TestStockValuation(TestStockValuationBase):
                 'quantity': 10.0,
             })]
         })
-        move2.picked = True
-        move2._action_done()
-
+        # Move is automatically set to Done as it is linked to a Done picking
+        self.assertEqual(move2.state, 'done')
         self.assertEqual(move2.stock_valuation_layer_ids.value, 200.0)
         self.assertEqual(move2.stock_valuation_layer_ids.remaining_qty, 10.0)
         self.assertEqual(move2.stock_valuation_layer_ids.unit_cost, 20.0)
@@ -1959,6 +1958,23 @@ class TestStockValuation(TestStockValuationBase):
         self.assertEqual(product.standard_price, 23)
         self._make_in_move(product, 1, unit_cost=77)
         self.assertEqual(product.standard_price, 77)
+
+    def test_fifo_manual_revaluation_after_manual_standard_price(self):
+        self.product1.categ_id.property_cost_method = 'fifo'
+        self._make_in_move(self.product1, 1, unit_cost=200)
+        self._make_in_move(self.product1, 1, unit_cost=300)
+        self.assertEqual(self.product1.standard_price, 250)
+
+        self.product1.standard_price = 300
+
+        Form(self.env['stock.valuation.layer.revaluation'].with_context({
+            'default_product_id': self.product1.id,
+            'default_company_id': self.env.company.id,
+            'default_account_id': self.stock_valuation_account,
+            'default_added_value': 200.0,
+        })).save().action_validate_revaluation()
+
+        self.assertEqual(self.product1.standard_price, 350)
 
     def test_create_done_move(self):
         """Stock Move created directly in Done state must impact de valuation."""
@@ -4280,3 +4296,127 @@ class TestStockValuation(TestStockValuationBase):
 
         self.assertEqual(move.quantity, 24)
         self.assertRecordValues(move.stock_valuation_layer_ids, [{'quantity': 12}, {'quantity': 12}])
+
+    def test_stock_valuation_layer_revaluation_with_branch_company(self):
+        """
+        Test that the product price is updated in the branch company
+        by taking into account only the stock valuation layer of the branch company.
+        """
+        self.assertEqual(self.product1.standard_price, 0)
+        self.product1.categ_id.property_cost_method = 'average'
+        self._make_in_move(self.product1, 1, unit_cost=20)
+        self.assertEqual(self.product1.standard_price, 20)
+        # create a branch company
+        branch = self.env['res.company'].create({
+            'name': "Branch A",
+            'parent_id': self.env.company.id,
+        })
+        # Create a move in the branch company
+        self.env.company = branch
+        self.product1.with_company(branch).categ_id.property_cost_method = 'average'
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', branch.id)], limit=1)
+        self._make_in_move(self.product1, 1, unit_cost=30, location_dest_id=warehouse.lot_stock_id.id, picking_type_id=warehouse.in_type_id.id)
+        self.assertEqual(self.product1.with_company(branch).standard_price, 30)
+
+    def test_action_done_with_state_already_done(self):
+        """ This test ensure that calling _action_done on a move already done
+        has no effect on the valuation.
+        """
+        self.product1.standard_price = 10
+
+        in_move = self.env['stock.move'].create({
+            'name': 'IN 10 units',
+            'location_id': self.supplier_location.id,
+            'location_dest_id': self.stock_location.id,
+            'product_id': self.product1.id,
+            'product_uom_qty': 10.0,
+            'picked': True,
+            'quantity': 10,
+        })
+        # Call _action_done twice, only 1 layer should be created
+        in_move._action_done()
+        self.assertEqual(in_move.state, 'done')
+        in_move._action_done()
+
+        self.assertEqual(len(in_move.stock_valuation_layer_ids), 1)
+        self.assertEqual(in_move.stock_valuation_layer_ids.value, 100)
+        self.assertEqual(in_move.stock_valuation_layer_ids.quantity, 10)
+
+    def test_scrap_reception_valuation(self):
+        product = self.product1
+        product.categ_id.property_cost_method = 'fifo'
+        receipt = self.env['stock.picking'].create({
+            'picking_type_id': self.ref('stock.picking_type_in'),
+            'location_id': self.supplier_location.id,
+            'location_dest_id': self.stock_location.id,
+            'move_ids': [Command.create({
+                'name': f'in {product.name}',
+                'product_id': product.id,
+                'product_uom_qty': 10,
+                'quantity': 10,
+                'price_unit': 15,
+                'location_id': self.supplier_location.id,
+                'location_dest_id': self.stock_location.id,
+            })],
+        })
+        receipt.button_validate()
+        scrap_form = Form(self.env['stock.scrap'].with_context(default_picking_id=receipt.id))
+        scrap_form.product_id = product
+        scrap_form.scrap_qty = 2
+        scrap = scrap_form.save()
+        scrap.action_validate()
+        svls = product.stock_valuation_layer_ids
+        self.assertRecordValues(
+            svls,
+            [
+                {'quantity': 10.0, 'remaining_qty': 8.0, 'value': 150.0, 'remaining_value': 120.0},
+                {'quantity': -2.0, 'remaining_qty': 0.0, 'value': -30.0, 'remaining_value': 0.0},
+            ]
+        )
+
+    def test_valuation_rounding_method(self):
+        uom_g = self.env.ref('uom.product_uom_gram')
+        uom_kg = self.env.ref('uom.product_uom_kgm')
+        self.product1.uom_id = uom_kg
+
+        receipt = self.env['stock.picking'].create({
+            'picking_type_id': self.ref('stock.picking_type_in'),
+            'location_id': self.supplier_location.id,
+            'location_dest_id': self.stock_location.id,
+            'move_ids': [Command.create({
+                'name': 'IN 11g',
+                'product_id': self.product1.id,
+                'product_uom': uom_g.id,
+                'product_uom_qty': 11,
+                'quantity': 11,
+                'location_id': self.supplier_location.id,
+                'location_dest_id': self.stock_location.id,
+            })],
+        })
+        receipt.button_validate()
+
+        self.assertEqual(receipt.move_ids.quantity, 11)
+        self.assertEqual(receipt.move_ids.product_qty, 0.01)
+        self.assertEqual(receipt.move_ids.stock_valuation_layer_ids.quantity, 0.01)
+        self.assertEqual(self.product1.qty_available, 0.01)
+
+        delivery = self.env['stock.picking'].create({
+            'picking_type_id': self.ref('stock.picking_type_out'),
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+            'move_ids': [Command.create({
+                'name': 'OUT 11g',
+                'product_id': self.product1.id,
+                'product_uom': uom_g.id,
+                'product_uom_qty': 11,
+                'quantity': 11,
+                'location_id': self.stock_location.id,
+                'location_dest_id': self.customer_location.id,
+            })],
+        })
+        delivery.button_validate()
+
+        self.assertEqual(delivery.move_ids.quantity, 11)
+        self.assertEqual(delivery.move_ids.product_qty, 0.01)
+        self.assertEqual(delivery.move_ids.stock_valuation_layer_ids.quantity, -0.01)
+        self.assertEqual(self.product1.qty_available, 0.00)

@@ -2,6 +2,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import models, api
+from odoo.osv.expression import AND, OR
+
 import ast
 import json
 
@@ -18,13 +20,26 @@ class LoyaltyReward(models.Model):
     @api.model
     def _load_pos_data_domain(self, data):
         config_id = self.env['pos.config'].browse(data['pos.config']['data'][0]['id'])
-        return [('program_id', 'in', config_id._get_program_ids().ids)]
+        reward_product_tag_domain = [
+            ('reward_product_tag_id', '!=', False),
+            '|',
+            ('reward_product_tag_id.product_template_ids.active', '=', True),
+            ('reward_product_tag_id.product_product_ids.active', '=', True),
+        ]
+        return AND([
+            [('program_id', 'in', config_id._get_program_ids().ids)],
+            OR([
+                [('reward_type', '!=', 'product')],
+                [('reward_product_id.active', '=', True)],
+                reward_product_tag_domain,
+            ]),
+        ])
 
     @api.model
     def _load_pos_data_fields(self, config_id):
         return ['description', 'program_id', 'reward_type', 'required_points', 'clear_wallet', 'currency_id',
                 'discount', 'discount_mode', 'discount_applicability', 'all_discount_product_ids', 'is_global_discount',
-                'discount_max_amount', 'discount_line_product_id', 'reward_product_id', 'tax_ids',
+                'discount_max_amount', 'discount_line_product_id', 'reward_product_id',
                 'multi_product', 'reward_product_ids', 'reward_product_qty', 'reward_product_uom_id', 'reward_product_domain']
 
     def _load_pos_data(self, data):
@@ -44,7 +59,7 @@ class LoyaltyReward(models.Model):
         search_domain = [('program_id', 'in', config._get_program_ids().ids)]
         domains = self.search_read(search_domain, fields=['reward_product_domain'], load=False)
         for domain in filter(lambda d: d['reward_product_domain'] != "null", domains):
-            domain = ast.literal_eval(domain['reward_product_domain'])
+            domain = json.loads(domain['reward_product_domain'])
             for condition in self._parse_domain(domain).values():
                 field_name, _, _ = condition
                 fields.add(field_name)
@@ -62,7 +77,7 @@ class LoyaltyReward(models.Model):
 
             if field and field.type == 'many2one' and operator in ('ilike', 'not ilike'):
                 comodel = self.env[field.comodel_name]
-                matching_ids = list(comodel._search([('display_name', operator, value)]))
+                matching_ids = list(comodel._search([('display_name', 'ilike', value)]))
 
                 new_operator = 'in' if operator == 'ilike' else 'not in'
                 domain[index] = [field_name, new_operator, matching_ids]

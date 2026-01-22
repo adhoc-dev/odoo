@@ -27,7 +27,12 @@ import {
     useState,
 } from "@odoo/owl";
 import { LinkTools } from '@web_editor/js/wysiwyg/widgets/link_tools';
-import { touching, closest, addLoadingEffect as addButtonLoadingEffect } from "@web/core/utils/ui";
+import {
+    touching,
+    closest,
+    addLoadingEffect as addButtonLoadingEffect,
+    isVisible,
+} from "@web/core/utils/ui";
 import { _t } from "@web/core/l10n/translation";
 import { renderToElement } from "@web/core/utils/render";
 import { RPCError } from "@web/core/network/rpc";
@@ -99,6 +104,7 @@ var SnippetEditor = publicWidget.Widget.extend({
         }
         this.displayOverlayOptions = false;
         this._$toolbarContainer = $();
+        this.isRtl = this.options.direction === "rtl";
 
         this.__isStarted = new Promise(resolve => {
             this.__isStartedResolveFunc = resolve;
@@ -352,9 +358,12 @@ var SnippetEditor = publicWidget.Widget.extend({
     /**
      * DOMElements have a default name which appears in the overlay when they
      * are being edited. This method retrieves this name; it can be defined
-     * directly in the DOM thanks to the `data-name` attribute.
+     * directly in the DOM thanks to the `data-translated-name` or `data-name` attribute.
      */
     getName: function () {
+        if (this.$target.data('translated-name') !== undefined) {
+            return this.$target.data('translated-name');
+        }
         if (this.$target.data('name') !== undefined) {
             return this.$target.data('name');
         }
@@ -436,11 +445,11 @@ var SnippetEditor = publicWidget.Widget.extend({
         // unit tested.
         let parent = this.$target[0].parentElement;
         let nextSibling = this.$target[0].nextElementSibling;
-        while (nextSibling && nextSibling.matches('.o_snippet_invisible')) {
+        while (nextSibling && !isVisible(nextSibling)) {
             nextSibling = nextSibling.nextElementSibling;
         }
         let previousSibling = this.$target[0].previousElementSibling;
-        while (previousSibling && previousSibling.matches('.o_snippet_invisible')) {
+        while (previousSibling && !isVisible(previousSibling)) {
             previousSibling = previousSibling.previousElementSibling;
         }
         if ($(parent).is('.o_editable:not(body)')) {
@@ -499,8 +508,13 @@ var SnippetEditor = publicWidget.Widget.extend({
                         // Consider layout-only elements (like bg-shapes) as empty
                         return el.matches(this.layoutElementsSelector);
                     }));
-                return isEmpty && !$el.hasClass('oe_structure')
-                    && !$el.parent().hasClass('carousel-item')
+                const notRemovableSelector =
+                    `.oe_structure,
+                    .carousel-item,
+                    .carousel-item > .container,
+                    .carousel-item > .container-fluid,
+                    .carousel-item > .o_container_small`;
+                return isEmpty && !$el[0].matches(notRemovableSelector)
                     && (!editor || editor.isTargetParentEditable)
                     && !isUnremovable($el[0]);
             };
@@ -919,7 +933,7 @@ var SnippetEditor = publicWidget.Widget.extend({
                 const gridRowSize = gridUtils.rowSize;
                 const boundedYMousePosition = Math.min(args.y, targetRect.bottom - gridRowSize);
                 this.mousePositionYOnElement = boundedYMousePosition - targetRect.y;
-                this.mousePositionXOnElement = args.x - targetRect.x;
+                this.mousePositionXOnElement = (args.x - targetRect.x) * (this.isRtl ? -1 : 1);
                 this._onDragAndDropStart(args);
             },
             onDragEnd: (...args) => {
@@ -1413,7 +1427,7 @@ var SnippetEditor = publicWidget.Widget.extend({
 
             const style = window.getComputedStyle(this.$target[0]);
             const top = parseFloat(style.top);
-            const left = parseFloat(style.left);
+            const left = parseFloat(this.isRtl ? style.right : style.left);
 
             const rowStart = Math.round(top / (gridProp.rowSize + gridProp.rowGap)) + 1;
             const columnStart = Math.round(left / (gridProp.columnSize + gridProp.columnGap)) + 1;
@@ -1643,6 +1657,14 @@ var SnippetEditor = publicWidget.Widget.extend({
             return;
         }
         ev.data.show = this._toggleVisibilityStatus(ev.data.show);
+        // Toggle the value of ev.data.show so that when trigger_up is called,
+        // it passes the value `true` to its parent. Additionally, in this
+        // block, we are calling `trigger_up` with `activate_snippet` to false,
+        // which disables options for that specific block.
+        if (this.$target[0] === ev.target.$target[0] && !ev.data.show) {
+            this.trigger_up("activate_snippet", { $snippet: false });
+            ev.data.show = true;
+        }
     },
     /**
      * @private
@@ -1723,10 +1745,11 @@ var SnippetEditor = publicWidget.Widget.extend({
         }
         const columnEl = this.$target[0];
         const rowEl = columnEl.parentNode;
+        const rowElRect = rowEl.getBoundingClientRect();
 
         // Computing the rowEl position.
-        const rowElTop = rowEl.getBoundingClientRect().top;
-        const rowElLeft = rowEl.getBoundingClientRect().left;
+        const rowElTop = rowElRect.top;
+        const rowElLeft = rowElRect.left;
 
         // Getting the column dimensions.
         const borderWidth = parseFloat(window.getComputedStyle(columnEl).borderWidth);
@@ -1736,14 +1759,25 @@ var SnippetEditor = publicWidget.Widget.extend({
         // Placing the column where the mouse is.
         let top = y - rowElTop - this.mousePositionYOnElement;
         const bottom = top + columnHeight;
-        let left = x - rowElLeft - this.mousePositionXOnElement;
+
+        let left;
+        if (this.isRtl) {
+            const rowElRight = rowElRect.right;
+            left = rowElRight - x - this.mousePositionXOnElement - columnWidth;
+        } else {
+            left = x - rowElLeft - this.mousePositionXOnElement;
+        }
 
         // Horizontal and top overflow.
         left = clamp(left, 0, rowEl.clientWidth - columnWidth);
         top = top < 0 ? 0 : top;
 
         columnEl.style.top = top + 'px';
-        columnEl.style.left = left + 'px';
+        if (this.isRtl) {
+            columnEl.style.right = left + 'px';
+        } else {
+            columnEl.style.left = left + 'px';
+        }
 
         // Computing the drag helper corresponding grid area.
         const gridProp = gridUtils._getGridProperties(rowEl);
@@ -1982,15 +2016,15 @@ class SnippetsMenu extends Component {
         });
 
         useBus(this.props.bus, "INSERT_SNIPPET", ({ detail }) => {
-            const { snippetSelector, block } = detail;
+            const { snippetSelector } = detail;
             this._execWithLoadingEffect(() => {
                 const snippet = [...this.snippets.values()].find((snippet) => {
                     return snippet.baseBody.matches(snippetSelector);
                 });
-                if (snippet && block) {
+                if (snippet) {
                     const clonedBody = snippet.baseBody.cloneNode(true);
                     clonedBody.classList.remove(".oe_snippet_body");
-                    block.after(clonedBody);
+                    this.options.wysiwyg.odooEditor.execCommand("insert", clonedBody);
                     // This call will block the mutex so it is not awaited.
                     this.callPostSnippetDrop($(clonedBody));
                 }
@@ -2909,6 +2943,9 @@ class SnippetsMenu extends Component {
                 }
                 resolve(null);
             }).then(async editorToEnable => {
+                if (editorToEnable && editorToEnable.$target[0] && !editorToEnable.$target[0].closest("body")) {
+                    return null;
+                }
                 if (!previewMode && this._enabledEditorHierarchy[0] === editorToEnable
                         || ifInactiveOptions && this._enabledEditorHierarchy.includes(editorToEnable)) {
                     return editorToEnable;
@@ -3119,6 +3156,13 @@ class SnippetsMenu extends Component {
         exclude += `${exclude && ', '}.o_snippet_not_selectable`;
 
         let filterFunc = function () {
+            if (forDrop) {
+                // Prevents blocks from being dropped into an image field.
+                const selfOrParentEl = isChildren ? this.parentNode : this;
+                if (selfOrParentEl.closest("[data-oe-type=image]")) {
+                    return false;
+                }
+            }
             // Exclude what it is asked to exclude.
             if ($(this).is(exclude)) {
                 return false;
@@ -3215,6 +3259,11 @@ class SnippetsMenu extends Component {
         const websiteFormEditorOptionsEl = $html.find('[data-js="WebsiteFormEditor"]')[0];
         if (websiteFormEditorOptionsEl) {
             websiteFormEditorOptionsEl.dataset.dropExcludeAncestor = "form";
+        }
+        // TODO: Remove in master and add it in the template.
+        const filterSelectEl = $html.find("we-select").has("we-button[data-gl-filter]")[0];
+        if (filterSelectEl) {
+            filterSelectEl.dataset.name = "glfilter_select_opt";
         }
         this.templateOptions = [];
         var selectors = [];
@@ -3334,6 +3383,7 @@ class SnippetsMenu extends Component {
 
                 if (snippetEl.dataset.moduleId) {
                     snippet.moduleId = snippetEl.dataset.moduleId;
+                    snippet.moduleDisplayName = snippetEl.dataset.moduleDisplayName;
                     snippet.installable = true;
                 }
 
@@ -3350,9 +3400,10 @@ class SnippetsMenu extends Component {
                 return snippet.category.id === "snippet_custom";
             });
             for (const customSnippet of customSnippets) {
-                // The "s_button" has a numeric value added to its name when it
-                // is custom, so we need to consider this in the search.
-                const customSnippetName = /s_button_\d+/.test(customSnippet.name) ?
+                // Custom "s_button" snippets add a unique suffix to their name
+                // (e.g. s_button_xxx). To reliably detect custom buttons, we
+                // normalize the name by removing this suffix.
+                const customSnippetName = customSnippet.name.startsWith("s_button_") ?
                     "s_button" :
                     customSnippet.name;
 
@@ -4174,9 +4225,10 @@ class SnippetsMenu extends Component {
             this.lastElement = false;
         });
 
-        if (!$target.closest('we-button, we-toggler, we-select, .o_we_color_preview').length) {
+        if (!$target.closest('we-button, we-toggler, we-select, .o_we_color_preview').length && !this._isColorpickerClick) {
             this._closeWidgets();
         }
+        delete this._isColorpickerClick;
         if (!$target.closest('body > *').length || $target.is('#iframe_target')) {
             return;
         }
@@ -4329,7 +4381,7 @@ class SnippetsMenu extends Component {
      * @param {Event} ev - a touch event
      */
     _onTouchEvent(ev) {
-        if (ev.touches.length > 1) {
+        if (ev.touches.length > 1 || ev.changedTouches.length < 1) {
             // Ignore multi-touch events.
             return;
         }
@@ -4392,8 +4444,8 @@ class SnippetsMenu extends Component {
     _onInstallBtnClick(ev) {
         const snippetEl = ev.currentTarget.closest('[data-module-id]');
         const moduleID = parseInt(snippetEl.dataset.moduleId);
-        const snippetName = snippetEl.getAttribute("name");
-        this._installModule(moduleID, snippetName);
+        const moduleDisplayName = snippetEl.dataset.moduleDisplayName;
+        this._installModule(moduleID, moduleDisplayName);
     }
     /**
      * @private
@@ -4488,6 +4540,9 @@ class SnippetsMenu extends Component {
             clearTimeout(enableTimeoutID);
             reenable();
         });
+        if (ev.target.closest(".o_colorpicker_widget")) {
+            this._isColorpickerClick = true;
+        }
     }
     /**
      * @private
@@ -4845,6 +4900,20 @@ class SnippetsMenu extends Component {
             // This is async but using the main editor mutex, currently locked.
             this._updateInvisibleDOM();
 
+            // Updating options upon changing preview mode to avoid ghost overlay
+            const enabledInvisibleOverrideEl =
+                this.options.wysiwyg.lastElement &&
+                this.options.wysiwyg.lastElement.closest(
+                    ".o_snippet_mobile_invisible, .o_snippet_desktop_invisible"
+                );
+            const needDeactivate = enabledInvisibleOverrideEl && enabledInvisibleOverrideEl.dataset.invisible === "1";
+
+            if (needDeactivate) {
+                return new Promise((resolve) => {
+                    this._activateSnippet(false);
+                    resolve();
+                });
+            }
             return this._snippetOptionUpdate();
         }, false);
     }
@@ -5076,38 +5145,42 @@ class SnippetsMenu extends Component {
                 dropZoneEls = [...dropZoneEls].filter(dropzoneEl => {
                     return !dropzoneEl.closest("[data-snippet]:not(.s_popup), #website_cookies_bar");
                 });
-                hookEl = this._getClosestDropzone(dropZoneEls)
-                    || dropZoneEls[dropZoneEls.length - 1];
-                hookEl.classList.add("o_hook_drop_zone");
+                if (dropZoneEls?.length) {
+                    hookEl = this._getClosestDropzone(dropZoneEls)
+                        || dropZoneEls[dropZoneEls.length - 1];
+                    hookEl.classList.add("o_hook_drop_zone");
+                }
             } else {
                 hookEl = initialSnippetEl;
             }
 
-            const hookParentEl = hookEl.parentNode;
-            // Excludes snippets that cannot be placed at the target location.
-            [...this.snippets.values()].forEach((snippet) => {
-                if (snippet.disabled) {
-                    snippet.excluded = true;
-                } else {
-                    const $snippetSelectorChildren =
-                            this._getSelectors($(snippet.baseBody)).$selectorChildren;
-                    const hasSelectorChild = [...$snippetSelectorChildren].some(snippetSelectorChild => {
-                        return snippetSelectorChild === hookParentEl;
-                    });
-                    const forbidSanitize = snippet.data.oeForbidSanitize;
-                    let isForbidden = false;
-                    if (forbidSanitize === "form") {
-                        isForbidden = hookEl.closest('[data-oe-sanitize]:not([data-oe-sanitize="allow_form"])');
-                    } else if (forbidSanitize) {
-                        isForbidden = hookEl.closest("[data-oe-sanitize]");
+            if (hookEl) {
+                const hookParentEl = hookEl.parentNode;
+                // Excludes snippets that cannot be placed at the target location.
+                [...this.snippets.values()].forEach((snippet) => {
+                    if (snippet.disabled) {
+                        snippet.excluded = true;
+                    } else {
+                        const $snippetSelectorChildren =
+                                this._getSelectors($(snippet.baseBody)).$selectorChildren;
+                        const hasSelectorChild = [...$snippetSelectorChildren].some(snippetSelectorChild => {
+                            return snippetSelectorChild === hookParentEl;
+                        });
+                        const forbidSanitize = snippet.data.oeForbidSanitize;
+                        let isForbidden = false;
+                        if (forbidSanitize === "form") {
+                            isForbidden = hookEl.closest('[data-oe-sanitize]:not([data-oe-sanitize="allow_form"])');
+                        } else if (forbidSanitize) {
+                            isForbidden = hookEl.closest("[data-oe-sanitize]");
+                        }
+                        snippet.excluded = !hasSelectorChild || isForbidden;
                     }
-                    snippet.excluded = !hasSelectorChild || isForbidden;
-                }
-            });
+                });
+            }
 
             const hasIncludedSnippet = [...this.snippets.values()].some(snippet => snippet.excluded === false);
-            if (!hasIncludedSnippet) {
-                if (dropZoneEls) {
+            if (!hasIncludedSnippet || !hookEl) {
+                if (dropZoneEls?.length) {
                     dropZoneEls.forEach(dropZoneEl => dropZoneEl.remove());
                 }
                 this.options.wysiwyg.odooEditor.historyUnpauseSteps();
@@ -5123,9 +5196,9 @@ class SnippetsMenu extends Component {
                     groupSelected: groupSelected,
                     optionsSnippets: this.options.snippets,
                     frontendDirection: this.options.direction,
-                    installModule: (moduleID, snippetName) => {
+                    installModule: (moduleID, moduleDisplayName) => {
                         resolve();
-                        this._installModule(moduleID, snippetName);
+                        this._installModule(moduleID, moduleDisplayName);
                     },
                     addSnippet: async (snippetEl) => {
                         isSnippetChosen = true;
@@ -5155,7 +5228,7 @@ class SnippetsMenu extends Component {
                         });
                     },
                     deleteCustomSnippet: (snippetKey) => {
-                        this._deleteCustomSnippet(snippetKey, false);
+                        return this._deleteCustomSnippet(snippetKey, false);
                     },
                     renameCustomSnippet: (snippetKey, newName) => {
                         this._renameCustomSnippet(snippetKey, newName, false);
@@ -5218,16 +5291,16 @@ class SnippetsMenu extends Component {
      *
      * @private
      * @param {Number} moduleID
-     * @param {String} snippetName
+     * @param {String} moduleDisplayName
      */
-    _installModule(moduleID, snippetName) {
-        // TODO: Should be the app name, not the snippet name ... Maybe both ?
-        const bodyText = _t("Do you want to install %s App?", snippetName);
+    _installModule(moduleID, moduleDisplayName) {
+        moduleDisplayName = `"${moduleDisplayName}"`;
+        const bodyText = _t("Do you want to install %s App?", moduleDisplayName);
         const linkText = _t("More info about this app.");
         const linkUrl = '/odoo/action-base.open_module_tree/' + encodeURIComponent(moduleID);
         this.dialog.add(ConfirmationDialog, {
-            title: _t("Install %s", snippetName),
-            body: markup(`${escape(bodyText)}\n<a href="${linkUrl}" target="_blank">${escape(linkText)}</a>`),
+            title: _t("Install %s", moduleDisplayName),
+            body: markup(`${escape(bodyText)}\n<a href="${escape(linkUrl)}" target="_blank"><i class="oi oi-arrow-right me-1"></i>${escape(linkText)}</a>`),
             confirm: async () => {
                 try {
                     await this.orm.call("ir.module.module", "button_immediate_install", [[moduleID]]);
@@ -5239,7 +5312,7 @@ class SnippetsMenu extends Component {
                     });
                 } catch (e) {
                     if (e instanceof RPCError) {
-                        const message = escape(_t("Could not install module %s", snippetName));
+                        const message = escape(_t("Could not install module %s", moduleDisplayName));
                         this.notification.add(message, {
                             type: "danger",
                             sticky: true,
@@ -5262,20 +5335,26 @@ class SnippetsMenu extends Component {
     async _deleteCustomSnippet(snippetKey, withMutex = true) {
         const snippet = this.snippets.get(snippetKey);
         const message = _t("Are you sure you want to delete the block %s?", snippet.displayName);
-        this.dialog.add(ConfirmationDialog, {
-            body: message,
-            confirm: async () => {
-                await this.orm.call("ir.ui.view", "delete_snippet", [], {
-                    'view_id': snippet.id,
-                    'template_key': this.options.snippets,
-                });
-                this.invalidateSnippetCache = true;
-                this.snippets.delete(snippetKey);
-                await this._loadSnippetsTemplates(withMutex);
-            },
-            cancel: () => null,
-            confirmLabel: _t("Yes"),
-            cancelLabel: _t("No"),
+        return new Promise(resolve => {
+            this.dialog.add(ConfirmationDialog, {
+                body: message,
+                confirm: async () => {
+                    await this.orm.call("ir.ui.view", "delete_snippet", [], {
+                        'view_id': snippet.id,
+                        'template_key': this.options.snippets,
+                    });
+                    this.invalidateSnippetCache = true;
+                    this.snippets.delete(snippetKey);
+                    await this._loadSnippetsTemplates(withMutex);
+                    resolve();
+                },
+                cancel: () => {
+                    resolve();
+                    return null;
+                },
+                confirmLabel: _t("Yes"),
+                cancelLabel: _t("No"),
+            });
         });
     }
     /**

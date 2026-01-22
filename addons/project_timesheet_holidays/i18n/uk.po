@@ -1,24 +1,27 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* project_timesheet_holidays
-# 
+#
 # Translators:
 # Alina Lisnenko <alina.lisnenko@erp.co.ua>, 2024
-# Wil Odoo, 2024
-# 
+# Wil Odoo, 2025
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
+"POT-Creation-Date: 2025-12-29 18:37+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
+"Last-Translator: Wil Odoo, 2025\n"
 "Language-Team: Ukrainian (https://app.transifex.com/odoo/teams/41243/uk/)\n"
+"Language: uk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: uk\n"
-"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != 11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || (n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
+"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != "
+"11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % "
+"100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || "
+"(n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
 
 #. module: project_timesheet_holidays
 #: model:ir.model,name:project_timesheet_holidays.model_account_analytic_line
@@ -72,8 +75,8 @@ msgid ""
 "If checked, when validating a time off, timesheet will be generated in the "
 "Vacation Project of the company."
 msgstr ""
-"Якщо перевірено, під час підтвердження відпустки, табель буде створюватися у"
-" проекті відпусток компанії."
+"Якщо перевірено, під час підтвердження відпустки, табель буде створюватися у "
+"проекті відпусток компанії."
 
 #. module: project_timesheet_holidays
 #. odoo-python
@@ -105,6 +108,7 @@ msgstr "Деталі відпустки співробітника"
 
 #. module: project_timesheet_holidays
 #: model:ir.model,name:project_timesheet_holidays.model_project_task
+#: model:ir.model.fields,field_description:project_timesheet_holidays.field_account_analytic_line__task_id
 #: model:ir.model.fields,field_description:project_timesheet_holidays.field_hr_leave_type__timesheet_task_id
 #: model_terms:ir.ui.view,arch_db:project_timesheet_holidays.res_config_settings_view_form
 msgid "Task"
@@ -118,8 +122,8 @@ msgid ""
 "individually."
 msgstr ""
 "Проект за замовчуванням, який використовується під час автоматичного "
-"створення табелів за допомогою запитів на відпустку. Ви можете вказати інший"
-" проект для кожного типу відпустки окремо."
+"створення табелів за допомогою запитів на відпустку. Ви можете вказати інший "
+"проект для кожного типу відпустки окремо."
 
 #. module: project_timesheet_holidays
 #: model:ir.model.fields,help:project_timesheet_holidays.field_res_config_settings__leave_timesheet_task_id
@@ -145,7 +149,7 @@ msgstr "Відпустка"
 #: code:addons/project_timesheet_holidays/models/hr_holidays.py:0
 #: code:addons/project_timesheet_holidays/models/resource_calendar_leaves.py:0
 msgid "Time Off (%(index)s/%(total)s)"
-msgstr ""
+msgstr "Відпустка (%(index)s/%(total)s)"
 
 #. module: project_timesheet_holidays
 #: model:ir.model.fields,field_description:project_timesheet_holidays.field_res_company__leave_timesheet_task_id
@@ -188,6 +192,12 @@ msgstr ""
 #. module: project_timesheet_holidays
 #. odoo-python
 #: code:addons/project_timesheet_holidays/models/account_analytic.py:0
+msgid "You cannot delete timesheets that are linked to global time off."
+msgstr ""
+
+#. module: project_timesheet_holidays
+#. odoo-python
+#: code:addons/project_timesheet_holidays/models/account_analytic.py:0
 msgid ""
 "You cannot delete timesheets that are linked to time off requests. Please "
 "cancel your time off request from the Time Off application instead."
@@ -203,5 +213,4 @@ msgid ""
 "use the Time Off application to modify your time off requests instead."
 msgstr ""
 "Ви не можете змінювати табелі, пов’язані із запитами на відпустку. Будь "
-"ласка, використовуйте модуль Відпустка, щоб змінити ваші запити на "
-"відпустку."
+"ласка, використовуйте модуль Відпустка, щоб змінити ваші запити на відпустку."

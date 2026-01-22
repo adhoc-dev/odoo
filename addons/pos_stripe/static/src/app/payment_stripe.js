@@ -56,6 +56,7 @@ export class PaymentStripe extends PaymentInterface {
                 }
             }
         } catch (error) {
+            console.error(error);
             this._showError(error);
             return false;
         }
@@ -96,6 +97,7 @@ export class PaymentStripe extends PaymentInterface {
                     this.pos.connectedReader = this.payment_method_id.stripe_serial_number;
                     return true;
                 } catch (error) {
+                    console.error(error);
                     if (error.error) {
                         this._showError(error.error.message, error.code);
                     } else {
@@ -220,11 +222,19 @@ export class PaymentStripe extends PaymentInterface {
     }
 
     async capturePayment(paymentIntentId) {
+        return this.capturePaymentStripe(paymentIntentId);
+    }
+
+    async capturePaymentStripe(paymentIntentId, amount = null, context = {}) {
         try {
             const data = await this.pos.data.silentCall(
                 "pos.payment.method",
                 "stripe_capture_payment",
-                [paymentIntentId]
+                [paymentIntentId],
+                {
+                    amount,
+                    context,
+                }
             );
             if (data.error) {
                 throw data.error;
@@ -267,7 +277,8 @@ export class PaymentStripe extends PaymentInterface {
                 return await this.collectPayment(line.amount);
             }
         } catch (error) {
-            this._showError(error);
+            console.error(error);
+            this._showError(String(error));
             return false;
         }
     }

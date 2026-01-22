@@ -330,7 +330,7 @@ test("Export dialog: interacting with export templates", async () => {
 });
 
 test("Export dialog: interacting with export templates in debug", async () => {
-    serverState.debug = true;
+    serverState.debug = "1";
 
     onRpc("/web/export/formats", () => {
         return [{ tag: "csv", label: "CSV" }];
@@ -670,7 +670,15 @@ test("ExportDialog: export all records of the domain", async () => {
     onRpc("/web/export/formats", () => {
         return [{ tag: "xls", label: "Excel" }];
     });
-    onRpc("/web/export/get_fields", () => {
+    onRpc("/web/export/get_fields", async (request) => {
+        const { params } = await request.json();
+        if (isDomainSelected) {
+            const expectedDomain = params.parent_field ? [] : [["bar", "!=", "glou"]];
+            expect(params.domain).toEqual(expectedDomain, {
+                message: "Domain is only applied on the root model",
+            });
+            expect.step("get export fields route called with correct domain");
+        }
         return fetchedFields.root;
     });
 
@@ -696,9 +704,15 @@ test("ExportDialog: export all records of the domain", async () => {
     await contains(".o_control_panel .o_cp_action_menus .dropdown-toggle").click();
     await contains(".dropdown-menu span:contains(Export)").click();
     await contains(".o_select_button").click();
+
+    const firstField = ".o_left_field_panel .o_export_tree_item:first-child ";
+    await contains(firstField).click();
+
     expect.verifySteps([
         "download called with correct params when only one record is selected",
+        "get export fields route called with correct domain",
         "download called with correct params when all records are selected",
+        "get export fields route called with correct domain",
     ]);
 });
 
@@ -1022,7 +1036,7 @@ test("Export dialog: expand subfields after search", async () => {
 });
 
 test("Export dialog: search in debug", async () => {
-    serverState.debug = true;
+    serverState.debug = "1";
 
     onRpc("/web/export/formats", () => {
         return [{ tag: "csv", label: "CSV" }];

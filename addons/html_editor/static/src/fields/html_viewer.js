@@ -1,5 +1,6 @@
 import {
     Component,
+    markup,
     onMounted,
     onWillStart,
     onWillUnmount,
@@ -10,7 +11,11 @@ import {
 } from "@odoo/owl";
 import { getBundle } from "@web/core/assets";
 import { memoize } from "@web/core/utils/functions";
+import { fillClipboardData } from "@html_editor/utils/clipboard";
+import { fixInvalidHTML, instanceofMarkup } from "@html_editor/utils/sanitize";
+import { HtmlUpgradeManager } from "@html_editor/html_migrations/html_upgrade_manager";
 import { TableOfContentManager } from "@html_editor/others/embedded_components/core/table_of_content/table_of_content_manager";
+import { getDeepestPosition } from "@html_editor/utils/dom_info";
 
 export class HtmlViewer extends Component {
     static template = "html_editor.HtmlViewer";
@@ -22,6 +27,8 @@ export class HtmlViewer extends Component {
     };
 
     setup() {
+        this._cleanups = [];
+        this.htmlUpgradeManager = new HtmlUpgradeManager();
         this.iframeRef = useRef("iframe");
 
         this.state = useState({
@@ -57,9 +64,12 @@ export class HtmlViewer extends Component {
             });
         } else {
             this.readonlyElementRef = useRef("readonlyContent");
-            useEffect(() => {
-                this.retargetLinks(this.readonlyElementRef.el);
-            });
+            useEffect(
+                () => {
+                    this.processReadonlyContent(this.readonlyElementRef.el);
+                },
+                () => [this.props.config.value.toString(), this.readonlyElementRef?.el]
+            );
         }
 
         if (this.props.config.cssAssetId) {
@@ -89,18 +99,79 @@ export class HtmlViewer extends Component {
         }
     }
 
+    addDomListener(target, eventName, fn, capture = false) {
+        const handler = (ev) => {
+            fn?.call(this, ev);
+        };
+        target.addEventListener(eventName, handler, capture);
+        this._cleanups.push(() => target.removeEventListener(eventName, handler, capture));
+    }
+
     get showIframe() {
         return this.props.config.hasFullHtml || this.props.config.cssAssetId;
     }
 
     /**
      * Allows overrides to process the value used in the Html Viewer.
+     * Typically, if the value comes from the html_field, it is already fixed
+     * (invalid and obsolete elements were replaced). If used as a standalone,
+     * the HtmlViewer has to handle invalid nodes and html upgrades.
      *
-     * @param { Markup } value
-     * @returns { Markup }
+     * @param { string | Markup } value
+     * @returns { string | Markup }
      */
     formatValue(value) {
-        return value;
+        if (this.props.config.isFixedValue) {
+            return value;
+        }
+        const newVal = this.htmlUpgradeManager.processForUpgrade(fixInvalidHTML(value), {
+            env: this.env,
+        });
+        if (instanceofMarkup(value)) {
+            return markup(newVal);
+        }
+        return newVal;
+    }
+
+    processReadonlyContent(container) {
+        this.retargetLinks(container);
+        this.applyAccessibilityAttributes(container);
+        this.addDomListener(container, "copy", this.onCopy);
+    }
+
+    /**
+     * @param {ClipboardEvent} ev
+     */
+    onCopy(ev) {
+        ev.preventDefault();
+        const selection = ev.target.ownerDocument.defaultView.getSelection();
+        const [deepAnchorNode, deepAnchorOffset] = getDeepestPosition(
+            selection.anchorNode,
+            selection.anchorOffset
+        );
+        const [deepFocusNode, deepFocusOffset] = getDeepestPosition(
+            selection.focusNode,
+            selection.focusOffset
+        );
+
+        const range = new Range();
+        range.setStart(deepAnchorNode, deepAnchorOffset);
+        range.setEnd(deepFocusNode, deepFocusOffset);
+        const clonedContents = range.cloneContents();
+        fillClipboardData(ev, selection.toString(), clonedContents);
+    }
+
+    /**
+     * Ensure that elements with accessibility editor attributes correctly get
+     * the standard accessibility attribute (aria-label, role).
+     */
+    applyAccessibilityAttributes(container) {
+        for (const el of container.querySelectorAll("[data-oe-role]")) {
+            el.setAttribute("role", el.dataset.oeRole);
+        }
+        for (const el of container.querySelectorAll("[data-oe-aria-label]")) {
+            el.setAttribute("aria-label", el.dataset.oeAriaLabel);
+        }
     }
 
     /**
@@ -123,7 +194,7 @@ export class HtmlViewer extends Component {
             ? contentWindow.document.documentElement
             : contentWindow.document.querySelector("#iframe_target");
         iframeTarget.innerHTML = content;
-        this.retargetLinks(iframeTarget);
+        this.processReadonlyContent(iframeTarget);
     }
 
     onLoadIframe(value) {
@@ -170,6 +241,9 @@ export class HtmlViewer extends Component {
     }
 
     destroyComponents() {
+        for (const cleanup of this._cleanups) {
+            cleanup();
+        }
         for (const info of [...this.components]) {
             this.destroyComponent(info);
         }

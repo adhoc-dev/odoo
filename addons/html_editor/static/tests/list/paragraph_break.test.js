@@ -3,6 +3,9 @@ import { testEditor } from "../_helpers/editor";
 import { unformat } from "../_helpers/format";
 import { insertText, splitBlock } from "../_helpers/user_actions";
 
+const base64Img =
+    "data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAAUA\n        AAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO\n            9TXL0Y4OHwAAAABJRU5ErkJggg==";
+
 describe("Selection collapsed", () => {
     describe("Ordered", () => {
         describe("Basic", () => {
@@ -81,6 +84,36 @@ describe("Selection collapsed", () => {
                         </ol>`),
                 });
             });
+
+            test("should split list item containing image (1)", async () => {
+                await testEditor({
+                    contentBefore: unformat(`
+                        <ol>
+                            <li><img src="${base64Img}">[]</li>
+                        </ol>`),
+                    stepFunction: splitBlock,
+                    contentAfter: unformat(`
+                        <ol>
+                            <li><img src="${base64Img}"></li>
+                            <li>[]<br></li>
+                        </ol>`),
+                });
+            });
+
+            test("should split list item containing image (2)", async () => {
+                await testEditor({
+                    contentBefore: unformat(`
+                        <ol>
+                            <li>[]<img src="${base64Img}"></li>
+                        </ol>`),
+                    stepFunction: splitBlock,
+                    contentAfter: unformat(`
+                        <ol>
+                            <li><br></li>
+                            <li>[]<img src="${base64Img}"></li>
+                        </ol>`),
+                });
+            });
         });
         describe("Removing items", () => {
             test("should add an empty list item at the end of a list, then remove it", async () => {
@@ -149,7 +182,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test("should create list items after one with a block in it", async () => {
+            test("should create list items after one with a block in it (1)", async () => {
                 await testEditor({
                     contentBefore:
                         '<ol><li class="a"><custom-block style="display: block;">abc[]</custom-block></li></ol>',
@@ -163,6 +196,9 @@ describe("Selection collapsed", () => {
                         '<li class="a"><custom-block style="display: block;">b</custom-block></li>' +
                         '<li class="a"><custom-block style="display: block;">[]<br></custom-block></li></ol>',
                 });
+            });
+
+            test("should create list items after one with a block in it (2)", async () => {
                 await testEditor({
                     contentBefore:
                         '<ol><li><custom-block class="a" style="display: block;">abc[]</custom-block></li></ol>',
@@ -323,7 +359,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test("should create list items after one with a block in it", async () => {
+            test("should create list items after one with a block in it (1)", async () => {
                 await testEditor({
                     contentBefore:
                         '<ul><li class="a"><custom-block style="display: block;">abc[]</custom-block></li></ul>',
@@ -337,6 +373,9 @@ describe("Selection collapsed", () => {
                         '<li class="a"><custom-block style="display: block;">b</custom-block></li>' +
                         '<li class="a"><custom-block style="display: block;">[]<br></custom-block></li></ul>',
                 });
+            });
+
+            test("should create list items after one with a block in it (2)", async () => {
                 await testEditor({
                     contentBefore:
                         '<ul><li><custom-block class="a" style="display: block;">abc[]</custom-block></li></ul>',
@@ -544,7 +583,7 @@ describe("Selection collapsed", () => {
                     });
                 });
 
-                test("should create list items after one with a block in it", async () => {
+                test("should create list items after one with a block in it (1)", async () => {
                     await testEditor({
                         contentBefore:
                             '<ul class="o_checklist"><li class="a"><custom-block style="display: block;">abc[]</custom-block></li></ul>',
@@ -558,6 +597,9 @@ describe("Selection collapsed", () => {
                             '<li class="a"><custom-block style="display: block;">d</custom-block></li>' +
                             '<li class="a"><custom-block style="display: block;">[]<br></custom-block></li></ul>',
                     });
+                });
+
+                test("should create list items after one with a block in it (2)", async () => {
                     await testEditor({
                         contentBefore:
                             '<ul class="o_checklist"><li><custom-block class="a" style="display: block;">abc[]</custom-block></li></ul>',
@@ -708,13 +750,16 @@ describe("Selection collapsed", () => {
     });
 });
 describe("Selection not collapsed", () => {
-    test("should delete part of a list item, then split it", async () => {
+    test("should delete part of a list item, then split it (1)", async () => {
         // Forward selection
         await testEditor({
             contentBefore: "<ul><li>ab[cd]ef</li></ul>",
             stepFunction: splitBlock,
             contentAfter: "<ul><li>ab</li><li>[]ef</li></ul>",
         });
+    });
+
+    test("should delete part of a list item, then split it (2)", async () => {
         // Backward selection
         await testEditor({
             contentBefore: "<ul><li>ab]cd[ef</li></ul>",
@@ -723,7 +768,7 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test("should delete all contents of a list item, then split it", async () => {
+    test("should delete all contents of a list item, then split it (1)", async () => {
         // Forward selection
         await testEditor({
             contentBefore: "<ul><li>[abc]</li></ul>",
@@ -731,6 +776,9 @@ describe("Selection not collapsed", () => {
             // JW cAfter: '<ul><li><br></li><li>[]<br></li></ul>',
             contentAfter: "<p>[]<br></p>",
         });
+    });
+
+    test("should delete all contents of a list item, then split it (2)", async () => {
         // Backward selection
         await testEditor({
             contentBefore: "<ul><li>]abc[</li></ul>",
@@ -740,13 +788,16 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test("should delete across two list items, then split what's left", async () => {
+    test("should delete across two list items, then split what's left (1)", async () => {
         // Forward selection
         await testEditor({
             contentBefore: "<ul><li>ab[cd</li><li>ef]gh</li></ul>",
             stepFunction: splitBlock,
             contentAfter: "<ul><li>ab</li><li>[]gh</li></ul>",
         });
+    });
+
+    test("should delete across two list items, then split what's left (2)", async () => {
         // Backward selection
         await testEditor({
             contentBefore: "<ul><li>ab]cd</li><li>ef[gh</li></ul>",
@@ -755,13 +806,16 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test("should delete part of a checklist item, then split it", async () => {
+    test("should delete part of a checklist item, then split it (1)", async () => {
         // Forward selection
         await testEditor({
             contentBefore: "<ul><li>ab[cd]ef</li></ul>",
             stepFunction: splitBlock,
             contentAfter: "<ul><li>ab</li><li>[]ef</li></ul>",
         });
+    });
+
+    test("should delete part of a checklist item, then split it (2)", async () => {
         // Backward selection
         await testEditor({
             contentBefore: "<ul><li>ab]cd[ef</li></ul>",
@@ -770,7 +824,7 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test("should delete all contents of a checklist item, then split it", async () => {
+    test("should delete all contents of a checklist item, then split it (1)", async () => {
         // Forward selection
         await testEditor({
             contentBefore: "<ul><li>[abc]</li></ul>",
@@ -778,6 +832,9 @@ describe("Selection not collapsed", () => {
             // JW cAfter: '<ul><li><br></li><li>[]<br></li></ul>',
             contentAfter: "<p>[]<br></p>",
         });
+    });
+
+    test("should delete all contents of a checklist item, then split it (2)", async () => {
         // Backward selection
         await testEditor({
             contentBefore: "<ul><li>]abc[</li></ul>",

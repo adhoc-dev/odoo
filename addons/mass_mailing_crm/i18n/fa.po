@@ -3,17 +3,15 @@
 # 	* mass_mailing_crm
 #
 # Translators:
-# Martin Trigaux, 2023
-# Hamid Darabi, 2023
-# Hanna Kheradroosta, 2023
+# Tiffany Chang, 2025
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~15.1\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-12-07 10:47+0000\n"
-"PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Hanna Kheradroosta, 2023\n"
+"POT-Creation-Date: 2025-12-29 18:37+0000\n"
+"PO-Revision-Date: 2024-09-25 09:41+0000\n"
+"Last-Translator: Tiffany Chang, 2025\n"
 "Language-Team: Persian (https://app.transifex.com/odoo/teams/41243/fa/)\n"
 "Language: fa\n"
 "MIME-Version: 1.0\n"
@@ -24,11 +22,16 @@ msgstr ""
 #. module: mass_mailing_crm
 #: model_terms:ir.ui.view,arch_db:mass_mailing_crm.mailing_mailing_view_form
 msgid ""
-"<span class=\"o_stat_text\" attrs=\"{'invisible': [('use_leads', '=', False)]}\">Leads</span>\n"
-"                        <span class=\"o_stat_text\" attrs=\"{'invisible': [('use_leads', '=', True)]}\">Opportunities</span>"
+"<span class=\"o_stat_text\" invisible=\"not use_leads\">Leads</span>\n"
+"                        <span class=\"o_stat_text\" "
+"invisible=\"use_leads\">Opportunities</span>"
 msgstr ""
+"<span class=\"o_stat_text\" invisible=\"not use_leads\">سرنخ ها</span>\n"
+"                        <span class=\"o_stat_text\" "
+"invisible=\"use_leads\">فرصت ها</span>"
 
 #. module: mass_mailing_crm
+#. odoo-python
 #: code:addons/mass_mailing_crm/models/mailing_mailing.py:0
 msgid "LEADS"
 msgstr ""
@@ -39,12 +42,14 @@ msgid "Lead/Opportunity"
 msgstr "سرنخ / فرصت"
 
 #. module: mass_mailing_crm
+#. odoo-python
 #: code:addons/mass_mailing_crm/models/mailing_mailing.py:0
 #: model:ir.model.fields.selection,name:mass_mailing_crm.selection__utm_campaign__ab_testing_winner_selection__crm_lead_count
 msgid "Leads"
 msgstr "سرنخ ها"
 
 #. module: mass_mailing_crm
+#. odoo-python
 #: code:addons/mass_mailing_crm/models/mailing_mailing.py:0
 msgid "Leads Analysis"
 msgstr "تحلیل سرنخ"
@@ -60,16 +65,21 @@ msgid "Mass Mailing"
 msgstr "ایمیل دسته‌جمعی"
 
 #. module: mass_mailing_crm
+#. odoo-python
 #: code:addons/mass_mailing_crm/models/mailing_mailing.py:0
 msgid "No %s yet!"
 msgstr ""
 
 #. module: mass_mailing_crm
+#. odoo-python
 #: code:addons/mass_mailing_crm/models/mailing_mailing.py:0
-msgid "Note that Odoo cannot track replies if they are sent towards email addresses to this database."
+msgid ""
+"Note that Odoo cannot track replies if they are sent towards email addresses "
+"to this database."
 msgstr ""
 
 #. module: mass_mailing_crm
+#. odoo-python
 #: code:addons/mass_mailing_crm/models/mailing_mailing.py:0
 msgid "Opportunities"
 msgstr "فرصت‌ها"

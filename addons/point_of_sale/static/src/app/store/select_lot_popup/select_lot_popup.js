@@ -45,11 +45,13 @@ export class EditListPopup extends Component {
         options: { type: Array, optional: true },
         customInput: { type: Boolean, optional: true },
         uniqueValues: { type: Boolean, optional: true },
+        isLotNameUsed: { type: Function, optional: true },
     };
     static defaultProps = {
         options: [],
         customInput: true,
         uniqueValues: true,
+        isLotNameUsed: () => false,
     };
 
     /**
@@ -121,9 +123,17 @@ export class EditListPopup extends Component {
     }
     hasValidValue(itemId, text) {
         return (
-            (this.props.customInput || this.props.options.includes(text)) &&
+            this.isValidValue(text) &&
             (!this.props.uniqueValues ||
                 !this.state.array.some((elem) => elem._id !== itemId && elem.text === text))
+        );
+    }
+    isValidValue(text) {
+        return (
+            !this.props.isLotNameUsed(text) &&
+            (this.props.customInput ||
+                this.props.options.includes(text) ||
+                this.props.array.some((i) => i.text === text))
         );
     }
     onInputChange(itemId, text) {
@@ -184,9 +194,7 @@ export class EditListPopup extends Component {
             this.state.array
                 .filter((item) => {
                     const itemValue = item.text.trim();
-                    const isValidValue =
-                        itemValue !== "" &&
-                        (this.props.customInput || this.props.options.includes(itemValue));
+                    const isValidValue = itemValue !== "" && this.isValidValue(itemValue);
                     if (!isValidValue) {
                         return false;
                     }

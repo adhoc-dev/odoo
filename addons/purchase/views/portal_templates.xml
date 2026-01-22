@@ -170,7 +170,7 @@
                           </div>
 
                           <div>
-                            <button id="portal_connect_software_modal_btn" type="button" class="btn btn-primary"
+                            <button id="portal_connect_software_modal_btn" type="button" class="btn btn-primary invisible"
                             data-bs-toggle="modal" data-bs-target="#portal_connect_software_modal">
                                 Connect with your software!
                             </button>
@@ -338,7 +338,8 @@
                             <tr t-att-class="'fw-bold o_line_section' if line.display_type == 'line_section' else 'fst-italic text-break' if line.display_type == 'line_note' else ''">
                                 <t t-if="not line.display_type">
                                     <td id="product_name" class="d-flex">
-                                        <img t-att-src="image_data_uri(resize_to_48(line.product_id.image_1024))" alt="Product" class="d-none d-lg-inline"/>
+                                        <img t-att-src="line.product_id.image_128 and image_data_uri(line.product_id.image_128) or '/web/static/img/placeholder.png'"
+                                            alt="Product" class="d-none d-lg-inline o_purchase_portal_product_image"/>
                                         <span t-field="line.name"/>
                                     </td>
                                     <td class="text-end">
@@ -369,7 +370,7 @@
                                         />
                                     </td>
                                     <td t-if="display_price_and_taxes" t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
-                                        <span t-esc="', '.join(map(lambda x: (x.description or x.name), line.taxes_id))"/>
+                                        <span t-out="', '.join(map(lambda x: (x.name), line.taxes_id))"/>
                                     </td>
                                     <td t-if="display_price_and_taxes" t-attf-class="text-end {{ 'd-none d-sm-table-cell' if report_type == 'html' else '' }}">
                                         <div t-field="line.discount" class="text-end"/>

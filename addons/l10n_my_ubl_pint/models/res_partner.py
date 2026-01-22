@@ -1,11 +1,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from odoo import models, fields
+from odoo import models, fields, api
 
 
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
-    invoice_edi_format = fields.Selection(selection_add=[('pint_my', "PINT Malaysia")])
+    invoice_edi_format = fields.Selection(selection_add=[('pint_my', "Malaysia (Peppol PINT MY)")])
     sst_registration_number = fields.Char(
         string="SST",
         help="Malaysian Sales and Service Tax Number",
@@ -26,3 +26,7 @@ class ResPartner(models.Model):
         formats_info = super()._get_ubl_cii_formats_info()
         formats_info['pint_my'] = {'countries': ['MY'], 'on_peppol': True}
         return formats_info
+
+    @api.model
+    def _commercial_fields(self):
+        return super()._commercial_fields() + ['sst_registration_number', 'ttx_registration_number']

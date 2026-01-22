@@ -5,6 +5,7 @@ import base64
 import codecs
 import collections
 import csv
+import contextlib
 import difflib
 import unicodedata
 
@@ -317,6 +318,13 @@ class Import(models.TransientModel):
             definition_record_field = field['definition_record_field']
 
             target_model = Model.env[Model._fields[definition_record].comodel_name]
+
+            # ignore if you cannot access to the target model or the field definition
+            if not target_model.has_access('read'):
+                continue
+            if not target_model._fields[definition_record_field].is_accessible(target_model.env):
+                continue
+
             # Do not take into account the definition of archived parents,
             # we do not import archived records most of the time.
             definition_records = target_model.search_fetch(
@@ -365,14 +373,16 @@ class Import(models.TransientModel):
 
             if field['type'] in ('many2many', 'many2one'):
                 field_value['fields'] = [
-                    dict(field_value, name='id', string=_("External ID"), type='id'),
-                    dict(field_value, name='.id', string=_("Database ID"), type='id'),
+                    dict(field_value, model_name=field['relation'], name='id', string=_("External ID"), type='id'),
+                    dict(field_value, model_name=field['relation'], name='.id', string=_("Database ID"), type='id'),
                 ]
                 field_value['comodel_name'] = field['relation']
             elif field['type'] == 'one2many':
                 field_value['fields'] = self.get_fields_tree(field['relation'], depth=depth-1)
                 if self.env.user.has_group('base.group_no_one'):
-                    field_value['fields'].append({'id': '.id', 'name': '.id', 'string': _("Database ID"), 'required': False, 'fields': [], 'type': 'id'})
+                    field_value['fields'].append(
+                        dict(field_value, model_name=field['relation'], fields=[], name='.id', string=_("Database ID"), type='id')
+                    )
                 field_value['comodel_name'] = field['relation']
 
             importable_fields.append(field_value)
@@ -562,7 +572,9 @@ class Import(models.TransientModel):
             return ()
 
         encoding = options.get('encoding')
+        encoding_guessed = False
         if not encoding:
+            encoding_guessed = True
             encoding = options['encoding'] = chardet.detect(csv_data)['encoding'].lower()
             # some versions of chardet (e.g. 2.3.0 but not 3.x) will return
             # utf-(16|32)(le|be), which for python means "ignore / don't strip
@@ -572,7 +584,14 @@ class Import(models.TransientModel):
             if bom and csv_data.startswith(bom):
                 encoding = options['encoding'] = encoding[:-2]
 
-        csv_text = csv_data.decode(encoding)
+        try:
+            csv_text = csv_data.decode(encoding)
+        except UnicodeDecodeError as exc:
+            if encoding_guessed:
+                msg = _("There was an issue decoding the file using encoding “%s”.\nThis encoding was automatically detected.", encoding)
+            else:
+                msg = _("There was an issue decoding the file using encoding “%s”.\nThis encoding was manually selected.", encoding)
+            raise ImportValidationError(msg) from exc
 
         separator = options.get('separator')
         if not separator:
@@ -1418,7 +1437,7 @@ class Import(models.TransientModel):
         :rtype: dict(ids: list(int), messages: list({type, message, record}))
         """
         self.ensure_one()
-        self._cr.execute('SAVEPOINT import')
+        sp = self.env.cr.savepoint(flush=False)
 
         try:
             input_file_data, import_fields = self._convert_import_data(fields, options)
@@ -1449,23 +1468,14 @@ class Import(models.TransientModel):
 
         # If transaction aborted, RELEASE SAVEPOINT is going to raise
         # an InternalError (ROLLBACK should work, maybe). Ignore that.
-        # TODO: to handle multiple errors, create savepoint around
-        #       write and release it in case of write error (after
-        #       adding error to errors array) => can keep on trying to
-        #       import stuff, and rollback at the end if there is any
-        #       error in the results.
-        try:
-            if dryrun:
-                self._cr.execute('ROLLBACK TO SAVEPOINT import')
-                # cancel all changes done to the registry/ormcache
-                # we need to clear the cache in case any created id was added to an ormcache and would be missing afterward
-                self.pool.clear_all_caches()
-                # don't propagate to other workers since it was rollbacked
-                self.pool.reset_changes()
-            else:
-                self._cr.execute('RELEASE SAVEPOINT import')
-        except psycopg2.InternalError:
-            pass
+        with contextlib.suppress(psycopg2.InternalError):
+            sp.close(rollback=dryrun)
+        if dryrun:
+            # cancel all changes done to the registry/ormcache
+            # we need to clear the cache in case any created id was added to an ormcache and would be missing afterward
+            self.pool.clear_all_caches()
+            # don't propagate to other workers since it was rollbacked
+            self.pool.reset_changes()
 
         # Insert/Update mapping columns when import complete successfully
         if import_result['ids'] and options.get('has_headers'):
@@ -1513,7 +1523,7 @@ class Import(models.TransientModel):
             if any(name + '/' in import_field and name == import_field.split('/')[prefix.count('/')] for import_field in import_fields):
                 # Recursive call with the relational as new model and add the field name to the prefix
                 binary_filenames = self._extract_binary_filenames(import_fields, data, field.comodel_name, name + '/', binary_filenames)
-            elif field.type == 'binary' and field.attachment and any(f in name for f in IMAGE_FIELDS) and name in import_fields:
+            elif field.type == 'binary' and field.attachment and name in import_fields:
                 index = import_fields.index(name)
                 for line in data:
                     filename = None

@@ -1,5 +1,5 @@
 import { expect, test } from "@odoo/hoot";
-import { queryAll, queryAllTexts } from "@odoo/hoot-dom";
+import { queryAll, queryAllTexts, runAllTimers } from "@odoo/hoot-dom";
 import { animationFrame, Deferred } from "@odoo/hoot-mock";
 import { Component, onWillStart, xml } from "@odoo/owl";
 import {
@@ -27,6 +27,8 @@ import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { SearchBar } from "@web/search/search_bar/search_bar";
 import { useSetupAction } from "@web/search/action_hook";
 import { WebClient } from "@web/webclient/webclient";
+import { browser } from "@web/core/browser/browser";
+import { router } from "@web/core/browser/router";
 
 const { ResCompany, ResPartner, ResUsers } = webModels;
 const actionRegistry = registry.category("actions");
@@ -39,7 +41,7 @@ class Partner extends models.Model {
         { id: 2, display_name: "Second record" },
     ];
     _views = {
-        "form,false": `
+        form: /* xml */ `
             <form>
                 <header>
                     <button name="object" string="Call method" type="object"/>
@@ -47,17 +49,22 @@ class Partner extends models.Model {
                 <group>
                     <field name="display_name"/>
                 </group>
-            </form>`,
-        "kanban,1": `
+            </form>
+        `,
+        "kanban,1": /* xml */ `
             <kanban>
                 <templates>
                     <t t-name="card">
                         <field name="display_name"/>
                     </t>
                 </templates>
-            </kanban>`,
-        "list,false": `<list><field name="display_name"/></list>`,
-        "search,false": `<search/>`,
+            </kanban>
+        `,
+        "list,2": /* xml */ `
+            <list>
+                <field name="display_name" />
+            </list>
+        `,
     };
 }
 
@@ -70,9 +77,8 @@ class Pony extends models.Model {
         { id: 9, name: "Fluttershy" },
     ];
     _views = {
-        "list,false": `<list><field name="name"/></list>`,
-        "form,false": `<form><field name="name"/></form>`,
-        "search,false": `<search/>`,
+        list: `<list><field name="name"/></list>`,
+        form: `<form><field name="name"/></form>`,
     };
 }
 
@@ -84,8 +90,6 @@ defineActions([
         xml_id: "action_3",
         name: "Partners",
         res_model: "partner",
-        mobile_view_mode: "kanban",
-        type: "ir.actions.act_window",
         views: [
             [false, "list"],
             [1, "kanban"],
@@ -97,7 +101,6 @@ defineActions([
         xml_id: "action_4",
         name: "Partners Action 4",
         res_model: "partner",
-        type: "ir.actions.act_window",
         views: [
             [1, "kanban"],
             [2, "list"],
@@ -110,7 +113,6 @@ defineActions([
         name: "Create a Partner",
         res_model: "partner",
         target: "new",
-        type: "ir.actions.act_window",
         views: [[false, "form"]],
     },
     {
@@ -118,7 +120,6 @@ defineActions([
         xml_id: "action_8",
         name: "Favorite Ponies",
         res_model: "pony",
-        type: "ir.actions.act_window",
         views: [
             [false, "list"],
             [false, "form"],
@@ -261,7 +262,6 @@ test("execute a new action while handling a call_button", async () => {
         return {
             name: "Partners Action 1",
             res_model: "partner",
-            type: "ir.actions.act_window",
             views: [[1, "kanban"]],
         };
     });
@@ -688,9 +688,9 @@ test("local state, global state, and race conditions", async () => {
         toy: { multi_record: true, display_name: "Toy", icon: "fab fa-android" },
     });
     Partner._views = {
-        "toy,false": `<toy/>`,
-        "list,false": `<list><field name="display_name"/></list>`,
-        "search,false": `<search><filter name="display_name" string="Foo" domain="[]"/></search>`,
+        toy: `<toy/>`,
+        list: `<list><field name="display_name"/></list>`,
+        search: `<search><filter name="display_name" string="Foo" domain="[]"/></search>`,
     };
 
     let def = Promise.resolve();
@@ -755,4 +755,40 @@ test("local state, global state, and race conditions", async () => {
         `{"fromId":1}`, // setup second view instantiated
         `{"fromId":1}`, // setup third view instantiated
     ]);
+});
+
+test.tags("desktop");
+test("doing browser back temporarily disables the UI", async () => {
+    let def;
+    onRpc("partner", "web_search_read", () => def);
+    await mountWithCleanup(WebClient);
+
+    await getService("action").doAction(4);
+    await getService("action").doAction(8);
+    await runAllTimers(); // wait for the update of the router
+    expect(router.current).toEqual({
+        action: 8,
+        actionStack: [
+            {
+                action: 4,
+                displayName: "Partners Action 4",
+                view_type: "kanban",
+            },
+            {
+                action: 8,
+                displayName: "Favorite Ponies",
+                view_type: "list",
+            },
+        ],
+    });
+
+    def = new Deferred();
+    browser.history.back();
+    expect(document.body.style.pointerEvents).toBe("none");
+    // await contains(".o_control_panel .breadcrumb-item").click(); todo JUM: click on breadcrumb
+    def.resolve();
+
+    await animationFrame();
+    expect(queryAllTexts(".breadcrumb-item, .o_breadcrumb .active")).toEqual(["Partners Action 4"]);
+    expect(document.body.style.pointerEvents).toBe("auto");
 });

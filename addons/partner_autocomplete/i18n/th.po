@@ -1,22 +1,23 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* partner_autocomplete
-# 
+#
 # Translators:
 # Wil Odoo, 2024
-# 
+# Rasareeyar Lappiam, 2025
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:55+0000\n"
+"POT-Creation-Date: 2025-12-29 18:37+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
+"Last-Translator: Rasareeyar Lappiam, 2025\n"
 "Language-Team: Thai (https://app.transifex.com/odoo/teams/41243/th/)\n"
+"Language: th\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: th\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #. module: partner_autocomplete
@@ -28,7 +29,7 @@ msgstr "ข้อมูลเพิ่มเติม"
 #. module: partner_autocomplete
 #: model:iap.service,description:partner_autocomplete.iap_service_partner_autocomplete
 msgid "Automatically enrich your contact base with corporate data."
-msgstr ""
+msgstr "เสริมสร้างฐานข้อมูลติดต่อของคุณโดยอัตโนมัติด้วยข้อมูลองค์กร"
 
 #. module: partner_autocomplete
 #. odoo-javascript
@@ -40,12 +41,6 @@ msgstr "ซื้อเครดิตเพิ่ม"
 #: model:ir.model,name:partner_autocomplete.model_res_company
 msgid "Companies"
 msgstr "บริษัท"
-
-#. module: partner_autocomplete
-#. odoo-python
-#: code:addons/partner_autocomplete/models/res_company.py:0
-msgid "Company auto-completed by Odoo Partner Autocomplete Service"
-msgstr "บริษัทกรอกอัตโนมัติโดยบริการเติมข้อความอัตโนมัติของ Odoo พาร์ทเนอร์"
 
 #. module: partner_autocomplete
 #: model:ir.model.fields,field_description:partner_autocomplete.field_res_company__partner_gid
@@ -158,16 +153,10 @@ msgid "Partner Autocomplete: Sync with remote DB"
 msgstr "การเติมข้อความอัตโนมัติของพาร์ทเนอร์: ซิงค์กับฐานข้อมูลระยะไกล"
 
 #. module: partner_autocomplete
-#. odoo-python
-#: code:addons/partner_autocomplete/models/res_partner.py:0
-msgid "Partner created by Odoo Partner Autocomplete Service"
-msgstr "พาร์ทเนอร์ที่สร้างโดย Odoo Partner Autocomplete Service"
-
-#. module: partner_autocomplete
 #. odoo-javascript
 #: code:addons/partner_autocomplete/static/src/xml/partner_autocomplete.xml:0
-msgid "Placeholder"
-msgstr "ตัวอย่างข้อความ"
+msgid "Search Worldwide 🌎"
+msgstr ""
 
 #. module: partner_autocomplete
 #. odoo-javascript
@@ -187,3 +176,9 @@ msgstr "ตั้งค่าโทเค็นบัญชีของคุณ
 #: code:addons/partner_autocomplete/models/iap_autocomplete_api.py:0
 msgid "Test mode"
 msgstr "โหมดทดสอบ"
+
+#. module: partner_autocomplete
+#. odoo-python
+#: code:addons/partner_autocomplete/models/res_partner.py:0
+msgid "Unable to enrich company (no credit was consumed)."
+msgstr ""

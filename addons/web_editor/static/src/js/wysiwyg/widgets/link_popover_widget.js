@@ -54,6 +54,7 @@ export class LinkPopoverWidget {
         this.container = params.container || this.target.ownerDocument.body;
         this.href = this.$target.attr('href'); // for template
         this._keepLastPromise = new KeepLast();
+        this.isDocument = !!(this.$target.attr("data-mimetype") && this.$target[0].dataset.mimetype.startsWith("image"));
     }
 
     /**
@@ -66,6 +67,11 @@ export class LinkPopoverWidget {
         this.$previewFaviconFa = this.$el.find('.o_we_preview_favicon .fa');
         this.$copyLink = this.$el.find('.o_we_copy_link');
         this.$fullUrl = this.$el.find('.o_we_full_url');
+
+        // hide buttons for document links
+        if (this.isDocument) {
+            this.$el.find('.o_we_edit_link, .o_we_remove_link, .o_we_full_url').attr('hidden', true);
+        }
 
         this.$urlLink.attr('href', this.href);
         this.$fullUrl.attr('href', this.href);
@@ -85,6 +91,7 @@ export class LinkPopoverWidget {
             tooltips.push(Tooltip.getOrCreateInstance(el));
         }
         let popoverShown = true;
+        const editable = this.wysiwyg.odooEditor.editable;
         this.$target.popover({
             html: true,
             content: this.$el,
@@ -96,7 +103,7 @@ export class LinkPopoverWidget {
             // 4. ..except if it the click was on a button of the popover content
             // 5. Close when the user click somewhere on the page (not being the link or the popover content)
             trigger: 'manual',
-            boundary: 'viewport',
+            boundary: editable,
             container: this.container,
         })
         .on('show.bs.popover.link_popover', () => {

@@ -74,7 +74,6 @@ class AccountBankStatement(models.Model):
         comodel_name='account.bank.statement.line',
         inverse_name='statement_id',
         string='Statement lines',
-        required=True,
     )
 
     # A statement assumed to be complete when the sum of encoded lines is equal to the difference between start and
@@ -123,7 +122,10 @@ class AccountBankStatement(models.Model):
     @api.depends('create_date')
     def _compute_name(self):
         for stmt in self:
-            stmt.name = _("%(journal_code)s Statement %(date)s", journal_code=stmt.journal_id.code, date=stmt.date)
+            name = ''
+            if stmt.journal_id:
+                name = stmt.journal_id.code + ' '
+            stmt.name = name +_("Statement %(date)s", date=stmt.date or fields.Date.to_date(stmt.create_date))
 
     @api.depends('line_ids.internal_index', 'line_ids.state')
     def _compute_date_index(self):
@@ -243,22 +245,29 @@ class AccountBankStatement(models.Model):
         self.env['account.bank.statement'].flush_model(['balance_start', 'balance_end_real', 'first_line_index'])
 
         self.env.cr.execute(f"""
-            SELECT st.id
-              FROM account_bank_statement st
-         LEFT JOIN res_company co ON st.company_id = co.id
-         LEFT JOIN account_journal j ON st.journal_id = j.id
-         LEFT JOIN res_currency currency ON COALESCE(j.currency_id, co.currency_id) = currency.id,
-                   LATERAL (
-                       SELECT balance_end_real
-                         FROM account_bank_statement st_lookup
-                        WHERE st_lookup.first_line_index < st.first_line_index
-                          AND st_lookup.journal_id = st.journal_id
-                     ORDER BY st_lookup.first_line_index desc
-                        LIMIT 1
-                   ) prev
-             WHERE ROUND(prev.balance_end_real, currency.decimal_places) != ROUND(st.balance_start, currency.decimal_places)
-               {"" if all_statements else "AND st.id IN %(ids)s"}
+             WITH statements AS (
+                     SELECT st.id,
+                            st.balance_start,
+                            st.journal_id,
+                            LAG(st.balance_end_real) OVER (
+                                PARTITION BY st.journal_id
+                                    ORDER BY st.first_line_index
+                            ) AS prev_balance_end_real,
+                            currency.decimal_places
+                       FROM account_bank_statement st
+                  LEFT JOIN res_company co ON st.company_id = co.id
+                  LEFT JOIN account_journal j ON st.journal_id = j.id
+                  LEFT JOIN res_currency currency ON COALESCE(j.currency_id, co.currency_id) = currency.id
+                      WHERE st.first_line_index IS NOT NULL
+                      {"" if all_statements else "AND st.journal_id IN %(journal_ids)s"}
+                  )
+           SELECT id
+             FROM statements
+            WHERE prev_balance_end_real IS NOT NULL
+              AND ROUND(prev_balance_end_real, decimal_places) != ROUND(balance_start, decimal_places)
+              {"" if all_statements else "AND id IN %(ids)s"};
         """, {
+            'journal_ids': tuple(set(self.journal_id.ids)),
             'ids': tuple(self.ids)
         })
         res = self.env.cr.fetchall()
@@ -309,15 +318,17 @@ class AccountBankStatement(models.Model):
             lines = self.env['account.bank.statement.line'].browse(active_ids).sorted()
             if len(lines.journal_id) > 1:
                 raise UserError(_("A statement should only contain lines from the same journal."))
-            # Check that the selected lines are contiguous
+            # Check that the selected lines are contiguous (there might be canceled lines between the indexes and these should be ignored from the check)
             indexes = lines.mapped('internal_index')
-            count_lines_between = self.env['account.bank.statement.line'].search_count([
+            lines_between = self.env['account.bank.statement.line'].search([
                 ('internal_index', '>=', min(indexes)),
                 ('internal_index', '<=', max(indexes)),
                 ('journal_id', '=', lines.journal_id.id),
             ])
-            if len(lines) != count_lines_between:
+            canceled_lines = lines_between.filtered(lambda l: l.state == 'cancel')
+            if len(lines) != len(lines_between - canceled_lines):
                 raise UserError(_("Unable to create a statement due to missing transactions. You may want to reorder the transactions before proceeding."))
+            lines |= canceled_lines
 
         if lines:
             defaults['line_ids'] = [Command.set(lines.ids)]

@@ -46,7 +46,7 @@ export class ProductPage extends Component {
         return !(
             this.selfOrder.editedLine &&
             this.selfOrder.editedLine.uuid &&
-            order.lastChangesSent[this.selfOrder.editedLine.uuid]
+            order.uiState.lineChanges[this.selfOrder.editedLine.uuid]
         );
     }
 
@@ -86,7 +86,7 @@ export class ProductPage extends Component {
     }
 
     isEveryValueSelected() {
-        return Object.values(this.state.selectedValues).find((value) => !value) == false;
+        return Object.values(this.state.selectedValues).every((value) => value);
     }
 
     isArchivedCombination() {

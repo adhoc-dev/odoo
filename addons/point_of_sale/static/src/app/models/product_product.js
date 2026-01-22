@@ -42,9 +42,10 @@ export class ProductProduct extends Base {
 
     needToConfigure() {
         return (
-            this.isConfigurable() &&
-            this.attribute_line_ids.length > 0 &&
-            !this.attribute_line_ids.every((l) => l.attribute_id.create_variant === "always")
+            this.isCombo() ||
+            (this.isConfigurable() &&
+                this.attribute_line_ids.length > 0 &&
+                !this.attribute_line_ids.every((l) => l.attribute_id.create_variant === "always"))
         );
     }
 
@@ -90,26 +91,30 @@ export class ProductProduct extends Base {
     getApplicablePricelistRules(pricelistRules) {
         const applicableRules = {};
         for (const pricelistId in pricelistRules) {
-            if (pricelistRules[pricelistId].productItems[this.id]) {
-                applicableRules[pricelistId] = pricelistRules[pricelistId].productItems[this.id];
-                continue;
-            }
-            const productTmplId = this.raw.product_tmpl_id;
-            if (pricelistRules[pricelistId].productTmlpItems[productTmplId]) {
-                applicableRules[pricelistId] =
-                    pricelistRules[pricelistId].productTmlpItems[productTmplId];
-                continue;
-            }
-            for (const category of this.parentCategories) {
-                if (pricelistRules[pricelistId].categoryItems[category]) {
-                    applicableRules[pricelistId] =
-                        pricelistRules[pricelistId].categoryItems[category];
-                    break;
+            applicableRules[pricelistId] = [];
+            const rules = pricelistRules[pricelistId];
+            if (rules.productItems[this.id]) {
+                applicableRules[pricelistId].push(...rules.productItems[this.id]);
+                if (!rules.productItems[this.id][0].min_quantity) {
+                    continue;
                 }
             }
-            if (!applicableRules[pricelistId]) {
-                applicableRules[pricelistId] = pricelistRules[pricelistId].globalItems;
+            const productTmplId = this.raw.product_tmpl_id;
+            if (rules.productTmlpItems[productTmplId]) {
+                applicableRules[pricelistId].push(...rules.productTmlpItems[productTmplId]);
+                if (!rules.productTmlpItems[productTmplId][0].min_quantity) {
+                    continue;
+                }
             }
+            for (const category of this.parentCategories) {
+                if (rules.categoryItems[category]) {
+                    applicableRules[pricelistId].push(...rules.categoryItems[category]);
+                    if (!rules.categoryItems[category][0].min_quantity) {
+                        break;
+                    }
+                }
+            }
+            applicableRules[pricelistId].push(...rules.globalItems);
         }
         return applicableRules;
     }
@@ -124,7 +129,15 @@ export class ProductProduct extends Base {
     // product.pricelist.item records are loaded with a search_read
     // and were automatically sorted based on their _order by the
     // ORM. After that they are added in this order to the pricelists.
-    get_price(pricelist, quantity, price_extra = 0, recurring = false, list_price = false) {
+    get_price(
+        pricelist,
+        quantity,
+        price_extra = 0,
+        recurring = false,
+        list_price = false,
+        original_line = false,
+        related_lines = []
+    ) {
         // In case of nested pricelists, it is necessary that all pricelists are made available in
         // the POS. Display a basic alert to the user in the case where there is a pricelist item
         // but we can't load the base pricelist to get the price when calling this method again.
@@ -139,9 +152,18 @@ export class ProductProduct extends Base {
             );
         }
 
-        const rules = !pricelist ? [] : this.cachedPricelistRules[pricelist?.id] || [];
+        if (original_line && original_line.isLotTracked()) {
+            related_lines.push(
+                ...original_line.order_id.lines.filter((line) => line.product_id.id === this.id)
+            );
+            quantity = related_lines.reduce((sum, line) => {
+                return sum + line.get_quantity();
+            }, 0);
+        }
+
+        const rule = this.getPricelistRule(pricelist, quantity);
+
         let price = (list_price || this.lst_price) + (price_extra || 0);
-        const rule = rules.find((rule) => !rule.min_quantity || quantity >= rule.min_quantity);
         if (!rule) {
             return price;
         }
@@ -182,6 +204,10 @@ export class ProductProduct extends Base {
         return price;
     }
 
+    getPricelistRule(pricelist, quantity) {
+        const rules = !pricelist ? [] : this.cachedPricelistRules[pricelist?.id] || [];
+        return rules.find((rule) => !rule.min_quantity || quantity >= rule.min_quantity);
+    }
     getImageUrl() {
         return (
             (this.image_128 &&
@@ -199,16 +225,16 @@ export class ProductProduct extends Base {
     }
 
     get searchString() {
-        const fields = ["display_name", "description_sale", "description"];
+        const fields = ["display_name", "barcode", "default_code"];
         return fields
             .map((field) => this[field] || "")
             .filter(Boolean)
             .join(" ");
     }
 
-    exactMatch(searchWord) {
-        const fields = ["barcode", "default_code"];
-        return fields.some((field) => this[field] && this[field].includes(searchWord));
+    exactMatch() {
+        // this method is kept for backward compatibility
+        return [];
     }
 
     _isArchivedCombination(attributeValueIds) {
@@ -245,6 +271,12 @@ export class ProductProduct extends Base {
 
     get productDisplayName() {
         return this.default_code ? `[${this.default_code}] ${this.name}` : this.name;
+    }
+    get canBeDisplayed() {
+        return this.active && this.available_in_pos;
+    }
+    get variants() {
+        return this.product_tmpl_id?.["<-product.product.product_tmpl_id"];
     }
 }
 registry.category("pos_available_models").add(ProductProduct.pythonModel, ProductProduct);

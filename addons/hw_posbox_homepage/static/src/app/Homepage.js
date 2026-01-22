@@ -31,14 +31,12 @@ export class Homepage extends Component {
         this.store = useStore();
         this.state = useState({ data: {}, loading: true, waitRestart: false });
         this.store.advanced = localStorage.getItem("showAdvanced") === "true";
+        this.store.dev = new URLSearchParams(window.location.search).has("debug");
+        this.loadDataDelay = 10000;
 
         onWillStart(async () => {
             await this.loadInitialData();
         });
-
-        setInterval(() => {
-            this.loadInitialData();
-        }, 10000);
     }
 
     async loadInitialData() {
@@ -58,6 +56,10 @@ export class Homepage extends Component {
         } catch {
             console.warn("Error while fetching data");
         }
+        this.loadDataDelay *= 1.25;
+        setTimeout(async () => {
+            await this.loadInitialData();
+        }, Math.min(this.loadDataDelay, 30 * 60 * 1000));
     }
 
     async restartOdooService() {
@@ -93,9 +95,21 @@ export class Homepage extends Component {
             <div class="d-flex mb-4 flex-column align-items-center justify-content-center">
                 <h4 class="text-center m-0">IoT Box - <t t-esc="state.data.hostname" /></h4>
             </div>
-            <div t-if="this.store.advanced" class="alert alert-warning" role="alert">
-                <p class="m-0 fw-bold">HTTPS certificate</p>
-                <small>Error code: <t t-esc="state.data.certificate_details" /></small>
+            <div t-if="!state.data.is_certificate_ok and state.data.server_status !== 'Not Configured'" class="alert alert-warning" role="alert">
+                <p class="m-0 fw-bold">
+                    This IoT Box doesn't have a valid certificate.
+                </p>
+                <small t-if="state.data.certificate_details === 'ERR_SSL_CERT_DOWNLOAD'">
+                    The IoT Box should get a certificate automatically when paired with a database. If it doesn't, 
+                    try to restart it.
+                </small>
+                <small t-else="" t-esc="state.data.certificate_details" />
+            </div>
+            <div t-if="this.store.advanced and state.data.is_certificate_ok" class="alert alert-info" role="alert">
+                <p class="m-0 fw-bold">HTTPS Certificate</p>
+                <small>
+                    Status: <t t-esc="state.data.certificate_details" />
+                </small>
             </div>
             <SingleData name="'Name'" value="state.data.hostname" icon="'fa-id-card'">
 				<t t-set-slot="button">
@@ -104,7 +118,7 @@ export class Homepage extends Component {
 			</SingleData>
             <SingleData t-if="this.store.advanced" name="'Version'" value="state.data.version" icon="'fa-microchip'">
                 <t t-set-slot="button">
-                    <UpdateDialog t-if="this.store.isLinux" />
+                    <UpdateDialog />
                 </t>
             </SingleData>
             <SingleData t-if="this.store.advanced" name="'IP address'" value="state.data.ip" icon="'fa-globe'" />

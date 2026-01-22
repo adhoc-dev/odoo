@@ -464,6 +464,7 @@ class Related(models.Model):
     foo_bar_sudo_id = fields.Many2one(string='foo_bar_sudo_id', related='foo_id.bar_id', related_sudo=True)
     foo_bar_sudo_id_name = fields.Char('foo_bar_sudo_id_name', related='foo_bar_sudo_id.name', related_sudo=False)
 
+    foo_float_id = fields.Float(related='foo_id.test_float')
 
 class RelatedFoo(models.Model):
     _name = _description = 'test_new_api.related_foo'
@@ -472,6 +473,7 @@ class RelatedFoo(models.Model):
     bar_id = fields.Many2one('test_new_api.related_bar')
     bar_name = fields.Char('bar_name', related='bar_id.name', related_sudo=False)
 
+    test_float = fields.Float(digits='ORM Precision')
 
 class RelatedBar(models.Model):
     _name = _description = 'test_new_api.related_bar'
@@ -506,6 +508,10 @@ class ComputeInverse(models.Model):
     foo = fields.Char()
     bar = fields.Char(compute='_compute_bar', inverse='_inverse_bar', store=True)
     baz = fields.Char()
+    child_ids = fields.One2many(
+        'test_new_api.compute.inverse', 'parent_id',
+        compute='_compute_child_ids', inverse='_inverse_child_ids', store=True)
+    parent_id = fields.Many2one('test_new_api.compute.inverse')
 
     @api.depends('foo')
     def _compute_bar(self):
@@ -522,6 +528,20 @@ class ComputeInverse(models.Model):
     def _check_constraint(self):
         if self._context.get('log_constraint'):
             self._context.get('log', []).append('constraint')
+
+    @api.depends('foo')
+    def _compute_child_ids(self):
+        for rec in self:
+            if rec.foo == 'has one child':
+                rec.child_ids = [
+                    Command.clear(),
+                    Command.create({'foo': 'child'}),
+                ]
+
+    def _inverse_child_ids(self):
+        for rec in self:
+            if any(child.foo == 'child' for child in self.child_ids):
+                rec.foo = 'has one child'
 
 
 class ComputeSudo(models.Model):
@@ -1175,7 +1195,8 @@ class ModelChild(models.Model):
 
     name = fields.Char()
     company_id = fields.Many2one('res.company')
-    parent_id = fields.Many2one('test_new_api.model_parent', check_company=True)
+    parent_id = fields.Many2one('test_new_api.model_parent', string="Parent", check_company=True)
+    parent_ids = fields.Many2many('test_new_api.model_parent', string="Parents", check_company=True)
 
 
 class ModelChildNoCheck(models.Model):
@@ -1243,19 +1264,31 @@ class ModelMany2oneReference(models.Model):
 
     res_model = fields.Char('Resource Model')
     res_id = fields.Many2oneReference('Resource ID', model_field='res_model')
+    const = fields.Boolean(default=True)
 
 
 class InverseM2oRef(models.Model):
     _name = 'test_new_api.inverse_m2o_ref'
     _description = 'dummy m2oref inverse model'
 
-    model_ids = fields.One2many('test_new_api.model_many2one_reference', 'res_id', string="Models")
+    model_ids = fields.One2many(
+        'test_new_api.model_many2one_reference', 'res_id',
+        string="Models",
+    )
     model_ids_count = fields.Integer("Count", compute='_compute_model_ids_count')
+    model_computed_ids = fields.One2many(
+        'test_new_api.model_many2one_reference',
+        string="Models Computed",
+        compute='_compute_model_computed_ids',
+    )
 
     @api.depends('model_ids')
     def _compute_model_ids_count(self):
         for rec in self:
             rec.model_ids_count = len(rec.model_ids)
+
+    def _compute_model_computed_ids(self):
+        self.model_computed_ids = []
 
 
 class ModelChildM2o(models.Model):
@@ -1525,6 +1558,39 @@ class ComputeMember(models.Model):
         container = self.env['test_new_api.compute.container']
         for member in self:
             member.container_id = container.search([('name', '=', member.name)], limit=1)
+
+
+class ComputeCreator(models.Model):
+    """ This model has a computed field that creates a new record. """
+    _name = _description = 'test_new_api.compute.creator'
+
+    name = fields.Char()
+    created_id = fields.Many2one('test_new_api.compute.created', compute='_compute_created', store=True)
+
+    @api.depends('name')
+    def _compute_created(self):
+        model = self.env['test_new_api.compute.created']
+        for record in self:
+            record.created_id = (
+                model.search([('name', '=', record.name)], limit=1)
+                or model.create({'name': record.name})
+            )
+
+
+class ComputeCreated(models.Model):
+    """ This model has records created by another model, and has a stored
+    computed field. The purpose of that field is to make sure that flushing the
+    field above creates a record here and also flushes its computed field.
+    """
+    _name = _description = 'test_new_api.compute.created'
+
+    name = fields.Char()
+    value = fields.Integer(compute='_compute_value', store=True)
+
+    @api.depends('name')
+    def _compute_value(self):
+        for record in self:
+            record.value = len(record.name or "")
 
 
 class User(models.Model):
@@ -2189,3 +2255,14 @@ class SharedComputeMethod(models.Model):
                 record.start = 0
             if not record.end:
                 record.end = 10
+
+
+class BinaryTest(models.Model):
+    _name = _description = "binary.test"
+
+    img = fields.Image()
+    bin1 = fields.Binary()
+    bin2 = fields.Binary(compute="_compute_bin2")
+
+    def _compute_bin2(self):
+        self.bin2 = {}

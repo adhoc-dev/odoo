@@ -1,7 +1,7 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_forum
-# 
+# * website_forum
+#
 # Translators:
 # Tiffany Chang, 2024
 # Svante Suominen <svante.suominen@web-veistamo.fi>, 2024
@@ -26,24 +26,27 @@
 # Kari Lindgren <kari.lindgren@emsystems.fi>, 2024
 # Martin Trigaux, 2024
 # Simo Suurla <simo@suurla.fi>, 2024
-# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2024
 # Pekko Tuomisto <pekko.tuomisto@web-veistamo.fi>, 2024
 # Kari Lindgren <karisatu@gmail.com>, 2024
-# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2024
-# 
+# Jessica Jakara, 2025
+# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2025
+# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2025
+# "Jessica Tuulia Sade Jäkärä (jtsj)" <jtsj@odoo.com>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2024\n"
-"Language-Team: Finnish (https://app.transifex.com/odoo/teams/41243/fi/)\n"
+"POT-Creation-Date: 2025-12-29 18:38+0000\n"
+"PO-Revision-Date: 2025-08-18 12:32+0000\n"
+"Last-Translator: \"Jessica Tuulia Sade Jäkärä (jtsj)\" <jtsj@odoo.com>\n"
+"Language-Team: Finnish <https://translate.odoo.com/projects/odoo-18/"
+"website_forum/fi/>\n"
+"Language: fi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: fi\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 5.12.2\n"
 
 #. module: website_forum
 #. odoo-javascript
@@ -215,13 +218,13 @@ msgstr "&amp;nbsp;"
 #. odoo-javascript
 #: code:addons/website_forum/static/src/xml/website_forum_tags_wrapper.xml:0
 msgid "'Please enter 2 or more characters'"
-msgstr ""
+msgstr "'Kirjoita vähintään kaksi merkkiä'"
 
 #. module: website_forum
 #. odoo-javascript
 #: code:addons/website_forum/static/src/xml/website_forum_tags_wrapper.xml:0
 msgid "'Tags'"
-msgstr ""
+msgstr "'Tunnisteet'"
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -259,19 +262,23 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 msgid ""
 "<b class=\"d-block \">This answer has been flagged</b>\n"
-"                            As a moderator, you can either validate or reject this answer."
+"                            As a moderator, you can either validate or "
+"reject this answer."
 msgstr ""
 "<b class=\"d-block \">Tämä vastaus on merkitty</b>\n"
-"                            Moderaattorina voit joko hyväksyä tai hylätä tämän vastauksen."
+"                            Moderaattorina voit joko hyväksyä tai hylätä "
+"tämän vastauksen."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 msgid ""
 "<b class=\"d-block\">You have a pending post</b>\n"
-"                        Please wait for a moderator to validate your previous post to be allowed replying questions."
+"                        Please wait for a moderator to validate your "
+"previous post to be allowed replying questions."
 msgstr ""
 "<b class=\"d-block\">Sinulla on vireillä oleva viesti</b>\n"
-"                        Odota, että moderaattori vahvistaa edellisen viestisi, jotta voit vastata kysymyksiin."
+"                        Odota, että moderaattori vahvistaa edellisen "
+"viestisi, jotta voit vastata kysymyksiin."
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -309,8 +316,8 @@ msgstr ""
 msgid ""
 "<b>Answers should not start debates</b> This community Q&amp;A is not a "
 "discussion group. Please avoid holding debates in your answers as they tend "
-"to dilute the essence of questions and answers. For brief discussions please"
-" use commenting facility."
+"to dilute the essence of questions and answers. For brief discussions please "
+"use commenting facility."
 msgstr ""
 "<b>Vastaukset eivät saa aloittaa väittelyjä</b> Tämä yhteisö Q&amp;A ei ole "
 "keskusteluryhmä. Vältä vastauksissasi väittelyjä, sillä ne vesittävät "
@@ -323,8 +330,8 @@ msgstr ""
 msgid ""
 "<b>Answers shouldn't just point to other Questions</b>. Instead add a "
 "question comment indication \"Possible duplicate of...\". However, it's ok "
-"to include links to other questions or answers providing relevant additional"
-" information."
+"to include links to other questions or answers providing relevant additional "
+"information."
 msgstr ""
 "<b>Vastausten ei pitäisi vain viitata muihin kysymyksiin</b>. Sen sijaan "
 "tulisi lisätä kysymykseen kommentti \"Mahdollinen päällekkäisyys...\". On "
@@ -335,8 +342,8 @@ msgstr ""
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<b>Answers shouldn't just point to other questions</b>.Instead add a comment"
-" indicating <i>\"Possible duplicate of...\"</i>. However, it's fine to "
+"<b>Answers shouldn't just point to other questions</b>.Instead add a comment "
+"indicating <i>\"Possible duplicate of...\"</i>. However, it's fine to "
 "include links to other questions or answers providing relevant additional "
 "information."
 msgstr ""
@@ -349,23 +356,23 @@ msgstr ""
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<b>Answers shouldn't just provide a link a solution</b>. Instead provide the"
-" solution description text in your answer, even if it's just a copy/paste. "
+"<b>Answers shouldn't just provide a link a solution</b>. Instead provide the "
+"solution description text in your answer, even if it's just a copy/paste. "
 "Links are welcome, but should be complementary to answer, referring sources "
 "or additional reading."
 msgstr ""
-"<b>Vastauksissa ei pitäisi antaa vain linkkiä ratkaisuun</b>. Sen sijaan "
-"anna vastauksessasi ratkaisun kuvausteksti, vaikka se olisi vain "
-"kopio/liitä. Linkit ovat tervetulleita, mutta niiden tulisi täydentää "
-"vastausta, viitata lähteisiin tai lisälukemistoon."
+"<b>Vastauksissa ei tule antaa vain linkkiä ratkaisuun</b>. Sen sijaan anna "
+"vastauksessasi ratkaisun kuvausteksti, vaikka se olisi suoraan kopioitu "
+"muualta. Linkit ovat tervetulleita, mutta niiden tulee täydentää vastausta, "
+"viitata lähteisiin tai lisälukemistoon."
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
 "<b>Before you ask - please make sure to search for a similar question.</b> "
-"You can search questions by their title or tags. It’s also OK to answer your"
-" own question."
+"You can search questions by their title or tags. It’s also OK to answer your "
+"own question."
 msgstr ""
 "<b>Ennen kuin kysyt - varmista, että etsit vastaavanlaista kysymystä.</b> "
 "Voit etsiä kysymyksiä otsikon tai tunnisteiden perusteella. Voit myös "
@@ -375,8 +382,8 @@ msgstr ""
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<b>Please avoid asking questions that are too subjective and "
-"argumentative</b> or not relevant to this community."
+"<b>Please avoid asking questions that are too subjective and argumentative</"
+"b> or not relevant to this community."
 msgstr ""
 "<b>Vältä liian subjektiivisia ja kantaaottavia kysymyksiä</b> tai "
 "kysymyksiä, jotka eivät liity tähän yhteisöön."
@@ -384,15 +391,22 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_answer
 msgid ""
-"<b>Please try to give a substantial answer.</b> If you wanted to comment on the question or answer, just\n"
-"            <b>use the commenting tool.</b> Please remember that you can always <b>revise your answers</b>\n"
-"            - no need to answer the same question twice. Also, please <b>don't forget to vote</b>\n"
+"<b>Please try to give a substantial answer.</b> If you wanted to comment on "
+"the question or answer, just\n"
+"            <b>use the commenting tool.</b> Please remember that you can "
+"always <b>revise your answers</b>\n"
+"            - no need to answer the same question twice. Also, please "
+"<b>don't forget to vote</b>\n"
 "            - it really helps to select the best questions and answers!"
 msgstr ""
-"<b>Yritä antaa asiallinen vastaus.</b> Jos haluat vain kommentoida kysymystä tai vastausta,\n"
-"           <b>käytä kommentointityökalua.</b> Muistathan, että voit aina <b>tarkistaa vastauksiasi</b>\n"
-"            - samaan kysymykseen ei tarvitse vastata kahdesti. <b>Älä myöskään unohda äänestää</b>\n"
-"            - äänestys auttaa todella valitsemaan parhaat kysymykset ja vastaukset!"
+"<b>Yritä antaa asiallinen vastaus.</b> Jos haluat vain kommentoida kysymystä "
+"tai vastausta,\n"
+"           <b>käytä kommentointityökalua.</b> Muistathan, että voit aina "
+"<b>tarkistaa vastauksiasi</b>\n"
+"            - samaan kysymykseen ei tarvitse vastata kahdesti. <b>Älä "
+"myöskään unohda äänestää</b>\n"
+"            - äänestys auttaa todella valitsemaan parhaat kysymykset ja "
+"vastaukset!"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.faq_karma
@@ -408,10 +422,12 @@ msgstr "<b>Sinulla on jo vireillä oleva viesti.</b><br/>"
 #: model_terms:ir.ui.view,arch_db:website_forum.contact
 msgid ""
 "<b>|</b>\n"
-"                    <span class=\"fa fa-trophy o-text-gold ms-2\" role=\"img\" aria-label=\"Gold badge\" title=\"Gold badge\"/>"
+"                    <span class=\"fa fa-trophy o-text-gold ms-2\" "
+"role=\"img\" aria-label=\"Gold badge\" title=\"Gold badge\"/>"
 msgstr ""
 "<b>|</b>\n"
-"                    <span class=\"fa fa-trophy o-text-gold ms-2\" role=\"img\" aria-label=\"Kultainen merkki\" title=\"Kultainen merkki\"/>"
+"                    <span class=\"fa fa-trophy o-text-gold ms-2\" "
+"role=\"img\" aria-label=\"Kultainen merkki\" title=\"Kultainen merkki\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
@@ -474,8 +490,10 @@ msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
-msgid "<i class=\"fa fa-check fa-fw me-1\"/>Try searching for one or two words."
-msgstr "<i class=\"fa fa-check fa-fw me-1\"/>Kokeile etsiä yhtä tai kahta sanaa."
+msgid ""
+"<i class=\"fa fa-check fa-fw me-1\"/>Try searching for one or two words."
+msgstr ""
+"<i class=\"fa fa-check fa-fw me-1\"/>Kokeile etsiä yhtä tai kahta sanaa."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post_question_block
@@ -490,7 +508,8 @@ msgstr "<i class=\"fa fa-check\"/> Hyväksy"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
-msgid "<i class=\"fa fa-check\"/> How to configure TPS and TVQ's canadian taxes?"
+msgid ""
+"<i class=\"fa fa-check\"/> How to configure TPS and TVQ's canadian taxes?"
 msgstr ""
 "<i class=\"fa fa-check\"/> Miten konfiguroida TPS:n ja TVQ:n Kanadan verot?"
 
@@ -548,10 +567,12 @@ msgstr "<i class=\"fa fa-info-circle fa-fw\"/> Tietoa tästä foorumista"
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 msgid ""
 "<i class=\"fa fa-pencil\"/>\n"
-"                                Edit<span class=\"d-none d-lg-inline\"> your answer</span>"
+"                                Edit<span class=\"d-none d-lg-inline\"> your "
+"answer</span>"
 msgstr ""
 "<i class=\"fa fa-pencil\"/>\n"
-"                                Muokkaa<span class=\"d-none d-lg-inline\"> vastaustasi</span>"
+"                                Muokkaa<span class=\"d-none d-lg-inline\"> "
+"vastaustasi</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post
@@ -566,7 +587,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 msgid "<i class=\"fa fa-reply me-1\"/>Reply"
-msgstr ""
+msgstr "<i class=\"fa fa-reply me-1\"/>Vastaa"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
@@ -594,8 +615,8 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
 msgid ""
-"<i class=\"fa fa-thumbs-up text-success\" role=\"img\" aria-label=\"Positive"
-" votes\" title=\"Positive votes\"/>"
+"<i class=\"fa fa-thumbs-up text-success\" role=\"img\" aria-label=\"Positive "
+"votes\" title=\"Positive votes\"/>"
 msgstr ""
 "<i class=\"fa fa-thumbs-up text-success\" role=\"img\" aria-"
 "label=\"Positiiviset äänet\" title=\"Positiiviset äänet\"/>"
@@ -667,7 +688,7 @@ msgstr "<small class=\"fw-bold\">Äänet</small>"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar_body
 msgid "<small>(View all)</small>"
-msgstr ""
+msgstr "<small>(Näytä kaikki)</small>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_all_all_entries
@@ -695,28 +716,34 @@ msgstr ""
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
-msgid "<span class=\"flex-grow-1\">What kind of questions can I ask here?</span>"
+msgid ""
+"<span class=\"flex-grow-1\">What kind of questions can I ask here?</span>"
 msgstr ""
+"<span class=\"flex-grow-1\">Millaisia kysymyksiä voin kysyä täällä?</span>"
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid "<span class=\"flex-grow-1\">What should I avoid in my answers?</span>"
 msgstr ""
+"<span class=\"flex-grow-1\">Mitä minun tulisi välttää vastauksissani?</span>"
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid "<span class=\"flex-grow-1\">What should I avoid in my questions?</span>"
 msgstr ""
+"<span class=\"flex-grow-1\">Mitä minun tulisi välttää kysymyksissäni?</span>"
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<span class=\"flex-grow-1\">Why can other people edit my "
-"questions/answers?</span>"
+"<span class=\"flex-grow-1\">Why can other people edit my questions/answers?</"
+"span>"
 msgstr ""
+"<span class=\"flex-grow-1\">Miksi muut voivat muokata kysymystäni/"
+"vastaustani?</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
@@ -725,30 +752,38 @@ msgid ""
 "<span class=\"form-text small text-muted d-block\">consider adding an "
 "example.</span>"
 msgstr ""
+"<span class=\"form-text small text-muted d-block\">harkitse esimerkin "
+"lisäämistä.</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<span class=\"form-text small text-muted d-block\">select text to format "
-"it.</span>"
+"<span class=\"form-text small text-muted d-block\">select text to format it."
+"</span>"
 msgstr ""
+"<span class=\"form-text small text-muted d-block\">valitse teksti "
+"muotoillaksesi sen.</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<span class=\"form-text small text-muted d-block\">use '/' to insert "
-"images.</span>"
+"<span class=\"form-text small text-muted d-block\">use '/' to insert images."
+"</span>"
 msgstr ""
+"<span class=\"form-text small text-muted d-block\">käytä '/'-merkkiä kuvien "
+"lisäämiseen.</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<span class=\"form-text small text-muted me-1\"><i class=\"fa fa-"
-"lightbulb-o\"/> Tip:</span>"
+"<span class=\"form-text small text-muted me-1\"><i class=\"fa fa-lightbulb-"
+"o\"/> Tip:</span>"
 msgstr ""
+"<span class=\"form-text small text-muted me-1\"><i class=\"fa fa-lightbulb-"
+"o\"/> Vinkki:</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_forum_view_form
@@ -883,9 +918,9 @@ msgid ""
 "After posting the user will be proposed to share its question or answer on "
 "social networks, enabling social network propagation of the forum content."
 msgstr ""
-"Kirjoituksen lähettämisen jälkeen käyttäjälle ehdotetaan, että hän voi jakaa"
-" kysymyksensä tai vastauksensa sosiaalisissa verkostoissa, mikä mahdollistaa"
-" foorumin sisällön leviämisen sosiaalisissa verkostoissa."
+"Kirjoituksen lähettämisen jälkeen käyttäjälle ehdotetaan, että hän voi jakaa "
+"kysymyksensä tai vastauksensa sosiaalisissa verkostoissa, mikä mahdollistaa "
+"foorumin sisällön leviämisen sosiaalisissa verkostoissa."
 
 #. module: website_forum
 #. odoo-python
@@ -897,7 +932,7 @@ msgstr "Kaikki"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar_body
 msgid "All Posts"
-msgstr ""
+msgstr "Kaikki kirjoitukset"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
@@ -1034,7 +1069,7 @@ msgstr "Arkistoitu"
 #. odoo-javascript
 #: code:addons/website_forum/static/src/js/website_forum.js:0
 msgid "Are you sure you want to delete this comment?"
-msgstr ""
+msgstr "Haluatko varmasti poistaa tämän kommentin?"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
@@ -1299,7 +1334,7 @@ msgstr "Klikkaa lähettääksesi kysymyksesi."
 #. odoo-javascript
 #: code:addons/website_forum/static/src/js/tours/website_forum.js:0
 msgid "Click to reply."
-msgstr ""
+msgstr "Vastaa klikkaamalla."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_dropdown
@@ -1421,7 +1456,7 @@ msgstr "Sisältö"
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_comment_convert_all
 msgid "Convert all comments to answers"
-msgstr ""
+msgstr "Muunna kaikki kommentit vastauksiksi"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__karma_accept
@@ -1431,12 +1466,12 @@ msgstr "Muunna kommentti vastaukseksi"
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_comment_convert_own
 msgid "Convert own comments to answers"
-msgstr ""
+msgstr "Muunna omat kommentit vastauksiksi"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_dropdown
 msgid "Convert to Comment"
-msgstr ""
+msgstr "Muunna kommentiksi"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_comment
@@ -1481,6 +1516,8 @@ msgid ""
 "Create an account today to enjoy exclusive features and engage with our "
 "awesome community!"
 msgstr ""
+"Luo tili jo tänään nauttiaksesi yksinoikeusominaisuuksista ja "
+"osallistuaksesi mahtavaan yhteisöömme!"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_tag_create
@@ -1491,7 +1528,7 @@ msgstr "Luo uusi tunniste"
 #. odoo-javascript
 #: code:addons/website_forum/static/src/xml/website_forum_tags_wrapper.xml:0
 msgid "Create option \""
-msgstr ""
+msgstr "Luo vaihtoehto \""
 
 #. module: website_forum
 #: model_terms:gamification.badge,description:website_forum.badge_32
@@ -1570,7 +1607,7 @@ msgstr "Poista"
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_comment_unlink_all
 msgid "Delete all comments"
-msgstr ""
+msgstr "Poista kaikki kommentit"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_unlink_all
@@ -1580,7 +1617,7 @@ msgstr "Poista kaikki viestit"
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_comment_unlink_own
 msgid "Delete own comments"
-msgstr ""
+msgstr "Poista omat kommentit"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_unlink_own
@@ -1745,7 +1782,7 @@ msgstr "Tyhjä laatikko"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_sign_up_cta
 msgid "Enjoying the discussion? Don't just read, join in!"
-msgstr ""
+msgstr "Nautitko keskustelusta? Älä vain lue, vaan osallistu!"
 
 #. module: website_forum
 #: model:gamification.badge,name:website_forum.badge_a_5
@@ -1825,9 +1862,9 @@ msgid ""
 "Field to keep track of a post's last activity. Updated whenever it is "
 "replied to, or when a comment is added on the post or one of its replies."
 msgstr ""
-"Kenttä, jolla seurataan viestin viimeisintä aktiviteettia. Päivitetään aina,"
-" kun siihen vastataan tai kun viestiin tai johonkin sen vastauksista "
-"lisätään kommentti."
+"Kenttä, jolla seurataan viestin viimeisintä aktiviteettia. Päivitetään aina, "
+"kun siihen vastataan tai kun viestiin tai johonkin sen vastauksista lisätään "
+"kommentti."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
@@ -1920,8 +1957,8 @@ msgstr ""
 "Jos esimerkiksi kysyt mielenkiintoisen kysymyksen tai annat hyödyllisen "
 "vastauksen, mielipiteesi saa kannatusta. Toisaalta, jos vastaus on "
 "harhaanjohtava, sitä aletaan äänestää alaspäin. Jokainen puolesta annettu "
-"ääni tuottaa 10 pistettä, jokainen vastaan annettu ääni vähentää 2 pistettä."
-" Kysymyksestä tai vastauksesta voi kerätä enintään 200 pistettä päivässä. "
+"ääni tuottaa 10 pistettä, jokainen vastaan annettu ääni vähentää 2 pistettä. "
+"Kysymyksestä tai vastauksesta voi kerätä enintään 200 pistettä päivässä. "
 "Lopussa olevassa taulukossa selvitetään kunkin moderointitehtävän "
 "mainepistevaatimukset."
 
@@ -1987,7 +2024,7 @@ msgstr "Foorumin tunniste"
 #. module: website_forum
 #: model:ir.actions.act_window,name:website_forum.forum_tag_action
 msgid "Forum Tags"
-msgstr ""
+msgstr "Foorumin tunnisteet"
 
 #. module: website_forum
 #: model:ir.actions.act_window,name:website_forum.forum_forum_action
@@ -2178,7 +2215,8 @@ msgid ""
 "            them."
 msgstr ""
 "Jos suljet tämän viestin, se jää piiloon useimmilta käyttäjiltä. Vain\n"
-"            käyttäjät, joilla on korkea karma, voivat nähdä suljetut viestit ja moderoida\n"
+"            käyttäjät, joilla on korkea karma, voivat nähdä suljetut viestit "
+"ja moderoida\n"
 "            niitä."
 
 #. module: website_forum
@@ -2186,14 +2224,14 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
 "If you fit in one of these example or if your motivation for asking the "
-"question is “I would like to participate in a discussion about ______”, then"
-" you should not be asking here but on our mailing lists. However, if your "
+"question is “I would like to participate in a discussion about ______”, then "
+"you should not be asking here but on our mailing lists. However, if your "
 "motivation is “I would like others to explain ______ to me”, then you are "
 "probably OK."
 msgstr ""
 "Jos kuulut johonkin näistä esimerkkitapauksista tai jos kysymyksesi "
-"motiivina on \"haluaisin osallistua keskusteluun osoitteesta ______\", sinun"
-" ei pitäisi kysyä kysymystä täällä vaan postituslistoillamme. Jos motiivisi "
+"motiivina on \"haluaisin osallistua keskusteluun osoitteesta ______\", sinun "
+"ei pitäisi kysyä kysymystä täällä vaan postituslistoillamme. Jos motiivisi "
 "on kuitenkin \"haluaisin muiden selittävän minulle ______\", olet "
 "luultavasti ok."
 
@@ -2204,8 +2242,10 @@ msgid ""
 "            users having a high karma can see offensive posts to moderate\n"
 "            them."
 msgstr ""
-"Jos merkitset tämän viestin loukkaavaksi, se piilotetaan useimmilta käyttäjiltä. Vain\n"
-"            käyttäjät, joilla on korkea karma, näkevät loukkaavat viestit moderoidakseen\n"
+"Jos merkitset tämän viestin loukkaavaksi, se piilotetaan useimmilta "
+"käyttäjiltä. Vain\n"
+"            käyttäjät, joilla on korkea karma, näkevät loukkaavat viestit "
+"moderoidakseen\n"
 "            niitä."
 
 #. module: website_forum
@@ -2659,7 +2699,7 @@ msgstr "Loukkaavat viestit"
 #. odoo-javascript
 #: code:addons/website_forum/static/src/js/website_forum.js:0
 msgid "Oh no! Please <a href=\"%s\">sign in</a> to perform this action"
-msgstr ""
+msgstr "<a href=\"%s\">Kirjaudu sisään</a> suorittaaksesi tämän toiminnon"
 
 #. module: website_forum
 #. odoo-javascript
@@ -2698,8 +2738,7 @@ msgstr "Tavallinen sisältö"
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_model_nav
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"Please wait for a moderator to validate your previous post before "
-"continuing."
+"Please wait for a moderator to validate your previous post before continuing."
 msgstr ""
 "Odota, että moderaattori vahvistaa edellisen viestisi ennen kuin jatkat."
 
@@ -2828,11 +2867,13 @@ msgstr "Julkinen"
 msgid ""
 "Public: Forum is public\n"
 "Signed In: Forum is visible for signed in users\n"
-"Some users: Forum and their content are hidden for non members of selected group"
+"Some users: Forum and their content are hidden for non members of selected "
+"group"
 msgstr ""
 "Yleisö: Foorumi on julkinen\n"
 "Kirjaudu sisään: Foorumi on näkyvissä kirjautuneille käyttäjille\n"
-"Jotkut käyttäjät: Foorumi ja sen sisältö on piilotettu muille kuin valitun ryhmän jäsenille"
+"Jotkut käyttäjät: Foorumi ja sen sisältö on piilotettu muille kuin valitun "
+"ryhmän jäsenille"
 
 #. module: website_forum
 #: model:gamification.badge,name:website_forum.badge_25
@@ -3011,7 +3052,7 @@ msgstr "Hylkää"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_related_posts
 msgid "Related Posts"
-msgstr ""
+msgstr "Aiheeseen liittyviä artikkeleita"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__relevancy
@@ -3070,7 +3111,7 @@ msgstr "Vastaa omaan kysymykseen"
 #: model:ir.model.fields,help:website_forum.field_forum_forum__website_id
 #: model:ir.model.fields,help:website_forum.field_forum_post__website_id
 msgid "Restrict to a specific website."
-msgstr ""
+msgstr "Rajoita tiettyyn verkkosivustoon."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.profile_access_denied
@@ -3178,8 +3219,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website_forum/static/src/xml/public_templates.xml:0
 msgid ""
-"Share this content to increase your chances to be featured on the front page"
-" and attract more visitors."
+"Share this content to increase your chances to be featured on the front page "
+"and attract more visitors."
 msgstr ""
 "Jaa tätä sisältöä, jotta voit lisätä mahdollisuuksiasi päästä etusivulle ja "
 "houkutella lisää kävijöitä."
@@ -3197,7 +3238,7 @@ msgstr "Näytä tunnisteet, jotka alkavat"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
 msgid "Showing results for"
-msgstr "Näytetään tulokset seuraavasti"
+msgstr "Tulokset haulle"
 
 #. module: website_forum
 #. odoo-python
@@ -3409,9 +3450,9 @@ msgstr "Valittua hakua vastaavia tunnisteita ei ole."
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 #: model_terms:ir.ui.view,arch_db:website_forum.faq_karma
 msgid ""
-"Therefore questions and answers can be edited like wiki pages by experienced"
-" users of this site in order to improve the overall quality of the knowledge"
-" base content. Such privileges are granted based on user karma level: you "
+"Therefore questions and answers can be edited like wiki pages by experienced "
+"users of this site in order to improve the overall quality of the knowledge "
+"base content. Such privileges are granted based on user karma level: you "
 "will be able to do the same once your karma gets high enough."
 msgstr ""
 "Näin ollen kokeneet käyttäjät voivat muokata kysymyksiä ja vastauksia "
@@ -3437,8 +3478,8 @@ msgid ""
 "services. Share and discuss the best content and new marketing ideas, build "
 "your professional profile and become a better marketer together."
 msgstr ""
-"Tämä yhteisö on tarkoitettu tuotteidemme ja palveluidemme ammattilaisille ja"
-" harrastajille. Jaa ja keskustele parhaasta sisällöstä ja uusista "
+"Tämä yhteisö on tarkoitettu tuotteidemme ja palveluidemme ammattilaisille ja "
+"harrastajille. Jaa ja keskustele parhaasta sisällöstä ja uusista "
 "markkinointi-ideoista, rakenna ammatillista profiiliasi ja tule yhdessä "
 "paremmaksi markkinoijaksi."
 
@@ -3479,10 +3520,13 @@ msgstr "Tämä viesti odottaa vahvistusta"
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 msgid ""
 "This post is currently awaiting moderation and is not published yet.<br/>\n"
-"                    As a moderator you can either <b>Accept</b> or <b>Reject</b> this post."
+"                    As a moderator you can either <b>Accept</b> or "
+"<b>Reject</b> this post."
 msgstr ""
-"Tämä viesti odottaa parhaillaan moderointia, eikä sitä ole vielä julkaistu.<br/>\n"
-"                    Moderaattorina voit joko <b>hyväksyä</b> tai <b>hylätä</b> tämän viestin."
+"Tämä viesti odottaa parhaillaan moderointia, eikä sitä ole vielä julkaistu."
+"<br/>\n"
+"                    Moderaattorina voit joko <b>hyväksyä</b> tai <b>hylätä</"
+"b> tämän viestin."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
@@ -3830,8 +3874,7 @@ msgstr ""
 "Kun kysymystä tai vastausta äänestetään ylöspäin, sen lähettänyt käyttäjä "
 "saa pisteitä, joita kutsutaan \"karmapisteiksi\". Nämä pisteet toimivat "
 "karkeana mittarina yhteisön luottamuksesta häntä kohtaan. Käyttäjille "
-"jaetaan vähitellen erilaisia moderointitehtäviä näiden pisteiden "
-"perusteella."
+"jaetaan vähitellen erilaisia moderointitehtäviä näiden pisteiden perusteella."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
@@ -3903,16 +3946,15 @@ msgstr "Voit nyt osallistua foorumeillemme."
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 msgid "You need to have sufficient karma to edit tags"
-msgstr ""
-"Sinulla täytyy olla riittävästi karmaa, jotta voit muokata tunnisteita"
+msgstr "Sinulla täytyy olla riittävästi karmaa, jotta voit muokata tunnisteita"
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"You should only ask practical, answerable questions based on actual problems"
-" that you face. Chatty, open-ended questions diminish the usefulness of this"
-" site and push other questions off the front page."
+"You should only ask practical, answerable questions based on actual problems "
+"that you face. Chatty, open-ended questions diminish the usefulness of this "
+"site and push other questions off the front page."
 msgstr ""
 "Sinun tulisi esittää vain käytännönläheisiä kysymyksiä, joihin voit vastata "
 "ja jotka perustuvat todellisiin ongelmiin, joita kohtaat. Juttelevat, "
@@ -4043,8 +4085,7 @@ msgid ""
 "has been posted and require your validation. Click here to access the "
 "question :"
 msgstr ""
-"on lähetetty ja vaatii validointiasi. Klikkaa tästä päästäksesi kysymykseen "
-":"
+"on lähetetty ja vaatii validointiasi. Klikkaa tästä päästäksesi kysymykseen :"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_template_new_answer
@@ -4169,7 +4210,8 @@ msgid ""
 "        5 hours. Questions shared on two social networks have"
 msgstr ""
 "sosiaalisissa verkostoissa saa vastauksen\n"
-"        5 tunnin kuluessa. Kahdessa sosiaalisessa verkostossa jaetut kysymykset ovat"
+"        5 tunnin kuluessa. Kahdessa sosiaalisessa verkostossa jaetut "
+"kysymykset ovat"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_all_all_entries
@@ -4232,8 +4274,8 @@ msgid ""
 "we are being asked an open-ended, hypothetical question: “What if ______ "
 "happened?”"
 msgstr ""
-"meille esitetään avoin, hypoteettinen kysymys: \"Mitä jos ______ "
-"tapahtuisi?\""
+"meille esitetään avoin, hypoteettinen kysymys: \"Mitä jos ______ tapahtuisi?"
+"\""
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help

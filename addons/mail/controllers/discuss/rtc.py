@@ -61,7 +61,7 @@ class RtcController(http.Controller):
 
     @http.route("/mail/rtc/channel/join_call", methods=["POST"], type="json", auth="public")
     @add_guest_to_context
-    def channel_call_join(self, channel_id, check_rtc_session_ids=None):
+    def channel_call_join(self, channel_id, check_rtc_session_ids=None, camera=False):
         """Joins the RTC call of a channel if the user is a member of that channel
         :param int channel_id: id of the channel to join
         """
@@ -73,7 +73,7 @@ class RtcController(http.Controller):
             raise NotFound()
         store = Store()
         # sudo: discuss.channel.rtc.session - member of current user can join call
-        member.sudo()._rtc_join_call(store, check_rtc_session_ids=check_rtc_session_ids)
+        member.sudo()._rtc_join_call(store, check_rtc_session_ids=check_rtc_session_ids, camera=camera)
         return store.get_result()
 
     @http.route("/mail/rtc/channel/leave_call", methods=["POST"], type="json", auth="public")
@@ -87,6 +87,13 @@ class RtcController(http.Controller):
             raise NotFound()
         # sudo: discuss.channel.rtc.session - member of current user can leave call
         member.sudo()._rtc_leave_call()
+
+    @http.route("/mail/rtc/channel/upgrade_connection", methods=["POST"], type="json", auth="user")
+    def channel_upgrade(self, channel_id):
+        member = request.env["discuss.channel.member"].search([("channel_id", "=", channel_id), ("is_self", "=", True)])
+        if not member:
+            raise NotFound()
+        member.sudo()._join_sfu(force=True)
 
     @http.route("/mail/rtc/channel/cancel_call_invitation", methods=["POST"], type="json", auth="public")
     @add_guest_to_context

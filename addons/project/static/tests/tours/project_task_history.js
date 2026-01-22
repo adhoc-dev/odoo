@@ -11,25 +11,43 @@ import { registry } from "@web/core/registry";
 import { stepUtils } from "@web_tour/tour_service/tour_utils";
 
 const baseDescriptionContent = "Test project task history version";
-const descriptionField = "div.note-editable.odoo-editor-editable p";
 function changeDescriptionContentAndSave(newContent) {
     const newText = `${baseDescriptionContent} ${newContent}`;
-    return [ {
-        // force focus on editable so editor will create initial p (if not yet done)
-        trigger: "div.note-editable.odoo-editor-editable",
-        run: "click",
-    }, {
-        trigger: descriptionField,
-        run: async function(actions) {
-            const textTriggerElement = this.anchor.querySelector(descriptionField);
-            await actions.editor(newText, textTriggerElement);
-            await new Promise((r) => setTimeout(r, 300));
+    return [
+        {
+            // force focus on editable so editor will create initial p (if not yet done)
+            trigger: "div.note-editable.odoo-editor-editable",
+            run: "click",
         },
-    }, {
-        trigger: "button.o_form_button_save",
-        run: "click",
-    }];
+        {
+            trigger: `div.note-editable[spellcheck='true'].odoo-editor-editable`,
+            run: `editor ${newText}`,
+        },
+        ...stepUtils.saveForm(),
+    ];
 }
+
+function insertEditorContent(newContent) {
+    return [
+        {
+            // force focus on editable so editor will create initial p (if not yet done)
+            trigger: "div.note-editable.odoo-editor-editable",
+            run: "click",
+        },
+        {
+            trigger: `div.note-editable[spellcheck='true'].odoo-editor-editable`,
+            run: async function () {
+                // Insert content as html and make the field dirty
+                const div = document.createElement("div");
+                div.appendChild(document.createTextNode(newContent));
+                this.anchor.removeChild(this.anchor.firstChild);
+                this.anchor.appendChild(div);
+                this.anchor.dispatchEvent(new Event("input", { bubbles: true }));
+            },
+        },
+    ];
+}
+
 
 registry.category("web_tour.tours").add("project_task_history_tour", {
     url: "/odoo",
@@ -81,7 +99,7 @@ registry.category("web_tour.tours").add("project_task_history_tour", {
         run: function () {
             const items = document.querySelectorAll(".revision-list .btn");
             if (items.length !== 4) {
-                throw new Error('Expect 4 Revisions in the history dialog, got ' + items.length);
+                console.error("Expect 4 Revisions in the history dialog, got " + items.length);
             }
         },
     }, {
@@ -112,20 +130,20 @@ registry.category("web_tour.tours").add("project_task_history_tour", {
         },
     }, {
         content: "Click on Restore History btn to get back to the selected revision in the previous step",
-        trigger: ".modal button.btn-primary:contains(/^Restore history$/)",
+        trigger: ".modal button.btn-primary:text(Restore history)",
         run: "click",
     }, {
         content: "Verify the confirmation dialog is opened",
-        trigger: ".modal button.btn-primary:contains(/^Restore$/)",
+        trigger: ".modal button.btn-primary:text(Restore)",
         run: "click",
     }, {
         content: "Verify that the description contains the right text after the restore",
-        trigger: descriptionField,
+        trigger: `div.note-editable.odoo-editor-editable`,
         run: function () {
             const p = this.anchor?.innerText;
             const expected = `${baseDescriptionContent} 1`;
             if (p !== expected) {
-                throw new Error(`Expect description to be ${expected}, got ${p}`);
+                console.error(`Expect description to be ${expected}, got ${p}`);
             }
         }
     }, {
@@ -155,10 +173,7 @@ registry.category("web_tour.tours").add("project_task_history_tour", {
         content: 'Set task name',
         run: 'edit New task',
     },
-    {
-        trigger: "button.o_form_button_save",
-        run: "click",
-    },
+    ...stepUtils.saveForm(),
         ...changeDescriptionContentAndSave("0"),
         ...changeDescriptionContentAndSave("1"),
         ...changeDescriptionContentAndSave("2"),
@@ -188,3 +203,61 @@ registry.category("web_tour.tours").add("project_task_history_tour", {
         trigger: 'button.o_switch_view.o_kanban.active',
     }
 ]});
+
+registry.category("web_tour.tours").add("project_task_last_history_steps_tour", {
+    url: "/odoo",
+    steps: () => [stepUtils.showAppsMenuItem(), {
+        content: "Open the project app",
+        trigger: ".o_app[data-menu-xmlid='project.menu_main_pm']",
+        run: "click",
+    },
+    {
+        content: "Open Test History Project",
+        trigger: ".o_kanban_view .o_kanban_record:contains(Test History Project)",
+        run: "click",
+    },
+    {
+        content: "Open Test History Task",
+        trigger: ".o_kanban_view .o_kanban_record:contains(Test History Task)",
+        run: "click",
+    },
+        ...insertEditorContent("0"),
+        ...stepUtils.saveForm(),
+    {
+        content: "Open History Dialog",
+        trigger: ".o_cp_action_menus i.fa-cog",
+        run: "click",
+    }, {
+        trigger: ".dropdown-menu",
+    }, {
+        content: "Open History Dialog",
+        trigger: ".o_menu_item i.fa-history",
+        run: "click",
+    },
+    {
+        content: "Open History Dialog",
+        trigger: ".revision-list a:first-child",
+        run: "click",
+    },
+    {
+        trigger: 'button:contains("/^Restore history$/")',
+        run: "click",
+    }, {
+        trigger: '.modal button.btn-primary:text(Restore)',
+        run: "click",
+    },
+        ...insertEditorContent("2"),
+        ...stepUtils.saveForm(),
+        ...insertEditorContent("4"),
+    {
+        trigger: ".o_notebook_headers li:nth-of-type(2) a",
+        run: "click",
+    },
+    {
+        trigger: ".o_notebook_headers li:nth-of-type(1) a",
+        run: "click",
+    },
+        ...insertEditorContent("5"),
+        ...stepUtils.saveForm(),
+    ],
+});

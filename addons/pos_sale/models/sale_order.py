@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, _
+from odoo.tools import groupby
 
 
 class SaleOrder(models.Model):
@@ -24,7 +25,7 @@ class SaleOrder(models.Model):
     @api.model
     def _load_pos_data_fields(self, config_id):
         return ['name', 'state', 'user_id', 'order_line', 'partner_id', 'pricelist_id', 'fiscal_position_id', 'amount_total', 'amount_untaxed', 'amount_unpaid',
-            'picking_ids', 'partner_shipping_id', 'partner_invoice_id', 'date_order']
+            'picking_ids', 'partner_shipping_id', 'partner_invoice_id', 'date_order', 'write_date', 'amount_paid']
 
     def _count_pos_order(self):
         for order in self:
@@ -42,22 +43,30 @@ class SaleOrder(models.Model):
             'domain': [('id', 'in', linked_orders.ids)],
         }
 
-    @api.depends('order_line', 'amount_total', 'order_line.invoice_lines.parent_state', 'order_line.invoice_lines.price_total', 'order_line.pos_order_line_ids')
+    @api.depends('transaction_ids.state', 'transaction_ids.amount', 'order_line', 'amount_total', 'order_line.invoice_lines.parent_state', 'order_line.invoice_lines.price_total', 'order_line.pos_order_line_ids')
     def _compute_amount_unpaid(self):
         for sale_order in self:
             total_invoice_paid = sum(sale_order.order_line.filtered(lambda l: not l.display_type).mapped('invoice_lines').filtered(lambda l: l.parent_state != 'cancel').mapped('price_total'))
             total_pos_paid = sum(sale_order.order_line.filtered(lambda l: not l.display_type).mapped('pos_order_line_ids.price_subtotal_incl'))
-            sale_order.amount_unpaid = sale_order.amount_total - (total_invoice_paid + total_pos_paid)
+            sale_order.amount_unpaid = max(sale_order.amount_total - total_invoice_paid - total_pos_paid - sale_order.amount_paid, 0.0)
 
     @api.depends('order_line.pos_order_line_ids')
     def _compute_amount_to_invoice(self):
         super()._compute_amount_to_invoice()
         for order in self:
+            # We need to account for all amount paid in POS with and without invoice
+            order_amount = sum(order.sudo().pos_order_line_ids.mapped('price_subtotal_incl'))
+            order.amount_to_invoice -= order_amount
+
+    @api.depends('order_line.pos_order_line_ids')
+    def _compute_amount_invoiced(self):
+        super()._compute_amount_invoiced()
+        for order in self:
             if order.invoice_status == 'invoiced':
                 continue
             # We need to account for the downpayment paid in POS with and without invoice
-            order_amount = sum(order.sudo().pos_order_line_ids.filtered(lambda pol: pol.sale_order_line_id.is_downpayment).mapped('price_subtotal_incl'))
-            order.amount_to_invoice -= order_amount
+            order_amount = sum(order.sudo().pos_order_line_ids.filtered(lambda pol: pol.order_id.state in ['paid', 'done', 'invoiced'] and pol.sale_order_line_id.is_downpayment).mapped('price_subtotal_incl'))
+            order.amount_invoiced += order_amount
 
 
 class SaleOrderLine(models.Model):
@@ -73,19 +82,25 @@ class SaleOrderLine(models.Model):
     @api.model
     def _load_pos_data_fields(self, config_id):
         return ['discount', 'display_name', 'price_total', 'price_unit', 'product_id', 'product_uom_qty', 'qty_delivered',
-            'qty_invoiced', 'qty_to_invoice', 'display_type', 'name', 'tax_id', 'is_downpayment']
+            'qty_invoiced', 'qty_to_invoice', 'display_type', 'name', 'tax_id', 'is_downpayment', 'write_date']
 
-    @api.depends('pos_order_line_ids.qty')
+    @api.depends('pos_order_line_ids.qty', 'pos_order_line_ids.order_id.picking_ids', 'pos_order_line_ids.order_id.picking_ids.state', 'pos_order_line_ids.refund_orderline_ids.order_id.picking_ids.state')
     def _compute_qty_delivered(self):
         super()._compute_qty_delivered()
         for sale_line in self:
-            sale_line.qty_delivered += sum([self._convert_qty(sale_line, pos_line.qty, 'p2s') for pos_line in sale_line.pos_order_line_ids if sale_line.product_id.type != 'service'], 0)
+            pos_lines = (sale_line.pos_order_line_ids | sale_line.pos_order_line_ids.refund_orderline_ids).filtered(lambda order_line: order_line.order_id.state not in ['cancel', 'draft'])
+            # Group lines by procurement_id
+            for key, lines in groupby(pos_lines, lambda l: l.order_id.picking_ids.group_id):
+                pickings = [line.order_id.picking_ids for line in lines]
+                if all(picking.state == 'done' for picking in pickings):
+                    sale_line.qty_delivered += sum((self._convert_qty(sale_line, pos_line.qty, 'p2s') for pos_line in lines if sale_line.product_id.type != 'service'), 0)
 
-    @api.depends('pos_order_line_ids.qty')
+    @api.depends('pos_order_line_ids.qty', 'pos_order_line_ids.order_id.state')
     def _compute_qty_invoiced(self):
         super()._compute_qty_invoiced()
         for sale_line in self:
-            sale_line.qty_invoiced += sum([self._convert_qty(sale_line, pos_line.qty, 'p2s') for pos_line in sale_line.pos_order_line_ids], 0)
+            pos_lines = sale_line.pos_order_line_ids.filtered(lambda order_line: order_line.order_id.state not in ['cancel', 'draft'])
+            sale_line.qty_invoiced += sum([self._convert_qty(sale_line, pos_line.qty, 'p2s') for pos_line in pos_lines], 0)
 
     def _get_sale_order_fields(self):
         return ["product_id", "display_name", "price_unit", "product_uom_qty", "tax_id", "qty_delivered", "qty_invoiced", "discount", "qty_to_invoice", "price_total", "is_downpayment"]
@@ -99,7 +114,9 @@ class SaleOrderLine(models.Model):
                 sale_line_uom = sale_line.product_uom
                 item = sale_line.read(field_names, load=False)[0]
                 if sale_line.product_id.tracking != 'none':
-                    item['lot_names'] = sale_line.move_ids.move_line_ids.lot_id.mapped('name')
+                    move_lines = sale_line.move_ids.move_line_ids.filtered(lambda ml: ml.product_id.id == sale_line.product_id.id)
+                    item['lot_names'] = move_lines.lot_id.mapped('name')
+                    item['lot_qty_by_name'] = {line.lot_id.name: line.quantity for line in move_lines}
                 if product_uom == sale_line_uom:
                     results.append(item)
                     continue

@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.5alpha1+e\n"
+"Project-Id-Version: Odoo Server 18.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-09-07 07:42+0000\n"
-"PO-Revision-Date: 2023-09-07 07:42+0000\n"
+"POT-Creation-Date: 2025-12-29 19:01+0000\n"
+"PO-Revision-Date: 2025-12-29 19:01+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -39,18 +39,10 @@ msgid ""
 msgstr ""
 
 #. module: l10n_cl
-#: model_terms:ir.ui.view,arch_db:l10n_cl.informations
-msgid ""
-"<br/>\n"
-"\n"
-"                <strong>Payment Terms:</strong>"
-msgstr ""
-
-#. module: l10n_cl
 #: model_terms:ir.ui.view,arch_db:l10n_cl.custom_header
 msgid ""
 "<br/>\n"
-"                                            <span style=\"line-height: 180%;\">RUT:</span>"
+"                                            <span style=\"font-family:arial; line-height: 180%;\">RUT:</span>"
 msgstr ""
 
 #. module: l10n_cl
@@ -83,7 +75,7 @@ msgstr ""
 
 #. module: l10n_cl
 #: model_terms:ir.ui.view,arch_db:l10n_cl.report_invoice_document
-msgid "<span>Amount</span>"
+msgid "<span>Disc.</span>"
 msgstr ""
 
 #. module: l10n_cl
@@ -94,6 +86,21 @@ msgstr ""
 #. module: l10n_cl
 #: model_terms:ir.ui.view,arch_db:l10n_cl.informations
 msgid "<strong>Due Date:</strong>"
+msgstr ""
+
+#. module: l10n_cl
+#: model_terms:ir.ui.view,arch_db:l10n_cl.tax_totals_widget
+msgid "<strong>Exempt Amount</strong>"
+msgstr ""
+
+#. module: l10n_cl
+#: model_terms:ir.ui.view,arch_db:l10n_cl.tax_totals_widget
+msgid "<strong>Net Amount</strong>"
+msgstr ""
+
+#. module: l10n_cl
+#: model_terms:ir.ui.view,arch_db:l10n_cl.tax_totals_widget
+msgid "<strong>Total</strong>"
 msgstr ""
 
 #. module: l10n_cl
@@ -152,7 +159,6 @@ msgstr ""
 #. module: l10n_cl
 #: model:ir.model.fields,help:l10n_cl.field_account_bank_statement_line__l10n_latam_internal_type
 #: model:ir.model.fields,help:l10n_cl.field_account_move__l10n_latam_internal_type
-#: model:ir.model.fields,help:l10n_cl.field_account_payment__l10n_latam_internal_type
 #: model:ir.model.fields,help:l10n_cl.field_l10n_latam_document_type__internal_type
 msgid ""
 "Analog to odoo account.move.move_type but with more options allowing to "
@@ -300,7 +306,7 @@ msgstr ""
 #: model:ir.model.fields,help:l10n_cl.field_res_company__l10n_cl_activity_description
 #: model:ir.model.fields,help:l10n_cl.field_res_partner__l10n_cl_activity_description
 #: model:ir.model.fields,help:l10n_cl.field_res_users__l10n_cl_activity_description
-msgid "Chile: Economic activity"
+msgid "Chile: Economic activity."
 msgstr ""
 
 #. module: l10n_cl
@@ -416,6 +422,12 @@ msgid "Declaration of Entry to Primary Free Trade Zone"
 msgstr ""
 
 #. module: l10n_cl
+#: model:ir.model.fields.selection,name:l10n_cl.selection__l10n_latam_document_type__internal_type__stock_picking
+msgid "Delivery Guide"
+msgstr ""
+
+#. module: l10n_cl
+#: model:res.currency,currency_unit_label:l10n_cl.UF
 #: model:res.currency,l10n_cl_short_name:l10n_cl.UF
 msgid "Development Unit"
 msgstr ""
@@ -435,8 +447,8 @@ msgid ""
 msgstr ""
 
 #. module: l10n_cl
-#: model:l10n_latam.document.type,name:l10n_cl.dc_b_f_dte
-msgid "Electronic Receipt"
+#: model:ir.model,name:l10n_cl.model_account_tax
+msgid "ETA tax codes mixin"
 msgstr ""
 
 #. module: l10n_cl
@@ -452,6 +464,11 @@ msgstr ""
 #. module: l10n_cl
 #: model:l10n_latam.document.type,name:l10n_cl.dc_gd_dte
 msgid "Electronic Dispatch Guide"
+msgstr ""
+
+#. module: l10n_cl
+#: model:l10n_latam.document.type,name:l10n_cl.dc_b_e_dte
+msgid "Electronic Exempt Receipt"
 msgstr ""
 
 #. module: l10n_cl
@@ -490,13 +507,11 @@ msgid "Electronic Purchase Invoice"
 msgstr ""
 
 #. module: l10n_cl
-#: model:l10n_latam.document.type,name:l10n_cl.dc_b_e_dte
-msgid "Electronic Exempt Receipt"
+#: model:l10n_latam.document.type,name:l10n_cl.dc_b_f_dte
+msgid "Electronic Receipt"
 msgstr ""
 
 #. module: l10n_cl
-#. odoo-python
-#: code:addons/l10n_cl/models/res_partner.py:0
 #: model:ir.model.fields.selection,name:l10n_cl.selection__res_partner__l10n_cl_sii_taxpayer_type__3
 msgid "End Consumer"
 msgstr ""
@@ -517,13 +532,13 @@ msgid "Exchange Rate Increase Adjustment (code 500)"
 msgstr ""
 
 #. module: l10n_cl
-#: model:account.report.line,name:l10n_cl.tax_report_ventas_exentas
-msgid "Exempt Sales"
+#: model:l10n_latam.document.type,name:l10n_cl.dc_b_e_dtn
+msgid "Exempt Receipt"
 msgstr ""
 
 #. module: l10n_cl
-#: model:l10n_latam.document.type,name:l10n_cl.dc_b_e_dtn
-msgid "Exempt Receipt"
+#: model:account.report.line,name:l10n_cl.tax_report_ventas_exentas
+msgid "Exempt Sales"
 msgstr ""
 
 #. module: l10n_cl
@@ -568,8 +583,6 @@ msgid "Fees - Amounts Subject to 2 Category Income Tax Withholding"
 msgstr ""
 
 #. module: l10n_cl
-#. odoo-python
-#: code:addons/l10n_cl/models/res_partner.py:0
 #: model:ir.model.fields.selection,name:l10n_cl.selection__res_partner__l10n_cl_sii_taxpayer_type__2
 msgid "Fees Receipt Issuer (2nd category)"
 msgstr ""
@@ -577,6 +590,11 @@ msgstr ""
 #. module: l10n_cl
 #: model:account.report.line,name:l10n_cl.tax_report_impuestos_renta
 msgid "First Category Income Taxes Payable"
+msgstr ""
+
+#. module: l10n_cl
+#: model:ir.model.fields,field_description:l10n_cl.field_res_bank__fiscal_country_codes
+msgid "Fiscal Country Codes"
 msgstr ""
 
 #. module: l10n_cl
@@ -590,10 +608,18 @@ msgid "Foreign ID"
 msgstr ""
 
 #. module: l10n_cl
-#. odoo-python
-#: code:addons/l10n_cl/models/res_partner.py:0
 #: model:ir.model.fields.selection,name:l10n_cl.selection__res_partner__l10n_cl_sii_taxpayer_type__4
 msgid "Foreigner"
+msgstr ""
+
+#. module: l10n_cl
+#: model:account.report.line,name:l10n_cl.tax_report_base_compras_combustibles
+msgid "Fuel Purchases (Base)"
+msgstr ""
+
+#. module: l10n_cl
+#: model:account.report.line,name:l10n_cl.tax_report_tax_compras_combustibles
+msgid "Fuel Purchases (Tax)"
 msgstr ""
 
 #. module: l10n_cl
@@ -658,7 +684,6 @@ msgstr ""
 #. module: l10n_cl
 #: model:ir.model.fields,help:l10n_cl.field_account_bank_statement_line__partner_id_vat
 #: model:ir.model.fields,help:l10n_cl.field_account_move__partner_id_vat
-#: model:ir.model.fields,help:l10n_cl.field_account_payment__partner_id_vat
 msgid "Identification Number for selected type"
 msgstr ""
 
@@ -742,7 +767,6 @@ msgstr ""
 #. module: l10n_cl
 #: model:ir.model.fields,field_description:l10n_cl.field_account_bank_statement_line__l10n_latam_internal_type
 #: model:ir.model.fields,field_description:l10n_cl.field_account_move__l10n_latam_internal_type
-#: model:ir.model.fields,field_description:l10n_cl.field_account_payment__l10n_latam_internal_type
 msgid "L10n Latam Internal Type"
 msgstr ""
 
@@ -807,6 +831,7 @@ msgid "Material Entry Sheet (HEM)"
 msgstr ""
 
 #. module: l10n_cl
+#: model:res.currency,currency_unit_label:l10n_cl.UTM
 #: model:res.currency,l10n_cl_short_name:l10n_cl.UTM
 msgid "Monthly Tax Unit"
 msgstr ""
@@ -944,9 +969,13 @@ msgid "Purchases - Amount VAT Commun Use"
 msgstr ""
 
 #. module: l10n_cl
-#: model:account.account.tag,name:l10n_cl.tag_cl_purchase_mnt_iva_actf_no_recup
 #: model:account.account.tag,name:l10n_cl.tag_cl_purchase_mnt_iva_actf_uso_comun
 msgid "Purchases - Amount of Active Fixed VAT (Common Use)"
+msgstr ""
+
+#. module: l10n_cl
+#: model:account.account.tag,name:l10n_cl.tag_cl_purchase_mnt_iva_actf_no_recup
+msgid "Purchases - Amount of Active Fixed VAT (Non Deductible)"
 msgstr ""
 
 #. module: l10n_cl
@@ -972,6 +1001,11 @@ msgstr ""
 #. module: l10n_cl
 #: model:account.account.tag,name:l10n_cl.tag_cl_purchase_mnt_iva_no_rec
 msgid "Purchases - Non Recoverable VAT Amount"
+msgstr ""
+
+#. module: l10n_cl
+#: model:account.account.tag,name:l10n_cl.tag_cl_purchase_mnt_iec
+msgid "Purchases - Specific Fuel Tax"
 msgstr ""
 
 #. module: l10n_cl
@@ -1304,8 +1338,8 @@ msgid "Source Document"
 msgstr ""
 
 #. module: l10n_cl
-#: model:ir.model.fields.selection,name:l10n_cl.selection__l10n_latam_document_type__internal_type__stock_picking
-msgid "Stock Delivery"
+#: model:account.account.tag,name:l10n_cl.tag_cl_specific_fuel_tax
+msgid "Specific Fuel Tax"
 msgstr ""
 
 #. module: l10n_cl
@@ -1339,7 +1373,6 @@ msgid "TMN"
 msgstr ""
 
 #. module: l10n_cl
-#: model:ir.model,name:l10n_cl.model_account_tax
 #: model_terms:ir.ui.view,arch_db:l10n_cl.view_complete_invoice_refund_tree
 msgid "Tax"
 msgstr ""
@@ -1387,6 +1420,11 @@ msgstr ""
 msgid ""
 "The DIN document is intended to be used only with RUT 60805000-0 (Tesorería "
 "General de La República)"
+msgstr ""
+
+#. module: l10n_cl
+#: model_terms:ir.ui.view,arch_db:l10n_cl.report_invoice_document
+msgid "The VAT tax of this boleta is:"
 msgstr ""
 
 #. module: l10n_cl
@@ -1444,8 +1482,11 @@ msgid "Unaffected or Exempt Electronic Invoice"
 msgstr ""
 
 #. module: l10n_cl
-#. odoo-python
-#: code:addons/l10n_cl/models/res_partner.py:0
+#: model_terms:ir.ui.view,arch_db:l10n_cl.tax_totals_widget
+msgid "VAT"
+msgstr ""
+
+#. module: l10n_cl
 #: model:ir.model.fields.selection,name:l10n_cl.selection__res_partner__l10n_cl_sii_taxpayer_type__1
 msgid "VAT Affected (1st Category)"
 msgstr ""
@@ -1453,7 +1494,6 @@ msgstr ""
 #. module: l10n_cl
 #: model:ir.model.fields,field_description:l10n_cl.field_account_bank_statement_line__partner_id_vat
 #: model:ir.model.fields,field_description:l10n_cl.field_account_move__partner_id_vat
-#: model:ir.model.fields,field_description:l10n_cl.field_account_payment__partner_id_vat
 msgid "VAT No"
 msgstr ""
 

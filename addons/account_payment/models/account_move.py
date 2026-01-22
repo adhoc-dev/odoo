@@ -2,6 +2,7 @@
 
 from odoo import api, fields, models
 from odoo.tools import format_date, str2bool
+from odoo.tools.translate import _
 
 from odoo.addons.payment import utils as payment_utils
 
@@ -69,6 +70,35 @@ class AccountMove(models.Model):
             and not pending_transactions
         )
 
+    def _get_online_payment_error(self):
+        """
+        Returns the appropriate error message to be displayed if _has_to_be_paid() method returns False.
+        """
+        self.ensure_one()
+        transactions = self.transaction_ids.filtered(lambda tx: tx.state in ('pending', 'authorized', 'done'))
+        pending_transactions = transactions.filtered(
+            lambda tx: tx.state in {'pending', 'authorized'}
+                       and tx.provider_code not in {'none', 'custom'})
+        enabled_feature = str2bool(
+            self.env['ir.config_parameter'].sudo().get_param(
+                'account_payment.enable_portal_payment'
+            )
+        )
+        errors = []
+        if not enabled_feature:
+            errors.append(_("This invoice cannot be paid online."))
+        if transactions or self.currency_id.is_zero(self.amount_residual):
+            errors.append(_("There is no amount to be paid."))
+        if self.state != 'posted':
+            errors.append(_("This invoice isn't posted."))
+        if self.currency_id.is_zero(self.amount_residual):
+            errors.append(_("This invoice has already been paid."))
+        if self.move_type != 'out_invoice':
+            errors.append(_("This is not an outgoing invoice."))
+        if pending_transactions:
+            errors.append(_("There are pending transactions for this invoice."))
+        return '\n'.join(errors)
+
     def get_portal_last_transaction(self):
         self.ensure_one()
         return self.with_context(active_test=False).transaction_ids.sudo()._get_last()
@@ -129,7 +159,6 @@ class AccountMove(models.Model):
             'currency_id': self.currency_id.id,
             'partner_id': self.partner_id.id,
             'open_installments': open_installments,
-            'installment_state': installment_state,
             'amount': next_amount_to_pay,
             'amount_max': amount_max,
             **additional_info

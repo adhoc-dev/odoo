@@ -318,7 +318,7 @@ class Lead(models.Model):
     @api.depends('team_id', 'type')
     def _compute_stage_id(self):
         for lead in self:
-            if not lead.stage_id:
+            if not lead.stage_id or (lead.team_id and lead.stage_id.team_id and lead.team_id != lead.stage_id.team_id):
                 lead.stage_id = lead._stage_find(domain=[('fold', '=', False)]).id
 
     @api.depends('user_id')
@@ -918,7 +918,7 @@ class Lead(models.Model):
         for lead, vals in zip(self, vals_list):
             vals.setdefault('type', lead.type)
             vals.setdefault('team_id', lead.team_id.id)
-            vals['date_open'] = now if lead.type == 'opportunity' else False
+            vals['date_open'] = now if lead.type == 'opportunity' and lead.user_id.active else False
             if not lead.user_id.active:
                 vals['user_id'] = False
         return vals_list
@@ -1269,7 +1269,7 @@ class Lead(models.Model):
         else:
             help_title = _('Create an opportunity to start playing with your pipeline.')
         alias_domain = [
-            ('company_id', '=', self.env.company.id),
+            ('company_id', 'in', [self.env.company.id, False]),
             ('alias_id.alias_name', '!=', False),
             ('alias_id.alias_name', '!=', ''),
             ('alias_id.alias_model_id.model', '=', 'crm.lead'),
@@ -1281,7 +1281,7 @@ class Lead(models.Model):
         alias_record = alias_records[0] if alias_records else None
         if alias_record and alias_record.alias_domain and alias_record.alias_name:
             sub_title = Markup(_('Use the <i>New</i> button, or send an email to %(email_link)s to test the email gateway.')) % {
-                'email_link': Markup("<b><a href='mailto:%s'>%s</a></b>") % (alias_record.display_name, alias_record.display_name),
+                'email_link': Markup("<b><a href='mailto:%s'>%s</a></b>") % (alias_record.alias_email, alias_record.alias_email),
             }
         return super().get_empty_list_help(
             f'<p class="o_view_nocontent_smiling_face">{help_title}</p><p class="oe_view_nocontent_alias">{sub_title}</p>'
@@ -1447,7 +1447,7 @@ class Lead(models.Model):
         return {
             'description': lambda fname, leads: '<br/><br/>'.join(desc for desc in leads.mapped('description') if not is_html_empty(desc)),
             'type': lambda fname, leads: 'opportunity' if any(lead.type == 'opportunity' for lead in leads) else 'lead',
-            'priority': lambda fname, leads: max(leads.mapped('priority')) if leads else False,
+            'priority': lambda fname, leads: max(priorities) if (priorities := leads.filtered('priority').mapped('priority')) else False,
             'tag_ids': lambda fname, leads: leads.mapped('tag_ids'),
             'lost_reason_id': lambda fname, leads:
                 False if leads and leads[0].probability
@@ -2062,7 +2062,7 @@ class Lead(models.Model):
             name_from_email = name_emails[0][0] if name_emails else False
             if name_from_email:
                 continue  # already containing name + email
-            name_from_email = self.partner_name or self.contact_name
+            name_from_email = self.contact_name or self.partner_name
             emails_normalized = tools.email_normalize_all(email)
             email_normalized = emails_normalized[0] if emails_normalized else False
             if email.lower() == self.email_from.lower() or (email_normalized and self.email_normalized == email_normalized):

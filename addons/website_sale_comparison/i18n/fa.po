@@ -3,20 +3,17 @@
 # 	* website_sale_comparison
 #
 # Translators:
-# Hamid Darabi, 2023
-# Hamed Mohammadi <hamed@dehongi.com>, 2023
-# Mohsen Mohammadi <iammohsen.123@gmail.com>, 2023
-# Hanna Kheradroosta, 2023
-# Martin Trigaux, 2023
-# fardin mardani, 2023
+# zakariya moradi, 2025
+# Tiffany Chang, 2025
+# Naser mars, 2025
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0+e\n"
+"Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:56+0000\n"
-"PO-Revision-Date: 2022-09-22 05:57+0000\n"
-"Last-Translator: fardin mardani, 2023\n"
+"POT-Creation-Date: 2025-12-29 18:38+0000\n"
+"PO-Revision-Date: 2024-09-25 09:42+0000\n"
+"Last-Translator: Naser mars, 2025\n"
 "Language-Team: Persian (https://app.transifex.com/odoo/teams/41243/fa/)\n"
 "Language: fa\n"
 "MIME-Version: 1.0\n"
@@ -49,11 +46,13 @@ msgid ""
 "<i class=\"fa fa-chevron-circle-down o_product_comparison_collpase\" "
 "role=\"img\" aria-label=\"Collapse\" title=\"Collapse\"/><span>Tags</span>"
 msgstr ""
+"<i class=\"fa fa-chevron-circle-down o_product_comparison_collpase\" "
+"role=\"img\" aria-label=\"Collapse\" title=\"Collapse\"/><span>برچسب</span>"
 
 #. module: website_sale_comparison
 #: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_compare
 msgid "<i class=\"fa fa-shopping-cart me-2\"/>Add to Cart"
-msgstr "<i class=\"fa fa-shopping-cart me-2\"/>به سبد خرید اضافه کنید"
+msgstr "<i class=\"fa fa-shopping-cart me-2\"/>افزودن به سبد خرید"
 
 #. module: website_sale_comparison
 #: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_product
@@ -69,7 +68,7 @@ msgstr "<span class=\"fa fa-exchange me-2\"/>مقایسه کنید"
 #: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_attributes_body
 #: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_compare
 msgid "<span>Tags</span>"
-msgstr ""
+msgstr "<span>برچسب</span>"
 
 #. module: website_sale_comparison
 #: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_compare
@@ -126,7 +125,7 @@ msgstr "تماس با ما"
 #. module: website_sale_comparison
 #: model_terms:ir.actions.act_window,help:website_sale_comparison.product_attribute_category_action
 msgid "Create a new attribute category"
-msgstr ""
+msgstr "یک دسته ویژگی جدید ایجاد کنید"
 
 #. module: website_sale_comparison
 #: model:ir.model.fields,field_description:website_sale_comparison.field_product_attribute_category__create_uid
@@ -142,12 +141,12 @@ msgstr "ایجادشده در"
 #: model:product.attribute,name:website_sale_comparison.product_attribute_8
 #: model:product.attribute.category,name:website_sale_comparison.product_attribute_category_2
 msgid "Dimensions"
-msgstr ""
+msgstr "ابعاد"
 
 #. module: website_sale_comparison
 #: model:ir.model.fields,field_description:website_sale_comparison.field_product_attribute_category__display_name
 msgid "Display Name"
-msgstr "نام نمایشی"
+msgstr "نام نمایش داده شده"
 
 #. module: website_sale_comparison
 #: model:product.attribute.category,name:website_sale_comparison.product_attribute_category_duration
@@ -157,7 +156,7 @@ msgstr "مدت زمان"
 #. module: website_sale_comparison
 #: model:product.attribute.category,name:website_sale_comparison.product_attribute_category_general_features
 msgid "General Features"
-msgstr ""
+msgstr "ویژگی های عمومی"
 
 #. module: website_sale_comparison
 #: model_terms:ir.actions.act_window,help:website_sale_comparison.product_attribute_category_action
@@ -165,6 +164,8 @@ msgid ""
 "Group attributes by category that will appear in the specification\n"
 "                part of a product page."
 msgstr ""
+"گروه بندی ویژگی ها بر اساس دسته بندی که در قسمت\n"
+"                مشخصات صفحه محصول ظاهر می شود."
 
 #. module: website_sale_comparison
 #: model:ir.model.fields,field_description:website_sale_comparison.field_product_attribute_category__id
@@ -172,9 +173,14 @@ msgid "ID"
 msgstr "شناسه"
 
 #. module: website_sale_comparison
+#: model_terms:ir.ui.view,arch_db:website_sale_comparison.snippet_options
+msgid "In accordion"
+msgstr "در آکاردئون"
+
+#. module: website_sale_comparison
 #: model:ir.model.fields,field_description:website_sale_comparison.field_product_attribute_category__write_uid
 msgid "Last Updated by"
-msgstr "آخرین تغییر توسط"
+msgstr "آخرین بروز رسانی توسط"
 
 #. module: website_sale_comparison
 #: model:ir.model.fields,field_description:website_sale_comparison.field_product_attribute_category__write_date
@@ -185,6 +191,12 @@ msgstr "آخرین بروز رسانی در"
 #: model_terms:ir.ui.view,arch_db:website_sale_comparison.snippet_options
 msgid "None"
 msgstr "هیچکدام"
+
+#. module: website_sale_comparison
+#: model_terms:ir.ui.view,arch_db:website_sale_comparison.accordion_specs_item
+#: model_terms:ir.ui.view,arch_db:website_sale_comparison.specifications_table
+msgid "Others"
+msgstr "دیگران"
 
 #. module: website_sale_comparison
 #. odoo-javascript
@@ -206,7 +218,7 @@ msgstr "دسته ویژگی محصول"
 #. module: website_sale_comparison
 #: model:ir.model,name:website_sale_comparison.model_product_template_attribute_line
 msgid "Product Template Attribute Line"
-msgstr "سطر ویژگی الگوی محصول"
+msgstr "خط ویژگی الگوی محصول"
 
 #. module: website_sale_comparison
 #: model:ir.model,name:website_sale_comparison.model_product_product
@@ -240,6 +252,8 @@ msgid ""
 "Set a category to regroup similar attributes under the same section in the "
 "Comparison page of eCommerce."
 msgstr ""
+"دسته‌ای را تنظیم کنید تا ویژگی‌های مشابه را در همان بخش در صفحه مقایسه تجارت "
+"الکترونیک دسته‌بندی مجدد کند."
 
 #. module: website_sale_comparison
 #: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_compare
@@ -252,12 +266,12 @@ msgid "Specification"
 msgstr "مشخصات"
 
 #. module: website_sale_comparison
+#: model_terms:ir.ui.view,arch_db:website_sale_comparison.accordion_specs_item
 #: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_attributes_body
 msgid "Specifications"
 msgstr "مشخصات"
 
 #. module: website_sale_comparison
-#: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_attributes_body
 #: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_compare
 msgid "Uncategorized"
 msgstr "دسته‌بندی نشده"
@@ -282,9 +296,4 @@ msgstr "شما می توانید حداکثر 4 محصول را مقایسه ک�
 #. module: website_sale_comparison
 #: model:ir.model.fields,field_description:website_sale_comparison.field_product_attribute__category_id
 msgid "eCommerce Category"
-msgstr ""
-
-#. module: website_sale_comparison
-#: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_attributes_body
-msgid "or"
-msgstr "یا"
+msgstr "دسته‌بندی‌های فروشگاه آنلاین"

@@ -587,7 +587,7 @@ class IrActionsServer(models.Model):
 
     update_field_id = fields.Many2one('ir.model.fields', string='Field to Update', ondelete='cascade', compute='_compute_crud_relations', store=True, readonly=False)
     update_path = fields.Char(string='Field to Update Path', help="Path to the field to update, e.g. 'partner_id.name'", default=_default_update_path)
-    update_related_model_id = fields.Many2one('ir.model', compute='_compute_crud_relations', store=True)
+    update_related_model_id = fields.Many2one('ir.model', compute='_compute_crud_relations', readonly=False, store=True)
     update_field_type = fields.Selection(related='update_field_id.ttype', readonly=True)
     update_m2m_operation = fields.Selection([
         ('add', 'Adding'),
@@ -730,7 +730,11 @@ class IrActionsServer(models.Model):
             return ''
         model = self.env[self.model_id.model]
         pretty_path = []
+        field = None
         for field_name in path.split('.'):
+            if field and field.type == 'properties':
+                pretty_path.append(field_name)
+                continue
             field = model._fields[field_name]
             field_id = self.env['ir.model.fields']._get(model._name, field_name)
             if field.relational:
@@ -745,15 +749,15 @@ class IrActionsServer(models.Model):
                 action.webhook_sample_payload = False
                 continue
             payload = {
-                'id': 1,
+                '_id': 1,
                 '_model': self.model_id.model,
-                '_name': action.name,
+                '_action': f'{action.name}(#{action.id})',
             }
             if self.model_id:
                 sample_record = self.env[self.model_id.model].with_context(active_test=False).search([], limit=1)
                 for field in action.webhook_field_ids:
                     if sample_record:
-                        payload['id'] = sample_record.id
+                        payload['_id'] = sample_record.id
                         payload.update(sample_record.read(self.webhook_field_ids.mapped('name'), load=None)[0])
                     else:
                         payload[field.name] = WEBHOOK_SAMPLE_VALUES[field.ttype] if field.ttype in WEBHOOK_SAMPLE_VALUES else WEBHOOK_SAMPLE_VALUES[None]
@@ -838,7 +842,7 @@ class IrActionsServer(models.Model):
             record_cached = self._context['onchange_self']
             for field, new_value in res.items():
                 record_cached[field] = new_value
-        else:
+        elif self.update_path:
             starting_record = self.env[self.model_id.model].browse(self._context.get('active_id'))
             _, _, target_records = self._traverse_path(record=starting_record)
             target_records.write(res)
@@ -1000,6 +1004,7 @@ class IrActionsServer(models.Model):
                     # run context dedicated to a particular active_id
                     run_self = action.with_context(active_ids=[active_id], active_id=active_id)
                     eval_context["env"].context = run_self._context
+                    eval_context['records'] = eval_context['record'] = records.browse(active_id)
                     res = runner(run_self, eval_context=eval_context)
             else:
                 _logger.warning(
@@ -1013,7 +1018,7 @@ class IrActionsServer(models.Model):
     @api.depends('evaluation_type', 'update_field_id')
     def _compute_value_field_to_show(self):  # check if value_field_to_show can be removed and use ttype in xml view instead
         for action in self:
-            if action.update_field_id.ttype in ('many2one', 'many2many'):
+            if action.update_field_id.ttype in ('one2many', 'many2one', 'many2many'):
                 action.value_field_to_show = 'resource_ref'
             elif action.update_field_id.ttype == 'selection':
                 action.value_field_to_show = 'selection_value'
@@ -1028,8 +1033,7 @@ class IrActionsServer(models.Model):
 
     @api.constrains('update_field_id', 'evaluation_type')
     def _raise_many2many_error(self):
-        if self.filtered(lambda line: line.update_field_id.ttype == 'many2many' and line.evaluation_type == 'reference'):
-            raise ValidationError(_('many2many fields cannot be evaluated by reference'))
+        pass  # TODO: remove in master
 
     @api.onchange('resource_ref')
     def _set_resource_ref(self):
@@ -1049,7 +1053,7 @@ class IrActionsServer(models.Model):
             expr = action.value
             if action.evaluation_type == 'equation':
                 expr = safe_eval(action.value, eval_context)
-            elif action.update_field_id.ttype == 'many2many':
+            elif action.update_field_id.ttype in ['one2many', 'many2many']:
                 operation = action.update_m2m_operation
                 if operation == 'add':
                     expr = [Command.link(int(action.value))]
@@ -1073,6 +1077,14 @@ class IrActionsServer(models.Model):
                     expr = float(action.value)
             result[action.id] = expr
         return result
+
+    def copy_data(self, default=None):
+        default = default or {}
+        vals_list = super().copy_data(default=default)
+        if not default.get('name'):
+            for vals in vals_list:
+                vals['name'] = _('%s (copy)', vals.get('name', ''))
+        return vals_list
 
 class IrActionsTodo(models.Model):
     """
@@ -1185,14 +1197,6 @@ class IrActionsActClient(models.Model):
         for record in self:
             params = record.params
             record.params_store = repr(params) if isinstance(params, dict) else params
-
-    def _get_default_form_view(self):
-        doc = super(IrActionsActClient, self)._get_default_form_view()
-        params = doc.find(".//field[@name='params']")
-        params.getparent().remove(params)
-        params_store = doc.find(".//field[@name='params_store']")
-        params_store.getparent().remove(params_store)
-        return doc
 
 
     def _get_readable_fields(self):

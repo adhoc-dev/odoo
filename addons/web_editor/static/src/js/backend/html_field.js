@@ -401,6 +401,10 @@ export class HtmlField extends Component {
                     await this.updateValue();
                 }
                 await savePendingImagesPromise;
+                const codeViewEl = this._getCodeViewEl();
+                if (codeViewEl) {
+                    codeViewEl.value = this.wysiwyg.getValue();
+                }
                 if (this.props.isInlineStyle) {
                     await toInlinePromise;
                 }
@@ -745,6 +749,9 @@ export const htmlField = {
 	    if ('style-inline' in options) {
 	        wysiwygOptions.inlineStyle = Boolean(options['style-inline']);
 	    }
+        if ('disableTransform' in options) {
+            wysiwygOptions.disableTransform = Boolean(options['disableTransform']);
+        }
         if ('allowCommandImage' in options) {
             // Set the option only if it is explicitly set in the view so a default
             // can be set elsewhere otherwise.

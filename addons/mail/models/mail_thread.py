@@ -6,6 +6,7 @@ import datetime
 import dateutil
 import email
 import email.policy
+import encodings
 import hashlib
 import hmac
 import json
@@ -17,6 +18,7 @@ import time
 import threading
 
 from collections import namedtuple
+from collections.abc import Iterable
 from email import message_from_string
 from email.message import EmailMessage
 from xmlrpc import client as xmlrpclib
@@ -28,7 +30,10 @@ from werkzeug import urls
 
 from odoo import _, api, exceptions, fields, models, Command
 from odoo.addons.mail.tools.discuss import Store
-from odoo.addons.mail.tools.web_push import push_to_end_point, DeviceUnreachableError
+from odoo.addons.mail.tools.web_push import (
+    push_to_end_point, DeviceUnreachableError,
+    ENCRYPTION_BLOCK_OVERHEAD, ENCRYPTION_HEADER_SIZE, MAX_PAYLOAD_SIZE
+)
 from odoo.exceptions import MissingError, AccessError
 from odoo.osv import expression
 from odoo.tools import (
@@ -39,12 +44,19 @@ from odoo.tools import (
 from odoo.tools.mail import (
     append_content_to_html, decode_message_header, email_normalize, email_split,
     email_split_and_format, formataddr, html_sanitize,
-    generate_tracking_message_id, mail_header_msgid_re,
+    generate_tracking_message_id,
+    unfold_references,
 )
 
 MAX_DIRECT_PUSH = 5
 
 _logger = logging.getLogger(__name__)
+
+# monkey-patching encodings so that it will recognize `charset=cp-850` in emails
+# as a correct alias for cp850 when decoding email parts with the email python library.
+# The key "cp_850" will implicitly match "cp_850" and "cp-850"
+# See https://stackoverflow.com/a/51961225
+encodings.aliases.aliases['cp_850'] = 'cp850'
 
 
 class MailThread(models.AbstractModel):
@@ -128,6 +140,11 @@ class MailThread(models.AbstractModel):
             thread.message_partner_ids = thread.message_follower_ids.mapped('partner_id')
 
     def _inverse_message_partner_ids(self):
+        # The unsubscription is postponed until the end of the method because the
+        # message_unsubscribe() unlinks records that invalidates all the cache including
+        # `message_partner_ids` in `self`.
+        to_unsubscribe = []
+
         for thread in self:
             new_partners_ids = thread.message_partner_ids
             previous_partners_ids = thread.message_follower_ids.partner_id
@@ -136,11 +153,20 @@ class MailThread(models.AbstractModel):
             if added_patners_ids:
                 thread.message_subscribe(added_patners_ids.ids)
             if removed_partners_ids:
-                thread.message_unsubscribe(removed_partners_ids.ids)
+                to_unsubscribe.append((thread, removed_partners_ids.ids))
+
+        for thread, partner_ids in to_unsubscribe:
+            thread.message_unsubscribe(partner_ids)
 
     @api.model
     def _search_message_partner_ids(self, operator, operand):
-        """Search function for message_follower_ids"""
+        if not (self.env.su or self.env.user._is_internal()):
+            user_partner = self.env.user.partner_id
+            allow_partner_ids = set((user_partner | user_partner.commercial_partner_id).ids)
+            operand_values = operand if isinstance(operand, Iterable) else [operand]
+            if not allow_partner_ids.issuperset(operand_values):
+                raise AccessError(self.env._("Portal users can only filter threads by themselves as followers."))
+
         neg = ''
         if operator in expression.NEGATIVE_TERM_OPERATORS:
             neg = 'not '
@@ -335,7 +361,7 @@ class MailThread(models.AbstractModel):
         return result
 
     def unlink(self):
-        """ Override unlink to delete messages and followers. This cannot be
+        """ Override unlink to delete (scheduled) messages and followers. This cannot be
         cascaded, because link is done through (res_model, res_id). """
         if not self:
             return True
@@ -346,6 +372,7 @@ class MailThread(models.AbstractModel):
         self.env['mail.followers'].sudo().search(
             [('res_model', '=', self._name), ('res_id', 'in', self.ids)]
         ).unlink()
+        self.env['mail.scheduled.message'].sudo().search([('model', '=', self._name), ('res_id', 'in', self.ids)]).unlink()
         return res
 
     def copy_data(self, default=None):
@@ -403,18 +430,6 @@ class MailThread(models.AbstractModel):
             return super().get_empty_list_help(f"<p class='o_view_nocontent_smiling_face'>{dyn_help}</p>")
 
         return super().get_empty_list_help(help_message)
-
-    def _condition_to_sql(self, alias: str, fname: str, operator: str, value, query: Query) -> SQL:
-        if self.env.su or self.env.user._is_internal():
-            return super()._condition_to_sql(alias, fname, operator, value, query)
-        if fname != 'message_partner_ids':
-            return super()._condition_to_sql(alias, fname, operator, value, query)
-        user_partner = self.env.user.partner_id
-        allow_partner_ids = set((user_partner | user_partner.commercial_partner_id).ids)
-        operand = value if isinstance(value, (list, tuple)) else [value]
-        if not allow_partner_ids.issuperset(operand):
-            raise AccessError("Portal users can only filter threads by themselves as followers.")
-        return super(MailThread, self.sudo())._condition_to_sql(alias, fname, operator, value, query)
 
     # ------------------------------------------------------
     # MODELS / CRUD HELPERS
@@ -534,9 +549,6 @@ class MailThread(models.AbstractModel):
         for record in records:
             changes, _tracking_value_ids = tracking.get(record.id, (None, None))
             record._message_track_post_template(changes)
-        # this method is called after the main flush() and just before commit();
-        # we have to flush() again in case we triggered some recomputations
-        self.env.flush_all()
 
     def _track_set_author(self, author):
         """ Set the author of the tracking message. """
@@ -549,7 +561,6 @@ class MailThread(models.AbstractModel):
     def _track_post_template_finalize(self):
         """Call the tracking template method with right values from precommit."""
         self._message_track_post_template(self.env.cr.precommit.data.pop(f'mail.tracking.create.{self._name}.{self.id}', []))
-        self.env.flush_all()
 
     def _track_set_log_message(self, message):
         """ Link tracking to a message logged as body, in addition to subtype
@@ -804,6 +815,10 @@ class MailThread(models.AbstractModel):
                     followers
                 'partners': check that author_id id set
 
+        Note that this method also updates 'author_id' of message_dict as route
+        links an incoming message to a record and linking email to partner is
+        better done in a record's context.
+
         :param message: an email.message instance
         :param message_dict: dictionary of values that will be given to
                              mail_message.create()
@@ -890,15 +905,15 @@ class MailThread(models.AbstractModel):
         If the email is related to a partner, we consider that the number of message_bounce
         is not relevant anymore as the email is valid - as we received an email from this
         address. The model is here hardcoded because we cannot know with which model the
-        incomming mail match. We consider that if a mail arrives, we have to clear bounce for
+        incoming mail match. We consider that if a mail arrives, we have to clear bounce for
         each model having bounce count.
 
         :param email_from: email address that sent the incoming email."""
-        valid_email = message_dict['email_from']
-        if valid_email:
+        normalized_from = email_normalize(message_dict['email_from'])
+        if normalized_from:
             bl_models = self.env['ir.model'].sudo().search(['&', ('is_mail_blacklist', '=', True), ('model', '!=', 'mail.thread.blacklist')])
             for model in [bl_model for bl_model in bl_models if bl_model.model in self.env]:  # transient test mode
-                self.env[model.model].sudo().search([('message_bounce', '>', 0), ('email_normalized', '=', valid_email)])._message_reset_bounce(valid_email)
+                self.env[model.model].sudo().search([('message_bounce', '>', 0), ('email_normalized', '=', normalized_from)])._message_reset_bounce(normalized_from)
 
     @api.model
     def _detect_is_bounce(self, message, message_dict):
@@ -970,45 +985,65 @@ class MailThread(models.AbstractModel):
         LOOP_THRESHOLD = int(get_param('mail.gateway.loop.threshold', 20))
 
         create_date_limit = self.env.cr.now() - datetime.timedelta(minutes=LOOP_MINUTES)
+        author_id = message_dict.get('author_id')
 
         # Search only once per model
-        models = {
-            self.env[model]
-            for model, thread_id, *__ in routes or []
-            if not thread_id  # Reply to an existing thread
-        }
+        model_res_ids = dict()
+        for model, thread_id, *__ in routes or []:
+            model_res_ids.setdefault(model, list()).append(thread_id)
 
-        for model in models:
+        for model_name, thread_ids in model_res_ids.items():
+            model = self.env[model_name]
             if not hasattr(model, '_detect_loop_sender_domain'):
                 continue
 
-            domain = model._detect_loop_sender_domain(email_from_normalized)
-            if not domain:
-                continue
+            loop_new, loop_update = False, False
+            search_new = 0 in thread_ids  # route creating new records = thread_id = 0
+            doc_ids = list(filter(None, thread_ids))  # route updating records = thread_id set
 
-            mail_incoming_messages_count = model.sudo().search_count(
-                expression.AND([
-                    [('create_date', '>', create_date_limit)],
-                    domain,
-                ]),
-            )
+            # search records created by email -> alias creating new records
+            if search_new:
+                base_domain = model._detect_loop_sender_domain(email_from_normalized)
+                if base_domain:
+                    mail_new_count = model.sudo().search_count(
+                        expression.AND([
+                            [('create_date', '>=', create_date_limit)],
+                            base_domain,
+                        ]),
+                    )
+                    loop_new = mail_new_count >= LOOP_THRESHOLD
 
-            if mail_incoming_messages_count >= LOOP_THRESHOLD:
-                _logger.info('Email address %s created too many <%s>.', email_from, model)
+            # search messages linked to email -> alias updating records
+            if doc_ids and not loop_new:
+                base_msg_domain = [('model', '=', model._name), ('res_id', 'in', doc_ids), ('create_date', '>=', create_date_limit), ('message_type', '=', 'email')]
+                if author_id:
+                    msg_domain = expression.AND([[('author_id', '=', author_id)], base_msg_domain])
+                else:
+                    msg_domain = expression.AND([[('email_from', 'in', [email_from, email_from_normalized])], base_msg_domain])
+                mail_update_groups = self.env['mail.message'].sudo()._read_group(msg_domain, ['res_id'], ['__count'])
+                if mail_update_groups:
+                    loop_update = any(
+                        group[1] >= LOOP_THRESHOLD
+                        for group in mail_update_groups
+                    )
 
+            if loop_new or loop_update:
+                if loop_new:
+                    _logger.info('--> ignored mail from %s to %s with Message-Id %s: created too many <%s>',
+                                message_dict.get('email_from'), message_dict.get('to'), message_dict.get('message_id'), model)
+                if loop_update:
+                    _logger.info('--> ignored mail from %s to %s with Message-Id %s: too much replies on same <%s>',
+                                message_dict.get('email_from'), message_dict.get('to'), message_dict.get('message_id'), model)
                 body = self.env['ir.qweb']._render(
                     'mail.message_notification_limit_email',
                     {'email': message_dict.get('to')},
                     minimal_qcontext=True,
                     raise_if_not_found=False,
                 )
-
-                # Add a reference with a tag, to be able to ignore response to this email
-                references = (
-                    message_dict.get('message_id', '') + ' '
-                    + generate_tracking_message_id('loop-detection-bounce-email')
-                )
-                self._routing_create_bounce_email(email_from, body, message, references=references)
+                self._routing_create_bounce_email(
+                    email_from, body, message,
+                    # add a reference with a tag, to be able to ignore response to this email
+                    references=f'{message_dict["message_id"]} {generate_tracking_message_id("loop-detection-bounce-email")}')
                 return True
 
         return False
@@ -1016,8 +1051,8 @@ class MailThread(models.AbstractModel):
     @api.model
     def _detect_loop_headers(self, msg_dict):
         """Return True if the email must be ignored based on its headers."""
-        if ('-loop-detection-bounce-email@' in msg_dict.get('references', '')
-           or '-loop-detection-bounce-email@' in msg_dict.get('in_reply_to', '')):
+        references = unfold_references(msg_dict['references']) + [msg_dict['in_reply_to']]
+        if references and any('-loop-detection-bounce-email@' in ref for ref in references):
             _logger.info('Email is a reply to the bounce notification, ignoring it.')
             return True
 
@@ -1107,18 +1142,12 @@ class MailThread(models.AbstractModel):
 
         # compute references to find if message is a reply to an existing thread
         thread_references = message_dict['references'] or message_dict['in_reply_to']
-        msg_references = [
-            re.sub(r'[\r\n\t ]+', r'', ref)  # "Unfold" buggy references
-            for ref in mail_header_msgid_re.findall(thread_references)
-            if 'reply_to' not in ref
-        ]
-
+        msg_references = [r.strip() for r in unfold_references(thread_references) if 'reply_to' not in r]
         # avoid creating a gigantic query by limiting the number of references taken into account.
         # newer msg_ids are *appended* to References as per RFC5322 §3.6.4, so we should generally
         # find a match just with the last entry (equal to `In-Reply-To`). 32 refs seems large enough,
         # we've seen performance degrade with 100+ refs.
         msg_references = msg_references[-32:]
-
         replying_to_msg = self.env['mail.message'].sudo().search(
             [('message_id', 'in', msg_references)], limit=1, order='id desc'
         ) if msg_references else self.env['mail.message']
@@ -1196,7 +1225,11 @@ class MailThread(models.AbstractModel):
                 body = self.env['ir.qweb']._render('mail.mail_bounce_catchall', {
                     'message': message,
                 })
-                self._routing_create_bounce_email(email_from, body, message, references=message_id, reply_to=self.env.company.email)
+                self._routing_create_bounce_email(
+                    email_from, body, message,
+                    # add a reference with a tag, to be able to ignore response to this email
+                    references=f'{message_id} {generate_tracking_message_id("loop-detection-bounce-email")}',
+                    reply_to=self.env.company.email)
                 return []
 
             dest_aliases = self.env['mail.alias'].search([
@@ -1242,7 +1275,11 @@ class MailThread(models.AbstractModel):
             body = self.env['ir.qweb']._render('mail.mail_bounce_catchall', {
                 'message': message,
             })
-            self._routing_create_bounce_email(email_from, body, message, references=message_id, reply_to=self.env.company.email)
+            self._routing_create_bounce_email(
+                email_from, body, message,
+                # add a reference with a tag, to be able to ignore response to this email
+                references=f'{message_id} {generate_tracking_message_id("loop-detection-bounce-email")}',
+                reply_to=self.env.company.email)
             return []
 
         # ValueError if no routes found and if no bounce occurred
@@ -1311,7 +1348,8 @@ class MailThread(models.AbstractModel):
 
             post_params = dict(subtype_id=subtype_id, partner_ids=partner_ids, **message_dict)
             # remove computational values not stored on mail.message and avoid warnings when creating it
-            for x in ('from', 'to', 'cc', 'recipients', 'references', 'in_reply_to', 'is_bounce', 'bounced_email', 'bounced_message', 'bounced_msg_ids', 'bounced_partner'):
+            for x in ('from', 'to', 'cc', 'recipients', 'references', 'in_reply_to', 'x_odoo_message_id',
+                      'is_bounce', 'bounced_email', 'bounced_message', 'bounced_msg_ids', 'bounced_partner'):
                 post_params.pop(x, None)
             new_msg = False
             if thread_root._name == 'mail.thread':  # message with parent_id not linked to record
@@ -1379,9 +1417,12 @@ class MailThread(models.AbstractModel):
             return False
 
         if self._detect_loop_headers(msg_dict):
+            _logger.info('Ignored mail from %s to %s with Message-Id %s: reply to a bounce notification detected by headers',
+                             msg_dict.get('email_from'), msg_dict.get('to'), msg_dict.get('message_id'))
             return
 
-        # find possible routes for the message
+        # find possible routes for the message; note this also updates notably
+        # 'author_id' of msg_dict
         routes = self.message_route(message, msg_dict, model, thread_id, custom_values)
         if self._detect_loop_sender(message, msg_dict, routes):
             return
@@ -1536,6 +1577,9 @@ class MailThread(models.AbstractModel):
                     break
                 if part.get_content_type() == 'binary/octet-stream':
                     _logger.warning("Message containing an unexpected Content-Type 'binary/octet-stream', assuming 'application/octet-stream'")
+                    part.replace_header('Content-Type', 'application/octet-stream')
+                if part.get_content_type() == '*/*':
+                    _logger.warning("Message containing an unexpected Content-Type '*/*', assuming 'application/octet-stream'")
                     part.replace_header('Content-Type', 'application/octet-stream')
                 if part.get_content_type() == 'multipart/alternative':
                     alternative = True
@@ -1783,7 +1827,7 @@ class MailThread(models.AbstractModel):
         headers = ('Message-Id', 'X-Microsoft-Original-Message-ID')
         for header in headers:
             value = decode_message_header(message, header)
-            references = mail_header_msgid_re.findall(value)
+            references = unfold_references(value)
             reference_ids.extend([reference.strip() for reference in references])
 
         if reference_ids:
@@ -1794,8 +1838,8 @@ class MailThread(models.AbstractModel):
             if bounced_message:
                 return bounced_message, reference_ids
 
-        reference_ids.extend(mail_header_msgid_re.findall(message_dict['in_reply_to']))
-        reference_ids.extend(mail_header_msgid_re.findall(message_dict['references']))
+        reference_ids.extend(unfold_references(message_dict['in_reply_to']))
+        reference_ids.extend([r.strip() for r in unfold_references(message_dict['references'])])
 
         if message_dict.get('parent_id'):
             # Parent based on References, In-Reply-To, etc
@@ -1811,19 +1855,24 @@ class MailThread(models.AbstractModel):
         :param msg_dict: The dict values already parsed
         :return: The <mail.message> or None if nothing has been found
         """
-        in_reply_to = msg_dict.get('in_reply_to').strip()
+        in_reply_to = msg_dict['in_reply_to']
         if in_reply_to:
             parent = self.env['mail.message'].search(
                 [('message_id', '=', in_reply_to)],
-                order='create_date DESC, id DESC', limit=1)
+                order='id DESC', limit=1)
             if parent:
                 return parent
 
-        reference_ids = mail_header_msgid_re.findall(msg_dict.get('references') or '')
-        if reference_ids:
+        msg_references = [r.strip() for r in unfold_references(msg_dict['references'])]
+        if msg_references:
+            # avoid creating a gigantic query by limiting the number of references taken into account.
+            # newer msg_ids are *appended* to References as per RFC5322 §3.6.4, so we should generally
+            # find a match just with the last entry (equal to `In-Reply-To`). 32 refs seems large enough,
+            # we've seen performance degrade with 100+ refs.
+            msg_references = msg_references[-32:]
             parent = self.env['mail.message'].search(
-                [('message_id', 'in', [x.strip() for x in reference_ids])],
-                order='create_date DESC, id DESC', limit=1)
+                [('message_id', 'in', msg_references)],
+                order='id DESC', limit=1)
             if parent:
                 return parent
 
@@ -1852,9 +1901,22 @@ class MailThread(models.AbstractModel):
             return result
         if partner and partner.email:  # complete profile: id, name <email>
             email_normalized = ','.join(email_normalize_all(partner.email))
-            recipient_data.update({'partner_id': partner.id, 'name': partner.name or '', 'email': email_normalized})
+            recipient_data.update(
+                {
+                    "partner_id": partner.id,
+                    "name": partner.name or "",
+                    "email": email_normalized,
+                    "display_name": partner.display_name,
+                }
+            )
         elif partner:  # incomplete profile: id, name
-            recipient_data.update({'partner_id': partner.id, 'name': partner.name})
+            recipient_data.update(
+                {
+                    "partner_id": partner.id,
+                    "name": partner.name,
+                    "display_name": partner.display_name,
+                }
+            )
         else:  # unknown partner, we are probably managing an email address
             _, parsed_email_normalized = parse_contact_from_email(email)
             partner_create_values = self._get_customer_information().get(parsed_email_normalized, {})
@@ -2066,7 +2128,7 @@ class MailThread(models.AbstractModel):
     # ------------------------------------------------------------
 
     def _get_allowed_message_post_params(self):
-        return {"attachment_ids", "body", "message_type", "partner_ids", "subtype_xmlid"}
+        return {"attachment_ids", "body", "email_add_signature", "message_type", "partner_ids", "subtype_xmlid"}
 
     @api.returns('mail.message', lambda value: value.id)
     def message_post(self, *,
@@ -3410,8 +3472,11 @@ class MailThread(models.AbstractModel):
         """
         lang_to_recipients = {}
         for data in recipients_data:
+            # filter active lang
+            if lang_code := data.get('lang'):
+                lang_code = bool(self.env['res.lang']._lang_get(lang_code)) and lang_code
             lang_to_recipients.setdefault(
-                data.get('lang') or force_email_lang or self.env.lang,
+                lang_code or force_email_lang or self.env.lang,
                 [],
             ).append(data)
 
@@ -3482,15 +3547,14 @@ class MailThread(models.AbstractModel):
 
         # compute send user and its related signature; try to use self.env.user instead of browsing
         # user_ids if they are the author will give a sudo user, improving access performances and cache usage.
-        signature = ''
-        email_add_signature = msg_vals.get('email_add_signature') if msg_vals and 'email_add_signature' in msg_vals else message.email_add_signature
-        if email_add_signature:
-            author = message.env['res.partner'].browse(msg_vals.get('author_id')) if 'author_id' in msg_vals else message.author_id
-            author_user = self.env.user if self.env.user.partner_id == author else author.user_ids[0] if author and author.user_ids else False
-            if author_user:
+        author = message.env['res.partner'].browse(msg_vals.get('author_id')) if 'author_id' in msg_vals else message.author_id
+        author_user = self.env.user if self.env.user.partner_id == author else author.user_ids[0] if author and author.user_ids else False
+        signature, email_add_signature = '', False
+
+        if author_user:
+            email_add_signature = msg_vals.get('email_add_signature', message.email_add_signature)
+            if email_add_signature:
                 signature = author_user.signature
-            elif author.name:
-                signature = Markup("<p>-- <br/>%s</p>") % author.name
 
         if force_email_company:
             company = force_email_company
@@ -3542,6 +3606,7 @@ class MailThread(models.AbstractModel):
             'record_name': record_name,
             'subtitles': [record_name],
             # user / environment
+            'author_user': author_user,  # User who sends the message
             'company': company,
             'email_add_signature': email_add_signature,
             'lang': lang,
@@ -3549,6 +3614,11 @@ class MailThread(models.AbstractModel):
             'website_url': website_url,
             # tools
             'is_html_empty': is_html_empty,
+            # display
+            'email_notification_force_header': self.env.context.get('email_notification_force_header', False),  # force displaying the email header
+            'email_notification_force_footer': self.env.context.get('email_notification_force_footer', False),  # force displaying the email footer
+            'email_notification_allow_header': self.env.context.get('email_notification_allow_header', True),
+            'email_notification_allow_footer': self.env.context.get('email_notification_allow_footer', False),
         }
 
     def _notify_by_email_render_layout(self, message, recipients_group,
@@ -3612,14 +3682,29 @@ class MailThread(models.AbstractModel):
             # replace new lines by spaces to conform to email headers requirements
             mail_subject = ' '.join(mail_subject.splitlines())
 
-        # compute references: set references to the parent and add current message just to
+        # compute references: set references to parents likely to be sent and add current message just to
         # have a fallback in case replies mess with Messsage-Id in the In-Reply-To (e.g. amazon
         # SES SMTP may replace Message-Id and In-Reply-To refers an internal ID not stored in Odoo)
         message_sudo = message.sudo()
-        if message_sudo.parent_id:
-            references = f'{message_sudo.parent_id.message_id} {message_sudo.message_id}'
-        else:
-            references = message_sudo.message_id
+        ancestors = self.env['mail.message'].sudo().search(
+            [
+                ('model', '=', message_sudo.model), ('res_id', '=', message_sudo.res_id),
+                ('id', '!=', message_sudo.id),
+                ('subtype_id', '!=', False),  # filters out logs
+                ('message_id', '!=', False),  # ignore records that somehow don't have a message_id (non ORM created)
+            ], limit=32, order='id DESC',  # take 32 last, hoping to find public discussions in it
+        )
+
+        # filter out internal messages, to fetch 'public discussion' first
+        outgoing_types = ('comment', 'auto_comment', 'email', 'email_outgoing')
+        history_ancestors = ancestors.sorted(lambda m: (
+            not m.is_internal and not m.subtype_id.internal,
+            m.message_type in outgoing_types,
+            m.message_type != 'user_notification',  # user notif -> avoid if possible
+        ), reverse=True)  # False before True unless reverse
+        # order from oldest to newest
+        ancestors = history_ancestors[:3].sorted('id')
+        references = ' '.join(m.message_id for m in (ancestors + message_sudo))
         # prepare notification mail values
         base_mail_values = {
             'mail_message_id': message.id,
@@ -3774,7 +3859,7 @@ class MailThread(models.AbstractModel):
                 }
             }
         }
-        payload['options']['body'] = html2plaintext(body)
+        payload['options']['body'] = html2plaintext(body, include_references=False)
         payload['options']['body'] += self._generate_tracking_message(message)
 
         return payload
@@ -4044,31 +4129,17 @@ class MailThread(models.AbstractModel):
 
     def _notify_get_action_link(self, link_type, **kwargs):
         """ Prepare link to an action: view document, follow document, ... """
-        params = {
-            'model': kwargs.get('model', self._name),
-            'res_id': kwargs.get('res_id', self.ids and self.ids[0] or False),
-        }
-        # keep only accepted parameters:
-        # - action (deprecated), token (assign), access_token (view)
-        # - auth_signup: auth_signup_token and auth_login
-        # - portal: pid, hash
-        params.update(dict(
-            (key, value)
-            for key, value in kwargs.items()
-            if key in ('action', 'token', 'access_token', 'auth_signup_token',
-                       'auth_login', 'pid', 'hash')
-        ))
+        params = self._get_action_link_params(link_type, **kwargs)
 
         if link_type in ['view', 'assign', 'follow', 'unfollow']:
             base_link = '/mail/%s' % link_type
         elif link_type == 'controller':
             controller = kwargs.get('controller')
-            params.pop('model')
             base_link = '%s' % controller
         else:
             return ''
 
-        if link_type not in ['view']:
+        if link_type != 'view':
             token = self._encode_link(base_link, params)
             params['token'] = token
 
@@ -4087,6 +4158,28 @@ class MailThread(models.AbstractModel):
         token = '%s?%s' % (base_link, ' '.join('%s=%s' % (key, params[key]) for key in sorted(params)))
         hm = hmac.new(secret.encode('utf-8'), token.encode('utf-8'), hashlib.sha1).hexdigest()
         return hm
+
+    def _get_action_link_params(self, link_type, **kwargs):
+        """ Parameters management for '_notify_get_action_link' """
+        params = {
+            'model': kwargs.get('model', self._name),
+            'res_id': kwargs.get('res_id', self.ids[0] if self else False),
+        }
+        # keep only accepted parameters:
+        # - action (deprecated), token (assign), access_token (view)
+        # - auth_signup: auth_signup_token and auth_login
+        # - portal: pid, hash
+        params.update({
+            key: value
+            for key, value in kwargs.items()
+            if key in ('action', 'token', 'access_token', 'auth_signup_token',
+                       'auth_login', 'pid', 'hash')
+        })
+        if link_type == 'controller':
+            params.pop('model')
+        elif link_type not in ['view', 'assign', 'follow', 'unfollow']:
+            return {}
+        return params
 
     @api.model
     def _extract_model_and_id(self, msg_vals):
@@ -4174,19 +4267,74 @@ class MailThread(models.AbstractModel):
         return bool(res_id) if (res_model and res_model != 'mail.thread') else False
 
     def _truncate_payload(self, payload):
+        r"""Check the payload limit of ~3990 bytes to avoid 413 error return code.
+
+        See `_truncate_payload_get_max_payload_length` for the exact limit.
+
+        When sending a push notification, the entire encrypted json payload should be no more than 4096 bytes in length.
+        To ensure this, when possible, the body contents of the notification are truncated in such a way that the end
+        result will not exceed that limit.
+
+        Example Truncation:
+            We know there is an encryption overhead of 10 bytes, and a total limit of 50 bytes.
+            The payload is `{"messageId": "5291", "body": "A very long text"}`
+            So we have an effective payload length of (50 - 10) = 40.
+            Our full payload is 49 bytes, of which 16 bytes are text we are willing to truncate.
+            We must remove 9 bytes, such that the payload becomes effectively
+            `{"messageId": "5291", "body": "A very "}`
+
+        There are some considerations with this approach. Notably we must consider the full encoded length in bytes.
+        While we encode the payload in utf-8, it is actually transformed into json with `ensure_ascii=True` first.
+        This means this payload, as a python dictionary: {"body": "BØDY"}; Becomes {"body": "B\\u00d8DY"}.
+        Where `00d8` is the unicode codepoint for "Ø", and "\\u" is a json escape sequence.
+
+        In that case we must ensure that the truncated body does not suddenly contain invalid unicode escape sequences.
+        Similarly to how one should not cut an encoded string in the middle of a utf-8 character.
+
+        Example Unicode Truncation:
+            Assume {"body": "BØDY"} needs to be truncated of 3 bytes
+            It should not become {"body": "B\\u00d"}
+            Instead it should become {"body": "B"}
+
+        :param dict payload: Current payload to truncate.
+        :return: The truncated payload;
         """
-        Check the payload limit of 4096 bytes to avoid 413 error return code.
-        If the payload is too big, we trunc the body value.
-        :param dict payload: Current payload to trunc
-        :return: The truncate payload;
-        """
-        payload_length = len(str(payload).encode())
-        body = payload['options']['body']
+        payload_length = len(json.dumps(payload).encode())
+        # json.dumps defaults to translating unicode to hex codepoints (ensure_ascii=True)
+        # hence we need to check the length the body takes up in that format
+        # json string quotes are removed and the body is not encoded as it's already all ASCII
+        body = json.dumps(payload['options']['body'])[1:-1]
         body_length = len(body)
-        if payload_length > 4096:
-            body_max_length = 4096 - payload_length - body_length
-            payload['options']['body'] = body.encode()[:body_max_length].decode(errors="ignore")
+
+        max_length = self._truncate_payload_get_max_payload_length()
+        if payload_length > max_length:
+            body_max_length = max(0, max_length - payload_length + body_length)
+            # truncate to max length and try to loads again
+            # if there's any error, it will be a unicode error
+            # the error position gives us the start of the codepoint
+            # remove everything after that + the preceding escape marker (\u)
+            try:
+                # remove trailing '\' as the error for that is unhelpful
+                truncated_body = body[:body_max_length].rstrip('\\')
+                truncated_body = json.loads(f'"{truncated_body}"')
+            except json.decoder.JSONDecodeError as json_error:
+                truncated_body = json.loads(f'"{body[:json_error.pos - 2]}"')
+            payload['options']['body'] = truncated_body
         return payload
+
+    @staticmethod
+    def _truncate_payload_get_max_payload_length():
+        """Define the maximum length we want for the payload.
+
+        This limit is derived from:
+            - the maximum encrypted payload size we may send to web push servers.
+            - the header required using AES128GCM encryption.
+            - the overhead of encrypting one block. Payload will not exceed 1 block
+            as the point here is to keep everything within the default (and max) block size.
+        For details about encryption overhead sizes, see variable definition in web_push.
+        Currently all of these values are payload-independant.
+        """
+        return MAX_PAYLOAD_SIZE - ENCRYPTION_HEADER_SIZE - ENCRYPTION_BLOCK_OVERHEAD
 
     # ------------------------------------------------------
     # FOLLOWERS API
@@ -4553,7 +4701,7 @@ class MailThread(models.AbstractModel):
             "attachment_ids": Store.many(message.attachment_ids.sorted("id")),
             "body": message.body,
             "pinned_at": message.pinned_at,
-            "recipients": Store.many(message.partner_ids, fields=["name", "write_date"]),
+            "recipients": Store.many(message.partner_ids, fields=["avatar_128", "name"]),
             "write_date": message.write_date,
         }
         if body is not None:
@@ -4579,6 +4727,7 @@ class MailThread(models.AbstractModel):
         return res
 
     def _thread_to_store(self, store: Store, /, *, fields=None, request_list=None):
+        is_request = request_list is not None
         if fields is None:
             fields = []
         for thread in self:
@@ -4586,16 +4735,10 @@ class MailThread(models.AbstractModel):
                 [field for field in fields if field not in ["display_name", "modelName"]],
                 load=False,
             )[0]
-            if request_list:
-                res["hasReadAccess"] = True
-                res["hasWriteAccess"] = False
-                res["canPostOnReadonly"] = self._mail_post_access == "read"
-            try:
-                thread.check_access("write")
-                if request_list:
-                    res["hasWriteAccess"] = True
-            except AccessError:
-                pass
+            if is_request:
+                res["hasReadAccess"] = thread.sudo(False).has_access("read")
+                res["hasWriteAccess"] = thread.sudo(False).has_access("write")
+                res["canPostOnReadonly"] = self._get_mail_message_access(self.ids, 'create') == "read"
             if (
                 request_list
                 and "activities" in request_list
@@ -4648,6 +4791,10 @@ class MailThread(models.AbstractModel):
         if "form" in res["views"] and isinstance(self.env[self._name], self.env.registry['mail.activity.mixin']):
             res["models"][self._name]["has_activities"] = True
         return res
+
+    @api.model
+    def _get_allowed_message_update_params(self):
+        return {"attachment_ids", "body", "partner_ids"}
 
     @api.model
     def _get_thread_with_access(self, thread_id, mode="read", **kwargs):

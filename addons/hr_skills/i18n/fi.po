@@ -1,7 +1,7 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* hr_skills
-# 
+# * hr_skills
+#
 # Translators:
 # Tiffany Chang, 2024
 # Miku Laitinen <miku.laitinen@gmail.com>, 2024
@@ -16,22 +16,25 @@
 # Martin Trigaux, 2024
 # Melina Mäntylä <melina.mantyla@web-veistamo.fi>, 2024
 # Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2024
-# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2024
-# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2024
-# 
+# Musibau Muhammed, 2025
+# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2025
+# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2025
+# "Jessica Tuulia Sade Jäkärä (jtsj)" <jtsj@odoo.com>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2024\n"
-"Language-Team: Finnish (https://app.transifex.com/odoo/teams/41243/fi/)\n"
+"POT-Creation-Date: 2025-12-29 18:37+0000\n"
+"PO-Revision-Date: 2025-08-21 14:30+0000\n"
+"Last-Translator: \"Jessica Tuulia Sade Jäkärä (jtsj)\" <jtsj@odoo.com>\n"
+"Language-Team: Finnish <https://translate.odoo.com/projects/odoo-18/"
+"hr_skills/fi/>\n"
+"Language: fi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: fi\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 5.12.2\n"
 
 #. module: hr_skills
 #. odoo-python
@@ -80,12 +83,12 @@ msgstr "Aktiivinen"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_adaptability
 msgid "Adaptability"
-msgstr ""
+msgstr "Sopeutumiskyky"
 
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_agile_scrum
 msgid "Agile and Scrum methodologies"
-msgstr ""
+msgstr "Ketterät ja Scrum-menetelmät"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_jog_allenkeller
@@ -115,7 +118,7 @@ msgstr "Työpöytä"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_android
 msgid "Android"
-msgstr ""
+msgstr "Android"
 
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_arabic
@@ -172,7 +175,7 @@ msgstr "bengali"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_big_data_technologies
 msgid "Big data technologies (Hadoop,Spark)"
-msgstr ""
+msgstr "Big data -teknologiat (Hadoop, Spark)"
 
 #. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_fme_russellwebster
@@ -202,12 +205,12 @@ msgstr "Burtho Inc."
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_c
 msgid "C/C++"
-msgstr ""
+msgstr "C/C++"
 
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_cms
 msgid "CMS"
-msgstr ""
+msgstr "CMS"
 
 #. module: hr_skills
 #. odoo-javascript
@@ -218,7 +221,7 @@ msgstr "LUO UUSI MERKINTÄ"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_css
 msgid "CSS"
-msgstr ""
+msgstr "CSS"
 
 #. module: hr_skills
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_cv_wizard__can_show_others
@@ -263,7 +266,7 @@ msgstr "Klassinen"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_cloud_computing
 msgid "Cloud computing"
-msgstr ""
+msgstr "Pilvilaskenta"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_jep_cole_ltd
@@ -301,7 +304,7 @@ msgstr "Konferenssikeskuksen päällikkö"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_conflict_management
 msgid "Conflict Management"
-msgstr ""
+msgstr "Konfliktinhallinta"
 
 #. module: hr_skills
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_cv_wizard__show_contact
@@ -357,12 +360,12 @@ msgstr "Luotu"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_creativity
 msgid "Creativity"
-msgstr ""
+msgstr "Luovuutta"
 
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_critical_thinking
 msgid "Critical Thinking"
-msgstr ""
+msgstr "Kriittinen ajattelu"
 
 #. module: hr_skills
 #. odoo-javascript
@@ -378,7 +381,7 @@ msgstr "Asiakaspalvelupäällikkö"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_cybersecurity
 msgid "Cybersecurity"
-msgstr ""
+msgstr "Kyberturvallisuus"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_hne_dandenong_north_primary_school
@@ -393,12 +396,12 @@ msgstr "Darlingtonin peruskoulu"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_data_analysis
 msgid "Data analysis/visualization"
-msgstr ""
+msgstr "Tietojen analysointi/visualisointi"
 
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_database_management
 msgid "Database Management"
-msgstr ""
+msgstr "Tietokannan hallinta"
 
 #. module: hr_skills
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_log__date
@@ -409,12 +412,12 @@ msgstr "Päivämäärä"
 #. module: hr_skills
 #: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line__date_end
 msgid "Date End"
-msgstr "Loppupäiväys"
+msgstr "Päättymispäivä"
 
 #. module: hr_skills
 #: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line__date_start
 msgid "Date Start"
-msgstr "Aloituspäivämäärä"
+msgstr "Alkamispäivä"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_chs_davis_plc
@@ -425,7 +428,7 @@ msgstr "Davis PLC"
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_jve_davis_and_sons
 msgid "Davis and Sons"
-msgstr "Davis ja pojat"
+msgstr "Davis and Sons"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_jep_davis_sanchez_and_miller
@@ -435,7 +438,7 @@ msgstr "Davis, Sanchez ja Miller"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_decision_making
 msgid "Decision-Making"
-msgstr ""
+msgstr "Päätöksenteko"
 
 #. module: hr_skills
 #: model:ir.model.fields,field_description:hr_skills.field_hr_skill_level__default_level
@@ -473,12 +476,12 @@ msgstr "Suunnittelija, televisio-/elokuvakalusteet"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_devops
 msgid "DevOps"
-msgstr ""
+msgstr "DevOps"
 
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_digital_ad
 msgid "Digital advertising"
-msgstr ""
+msgstr "Digitaalinen mainonta"
 
 #. module: hr_skills
 #: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_cv_wizard_view_form
@@ -510,7 +513,7 @@ msgstr "Näyttötyyppi"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_django
 msgid "Django"
-msgstr ""
+msgstr "Django"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_jog_douglas_thompson_and_conner
@@ -727,7 +730,7 @@ msgstr "Lasinpuhaltaja/suunnittelija"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_go
 msgid "Go"
-msgstr ""
+msgstr "Mene"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_jth_goodman_inc
@@ -762,7 +765,7 @@ msgstr "HTML"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_hadoop
 msgid "Hadoop"
-msgstr ""
+msgstr "Hadoop"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_chs_hanson_roach_and_jordan
@@ -777,7 +780,7 @@ msgstr "Harrington Parkin julkinen koulu"
 #. module: hr_skills
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_report__has_department_manager_access
 msgid "Has Department Manager Access"
-msgstr ""
+msgstr "Osaston esimiehen pääsyoikeudet"
 
 #. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_jve_davis_and_sons
@@ -835,17 +838,17 @@ msgstr "ID"
 #. module: hr_skills
 #: model:hr.skill.type,name:hr_skills.hr_skill_type_it
 msgid "IT"
-msgstr ""
+msgstr "IT"
 
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_it_governance_compliance
 msgid "IT governance and compliance (GDPR,HIPAA,...)"
-msgstr ""
+msgstr "Tietotekniikan hallinto ja vaatimustenmukaisuus (GDPR, HIPAA,...)"
 
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_it_infrastructure_architecture
 msgid "IT infrastructure and architecture"
-msgstr ""
+msgstr "IT-infrastruktuuri ja -arkkitehtuuri"
 
 #. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_jth_simmonswilcox
@@ -855,12 +858,12 @@ msgstr "IT-myynnin ammattilainen"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_it_service_management
 msgid "IT service management (ITSM)"
-msgstr ""
+msgstr "IT-palvelujen hallinta (ITSM)"
 
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_it_support
 msgid "IT support"
-msgstr ""
+msgstr "IT-tuki"
 
 #. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_jgo_martin_stanley_and_duncan
@@ -903,7 +906,7 @@ msgstr "Vakuutusriskien tutkija"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_iot_embedded_systems
 msgid "IoT and embedded systems"
-msgstr ""
+msgstr "IoT ja sulautetut järjestelmät"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_ngh_jackson_schwartz_and_aguirre
@@ -918,17 +921,17 @@ msgstr "Japanilainen"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_java
 msgid "Java"
-msgstr ""
+msgstr "Java"
 
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_javanese
 msgid "Javanese"
-msgstr ""
+msgstr "Jaava"
 
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_js
 msgid "Javascript"
-msgstr ""
+msgstr "Javascript"
 
 #. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_jve_saundersadkins
@@ -939,19 +942,41 @@ msgstr "Korusuunnittelija"
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_line_admin_4
 msgid ""
 "Job position: Development team leader\n"
-"- Supported technical operations with investigating and correcting varied production support issues (Java, Perl, Shell scripts, SQL).\n"
-"- Led quality assurance planning for multiple concurrent projects relative to overall system architecture or trading system changes/new developments.\n"
-"- Configured and released business critical alpha and risk models using MATLAB and SQL with inputs from Portfolio Managers."
+"- Supported technical operations with investigating and correcting varied "
+"production support issues (Java, Perl, Shell scripts, SQL).\n"
+"- Led quality assurance planning for multiple concurrent projects relative "
+"to overall system architecture or trading system changes/new developments.\n"
+"- Configured and released business critical alpha and risk models using "
+"MATLAB and SQL with inputs from Portfolio Managers."
 msgstr ""
+"Työpaikka: Työntekijä: Kehitystiimin johtaja\n"
+"- Tukenut teknistä toimintaa tutkimalla ja korjaamalla erilaisia "
+"tuotantotukiongelmia (Java, Perl, Shell-skriptit, SQL).\n"
+"- Johtanut useiden rinnakkaisten hankkeiden laadunvarmistussuunnittelua "
+"suhteessa järjestelmän kokonaisarkkitehtuuriin tai kaupankäyntijärjestelmän "
+"muutoksiin/uusiin kehityshankkeisiin.\n"
+"- Konfiguroi ja julkaisi liiketoiminnan kannalta kriittisiä alfa- ja "
+"riskimalleja MATLABin ja SQL:n avulla salkunhoitajien syötteiden "
+"perusteella.\n"
+"        "
 
 #. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_line_admin_3
 msgid ""
 "Job position: Product manager\n"
-"- Coordinated and managed software deployment across five system environments from development to production.\n"
+"- Coordinated and managed software deployment across five system "
+"environments from development to production.\n"
 "- Developed stored procedures to assist Java level programming efforts.\n"
-"- Developed multiple renewable energy plant architectures, both commercial installations and defense-related."
+"- Developed multiple renewable energy plant architectures, both commercial "
+"installations and defense-related."
 msgstr ""
+"Työpaikka: Tuotepäällikkö\n"
+"- Koordinoi ja hallinnoi ohjelmistojen käyttöönottoa viidessä "
+"järjestelmäympäristössä kehityksestä tuotantoon.\n"
+"- Kehitti tallennettuja proseduureja Java-tason ohjelmointityön avuksi.\n"
+"- Kehitti useita uusiutuvan energian laitosarkkitehtuureja, sekä kaupallisia "
+"laitoksia että puolustukseen liittyviä.\n"
+"        "
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_fme_johnson_shaw_and_carroll
@@ -981,7 +1006,7 @@ msgstr "Korea"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_kotlin
 msgid "Kotlin"
-msgstr ""
+msgstr "Kotlin"
 
 #. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_qdp_rivera_shaw_and_hughes
@@ -1026,7 +1051,7 @@ msgstr "Lawsonin julkinen koulu"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_leadership
 msgid "Leadership"
-msgstr ""
+msgstr "Johtajuus"
 
 #. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_vad_gallegos_little_and_walters
@@ -1092,7 +1117,7 @@ msgstr "Lynch-Hodges"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_machine_learning
 msgid "Machine Learning (AI)"
-msgstr ""
+msgstr "Koneoppiminen (AI)"
 
 #. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_admin_greeneorr
@@ -1102,7 +1127,7 @@ msgstr "Aikakauslehden toimittaja"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_mandarin_chinese
 msgid "Mandarin Chinese"
-msgstr ""
+msgstr "Mandariinikiina"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_jog_mandurah_catholic_college
@@ -1138,15 +1163,17 @@ msgstr "Martin, Stanley ja Duncan"
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_line_admin_1
 msgid ""
 "Master in Electrical engineering\n"
-"            Master thesis: Better grid management and control through machine learning"
+"            Master thesis: Better grid management and control through "
+"machine learning"
 msgstr ""
 "Sähkötekniikan maisteri\n"
-"            Maisterin tutkielma: Parempi sähköverkon hallinta ja ohjaus koneoppimisen avulla"
+"            Maisterin tutkielma: Parempi sähköverkon hallinta ja ohjaus "
+"koneoppimisen avulla"
 
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_matlab
 msgid "Matlab"
-msgstr ""
+msgstr "Matlab"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_jep_mcneil_rodriguez_and_warren
@@ -1176,7 +1203,7 @@ msgstr "Kauppalaivaston upseeri"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_mobile_app_development
 msgid "Mobile app development"
-msgstr ""
+msgstr "Mobiilisovellusten kehittäminen"
 
 #. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_jog_douglas_thompson_and_conner
@@ -1205,18 +1232,18 @@ msgstr "Narroginin peruskoulu"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_network_administration
 msgid "Network administration"
-msgstr ""
+msgstr "Verkonhallinta"
 
 #. module: hr_skills
 #. odoo-javascript
 #: code:addons/hr_skills/static/src/fields/resume_one2many/resume_one2many.js:0
 msgid "New Resume line"
-msgstr ""
+msgstr "Uusi ansioluettelon rivi"
 
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_nosql
 msgid "NoSQL"
-msgstr ""
+msgstr "NoSQL"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_stw_northern_bay_p12_college
@@ -1236,12 +1263,12 @@ msgstr "Odoo SA"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_openness_to_criticism
 msgid "Openness to criticism"
-msgstr ""
+msgstr "Avoimuus kritiikille"
 
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_organizational
 msgid "Organizational"
-msgstr ""
+msgstr "Organisaatio"
 
 #. module: hr_skills
 #. odoo-javascript
@@ -1264,7 +1291,7 @@ msgstr "Our Lady Star of the Sea School"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_php
 msgid "PHP"
-msgstr ""
+msgstr "PHP"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_admin_park_lake_state_school
@@ -1289,7 +1316,7 @@ msgstr "Perez-Morgan"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_perl
 msgid "Perl"
-msgstr ""
+msgstr "Perl"
 
 #. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_jve_arnoldcohen
@@ -1299,7 +1326,7 @@ msgstr "Henkilöstövastaava"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_persuasion
 msgid "Persuasion"
-msgstr ""
+msgstr "Vakuuttaminen"
 
 #. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_vad_loganmartin
@@ -1330,7 +1357,7 @@ msgstr "Port Curtis Road State School"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_portuguese
 msgid "Portuguese"
-msgstr ""
+msgstr "Portugali"
 
 #. module: hr_skills
 #: model_terms:ir.ui.view,arch_db:hr_skills.report_employee_cv_main_panel
@@ -1360,12 +1387,12 @@ msgstr "Tulosta ansioluettelo"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_problem_solving
 msgid "Problem-Solving"
-msgstr ""
+msgstr "Ongelmanratkaisu"
 
 #. module: hr_skills
 #: model:hr.skill.type,name:hr_skills.hr_skill_type_dev
 msgid "Programming Languages"
-msgstr ""
+msgstr "Ohjelmointikielet"
 
 #. module: hr_skills
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill__level_progress
@@ -1399,7 +1426,7 @@ msgstr "Edistyksen tulisi olla luku 0 ja 100 välillä."
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_project_management
 msgid "Project Management"
-msgstr ""
+msgstr "Projektinhallinta"
 
 #. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_mit_robinson_crawford_and_norman
@@ -1414,7 +1441,7 @@ msgstr "Julkinen työntekijä"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_public
 msgid "Public Speaking"
-msgstr ""
+msgstr "Julkinen puhuminen"
 
 #. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_stw_lynchhodges
@@ -1435,7 +1462,7 @@ msgstr "Python"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_sql
 msgid "RDMS"
-msgstr ""
+msgstr "RDMS"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_lur_ramirez_inc
@@ -1445,12 +1472,12 @@ msgstr "Ramirez Inc"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_react
 msgid "React"
-msgstr ""
+msgstr "Reagoi"
 
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_resourcefulness
 msgid "Resourcefulness"
-msgstr ""
+msgstr "Kekseliäisyys"
 
 #. module: hr_skills
 #: model:ir.model,name:hr_skills.model_resource_resource
@@ -1510,7 +1537,7 @@ msgstr "Robinson, Crawford ja Norman"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_ruby
 msgid "Ruby"
-msgstr ""
+msgstr "Rubiini"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_fme_russellwebster
@@ -1525,7 +1552,7 @@ msgstr "Venäjä"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_rust
 msgid "Rust"
-msgstr ""
+msgstr "Rust"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_line_admin_2
@@ -1540,7 +1567,7 @@ msgstr "Saunders-Adkins"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_scala
 msgid "Scala"
-msgstr ""
+msgstr "Scala"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_admin_schultz_inc
@@ -1550,7 +1577,7 @@ msgstr "Schultz Inc"
 #. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_line_admin_2
 msgid "Science &amp; math"
-msgstr ""
+msgstr "Tiede ja matematiikka"
 
 #. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_mit_parker_roberson_and_acosta
@@ -1570,7 +1597,7 @@ msgstr "Taitojen haku"
 #. module: hr_skills
 #: model_terms:ir.ui.view,arch_db:hr_skills.hr_skill_type_view_search
 msgid "Search Skill Type"
-msgstr ""
+msgstr "Etsi taitotyyppiä"
 
 #. module: hr_skills
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_cv_wizard__color_secondary
@@ -1614,7 +1641,7 @@ msgstr "Seymour P-12 College"
 #. module: hr_skills
 #: model:hr.resume.line.type,name:hr_skills.resume_type_side_projects
 msgid "Side Projects"
-msgstr ""
+msgstr "Sivuprojektit"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_jth_simmonswilcox
@@ -1723,7 +1750,7 @@ msgstr "Sosiaalinen media"
 #. module: hr_skills
 #: model:hr.skill.type,name:hr_skills.hr_skill_type_softskill
 msgid "Soft Skills"
-msgstr ""
+msgstr "Pehmeät taidot"
 
 #. module: hr_skills
 #: model_terms:ir.ui.view,arch_db:hr_skills.report_employee_cv_main_panel
@@ -1739,7 +1766,7 @@ msgstr "Espanja"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_spark
 msgid "Spark"
-msgstr ""
+msgstr "Spark"
 
 #. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_lur_whitebell
@@ -1774,7 +1801,7 @@ msgstr "Stanley-Mendez"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_stress_management
 msgid "Stress management"
-msgstr ""
+msgstr "Stressinhallinta"
 
 #. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_jep_mcneil_rodriguez_and_warren
@@ -1789,12 +1816,12 @@ msgstr "Sutherland Dianella Primary School"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_swift
 msgid "Swift"
-msgstr ""
+msgstr "Swift"
 
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_system_administration
 msgid "System Administration (Linux, Windows)"
-msgstr ""
+msgstr "Järjestelmänhallinta (Linux, Windows)"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_jve_talbot_primary_school
@@ -1809,7 +1836,7 @@ msgstr "Opettaja, erityisopettaja"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_teamwork
 msgid "Teamwork"
-msgstr ""
+msgstr "Tiimityö"
 
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_telugu
@@ -1845,6 +1872,8 @@ msgid ""
 "There are no resume lines on this employee.\n"
 "                        Why not add a new one?"
 msgstr ""
+"Tällä työntekijällä ei ole ansioluetteloriviä.\n"
+"                        Lisää sellainen?"
 
 #. module: hr_skills
 #. odoo-javascript
@@ -1858,6 +1887,8 @@ msgid ""
 "This report will give you an overview of the skills per Employee.\n"
 "                Create them in configuration and add them on the Employee."
 msgstr ""
+"Tämä raportti antaa sinulle yleiskuvan työntekijäkohtaisista taidoista.\n"
+"                Luo ne määrityksissä ja lisää ne työntekijälle."
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_vad_thomas_chirnside_primary_school
@@ -1928,7 +1959,7 @@ msgstr "Yhteenvetorivin tyyppi"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_typescript
 msgid "TypeScript"
-msgstr ""
+msgstr "TypeScript"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_jod_umbakumba_school
@@ -1953,12 +1984,12 @@ msgstr "Käyttäjä"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_virtualization_containerization
 msgid "Virtualization and Containerization"
-msgstr ""
+msgstr "Virtualisointi ja konttijärjestelmä"
 
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_web_development
 msgid "Web Development"
-msgstr ""
+msgstr "Verkkokehitys"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_admin_white_inc
@@ -2014,7 +2045,7 @@ msgstr "Woodridge State School"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_wu_chinese
 msgid "Wu Chinese"
-msgstr ""
+msgstr "Yksinkertaistettu kiina"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_vad_wycheproof_p12_college

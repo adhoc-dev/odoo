@@ -1,12 +1,13 @@
 import { Plugin } from "@html_editor/plugin";
 import { isBlock, closestBlock } from "@html_editor/utils/blocks";
-import { fillEmpty } from "@html_editor/utils/dom";
+import { fillEmpty, unwrapContents } from "@html_editor/utils/dom";
 import { leftLeafOnlyNotBlockPath } from "@html_editor/utils/dom_state";
-import { isVisibleTextNode } from "@html_editor/utils/dom_info";
+import { isRedundantElement, isVisibleTextNode } from "@html_editor/utils/dom_info";
 import {
     closestElement,
     createDOMPathGenerator,
     descendants,
+    selectElements,
 } from "@html_editor/utils/dom_traversal";
 import {
     convertNumericToUnit,
@@ -17,8 +18,11 @@ import {
 import { DIRECTIONS } from "@html_editor/utils/position";
 import { _t } from "@web/core/l10n/translation";
 import { FontSelector } from "./font_selector";
+import { getBaseContainerSelector } from "@html_editor/utils/base_container";
 import { withSequence } from "@html_editor/utils/resource";
 import { reactive } from "@odoo/owl";
+import { FontSizeSelector } from "./font_size_selector";
+import { childNodes } from "../../utils/dom_traversal";
 
 export const fontItems = [
     {
@@ -51,9 +55,16 @@ export const fontItems = [
     { name: _t("Header 5"), tagName: "h5" },
     { name: _t("Header 6"), tagName: "h6" },
 
-    { name: _t("Normal"), tagName: "p" },
+    {
+        name: _t("Normal"),
+        tagName: "div",
+        // for the FontSelector component
+        selector: getBaseContainerSelector("DIV"),
+    },
+    { name: _t("Paragraph"), tagName: "p" },
 
     // TODO @phoenix use them if showExtendedTextStylesOptions is true
+    // consider baseContainer if enabling them
     // {
     //     name: _t("Light"),
     //     tagName: "p",
@@ -99,7 +110,7 @@ const handledElemSelector = [...headingTags, "PRE", "BLOCKQUOTE"].join(", ");
 
 export class FontPlugin extends Plugin {
     static id = "font";
-    static dependencies = ["input", "split", "selection", "dom", "format"];
+    static dependencies = ["baseContainer", "input", "split", "selection", "dom", "format"];
     resources = {
         user_commands: [
             {
@@ -128,7 +139,11 @@ export class FontPlugin extends Plugin {
                 title: _t("Text"),
                 description: _t("Paragraph block"),
                 icon: "fa-paragraph",
-                run: () => this.dependencies.dom.setTag({ tagName: "P" }),
+                run: () => {
+                    this.dependencies.dom.setTag({
+                        tagName: this.dependencies.baseContainer.getDefaultNodeName(),
+                    });
+                },
             },
             {
                 id: "setTagQuote",
@@ -167,7 +182,7 @@ export class FontPlugin extends Plugin {
                             tagName: item.tagName,
                             extraClass: item.extraClass,
                         });
-                        this.updateFontParams();
+                        this.updateFontSelectorParams();
                     },
                 },
             },
@@ -175,17 +190,26 @@ export class FontPlugin extends Plugin {
                 id: "font-size",
                 groupId: "font-size",
                 title: _t("Font size"),
-                Component: FontSelector,
+                Component: FontSizeSelector,
                 props: {
                     getItems: () => this.fontSizeItems,
                     getDisplay: () => this.fontSize,
+                    onFontSizeInput: (size) => {
+                        this.dependencies.format.formatSelection("fontSize", {
+                            formatProps: { size },
+                            applyStyle: true,
+                        });
+                        this.updateFontSizeSelectorParams();
+                    },
                     onSelected: (item) => {
                         this.dependencies.format.formatSelection("setFontSizeClassName", {
                             formatProps: { className: item.className },
                             applyStyle: true,
                         });
-                        this.updateFontParams();
+                        this.updateFontSizeSelectorParams();
                     },
+                    onBlur: () => this.dependencies.selection.focusEditable(),
+                    document: this.document,
                 },
             },
         ],
@@ -229,9 +253,19 @@ export class FontPlugin extends Plugin {
 
         /** Handlers */
         input_handlers: this.onInput.bind(this),
-        selectionchange_handlers: this.updateFontParams.bind(this),
-        post_undo_handlers: this.updateFontParams.bind(this),
-        post_redo_handlers: this.updateFontParams.bind(this),
+        selectionchange_handlers: [
+            this.updateFontSelectorParams.bind(this),
+            this.updateFontSizeSelectorParams.bind(this),
+        ],
+        post_undo_handlers: [
+            this.updateFontSelectorParams.bind(this),
+            this.updateFontSizeSelectorParams.bind(this),
+        ],
+        post_redo_handlers: [
+            this.updateFontSelectorParams.bind(this),
+            this.updateFontSizeSelectorParams.bind(this),
+        ],
+        normalize_handlers: this.normalize.bind(this),
 
         /** Overrides */
         split_element_block_overrides: [
@@ -241,11 +275,24 @@ export class FontPlugin extends Plugin {
         ],
         delete_backward_overrides: withSequence(20, this.handleDeleteBackward.bind(this)),
         delete_backward_word_overrides: this.handleDeleteBackward.bind(this),
+
+        before_insert_processors: this.handleInsertWithinPre.bind(this),
     };
 
     setup() {
         this.fontSize = reactive({ displayName: "" });
         this.font = reactive({ displayName: "" });
+    }
+
+    normalize(root) {
+        for (const el of selectElements(
+            root,
+            "strong, b, span[style*='font-weight: bolder'], small"
+        )) {
+            if (isRedundantElement(el)) {
+                unwrapContents(el);
+            }
+        }
     }
 
     get fontName() {
@@ -258,13 +305,13 @@ export class FontPlugin extends Plugin {
         const tagName = block.tagName.toLowerCase();
 
         const matchingItems = fontItems.filter((item) => {
-            return item.tagName === tagName;
+            return item.selector ? block.matches(item.selector) : item.tagName === tagName;
         });
 
         const matchingItemsWitoutExtraClass = matchingItems.filter((item) => !item.extraClass);
 
         if (!matchingItems.length) {
-            return "Normal";
+            return _t("Normal");
         }
 
         return (
@@ -327,10 +374,14 @@ export class FontPlugin extends Plugin {
             if (closestBlockNode.nodeName !== "PRE") {
                 closestBlockNode.remove();
             }
-            const p = this.document.createElement("p");
-            closestPre.after(p);
-            fillEmpty(p);
-            this.dependencies.selection.setCursorStart(p);
+            const baseContainer = this.dependencies.baseContainer.createBaseContainer();
+            const dir = closestBlockNode.getAttribute("dir") || closestPre.getAttribute("dir");
+            if (dir) {
+                baseContainer.setAttribute("dir", dir);
+            }
+            closestPre.after(baseContainer);
+            fillEmpty(baseContainer);
+            this.dependencies.selection.setCursorStart(baseContainer);
         } else {
             const lineBreak = this.document.createElement("br");
             targetNode.insertBefore(lineBreak, targetNode.childNodes[targetOffset]);
@@ -364,10 +415,14 @@ export class FontPlugin extends Plugin {
             if (closestBlockNode.nodeName !== "BLOCKQUOTE") {
                 closestBlockNode.remove();
             }
-            const p = this.document.createElement("p");
-            closestQuote.after(p);
-            fillEmpty(p);
-            this.dependencies.selection.setCursorStart(p);
+            const baseContainer = this.dependencies.baseContainer.createBaseContainer();
+            const dir = closestBlockNode.getAttribute("dir") || closestQuote.getAttribute("dir");
+            if (dir) {
+                baseContainer.setAttribute("dir", dir);
+            }
+            closestQuote.after(baseContainer);
+            fillEmpty(baseContainer);
+            this.dependencies.selection.setCursorStart(baseContainer);
             return true;
         }
     }
@@ -392,27 +447,32 @@ export class FontPlugin extends Plugin {
                 headingTags.includes(newElement.tagName) &&
                 !descendants(newElement).some(isVisibleTextNode)
             ) {
-                const p = this.document.createElement("P");
-                newElement.replaceWith(p);
-                p.replaceChildren(this.document.createElement("br"));
-                this.dependencies.selection.setCursorStart(p);
+                const baseContainer = this.dependencies.baseContainer.createBaseContainer();
+                const dir = newElement.getAttribute("dir");
+                if (dir) {
+                    baseContainer.setAttribute("dir", dir);
+                }
+                newElement.replaceWith(baseContainer);
+                baseContainer.replaceChildren(this.document.createElement("br"));
+                this.dependencies.selection.setCursorStart(baseContainer);
             }
             return true;
         }
     }
 
     /**
-     * Transform an empty heading, blockquote or pre at the beginning of the
-     * editable into a paragraph.
+     * Transform an empty heading or pre at the beginning of the
+     * editable into a base container. An empty blockquote is transformed
+     * into a base container, regardless of its position in the editable.
      */
     handleDeleteBackward({ startContainer, startOffset, endContainer, endOffset }) {
         // Detect if cursor is at the start of the editable (collapsed range).
         const rangeIsCollapsed = startContainer === endContainer && startOffset === endOffset;
-        if (!rangeIsCollapsed) {
+        const closestHandledElement = closestElement(endContainer, handledElemSelector);
+        if (!rangeIsCollapsed && closestHandledElement?.tagName !== "BLOCKQUOTE") {
             return;
         }
         // Check if cursor is inside an empty heading, blockquote or pre.
-        const closestHandledElement = closestElement(endContainer, handledElemSelector);
         if (!closestHandledElement || closestHandledElement.textContent.length) {
             return;
         }
@@ -420,11 +480,11 @@ export class FontPlugin extends Plugin {
         if (this.getResource("unremovable_node_predicates").some((p) => p(closestHandledElement))) {
             return;
         }
-        const p = this.document.createElement("p");
-        p.append(...closestHandledElement.childNodes);
-        closestHandledElement.after(p);
+        const baseContainer = this.dependencies.baseContainer.createBaseContainer();
+        baseContainer.append(...closestHandledElement.childNodes);
+        closestHandledElement.after(baseContainer);
         closestHandledElement.remove();
-        this.dependencies.selection.setCursorStart(p);
+        this.dependencies.selection.setCursorStart(baseContainer);
         return true;
     }
 
@@ -461,8 +521,41 @@ export class FontPlugin extends Plugin {
             this.dependencies.dom.setTag({ tagName: headingToBe });
         }
     }
-    updateFontParams() {
+
+    updateFontSelectorParams() {
         this.font.displayName = this.fontName;
+    }
+
+    updateFontSizeSelectorParams() {
         this.fontSize.displayName = this.fontSizeName;
+    }
+
+    handleInsertWithinPre(insertContainer, block) {
+        if (block.nodeName !== "PRE") {
+            return insertContainer;
+        }
+        for (const cb of this.getResource("before_insert_within_pre_processors")) {
+            insertContainer = cb(insertContainer);
+        }
+        const isDeepestBlock = (node) =>
+            isBlock(node) && ![...node.querySelectorAll("*")].some(isBlock);
+        let linebreak;
+        const processNode = (node) => {
+            const children = childNodes(node);
+            if (isDeepestBlock(node) && node.nextSibling) {
+                linebreak = this.document.createTextNode("\n");
+                node.append(linebreak);
+            }
+            if (node.nodeType === Node.ELEMENT_NODE) {
+                unwrapContents(node);
+            }
+            for (const child of children) {
+                processNode(child);
+            }
+        };
+        for (const node of childNodes(insertContainer)) {
+            processNode(node);
+        }
+        return insertContainer;
     }
 }

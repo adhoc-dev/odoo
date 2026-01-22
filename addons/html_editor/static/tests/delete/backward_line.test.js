@@ -2,6 +2,7 @@ import { test } from "@odoo/hoot";
 import { press } from "@odoo/hoot-dom";
 import { testEditor } from "../_helpers/editor";
 import { unformat } from "../_helpers/format";
+import { mockUserAgent } from "@odoo/hoot-mock";
 
 const ctrlShiftBackspace = () => press(["Ctrl", "Shift", "Backspace"]);
 
@@ -76,11 +77,11 @@ test("should not remove an unremovable element on CTRL+SHIFT+BACKSPACE", async (
 test("should not merge an unbreakable element on CTRL+SHIFT+BACKSPACE", async () => {
     await testEditor({
         contentBefore: unformat(`
-            <div>abc</div>
+            <div class="oe_unbreakable">abc</div>
             <p>[]def</p>`),
         stepFunction: ctrlShiftBackspace,
         contentAfter: unformat(`
-            <div>abc</div>
+            <div class="oe_unbreakable">abc</div>
             <p>[]def</p>`),
     });
 });
@@ -89,10 +90,19 @@ test("should not merge an unbreakable element on CTRL+SHIFT+BACKSPACE (2)", asyn
     await testEditor({
         contentBefore: unformat(`
             <p>abc</p>
-            <div>[]def</div>`),
+            <div class="oe_unbreakable">[]def</div>`),
         stepFunction: ctrlShiftBackspace,
         contentAfter: unformat(`
             <p>abc</p>
-            <div>[]def</div>`),
+            <div class="oe_unbreakable">[]def</div>`),
+    });
+});
+
+test("Should delete last line on MacOS", async () => {
+    mockUserAgent("mac");
+    await testEditor({
+        contentBefore: `<p>hello world, How Are you ?[]</p>`,
+        stepFunction: () => press(["Meta", "Backspace"]),
+        contentAfter: `<p>[]<br></p>`,
     });
 });

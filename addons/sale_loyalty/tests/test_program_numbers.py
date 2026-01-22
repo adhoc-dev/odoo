@@ -590,6 +590,17 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
         generated_coupon = order._get_reward_coupons()
         self.assertEqual(len(generated_coupon), 1, "We should still have only 1 coupon as we now benefit again from the program but no need to create a new one (see next assert)")
         self.assertEqual(generated_coupon.points, 0, "The coupon should not have it's points already.")
+        self.assertFalse(order._get_claimable_rewards(), "No rewards should be claimable")
+
+        order.action_confirm()
+        self.assertEqual(
+            generated_coupon.points, 1,
+            "The coupon should have 1 point after confirmation",
+        )
+        self.assertFalse(
+            order._get_claimable_rewards(),
+            "Next-order coupon rewards shouldn't be claimable on current order",
+        )
 
     def test_coupon_rule_minimum_amount(self):
         """ Ensure coupon with minimum amount rule are correctly
@@ -612,52 +623,6 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
         self.assertEqual(order.amount_total, 65.0, "The coupon should be correctly applied")
         self._auto_rewards(order, self.all_programs)
         self.assertEqual(order.amount_total, 65.0, "The coupon should not be removed from the order")
-
-    def test_coupon_discount_with_taxes_applied(self):
-        """Ensure coupon discount with taxes applies correctly
-           and doesn't make the order total go below 0.
-        """
-
-        coupon_program = self.env['loyalty.program'].create({
-            'name': '$300 coupon',
-            'program_type': 'coupons',
-            'trigger': 'with_code',
-            'applies_on': 'current',
-            'reward_ids': [(0, 0, {
-                'reward_type': 'discount',
-                'discount_mode': 'per_point',
-                'discount': 300,
-                'discount_applicability': 'order',
-                'required_points': 1,
-                'tax_ids': [(6, 0, (self.tax_15pc_excl.id,))],
-            })],
-        })
-
-        order = self.empty_order
-        self.env['sale.order.line'].create([
-        {
-            'product_id': self.conferenceChair.id,
-            'name': 'Conference Chair',
-            'product_uom_qty': 1.0,
-            'price_unit': 100.0,
-            'order_id': order.id,
-            'tax_id': [(6, 0, (self.tax_15pc_excl.id,))],
-        },
-        ])
-
-        self.env['loyalty.generate.wizard'].with_context(active_id=coupon_program.id).create({
-            'coupon_qty': 1,
-            'points_granted': 1,
-        }).generate_coupons()
-        coupon = coupon_program.coupon_ids
-        self._apply_promo_code(order, coupon.code)
-
-        self.assertEqual(order.amount_tax, 0.0)
-        self.assertEqual(order.amount_untaxed, 0.0, "The untaxed amount should not go below 0")
-        self.assertEqual(
-            order.amount_total, 0.0,
-            "The promotion program should not make the order total go below 0"
-        )
 
     def test_coupon_and_program_discount_fixed_amount(self):
         """ Ensure coupon and program discount both with
@@ -773,9 +738,9 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
         coupon = coupon_program.coupon_ids
         self._apply_promo_code(order, coupon.code)
         self._auto_rewards(order, self.all_programs)
-        self.assertEqual(order.amount_tax, 13.5)
+        self.assertEqual(order.amount_tax, 0.0)
         self.assertEqual(order.amount_untaxed, 0.0, "The untaxed amount should not go below 0")
-        self.assertEqual(order.amount_total, 13.5, "The promotion program should not make the order total go below 0")
+        self.assertEqual(order.amount_total, 0.0, "The promotion program should not make the order total go below 0")
 
         order.order_line[3:].unlink() #remove all coupon
         order._remove_program_from_points(coupon_program)
@@ -788,13 +753,13 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
         self._auto_rewards(order, self.all_programs)
         self._apply_promo_code(order, 'test_10pc')
         self._auto_rewards(order, self.all_programs)
-        self.assertAlmostEqual(order.amount_tax, 13.5, 2)
-        self.assertEqual(order.amount_untaxed, 10.35)
+        self.assertAlmostEqual(order.amount_tax, 1.13, 2)
+        self.assertEqual(order.amount_untaxed, 22.72)
         self.assertEqual(order.amount_total, 23.85, "The promotion program should not make the order total go below 0be altered after recomputation")
         # It should stay the same after a recompute, order matters
         self._auto_rewards(order, self.all_programs)
-        self.assertAlmostEqual(order.amount_tax, 13.5, 2)
-        self.assertEqual(order.amount_untaxed, 10.35)
+        self.assertAlmostEqual(order.amount_tax, 1.13, 2)
+        self.assertEqual(order.amount_untaxed, 22.72)
         self.assertEqual(order.amount_total, 23.85, "The promotion program should not make the order total go below 0be altered after recomputation")
 
     def test_coupon_and_coupon_discount_fixed_amount_tax_incl(self):
@@ -859,11 +824,11 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
         }).generate_coupons()
         coupon = coupon_program.coupon_ids
         self._apply_promo_code(order, coupon.code)
-        self.assertEqual(order.amount_total, 8.18, "The promotion program should not make the order total go below 0")
-        self.assertEqual(order.amount_tax, 8.18)
+        self.assertEqual(order.amount_total, 0, "The promotion program should not make the order total go below 0")
+        self.assertEqual(order.amount_tax, 0)
         self._auto_rewards(order, self.all_programs)
-        self.assertEqual(order.amount_total, 8.18, "The promotion program should not be altered after recomputation")
-        self.assertEqual(order.amount_tax, 8.18)
+        self.assertEqual(order.amount_total, 0, "The promotion program should not be altered after recomputation")
+        self.assertEqual(order.amount_tax, 0)
 
         order.order_line[3:].unlink() #remove all coupon
         order._remove_program_from_points(coupon_program)
@@ -876,13 +841,13 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
         self._apply_promo_code(order, 'test_10pc')
         self._auto_rewards(order, self.all_programs)
         self.assertEqual(order.amount_total, 9.0, "The promotion program should not make the order total go below 0")
-        self.assertEqual(order.amount_tax, 8.18)
-        self.assertEqual(order.amount_untaxed, 0.82)
+        self.assertEqual(order.amount_tax, 0.27)
+        self.assertEqual(order.amount_untaxed, 8.73)
         # It should stay the same after a recompute, order matters
         self._auto_rewards(order, self.all_programs)
         self.assertEqual(order.amount_total, 9.0, "The promotion program should not make the order total go below 0")
-        self.assertEqual(order.amount_tax, 8.18)
-        self.assertEqual(order.amount_untaxed, 0.82)
+        self.assertEqual(order.amount_tax, 0.27)
+        self.assertEqual(order.amount_untaxed, 8.73)
 
     def test_program_discount_on_multiple_specific_products(self):
         """ Ensure a discount on multiple specific products is correctly computed.
@@ -1323,6 +1288,42 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
         self.assertEqual(order.amount_total, 190.0, 'The price must be 190.0 since there is now 2x 5$ discount and 2x Product F')
         self.assertEqual(order.order_line.filtered(lambda x: x.is_reward_line).price_unit, -5, 'The discount unit price should still be -5 after the quantity was manually changed')
 
+    def test_program_multi_product_max_discount(self):
+        order = self.empty_order
+        coupon_program = self.env['loyalty.program'].create({
+            'name': "50% off for cheapest product(max $30)",
+            'trigger': 'with_code',
+            'program_type': 'coupons',
+            'reward_ids': [(0, 0, {
+                'reward_type': 'discount',
+                'discount': 50,
+                'discount_mode': 'percent',
+                'discount_applicability': 'cheapest',
+                'discount_max_amount': 30,
+            })],
+        })
+
+        # create SOL
+        self.env['sale.order.line'].create({
+            'product_id': self.largeCabinet.id,
+            'product_uom_qty': 2.0,
+            'order_id': order.id,
+        })
+
+        # generate and apply coupon
+        self.env['loyalty.generate.wizard'].with_context(active_id=coupon_program.id).create({
+            'coupon_qty': 1,
+            'points_granted': 1,
+        }).generate_coupons()
+
+        coupon = coupon_program.coupon_ids
+        self._apply_promo_code(order, coupon.code)
+
+        self.assertEqual(len(order.order_line), 2, "The order must contain 2 order lines")
+        self.assertEqual(
+            order.amount_total, 610.0, "The price must be 610.0 since the max discount is 30"
+        )
+
     def test_specific_discount_product_group(self):
         # Tests the following:
         # 1 program: -5$ on [A, B]
@@ -1551,13 +1552,13 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
         self._auto_rewards(order, program)
 
         self.assertEqual(order.amount_total, 7, 'Price should be 12$ - 5$(discount) = 7$')
-        self.assertEqual(float_compare(order.amount_tax, 7 / 4, precision_rounding=3), 0, '20% Tax included on 7$')
+        self.assertEqual(float_compare(order.amount_tax, 7 / 12, precision_rounding=3), 0, '20% Tax included on 7$')
 
         sol.tax_id = self.tax_10pc_base_incl + self.tax_10pc_excl
         self._auto_rewards(order, program)
 
         self.assertAlmostEqual(order.amount_total, 6, 1, msg='Price should be 11$ - 5$(discount) = 6$')
-        self.assertEqual(float_compare(order.amount_tax, 6 / 4, precision_rounding=3), 0, '20% Tax included on 6$')
+        self.assertEqual(float_compare(order.amount_tax, 6 / 12, precision_rounding=3), 0, '20% Tax included on 6$')
 
     def test_fixed_amount_taxes_attribution_multiline(self):
 
@@ -1607,8 +1608,8 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
         self._auto_rewards(order, program)
 
         self.assertAlmostEqual(order.amount_total, 16, 1, msg='Price should be 21$ - 5$(discount) = 16$')
-        # Tax amount = 10% in 10$ + 10% in 11$
-        self.assertEqual(float_compare(order.amount_tax, 5 / 3, precision_rounding=3), 0)
+        # Tax amount = 10% in 10$ + 10% in 11$ - 10% in 5$ (apply on excluded)
+        self.assertEqual(float_compare(order.amount_tax, 5 / 11, precision_rounding=3), 0)
 
         sol2.tax_id = self.tax_10pc_base_incl + self.tax_10pc_excl
         self._auto_rewards(order, program)
@@ -1863,3 +1864,97 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
         self.assertEqual(order.order_line[0].tax_id, tax_15pc_excl)
         self.assertEqual(order.order_line[1].tax_id, tax_15pc_excl)
         self.assertEqual(order.amount_total, 156.0, '140$ + 15% - 5$ = 156$')
+
+    def test_rounded_used_loyalty_points(self):
+        """Check that the loyalty points used in a reward are rounded according to the currency."""
+        loyalty_program = self.env['loyalty.program'].create({
+            'name': 'Test loyalty card',
+            'program_type': 'loyalty',
+            'trigger': 'auto',
+            'applies_on': 'both',
+            'rule_ids': [Command.set([])],
+            'reward_ids': [Command.create({
+                'reward_type': 'discount',
+                'discount_mode': 'per_point',
+                'discount': 0.03,
+                'discount_applicability': 'order',
+                'required_points': 1,
+            })],
+        })
+        order = self.empty_order
+        self.env['loyalty.card'].create([{
+            'program_id': loyalty_program.id,
+            'partner_id': order.partner_id.id,
+            'points': 3030,
+        }])
+        product_a = self._create_product(
+            name='product_a',
+            lst_price=3000.0,
+            taxes_id=[Command.set([])],
+        )
+        order.order_line = [Command.create({'product_id': product_a.id})]
+
+        coupon = loyalty_program.coupon_ids[0]
+        order._apply_program_reward(loyalty_program.reward_ids[0], coupon)
+        order.action_confirm()
+        self.assertEqual(len(order.order_line), 2, 'Promotion should add 1 line')
+        used_points = coupon.history_ids[0].used
+        self.assertEqual(used_points, coupon.currency_id.round(used_points))
+
+    def test_apply_order_and_specific_discounts(self):
+        """Ensure you can apply a full-order discount, and then a product-specific discount."""
+        order_program, specific_program = self.env['loyalty.program'].create([
+            {
+                'name': "$50 discount",
+                'program_type': 'promotion',
+                'trigger': 'auto',
+                'applies_on': 'current',
+                'rule_ids': [Command.create({})],
+                'reward_ids': [Command.create({
+                    'reward_type': 'discount',
+                    'discount_mode': 'per_order',
+                    'discount': 50,
+                    'discount_applicability': 'order',
+                    'required_points': 1,
+                })],
+            },
+            {
+                'name': "$10 discount on Pedal Bin",
+                'program_type': 'promotion',
+                'trigger': 'auto',
+                'applies_on': 'current',
+                'rule_ids': [Command.create({})],
+                'reward_ids': [Command.create({
+                    'reward_type': 'discount',
+                    'discount_mode': 'per_order',
+                    'discount': 10,
+                    'discount_applicability': 'specific',
+                    'discount_product_ids': self.pedalBin.ids,
+                    'required_points': 1,
+                })],
+            },
+        ])
+        order = self.empty_order
+        order.order_line = [Command.create({
+            'product_id': self.pedalBin.id,
+            'tax_id': self.tax_20pc_excl.ids,
+        })]
+
+        self.assertAlmostEqual(
+            order.amount_total,
+            self.pedalBin.list_price * (1 + self.tax_20pc_excl.amount / 100),  # $56.4
+            msg="Order total should equal product list price plus taxes",
+        )
+
+        self._auto_rewards(order, order_program)
+        self.assertAlmostEqual(
+            order.amount_total,
+            self.pedalBin.list_price * (1 + self.tax_20pc_excl.amount / 100) - 50,  # $6.4
+            msg="The order total should be $50 less than initially after the discount is applied.",
+        )
+
+        self._auto_rewards(order, specific_program)
+        self.assertFalse(
+            order.amount_total,
+            "Order total should be 0, as a specific discount should have been applied.",
+        )

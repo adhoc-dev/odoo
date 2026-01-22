@@ -1,40 +1,33 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* base_vat
-# 
+#
 # Translators:
 # Kari Lindgren <kari.lindgren@emsystems.fi>, 2024
 # Pekko Tuomisto <pekko.tuomisto@web-veistamo.fi>, 2024
 # Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2024
 # Kim Asplund <kim.asplund@gmail.com>, 2024
 # Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2024
-# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2024
-# 
+# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2025
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-30 14:40+0000\n"
+"POT-Creation-Date: 2025-12-29 18:37+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2024\n"
+"Last-Translator: Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2025\n"
 "Language-Team: Finnish (https://app.transifex.com/odoo/teams/41243/fi/)\n"
+"Language: fi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: fi\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: base_vat
 #. odoo-python
 #: code:addons/base_vat/models/res_partner.py:0
-msgid "'219999830019' (should be 12 digits)"
-msgstr ""
-
-#. module: base_vat
-#. odoo-python
-#: code:addons/base_vat/models/res_partner.py:0
-msgid ""
-"10XXXXXXXXY or 20XXXXXXXXY or 15XXXXXXXXY or 16XXXXXXXXY or 17XXXXXXXXY"
+msgid "10XXXXXXXXY or 20XXXXXXXXY or 15XXXXXXXXY or 16XXXXXXXXY or 17XXXXXXXXY"
 msgstr ""
 "10XXXXXXXXXXY tai 20XXXXXXXXXXXXY tai 15XXXXXXXXXXY tai 16XXXXXXXXXXY tai "
 "17XXXXXXXXXXY"
@@ -43,7 +36,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/base_vat/models/res_partner.py:0
 msgid "17291716060 (NIN) or 1729171602 (VKN)"
-msgstr ""
+msgstr "17291716060 (NIN) tai 1729171602 (VKN)"
 
 #. module: base_vat
 #. odoo-python
@@ -55,7 +48,7 @@ msgstr "1792060346001 tai 1792060346"
 #. odoo-python
 #: code:addons/base_vat/models/res_partner.py:0
 msgid "3101012009"
-msgstr ""
+msgstr "3101012009"
 
 #. module: base_vat
 #. odoo-python
@@ -133,6 +126,15 @@ msgstr ""
 "Eurooppalaiset ALV-numerot tarkistetaan automaattisesti VIES-palvelusta."
 
 #. module: base_vat
+#. odoo-python
+#: code:addons/base_vat/models/res_partner.py:0
+msgid ""
+"Example: '219999830019' (format: 12 digits, all numbers, valid check digit)"
+msgstr ""
+"Esimerkki: \"219999830019\" (muoto: 12 numeroa, kaikki numerot, kelvollinen "
+"tarkistusnumero)"
+
+#. module: base_vat
 #: model:ir.model,name:base_vat.model_account_fiscal_position
 msgid "Fiscal Position"
 msgstr "Verokanta"
@@ -195,10 +197,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/base_vat/models/res_partner.py:0
 msgid ""
-"The %(vat_label)s number [%(wrong_vat)s] for %(record_label)s does not seem to be valid. \n"
+"The %(vat_label)s number [%(wrong_vat)s] for %(record_label)s does not seem "
+"to be valid. \n"
 "Note: the expected format is %(expected_format)s"
 msgstr ""
-"ALV-tunnuksen %(vat_label)s numero [%(wrong_vat)s] tietueelle %(record_label)s ei näytä kelvolliselta. \n"
+"ALV-tunnuksen %(vat_label)s numero [%(wrong_vat)s] tietueelle %"
+"(record_label)s ei näytä kelvolliselta. \n"
 "Huomaa: odotettu muotoilu on %(expected_format)s"
 
 #. module: base_vat
@@ -221,8 +225,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/base_vat/models/account_fiscal_position.py:0
 msgid ""
-"The country of the foreign VAT number could not be detected. Please assign a"
-" country to the fiscal position or set a country group"
+"The country of the foreign VAT number could not be detected. Please assign a "
+"country to the fiscal position or set a country group"
 msgstr ""
 "Ulkomaisen alv-numeron maata ei voitu havaita. Määritä maa verokannalle tai "
 "aseta maaryhmä"
@@ -231,8 +235,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/base_vat/models/res_partner.py:0
 msgid ""
-"The request for VAT validation was not processed. VIES service has responded"
-" with the following error: %s"
+"The request for VAT validation was not processed. VIES service has responded "
+"with the following error: %s"
 msgstr ""
 "Arvonlisäveron vahvistamista koskevaa pyyntöä ei käsitelty. VIES-palvelu on "
 "vastannut seuraavalla virheilmoituksella: %s"

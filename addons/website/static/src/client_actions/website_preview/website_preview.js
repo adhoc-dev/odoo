@@ -6,6 +6,7 @@ import { registry } from '@web/core/registry';
 import { ResizablePanel } from '@web/core/resizable_panel/resizable_panel';
 import { useService, useBus } from '@web/core/utils/hooks';
 import { redirect } from "@web/core/utils/urls";
+import { session } from "@web/session";
 import { ResourceEditor } from '../../components/resource_editor/resource_editor';
 import { WebsiteEditorComponent } from '../../components/editor/editor';
 import { WebsiteTranslator } from '../../components/translator/translator';
@@ -28,6 +29,7 @@ import {
     useExternalListener,
 } from "@odoo/owl";
 import { getScrollingElement } from "@web/core/utils/scrolling";
+import { isBrowserMicrosoftEdge } from "@web/core/browser/feature_detection";
 
 class BlockPreview extends Component {
     static template = "website.BlockPreview";
@@ -79,7 +81,21 @@ export class WebsitePreview extends Component {
             this.backendWebsiteId = unslugHtmlDataObject(backendWebsiteRepr).id;
 
             const encodedPath = encodeURIComponent(this.path);
-            if (this.websiteDomain && !wUtils.isHTTPSorNakedDomainRedirection(this.websiteDomain, window.location.origin)) {
+            if (!session.website_bypass_domain_redirect // Used by the Odoo support (bugs to be expected)
+                    // As a stable fix, we chose to never redirect to the right
+                    // domain anymore in this case. We still do when using the
+                    // website switcher, but not when reaching the "default"
+                    // website. The goal is to better support users typing
+                    // mysupercompany.odoo.com explicitly to enter their
+                    // backend instead of mysupercompany.be.
+                    // Bugs are to be expected while editing/using the website
+                    // mysupercompany.be from mysupercompany.odoo.com though,
+                    // but it should be the case only in specific/advanced
+                    // situations.
+                    // TODO remove this code properly in master.
+                    && 1 === 0
+                    && this.websiteDomain
+                    && !wUtils.isHTTPSorNakedDomainRedirection(this.websiteDomain, window.location.origin)) {
                 // The website domain might be the naked one while the naked one
                 // is actually redirecting to `www` (or the other way around).
                 // In such a case, we need to consider those 2 from the same
@@ -245,6 +261,10 @@ export class WebsitePreview extends Component {
     get aceEditorWidth() {
         const storedWidth = browser.localStorage.getItem("ace_editor_width");
         return storedWidth ? parseInt(storedWidth) : 720;
+    }
+
+    get isMicrosoftEdge() {
+        return isBrowserMicrosoftEdge();
     }
 
     reloadIframe(url) {
@@ -472,6 +492,7 @@ export class WebsitePreview extends Component {
         this.iframe.el.contentDocument.addEventListener('keyup', ev => {
             this.iframe.el.dispatchEvent(new KeyboardEvent('keyup', ev));
         });
+        this.iframefallback.el?.contentDocument.documentElement.replaceChildren();
     }
 
     /**
@@ -501,10 +522,12 @@ export class WebsitePreview extends Component {
         // If the iframe is currently displaying an XML file, the body does not
         // exist, so we do not replace the iframefallback content.
         // The iframefallback is hidden in test mode
-        if (!this.websiteContext.edition && this.iframe.el.contentDocument.body && this.iframefallback.el) {
-            this.iframefallback.el.contentDocument.body.replaceWith(this.iframe.el.contentDocument.body.cloneNode(true));
-            this.iframefallback.el.classList.remove('d-none');
-            getScrollingElement(this.iframefallback.el.contentDocument).scrollTop = getScrollingElement(this.iframe.el.contentDocument).scrollTop;
+        const websiteDoc = this.iframe.el?.contentDocument;
+        const fallbackDoc = this.iframefallback.el?.contentDocument;
+        if (!this.websiteContext.edition && websiteDoc && fallbackDoc) {
+            fallbackDoc.documentElement.replaceWith(websiteDoc.documentElement.cloneNode(true));
+            this.iframefallback.el.classList.remove("d-none");
+            getScrollingElement(fallbackDoc).scrollTop = getScrollingElement(websiteDoc).scrollTop;
             this._cleanIframeFallback();
         }
     }

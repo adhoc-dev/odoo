@@ -327,8 +327,11 @@ class MailComposer(models.TransientModel):
                 composer.email_from = self.env.user.email_formatted
             # removing template or void from -> fallback on current user as default
             elif not composer.template_id or not composer.email_from:
-                composer.email_from = self.env.user.email_formatted
-                updated_author_id = self.env.user.partner_id.id
+                if self.env.context.get('default_email_from'):
+                    composer.email_from = self.env.context['default_email_from']
+                else:
+                    composer.email_from = self.env.user.email_formatted
+                    updated_author_id = self.env.user.partner_id.id
 
             # Update author. When being in rendered mode: link with rendered
             # email_from or fallback on current user if email does not match.
@@ -757,6 +760,7 @@ class MailComposer(models.TransientModel):
         batch_size = int(
             self.env['ir.config_parameter'].sudo().get_param('mail.batch_size')
         ) or self._batch_size or 50  # be sure to not have 0, as otherwise no iteration is done
+        counter_mails_done = 0
         for res_ids_iter in tools.split_every(batch_size, res_ids):
             res_ids_values = list(self._prepare_mail_values(res_ids_iter).values())
 
@@ -783,6 +787,9 @@ class MailComposer(models.TransientModel):
             # send better void the cache and commit what is already generated to avoid
             # running several times on same records in case of issue
             if auto_commit is True:
+                counter_mails_done += len(res_ids_values)
+                self.env['ir.cron']._notify_progress(done=counter_mails_done,
+                                                      remaining=len(res_ids) - counter_mails_done)
                 self._cr.commit()
             self.env.invalidate_all()
 
@@ -911,6 +918,17 @@ class MailComposer(models.TransientModel):
 
         if email_mode:
             mail_values_all = self._process_mail_values_state(mail_values_all)
+            # based on previous values, compute message ID / references
+            for res_id, mail_values in mail_values_all.items():
+                # generate message_id directly; instead of letting mail_message create
+                # method doing it. Then use it to craft references, allowing to keep
+                # a trace of message_id even when email providers override it.
+                # Note that if 'auto_delete' is set and if 'auto_delete_keep_log' is False,
+                # mail.message is removed and parent finding based on messageID
+                # may be broken, tough life
+                message_id = self.env['mail.message']._get_message_id(mail_values)
+                mail_values['message_id'] = message_id
+                mail_values['references'] = message_id
         return mail_values_all
 
     def _prepare_mail_values_static(self):

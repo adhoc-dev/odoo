@@ -325,7 +325,7 @@ class AccountJournal(models.Model):
         method_information_mapping = results['method_information_mapping']
         providers_per_code = results['providers_per_code']
 
-        journal_bank_cash = self.filtered(lambda j: j.type in ('bank', 'cash'))
+        journal_bank_cash = self.filtered(lambda j: j.type in ('bank', 'cash', 'credit'))
         journal_other = self - journal_bank_cash
         journal_other.available_payment_method_ids = False
 
@@ -387,11 +387,21 @@ class AccountJournal(models.Model):
         for journal in self:
             pay_method_line_ids_commands = [Command.clear()]
             if journal.type in ('bank', 'cash', 'credit'):
+                existing_method_lines = journal.inbound_payment_method_line_ids
                 default_methods = journal._default_inbound_payment_methods()
-                pay_method_line_ids_commands += [Command.create({
-                    'name': pay_method.name,
-                    'payment_method_id': pay_method.id,
-                }) for pay_method in default_methods]
+                for pay_method in default_methods:
+                    payment_account = existing_method_lines.filtered(lambda m: m.payment_method_id == pay_method)[:1].payment_account_id
+                    pay_method_line_ids_commands += [
+                        Command.create({
+                            'name': pay_method.name,
+                            'payment_method_id': pay_method.id,
+                            'payment_account_id': (
+                                payment_account.id
+                                if not payment_account.currency_id or payment_account.currency_id == journal.currency_id
+                                else False
+                            ),
+                        })
+                    ]
             journal.inbound_payment_method_line_ids = pay_method_line_ids_commands
 
     @api.depends('type', 'currency_id')
@@ -399,11 +409,21 @@ class AccountJournal(models.Model):
         for journal in self:
             pay_method_line_ids_commands = [Command.clear()]
             if journal.type in ('bank', 'cash', 'credit'):
+                existing_method_lines = journal.outbound_payment_method_line_ids
                 default_methods = journal._default_outbound_payment_methods()
-                pay_method_line_ids_commands += [Command.create({
-                    'name': pay_method.name,
-                    'payment_method_id': pay_method.id,
-                }) for pay_method in default_methods]
+                for pay_method in default_methods:
+                    payment_account = existing_method_lines.filtered(lambda m: m.payment_method_id == pay_method)[:1].payment_account_id
+                    pay_method_line_ids_commands += [
+                        Command.create({
+                            'name': pay_method.name,
+                            'payment_method_id': pay_method.id,
+                            'payment_account_id': (
+                                payment_account.id
+                                if not payment_account.currency_id or payment_account.currency_id == journal.currency_id
+                                else False
+                            ),
+                        })
+                    ]
             journal.outbound_payment_method_line_ids = pay_method_line_ids_commands
 
     @api.depends('outbound_payment_method_line_ids', 'inbound_payment_method_line_ids')
@@ -678,9 +698,6 @@ class AccountJournal(models.Model):
             for journal in self.filtered(lambda r: r.type == 'bank' and not r.bank_account_id):
                 journal.set_bank_account(vals.get('bank_acc_number'), vals.get('bank_id'))
 
-        if vals.get('restrict_mode_hash_table'):
-            self.env['res.groups']._activate_group_account_secured()
-
         return result
 
     def _alias_get_creation_values(self):
@@ -728,7 +745,7 @@ class AccountJournal(models.Model):
 
         domain = [('alias_name', '=', alias_name)]
         if alias_domain_name:
-            domain.append(('alias_domain', '=', alias_domain_name))
+            domain.extend(['|', ('alias_domain', '=', alias_domain_name), ('alias_domain_id', '=', False)])
 
         existing_alias = self.env['mail.alias'].search_count(domain, limit=1)
 
@@ -880,9 +897,6 @@ class AccountJournal(models.Model):
             if journal.type == 'bank' and not journal.bank_account_id and vals.get('bank_acc_number'):
                 journal.set_bank_account(vals.get('bank_acc_number'), vals.get('bank_id'))
 
-        if any(journals.mapped('restrict_mode_hash_table')):
-            self.env['res.groups']._activate_group_account_secured()
-
         return journals
 
     def set_bank_account(self, acc_number, bank_id=None):
@@ -907,14 +921,9 @@ class AccountJournal(models.Model):
     def _compute_display_name(self):
         for journal in self:
             name = journal.name
-            if journal.currency_id and journal.currency_id != journal.company_id.currency_id:
+            if journal.currency_id and journal.currency_id != journal.company_id.sudo().currency_id:
                 name = f"{name} ({journal.currency_id.name})"
             journal.display_name = name
-
-    def action_archive(self):
-        if self.env['account.payment.method.line'].search_count([('journal_id', 'in', self.ids)], limit=1):
-            raise ValidationError(_("This journal is associated with a payment method. You cannot archive it"))
-        return super().action_archive()
 
     def action_configure_bank_journal(self):
         """ This function is called by the "configure" button of bank journals,
@@ -956,7 +965,7 @@ class AccountJournal(models.Model):
                 'move_type': move_type,
             })
 
-            invoice._extend_with_attachments(attachment, new=True)
+            invoice.with_context(skip_is_manually_modified=True)._extend_with_attachments(attachment, new=True)
 
             all_invoices |= invoice
 

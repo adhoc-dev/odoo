@@ -1,3 +1,5 @@
+import { HtmlUpgradeManager } from "@html_editor/html_migrations/html_upgrade_manager";
+import { stripVersion } from "@html_editor/html_migrations/html_migrations_utils";
 import { stripHistoryIds } from "@html_editor/others/collaboration/collaboration_odoo_plugin";
 import {
     COLLABORATION_PLUGINS,
@@ -11,7 +13,7 @@ import {
 } from "@html_editor/others/embedded_components/embedding_sets";
 import { normalizeHTML } from "@html_editor/utils/html";
 import { Wysiwyg } from "@html_editor/wysiwyg";
-import { Component, status, useRef, useState } from "@odoo/owl";
+import { Component, markup, status, useRef, useState } from "@odoo/owl";
 import { localization } from "@web/core/l10n/localization";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
@@ -22,6 +24,9 @@ import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { TranslationButton } from "@web/views/fields/translation_button";
 import { HtmlViewer } from "./html_viewer";
 import { withSequence } from "@html_editor/utils/resource";
+import { fixInvalidHTML, instanceofMarkup } from "@html_editor/utils/sanitize";
+
+const HTML_FIELD_METADATA_ATTRIBUTES = ["data-last-history-steps"];
 
 /**
  * Check whether the current value contains nodes that would break
@@ -63,6 +68,7 @@ export class HtmlField extends Component {
     };
 
     setup() {
+        this.htmlUpgradeManager = new HtmlUpgradeManager();
         this.mutex = new Mutex();
 
         this.codeViewRef = useRef("codeView");
@@ -79,22 +85,19 @@ export class HtmlField extends Component {
         this.state = useState({
             key: 0,
             showCodeView: false,
-            containsComplexHTML: computeContainsComplexHTML(this.value),
+            containsComplexHTML: computeContainsComplexHTML(
+                this.props.record.data[this.props.name]
+            ),
         });
 
         useRecordObserver((record) => {
             // Reset Wysiwyg when we discard or onchange value
-            const newValue = record.data[this.props.name];
+            const newValue = fixInvalidHTML(record.data[this.props.name]);
             if (!this.isDirty) {
-                const value = normalizeHTML(
-                    newValue.toString(),
-                    this.clearElementToCompare.bind(this)
-                );
+                const value = normalizeHTML(newValue, this.clearElementToCompare.bind(this));
                 if (this.lastValue !== value) {
                     this.state.key++;
-                    this.state.containsComplexHTML = computeContainsComplexHTML(
-                        record.data[this.props.name]
-                    );
+                    this.state.containsComplexHTML = computeContainsComplexHTML(newValue);
                     this.lastValue = value;
                 }
             }
@@ -109,7 +112,15 @@ export class HtmlField extends Component {
     }
 
     get value() {
-        return this.props.record.data[this.props.name];
+        const value = this.props.record.data[this.props.name];
+        const newVal = this.htmlUpgradeManager.processForUpgrade(fixInvalidHTML(value), {
+            containsComplexHTML: this.state.containsComplexHTML,
+            env: this.env,
+        });
+        if (instanceofMarkup(value)) {
+            return markup(newVal);
+        }
+        return newVal;
     }
 
     get displayReadonly() {
@@ -133,6 +144,7 @@ export class HtmlField extends Component {
         if (this.props.isCollaborative) {
             stripHistoryIds(element);
         }
+        stripVersion(element);
     }
 
     async updateValue(value) {
@@ -145,8 +157,24 @@ export class HtmlField extends Component {
     }
 
     async getEditorContent() {
-        await this.editor.shared.media.savePendingImages();
-        return this.editor.getElContent();
+        const content = this.editor.getElContent();
+        const oldSrcToNewSrcMap = await this.editor.shared.media?.savePendingImages(content);
+        // Update the actual editable if still in the DOM.
+        if (this.editor.editable && oldSrcToNewSrcMap) {
+            this.editor.editable
+                .querySelectorAll('.o_b64_image_to_save, .o_modified_image_to_save')
+              .forEach((unsavedImage) => {
+                const oldSrc = unsavedImage.getAttribute('src');
+                if (oldSrcToNewSrcMap.has(oldSrc)) {
+                  unsavedImage.setAttribute(
+                    'src',
+                    oldSrcToNewSrcMap.get(oldSrc)
+                  );
+                }
+                unsavedImage.classList.remove("o_b64_image_to_save", "o_modified_image_to_save");
+              });
+        }
+        return content;
     }
 
     async _commitChanges({ urgent }) {
@@ -236,6 +264,10 @@ export class HtmlField extends Component {
             ...this.props.editorConfig,
         };
 
+        if (!("baseContainer" in config)) {
+            config.baseContainer = "DIV";
+        }
+
         if (this.props.embeddedComponents) {
             // TODO @engagement: fill this array with default/base components
             config.resources.embedded_components = [...MAIN_EMBEDDINGS];
@@ -250,6 +282,7 @@ export class HtmlField extends Component {
         }
         if (this.props.codeview) {
             config.resources = {
+                ...config.resources,
                 user_commands: [
                     {
                         id: "codeview",
@@ -276,6 +309,7 @@ export class HtmlField extends Component {
             value: this.value,
             cssAssetId: this.props.cssReadonlyAssetId,
             hasFullHtml: this.sandboxedPreview,
+            isFixedValue: true,
         };
         if (this.props.embeddedComponents) {
             config.embeddedComponents = [...READONLY_MAIN_EMBEDDINGS];
@@ -304,6 +338,7 @@ export const htmlField = {
         }
         if (options.height) {
             editorConfig.height = `${options.height}px`;
+            editorConfig.classList = ["overflow-auto"];
         }
         if ("disableImage" in options) {
             editorConfig.disableImage = Boolean(options.disableImage);
@@ -313,6 +348,9 @@ export const htmlField = {
         }
         if ("disableFile" in options) {
             editorConfig.disableFile = Boolean(options.disableFile);
+        }
+        if ("baseContainer" in options) {
+            editorConfig.baseContainer = options.baseContainer;
         }
         return {
             editorConfig,
@@ -331,3 +369,23 @@ export const htmlField = {
 };
 
 registry.category("fields").add("html", htmlField, { force: true });
+
+export function getHtmlFieldMetadata(content) {
+    const metadata = {};
+    for (const attribute of HTML_FIELD_METADATA_ATTRIBUTES) {
+        const regex = new RegExp(`${attribute}\\s*=\\s*"([^"]+)"`);
+        metadata[attribute] = content.match(regex)?.[1];
+    }
+    return metadata;
+}
+export function setHtmlFieldMetadata(content, metadata) {
+    const htmlContent = content.toString() || "<div></div>";
+    const parser = new DOMParser();
+    const contentDocument = parser.parseFromString(htmlContent, "text/html");
+    for (const [attribute, value] of Object.entries(metadata)) {
+        if (value) {
+            contentDocument.body.firstChild.setAttribute(attribute, value);
+        }
+    }
+    return contentDocument.body.innerHTML;
+}

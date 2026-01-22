@@ -6,7 +6,13 @@ import { floatIsZero } from "@web/core/utils/numbers";
 import { renderToElement } from "@web/core/utils/render";
 import { registry } from "@web/core/registry";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
-import { deduceUrl, random5Chars, uuidv4, getOnNotified } from "@point_of_sale/utils";
+import {
+    deduceUrl,
+    lte,
+    random5Chars,
+    uuidv4,
+    computeProductPricelistCache,
+} from "@point_of_sale/utils";
 import { Reactive } from "@web/core/utils/reactive";
 import { HWPrinter } from "@point_of_sale/app/printer/hw_printer";
 import { ConnectionLostError } from "@web/core/network/rpc";
@@ -24,18 +30,22 @@ import {
     ask,
     makeActionAwaitable,
 } from "@point_of_sale/app/store/make_awaitable_dialog";
-import { deserializeDate } from "@web/core/l10n/dates";
 import { PartnerList } from "../screens/partner_list/partner_list";
 import { ScaleScreen } from "../screens/scale_screen/scale_screen";
 import { computeComboItems } from "../models/utils/compute_combo_items";
 import { changesToOrder, getOrderChanges } from "../models/utils/order_change";
-import { getTaxesAfterFiscalPosition, getTaxesValues } from "../models/utils/tax_utils";
+import { getTaxesAfterFiscalPosition } from "../models/utils/tax_utils";
+import { accountTaxHelpers } from "@account/helpers/account_tax";
 import { QRPopup } from "@point_of_sale/app/utils/qr_code_popup/qr_code_popup";
 import { ActionScreen } from "@point_of_sale/app/screens/action_screen";
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
 import { CashMovePopup } from "@point_of_sale/app/navbar/cash_move_popup/cash_move_popup";
 import { ClosePosPopup } from "../navbar/closing_popup/closing_popup";
 import { user } from "@web/core/user";
+import { debounce } from "@web/core/utils/timing";
+import DevicesSynchronisation from "./devices_synchronisation";
+import { openCustomerDisplay } from "@point_of_sale/customer_display/utils";
+import { initLNA } from "../utils/init_lna";
 
 const { DateTime } = luxon;
 
@@ -50,6 +60,7 @@ export class PosStore extends Reactive {
         "hardware_proxy",
         "ui",
         "pos_data",
+        "pos_scale",
         "dialog",
         "notification",
         "printer",
@@ -74,6 +85,7 @@ export class PosStore extends Reactive {
             printer,
             bus_service,
             pos_data,
+            pos_scale,
             action,
             alert,
         }
@@ -122,7 +134,6 @@ export class PosStore extends Reactive {
             create: new Set(),
         };
 
-        this.synch = { status: "connected", pending: 0 };
         this.hardwareProxy = hardware_proxy;
         this.hiddenProductIds = new Set();
         this.selectedOrderUuid = null;
@@ -133,11 +144,7 @@ export class PosStore extends Reactive {
         this.ready = new Promise((resolve) => {
             this.markReady = resolve;
         });
-        this.isScaleScreenVisible = false;
-        this.scaleData = null;
-        this.scaleWeight = 0;
-        this.scaleTare = 0;
-        this.totalPriceOnScale = 0;
+        this.scale = pos_scale;
 
         // FIXME POSREF: the hardwareProxy needs the pos and the pos needs the hardwareProxy. Maybe
         // the hardware proxy should just be part of the pos service?
@@ -148,6 +155,14 @@ export class PosStore extends Reactive {
             await this.connectToProxy();
         }
         this.closeOtherTabs();
+        this.syncAllOrdersDebounced = debounce(this.syncAllOrders, 100);
+
+        window.addEventListener("online", () => {
+            // Sync should be done before websocket connection when going online
+            this.syncAllOrdersDebounced();
+        });
+
+        initLNA(this.notification);
     }
 
     get firstScreen() {
@@ -163,6 +178,23 @@ export class PosStore extends Reactive {
         }
 
         return !this.cashier ? "LoginScreen" : "ProductScreen";
+    }
+
+    get idleTimeout() {
+        return [
+            {
+                timeout: 300000, // 5 minutes
+                action: () =>
+                    this.mainScreen.component.name !== "PaymentScreen" &&
+                    this.showScreen("SaverScreen"),
+            },
+            {
+                timeout: 120000, // 2 minutes
+                action: () =>
+                    this.mainScreen.component.name === "LoginScreen" &&
+                    this.showScreen("SaverScreen"),
+            },
+        ];
     }
 
     async showLoginScreen() {
@@ -220,8 +252,47 @@ export class PosStore extends Reactive {
 
     async initServerData() {
         await this.processServerData();
-        this.onNotified = getOnNotified(this.bus, this.config.access_token);
+        this.data.connectWebSocket("CLOSING_SESSION", this.closingSessionNotification.bind(this));
         return await this.afterProcessServerData();
+    }
+
+    async closingSessionNotification(data) {
+        if (data.login_number == odoo.login_number) {
+            return;
+        }
+
+        try {
+            const paidOrderNotSynced = this.models["pos.order"].filter(
+                (order) => order.state === "paid" && order.id !== "number"
+            );
+            this.addPendingOrder(paidOrderNotSynced.map((o) => o.id));
+            await this.syncAllOrders({ throw: true });
+
+            this.dialog.add(AlertDialog, {
+                title: _t("Closing Session"),
+                body: _t("The session is being closed by another user. The page will be reloaded."),
+            });
+        } catch {
+            this.dialog.add(AlertDialog, {
+                title: _t("Error"),
+                body: _t(
+                    "An error occurred while closing the session. Unsynced orders will be available in the next session. The page will be reloaded."
+                ),
+            });
+        } finally {
+            // All orders saved on the server should be cancelled by the device that closes
+            // the session. If some orders are not cancelled, we need to cancel them here.
+            const orders = this.models["pos.order"].filter((o) => typeof o.id === "number");
+            for (const order of orders) {
+                if (!order.finalized) {
+                    order.state = "cancel";
+                }
+            }
+        }
+
+        setTimeout(() => {
+            window.location.reload();
+        }, 3000);
     }
 
     get session() {
@@ -238,6 +309,15 @@ export class PosStore extends Reactive {
         this.currency = this.config.currency_id;
         this.pickingType = this.data.models["stock.picking.type"].getFirst();
         this.models = this.data.models;
+        this.models["pos.session"].getFirst().login_number = parseInt(odoo.login_number);
+
+        const models = Object.keys(this.models);
+        const dynamicModels = this.data.opts.dynamicModels;
+        const staticModels = models.filter((model) => !dynamicModels.includes(model));
+        const deviceSync = new DevicesSynchronisation(dynamicModels, staticModels, this);
+
+        this.deviceSync = deviceSync;
+        this.data.deviceSync = deviceSync;
 
         // Check cashier
         this.checkPreviousLoggedCashier();
@@ -287,19 +367,26 @@ export class PosStore extends Reactive {
     }
     async closeSession() {
         const info = await this.getClosePosInfo();
-        await this.data.resetIndexedDB();
 
         if (info) {
             this.dialog.add(ClosePosPopup, info);
         }
     }
     async processProductAttributes() {
+        const products = this.models["product.product"].getAll();
+        await this.processProductAttributesByProducts(products);
+    }
+
+    async processProductAttributesByProducts(products) {
+        if (!products?.length) {
+            return;
+        }
         const productIds = new Set();
         const productTmplIds = new Set();
         const productByTmplId = {};
 
-        for (const product of this.models["product.product"].getAll()) {
-            if (product.product_template_variant_value_ids.length > 0) {
+        for (const product of products) {
+            if (product.raw?.product_template_variant_value_ids?.length > 0) {
                 productTmplIds.add(product.raw.product_tmpl_id);
                 productIds.add(product.id);
 
@@ -312,17 +399,17 @@ export class PosStore extends Reactive {
         }
 
         if (productIds.size > 0) {
-            await this.data.searchRead("product.product", [
+            const missingVariants = await this.data.searchRead("product.product", [
                 "&",
                 ["id", "not in", [...productIds]],
                 ["product_tmpl_id", "in", [...productTmplIds]],
             ]);
-        }
-
-        for (const product of this.models["product.product"].filter(
-            (p) => !productIds.has(p.id) && p.product_template_variant_value_ids.length > 0
-        )) {
-            productByTmplId[product.raw.product_tmpl_id].push(product);
+            for (const product of missingVariants.filter(
+                (p) =>
+                    !productIds.has(p.id) && p.raw?.product_template_variant_value_ids?.length > 0
+            )) {
+                productByTmplId[product.raw.product_tmpl_id].push(product);
+            }
         }
 
         for (const products of Object.values(productByTmplId)) {
@@ -349,12 +436,25 @@ export class PosStore extends Reactive {
                 return false;
             }
         }
+        const refundedOrderLines = order.lines
+            .filter((line) => line.refunded_orderline_id?.order_id)
+            .map((line) => ({
+                order: line.refunded_orderline_id.order_id,
+                uuid: line.refunded_orderline_id.uuid,
+            }));
+
         const orderIsDeleted = await this.deleteOrders([order]);
-        if (orderIsDeleted) {
-            order.uiState.displayed = false;
-            this.afterOrderDeletion();
+        if (!orderIsDeleted) {
+            return false;
         }
-        return orderIsDeleted;
+        order.uiState.displayed = false;
+        // Delete refunded lines linked to the current order
+        for (const refundedLine of refundedOrderLines) {
+            delete refundedLine.order?.uiState?.lineToRefund[refundedLine.uuid];
+        }
+
+        this.afterOrderDeletion();
+        return true;
     }
     afterOrderDeletion() {
         this.set_order(this.get_open_orders().at(-1) || this.createNewOrder());
@@ -368,10 +468,10 @@ export class PosStore extends Reactive {
                     typeof order.id === "number" &&
                     Object.keys(order.last_order_preparation_change.lines).length > 0
                 ) {
-                    await this.sendOrderInPreparation(order, true);
+                    await this.checkPreparationStateAndSentOrderInPreparation(order, true);
                 }
 
-                const cancelled = this.removeOrder(order, true);
+                const cancelled = this.removeOrder(order, false);
                 this.removePendingOrder(order);
                 if (!cancelled) {
                     return false;
@@ -408,111 +508,21 @@ export class PosStore extends Reactive {
     async _onBeforeDeleteOrder(order) {
         return true;
     }
+
     computeProductPricelistCache(data) {
         if (data) {
             data = this.models[data.model].readMany(data.ids);
         }
-        // This function is called via the addEventListener callback initiated in the
-        // processServerData function when new products or pricelists are loaded into the PoS.
-        // It caches the heavy pricelist calculation when there are many products and pricelists.
-        const date = DateTime.now();
-        let pricelistItems = this.models["product.pricelist.item"].getAll();
-        let products = this.models["product.product"].getAll();
-
-        if (data && data.length > 0) {
-            if (data[0].model.modelName === "product.product") {
-                products = data;
-            }
-
-            if (data[0].model.modelName === "product.pricelist.item") {
-                pricelistItems = data;
-                // it needs only to compute for the products that are affected by the pricelist items
-                const productTmplIds = new Set(data.map((item) => item.raw.product_tmpl_id));
-                const productIds = new Set(data.map((item) => item.raw.product_id));
-                products = products.filter(
-                    (product) =>
-                        productTmplIds.has(product.raw.product_tmpl_id) ||
-                        productIds.has(product.id)
-                );
-            }
-        }
-
-        const pushItem = (targetArray, key, item) => {
-            if (!targetArray[key]) {
-                targetArray[key] = [];
-            }
-            targetArray[key].push(item);
-        };
-
-        const pricelistRules = {};
-
-        for (const item of pricelistItems) {
-            if (
-                (item.date_start && deserializeDate(item.date_start, { zone: "utc" }) > date) ||
-                (item.date_end && deserializeDate(item.date_end, { zone: "utc" }) < date)
-            ) {
-                continue;
-            }
-            const pricelistId = item.pricelist_id.id;
-
-            if (!pricelistRules[pricelistId]) {
-                pricelistRules[pricelistId] = {
-                    productItems: {},
-                    productTmlpItems: {},
-                    categoryItems: {},
-                    globalItems: [],
-                };
-            }
-
-            const productId = item.raw.product_id;
-            if (productId) {
-                pushItem(pricelistRules[pricelistId].productItems, productId, item);
-                continue;
-            }
-            const productTmplId = item.raw.product_tmpl_id;
-            if (productTmplId) {
-                pushItem(pricelistRules[pricelistId].productTmlpItems, productTmplId, item);
-                continue;
-            }
-            const categId = item.raw.categ_id;
-            if (categId) {
-                pushItem(pricelistRules[pricelistId].categoryItems, categId, item);
-            } else {
-                pricelistRules[pricelistId].globalItems.push(item);
-            }
-        }
-
-        for (const product of products) {
-            const applicableRules = product.getApplicablePricelistRules(pricelistRules);
-            for (const pricelistId in applicableRules) {
-                if (product.cachedPricelistRules[pricelistId]) {
-                    const existingRuleIds = product.cachedPricelistRules[pricelistId].map(
-                        (rule) => rule.id
-                    );
-                    const newRules = applicableRules[pricelistId].filter(
-                        (rule) => !existingRuleIds.includes(rule.id)
-                    );
-                    product.cachedPricelistRules[pricelistId] = [
-                        ...newRules,
-                        ...product.cachedPricelistRules[pricelistId],
-                    ];
-                } else {
-                    product.cachedPricelistRules[pricelistId] = applicableRules[pricelistId];
-                }
-            }
-        }
-        if (data && data.length > 0 && data[0].model.modelName === "product.product") {
-            this._loadMissingPricelistItems(products);
-        }
+        computeProductPricelistCache(this, data);
     }
 
     async _loadMissingPricelistItems(products) {
-        if (!products.length) {
+        const validProducts = products.filter((product) => typeof product.id === "number");
+        if (!validProducts.length) {
             return;
         }
-
-        const product_tmpl_ids = products.map((product) => product.raw.product_tmpl_id);
-        const product_ids = products.map((product) => product.id);
+        const product_tmpl_ids = validProducts.map((product) => product.raw.product_tmpl_id);
+        const product_ids = validProducts.map((product) => product.id);
         await this.data.callRelated("pos.session", "get_pos_ui_product_pricelist_item_by_product", [
             odoo.pos_session_id,
             product_tmpl_ids,
@@ -522,7 +532,6 @@ export class PosStore extends Reactive {
     }
 
     async afterProcessServerData() {
-        // Adding the not synced paid orders to the pending orders
         const paidUnsyncedOrderIds = this.models["pos.order"]
             .filter((order) => order.isUnsyncedPaid)
             .map((order) => order.id);
@@ -531,6 +540,11 @@ export class PosStore extends Reactive {
             this.addPendingOrder(paidUnsyncedOrderIds);
         }
 
+        this.data.models["pos.order"]
+            .filter((order) => order._isResidual)
+            .forEach((order) => (order.state = "cancel"));
+
+        // Adding the not synced paid orders to the pending orders
         const openOrders = this.data.models["pos.order"].filter((order) => !order.finalized);
         this.syncAllOrders();
 
@@ -542,6 +556,14 @@ export class PosStore extends Reactive {
 
         this.markReady();
         this.showScreen(this.firstScreen);
+        await this.deviceSync.readDataFromServer();
+        if (this.config.customer_display_type !== "none") {
+            openCustomerDisplay(
+                this.getDisplayDeviceIP(),
+                this.config.access_token,
+                this.config.id
+            );
+        }
     }
 
     get productListViewMode() {
@@ -569,22 +591,39 @@ export class PosStore extends Reactive {
             return formattedUnitPrice;
         }
     }
-    async openConfigurator(product) {
+    async openConfigurator(product, opts = {}) {
         const attrById = this.models["product.attribute"].getAllBy("id");
-        const attributeLines = product.attribute_line_ids.filter(
+        let attributeLines = product.attribute_line_ids.filter(
             (attr) => attr.attribute_id?.id in attrById
         );
+        if (opts.code) {
+            attributeLines = attributeLines.filter(
+                (attr) => attr.attribute_id.create_variant === "no_variant"
+            );
+        }
         const attributeLinesValues = attributeLines.map((attr) => attr.product_template_value_ids);
         if (attributeLinesValues.some((values) => values.length > 1 || values[0].is_custom)) {
+            let defaultValues = {};
+            const match = product.barcode && product.barcode.includes(this.searchProductWord);
+            if (this.searchProductWord && match) {
+                defaultValues = Object.fromEntries(
+                    product.product_template_variant_value_ids.map((value) => [
+                        value.attribute_line_id.id,
+                        value.id.toString(),
+                    ])
+                );
+            }
             return await makeAwaitable(this.dialog, ProductConfiguratorPopup, {
                 product: product,
+                hideAlwaysVariants: opts.hideAlwaysVariants,
+                defaultValues: defaultValues,
             });
         }
         return {
             attribute_value_ids: attributeLinesValues.map((values) => values[0].id),
             attribute_custom_values: [],
             price_extra: attributeLinesValues
-                .filter((attr) => attr[0].attribute_id.create_variant !== "always")
+                .filter((attr) => attr[0].attribute_id.create_variant === "no_variant")
                 .reduce((acc, values) => acc + values[0].price_extra, 0),
             quantity: 1,
         };
@@ -639,7 +678,6 @@ export class PosStore extends Reactive {
         if (!order) {
             order = this.add_new_order();
         }
-        this.addPendingOrder([order.id]);
         return await this.addLineToOrder(vals, order, opts, configure);
     }
 
@@ -688,7 +726,7 @@ export class PosStore extends Reactive {
         // ---
         // This actions cannot be handled inside pos_order.js or pos_order_line.js
         if (values.product_id.isConfigurable() && configure) {
-            const payload = await this.openConfigurator(values.product_id);
+            const payload = await this.openConfigurator(values.product_id, opts);
 
             if (payload) {
                 const productFound = this.models["product.product"]
@@ -706,7 +744,8 @@ export class PosStore extends Reactive {
                                 const attr =
                                     this.data.models["product.template.attribute.value"].get(a);
                                 return (
-                                    attr.is_custom || attr.attribute_id.create_variant !== "always"
+                                    attr.is_custom ||
+                                    attr.attribute_id.create_variant === "no_variant"
                                 );
                             }
                             return true;
@@ -716,18 +755,14 @@ export class PosStore extends Reactive {
                             this.data.models["product.template.attribute.value"].get(id),
                         ]),
                     custom_attribute_value_ids: Object.entries(payload.attribute_custom_values).map(
-                        ([id, cus]) => {
-                            return [
-                                "create",
-                                {
-                                    custom_product_template_attribute_value_id:
-                                        this.data.models["product.template.attribute.value"].get(
-                                            id
-                                        ),
-                                    custom_value: cus,
-                                },
-                            ];
-                        }
+                        ([id, cus]) => [
+                            "create",
+                            {
+                                custom_product_template_attribute_value_id:
+                                    this.data.models["product.template.attribute.value"].get(id),
+                                custom_value: cus,
+                            },
+                        ]
                     ),
                     price_extra: values.price_extra + payload.price_extra,
                     qty: payload.qty || values.qty,
@@ -739,7 +774,7 @@ export class PosStore extends Reactive {
         } else if (values.product_id.product_template_variant_value_ids.length > 0) {
             // Verify price extra of variant products
             const priceExtra = values.product_id.product_template_variant_value_ids
-                .filter((attr) => attr.attribute_id.create_variant !== "always")
+                .filter((attr) => attr.attribute_id.create_variant === "no_variant")
                 .reduce((acc, attr) => acc + attr.price_extra, 0);
             values.price_extra += priceExtra;
         }
@@ -762,7 +797,8 @@ export class PosStore extends Reactive {
                 payload,
                 order.pricelist_id,
                 this.data.models["decimal.precision"].getAll(),
-                this.data.models["product.template.attribute.value"].getAllBy("id")
+                this.data.models["product.template.attribute.value"].getAllBy("id"),
+                this.currency
             );
 
             values.combo_line_ids = comboPrices.map((comboItem) => [
@@ -775,6 +811,7 @@ export class PosStore extends Reactive {
                     ]),
                     combo_item_id: comboItem.combo_item_id,
                     price_unit: comboItem.price_unit,
+                    price_type: "original",
                     order_id: order,
                     qty: 1,
                     attribute_value_ids: comboItem.attribute_value_ids?.map((attr) => [
@@ -783,16 +820,14 @@ export class PosStore extends Reactive {
                     ]),
                     custom_attribute_value_ids: Object.entries(
                         comboItem.attribute_custom_values
-                    ).map(([id, cus]) => {
-                        return [
-                            "create",
-                            {
-                                custom_product_template_attribute_value_id:
-                                    this.data.models["product.template.attribute.value"].get(id),
-                                custom_value: cus,
-                            },
-                        ];
-                    }),
+                    ).map(([id, cus]) => [
+                        "create",
+                        {
+                            custom_product_template_attribute_value_id:
+                                this.data.models["product.template.attribute.value"].get(id),
+                            custom_value: cus,
+                        },
+                    ]),
                 },
             ]);
         }
@@ -802,8 +837,8 @@ export class PosStore extends Reactive {
         // ---
         // This actions cannot be handled inside pos_order.js or pos_order_line.js
         const code = opts.code;
+        let pack_lot_ids = {};
         if (values.product_id.isTracked() && (configure || code)) {
-            let pack_lot_ids = {};
             const packLotLinesToEdit =
                 (!values.product_id.isAllowOnlyOneLot() &&
                     this.get_order()
@@ -827,9 +862,6 @@ export class PosStore extends Reactive {
 
             if (!pack_lot_ids) {
                 return;
-            } else {
-                const packLotLine = pack_lot_ids.newPackLotLines;
-                values.pack_lot_ids = packLotLine.map((lot) => ["create", lot]);
             }
         }
 
@@ -839,26 +871,13 @@ export class PosStore extends Reactive {
         // This actions cannot be handled inside pos_order.js or pos_order_line.js
         if (values.product_id.to_weight && this.config.iface_electronic_scale && configure) {
             if (values.product_id.isScaleAvailable) {
-                this.isScaleScreenVisible = true;
-                this.scaleData = {
-                    productName: values.product_id?.display_name,
-                    uomName: values.product_id.uom_id?.name,
-                    uomRounding: values.product_id.uom_id?.rounding,
-                    productPrice: this.getProductPrice(values.product_id),
-                };
-                const weight = await makeAwaitable(
-                    this.env.services.dialog,
-                    ScaleScreen,
-                    this.scaleData
-                );
-                if (!weight) {
+                this.scale.setProduct(values.product_id, this.getProductPrice(values.product_id));
+                const weight = await this.weighProduct();
+                if (weight) {
+                    values.qty = weight;
+                } else if (weight !== null) {
                     return;
                 }
-                values.qty = weight;
-                this.isScaleScreenVisible = false;
-                this.scaleWeight = 0;
-                this.scaleTare = 0;
-                this.totalPriceOnScale = 0;
             } else {
                 await values.product_id._onScaleNotAvailable();
             }
@@ -880,6 +899,20 @@ export class PosStore extends Reactive {
         }
 
         const line = this.data.models["pos.order.line"].create({ ...values, order_id: order });
+
+        if (values.product_id.tracking === "lot") {
+            const related_lines = [];
+            const price = values.product_id.get_price(
+                order.pricelist_id,
+                values.qty,
+                values.price_extra,
+                false,
+                false,
+                line,
+                related_lines
+            );
+            related_lines.forEach((line) => line.set_unit_price(price));
+        }
         line.setOptions(options);
         this.selectOrderLine(order, line);
         if (configure) {
@@ -894,6 +927,7 @@ export class PosStore extends Reactive {
         }
 
         let to_merge_orderline;
+        let lineToReturn = line;
         for (const curLine of order.lines) {
             if (curLine.id !== line.id) {
                 if (curLine.can_be_merged_with(line) && merge !== false) {
@@ -905,11 +939,19 @@ export class PosStore extends Reactive {
         if (to_merge_orderline) {
             to_merge_orderline.merge(line);
             line.delete();
+            lineToReturn = to_merge_orderline;
             this.selectOrderLine(order, to_merge_orderline);
         } else if (!selectedOrderline) {
             this.selectOrderLine(order, order.get_last_orderline());
         }
 
+        if (product.isTracked()) {
+            this.selectedOrder.get_selected_orderline().setPackLotLines({
+                modifiedPackLotLines: pack_lot_ids.modifiedPackLotLines ?? [],
+                newPackLotLines: pack_lot_ids.newPackLotLines ?? [],
+                setQuantity: true,
+            });
+        }
         if (configure) {
             this.numberBuffer.reset();
         }
@@ -928,7 +970,7 @@ export class PosStore extends Reactive {
         }, 3000);
 
         // FIXME: If merged with another line, this returned object is useless.
-        return line;
+        return lineToReturn;
     }
 
     create_printer(config) {
@@ -960,12 +1002,6 @@ export class PosStore extends Reactive {
             this.selectedCategory = this.models["pos.category"].get(categoryId);
         }
     }
-    setScaleWeight(weight) {
-        this.scaleWeight = weight;
-    }
-    setScaleTare(tare) {
-        this.scaleTare = tare;
-    }
 
     /**
      * Remove the order passed in params from the list of orders
@@ -975,6 +1011,7 @@ export class PosStore extends Reactive {
         if (this.isOpenOrderShareable() || removeFromServer) {
             if (typeof order.id === "number" && !order.finalized) {
                 this.addPendingOrder([order.id], true);
+                this.syncAllOrdersDebounced();
             }
         }
 
@@ -983,7 +1020,7 @@ export class PosStore extends Reactive {
             return;
         }
 
-        return this.data.localDeleteCascade(order, removeFromServer);
+        return this.data.localDeleteCascade(order);
     }
 
     /**
@@ -991,7 +1028,7 @@ export class PosStore extends Reactive {
      * @returns {name: string, id: int, role: string}
      */
     get_cashier() {
-        this.user.role = this.user._raw.role;
+        this.user._role = this.user.raw.role;
         return this.user;
     }
     get_cashier_user_id() {
@@ -1005,6 +1042,37 @@ export class PosStore extends Reactive {
     }
     cashierHasPriceControlRights() {
         return !this.config.restrict_price_control || this.get_cashier()._role == "manager";
+    }
+    get currentSequenceNumber() {
+        return this._sequenceNumber || 1;
+    }
+    getNextSequenceNumber() {
+        const sessionId = this.session.id;
+        const configId = this.config.id;
+        const storedData = localStorage.getItem("pos.sequenceNumbers") || "{}";
+        const cache = JSON.parse(storedData);
+
+        if (!cache[configId]) {
+            cache[configId] = {};
+        }
+        // Cleanup: Remove sequence numbers for previous sessions under the same configId
+        // If we used only sessionId, we wouldn't be able to remove outdated session data properly,
+        // because some session IDs might belong to a different configuration, which we must preserve.
+        for (const sid in cache[configId]) {
+            if (sid !== String(sessionId)) {
+                delete cache[configId][sid];
+            }
+        }
+
+        if (!cache[configId][sessionId]) {
+            cache[configId][sessionId] = 0;
+        }
+
+        cache[configId][sessionId] += 1;
+        this._sequenceNumber = cache[configId][sessionId];
+        localStorage.setItem("pos.sequenceNumbers", JSON.stringify(cache));
+
+        return this._sequenceNumber;
     }
     generate_unique_id() {
         // Generates a public identification number for the order.
@@ -1021,15 +1089,15 @@ export class PosStore extends Reactive {
         return (
             zero_pad(this.session.id, 5) +
             "-" +
-            zero_pad(this.session.login_number, 3) +
+            zero_pad(parseInt(odoo.login_number), 3) +
             "-" +
-            zero_pad(this.session.sequence_number, 4)
+            zero_pad(this.getNextSequenceNumber(), 4)
         );
     }
     createNewOrder(data = {}) {
-        const fiscalPosition = this.models["account.fiscal.position"].find((fp) => {
-            return fp.id === this.config.default_fiscal_position_id?.id;
-        });
+        const fiscalPosition = this.models["account.fiscal.position"].find(
+            (fp) => fp.id === this.config.default_fiscal_position_id?.id
+        );
 
         const uniqId = this.generate_unique_id();
         const order = this.models["pos.order"].create({
@@ -1038,7 +1106,7 @@ export class PosStore extends Reactive {
             config_id: this.config,
             picking_type_id: this.pickingType,
             user_id: this.user,
-            sequence_number: this.session.sequence_number,
+            sequence_number: this.currentSequenceNumber,
             access_token: uuidv4(),
             ticket_code: random5Chars(),
             fiscal_position_id: fiscalPosition,
@@ -1047,7 +1115,6 @@ export class PosStore extends Reactive {
             ...data,
         });
 
-        this.session.sequence_number++;
         order.set_pricelist(this.config.pricelist_id);
         return order;
     }
@@ -1094,18 +1161,15 @@ export class PosStore extends Reactive {
     }
 
     getPendingOrder() {
-        const orderToCreate = this.models["pos.order"].filter(
-            (order) =>
-                this.pendingOrder.create.has(order.id) &&
-                (order.lines.length > 0 ||
-                    order.payment_ids.some((p) => p.payment_method_id.type === "pay_later"))
-        );
-        const orderToUpdate = this.models["pos.order"].readMany(
-            Array.from(this.pendingOrder.write)
-        );
-        const orderToDelele = this.models["pos.order"].readMany(
-            Array.from(this.pendingOrder.delete)
-        );
+        const orderToCreate = this.models["pos.order"]
+            .filter((order) => this.pendingOrder.create.has(order.id) && order.hasItemsOrPayLater)
+            .filter(Boolean);
+        const orderToUpdate = this.models["pos.order"]
+            .readMany(Array.from(this.pendingOrder.write))
+            .filter(Boolean);
+        const orderToDelele = this.models["pos.order"]
+            .readMany(Array.from(this.pendingOrder.delete))
+            .filter(Boolean);
 
         return {
             orderToDelele,
@@ -1136,88 +1200,111 @@ export class PosStore extends Reactive {
     getSyncAllOrdersContext(orders, options = {}) {
         return {
             config_id: this.config.id,
-            login_number: this.session.login_number,
+            login_number: parseInt(odoo.login_number),
+            ...(options.context || {}),
         };
     }
 
     // There for override
     async preSyncAllOrders(orders) {}
-    postSyncAllOrders(orders) {}
+    async postSyncAllOrders(orders) {}
     async syncAllOrders(options = {}) {
         const { orderToCreate, orderToUpdate } = this.getPendingOrder();
-        let orders = [...orderToCreate, ...orderToUpdate];
+        let orders = options.orders || [...orderToCreate, ...orderToUpdate];
 
         // Filter out orders that are already being synced
         orders = orders.filter((order) => !this.syncingOrders.has(order.id));
+        const orderIdsToDelete = this.getOrderIdsToDelete();
+        const context = this.getSyncAllOrdersContext(orders, options);
 
-        try {
-            const orderIdsToDelete = this.getOrderIdsToDelete();
-            if (orderIdsToDelete.length > 0) {
-                await this.deleteOrders([], orderIdsToDelete);
-            }
-
-            const context = this.getSyncAllOrdersContext(orders, options);
-            await this.preSyncAllOrders(orders);
-
-            // Allow us to force the sync of the orders In the case of
-            // pos_restaurant is usefull to get unsynced orders
-            // for a specific table
-            if (orders.length === 0 && !context.force) {
-                return;
-            }
-
-            // Add order IDs to the syncing set
-            orders.forEach((order) => this.syncingOrders.add(order.id));
-
-            // Re-compute all taxes, prices and other information needed for the backend
-            for (const order of orders) {
-                order.recomputeOrderData();
-            }
-
-            const serializedOrder = orders.map((order) =>
-                order.serialize({ orm: true, clear: true })
-            );
-            const data = await this.data.call("pos.order", "sync_from_ui", [serializedOrder], {
-                context,
-            });
-            const missingRecords = await this.data.missingRecursive(data);
-            const newData = this.models.loadData(missingRecords);
-
-            for (const line of newData["pos.order.line"]) {
-                const refundedOrderLine = line.refunded_orderline_id;
-
-                if (refundedOrderLine) {
-                    const order = refundedOrderLine.order_id;
-                    delete order.uiState.lineToRefund[refundedOrderLine.uuid];
-                    refundedOrderLine.refunded_qty += Math.abs(line.qty);
-                }
-            }
-
-            this.postSyncAllOrders(newData["pos.order"]);
-
-            if (data["pos.session"].length > 0) {
-                // Replace the original session by the rescue one. And the rescue one will have
-                // a higher id than the original one since it's the last one created.
-                const session = this.models["pos.session"].sort((a, b) => a.id - b.id)[0];
-                session.delete();
-                this.models["pos.order"]
-                    .getAll()
-                    .filter((order) => order.state === "draft")
-                    .forEach((order) => (order.session_id = this.session));
-            }
-
-            this.clearPendingOrder();
-            return newData["pos.order"];
-        } catch (error) {
-            if (options.throw) {
-                throw error;
-            }
-
-            console.warn("Offline mode active, order will be synced later");
-            return error;
-        } finally {
-            orders.forEach((order) => this.syncingOrders.delete(order.id));
+        // Delete orders first
+        if (orderIdsToDelete.length > 0) {
+            await this.deleteOrders([], orderIdsToDelete);
         }
+
+        // Allow us to force the sync of the orders In the case of
+        // pos_restaurant is usefull to get unsynced orders
+        // for a specific table
+        if (orders.length === 0) {
+            return;
+        }
+
+        // We are now syncing orders one by one to avoid cancelling all sync
+        // when one order fails, this also avoid timeout issues with a lot of orders
+        let errorOccurred = false;
+        let newSession = false;
+        const syncedOrders = [];
+        for (const order of orders) {
+            await this.preSyncAllOrders([order]);
+
+            // Add order ID to the syncing set
+            this.syncingOrders.add(order.id);
+            order.recomputeOrderData();
+
+            const serialized = order.serialize({ orm: true });
+            try {
+                const data = await this.data.call("pos.order", "sync_from_ui", [[serialized]], {
+                    context,
+                });
+                const missingRecords = await this.data.missingRecursive(data);
+                const newData = this.models.loadData(missingRecords, [], false);
+
+                for (const line of newData["pos.order.line"]) {
+                    const refundedOrderLine = line.refunded_orderline_id;
+
+                    if (refundedOrderLine) {
+                        const order = refundedOrderLine.order_id;
+                        if (order) {
+                            delete order.uiState.lineToRefund[refundedOrderLine.uuid];
+                        }
+                        refundedOrderLine.refunded_qty =
+                            refundedOrderLine.refund_orderline_ids.reduce(
+                                (sum, obj) => sum + Math.abs(obj.qty),
+                                0
+                            );
+                    }
+                }
+
+                await this.postSyncAllOrders(newData["pos.order"]);
+                this.removePendingOrder(order);
+                syncedOrders.push(...newData["pos.order"]);
+                order.clearCommands();
+                newSession = newSession || data["pos.session"].length > 0;
+            } catch (error) {
+                if (options.throw) {
+                    throw error;
+                }
+
+                // After an error on the sync, verify order state by asking the server
+                if (error instanceof ConnectionLostError) {
+                    console.warn("Offline mode active, order will be synced later");
+                } else {
+                    errorOccurred = true;
+                }
+            } finally {
+                orders.forEach((order) => this.syncingOrders.delete(order.id));
+            }
+        }
+
+        if (errorOccurred) {
+            // In that case we assume the order data isn't valid anymore, so we
+            // try to read data from server, to be sure to have the latest state
+            // the order can be deleted from the server side during the sync_from_ui call
+            this.deviceSync.readDataFromServer();
+        }
+
+        if (newSession) {
+            // Replace the original session by the rescue one. And the rescue one will have
+            // a higher id than the original one since it's the last one created.
+            const session = this.models["pos.session"].sort((a, b) => a.id - b.id)[0];
+            session.delete();
+            this.models["pos.order"]
+                .getAll()
+                .filter((order) => order.state === "draft")
+                .forEach((order) => (order.session_id = this.session));
+        }
+
+        return syncedOrders;
     }
 
     push_single_order(order) {
@@ -1339,7 +1426,7 @@ export class PosStore extends Reactive {
 
     // return the list of unpaid orders
     get_open_orders() {
-        return this.models["pos.order"].filter((o) => !o.finalized);
+        return this.models["pos.order"].filter((o) => !o.finalized && o.uiState.displayed);
     }
 
     // To be used in the context of closing the POS
@@ -1374,9 +1461,11 @@ export class PosStore extends Reactive {
         }
     }
 
-    getProducePriceDetails(product, p = false) {
-        const pricelist = this.getDefaultPricelist();
-        const price = p === false ? product.get_price(pricelist, 1) : p;
+    prepareProductBaseLineForTaxesComputationExtraValues(product, p = false) {
+        const currency = this.config.currency_id;
+        const extraValues = { currency_id: currency };
+        const priceList = this.getDefaultPricelist();
+        const priceUnit = p === false ? product.get_price(priceList, 1) : p;
 
         let taxes = product.taxes_id;
 
@@ -1386,17 +1475,32 @@ export class PosStore extends Reactive {
             taxes = getTaxesAfterFiscalPosition(taxes, order.fiscal_position_id, this.models);
         }
 
-        // Taxes computation.
-        const taxesData = getTaxesValues(
-            taxes,
-            price,
-            1,
-            product,
-            this.config._product_default_values,
-            this.company,
-            this.currency
+        return {
+            ...extraValues,
+            product_id: accountTaxHelpers.eval_taxes_computation_prepare_product_values(
+                this.config._product_default_values,
+                product
+            ),
+            quantity: 1,
+            price_unit: priceUnit,
+            tax_ids: taxes,
+        };
+    }
+
+    getProducePriceDetails(product, p = false) {
+        const company = this.company;
+        const baseLine = accountTaxHelpers.prepare_base_line_for_taxes_computation(
+            {},
+            this.prepareProductBaseLineForTaxesComputationExtraValues(product, p)
         );
-        return taxesData;
+        accountTaxHelpers.add_tax_details_in_base_line(baseLine, company);
+        accountTaxHelpers.round_base_lines_tax_details([baseLine], company);
+
+        const results = baseLine.tax_details;
+        for (const taxData of results.taxes_data) {
+            Object.assign(taxData, taxData.tax);
+        }
+        return results;
     }
 
     getProductPrice(product, p = false) {
@@ -1416,7 +1520,8 @@ export class PosStore extends Reactive {
             const paymentLine = order.payment_ids.find(
                 (paymentLine) =>
                     paymentLine.payment_method_id.use_payment_terminal === terminalName &&
-                    !paymentLine.is_done()
+                    !paymentLine.is_done() &&
+                    paymentLine.get_payment_status() !== "retry"
             );
             if (paymentLine) {
                 return paymentLine;
@@ -1473,16 +1578,26 @@ export class PosStore extends Reactive {
         );
     }
     showScreen(name, props) {
+        if (name === "PaymentScreen" && !props.orderUuid) {
+            name = "ProductScreen";
+        }
         if (name === "ProductScreen") {
             this.get_order()?.deselect_orderline();
         }
-        this.previousScreen = this.mainScreen.component?.name;
         const component = registry.category("pos_screens").get(name);
+        if (
+            (component.updatePreviousScreen ?? true) &&
+            (this.mainScreen.component?.updatePreviousScreen ?? true)
+        ) {
+            this.previousScreen = this.mainScreen.component?.name;
+        }
         this.mainScreen = { component, props };
         // Save the screen to the order so that it is shown again when the order is selected.
         if (component.storeOnOrder ?? true) {
             this.get_order()?.set_screen_data({ name, props });
         }
+
+        return true;
     }
     orderExportForPrinting(order) {
         const headerData = this.getReceiptHeaderData(order);
@@ -1494,7 +1609,7 @@ export class PosStore extends Reactive {
         order = this.get_order(),
         printBillActionTriggered = false,
     } = {}) {
-        await this.printer.print(
+        const result = await this.printer.print(
             OrderReceipt,
             {
                 data: this.orderExportForPrinting(order),
@@ -1504,16 +1619,50 @@ export class PosStore extends Reactive {
             { webPrintFallback: true }
         );
         if (!printBillActionTriggered) {
-            const nbrPrint = order.nb_print;
-            await this.data.write("pos.order", [order.id], { nb_print: nbrPrint + 1 });
+            order.nb_print += 1;
+            if (typeof order.id === "number" && result) {
+                await this.data.write("pos.order", [order.id], { nb_print: order.nb_print });
+            }
         }
         return true;
     }
     getOrderChanges(skipped = false, order = this.get_order()) {
         return getOrderChanges(order, skipped, this.orderPreparationCategories);
     }
+    async checkPreparationStateAndSentOrderInPreparation(order, cancelled = false) {
+        if (typeof order.id !== "number") {
+            return this.sendOrderInPreparation(order, cancelled);
+        }
+
+        const data = await this.data.call("pos.order", "get_preparation_change", [order.id]);
+        const rawchange = data.last_order_preparation_change || "{}";
+        const lastChanges = JSON.parse(rawchange);
+        const lastServerDate = DateTime.fromSQL(lastChanges.metadata?.serverDate).toUTC();
+        const lastLocalDate = DateTime.fromSQL(
+            order.last_order_preparation_change?.metadata?.serverDate
+        ).toUTC();
+
+        if (lastServerDate.isValid && lastServerDate.ts != lastLocalDate.ts) {
+            this.dialog.add(AlertDialog, {
+                title: _t("Order Outdated"),
+                body: _t(
+                    "The order has been modified on another device. If you have modified existing " +
+                        "order lines, check that your changes have not been overwritten.\n\n" +
+                        "The order will be sent to the server with the last changes made on this device."
+                ),
+            });
+
+            // Update before syncing otherwise it will overwrite the last change
+            order.last_order_preparation_change = lastChanges;
+            await this.syncAllOrders({ orders: [order] });
+            return;
+        }
+
+        return this.sendOrderInPreparation(order, cancelled);
+    }
     // Now the printer should work in PoS without restaurant
     async sendOrderInPreparation(order, cancelled = false) {
+        let isPrinted = false;
         if (this.printers_category_ids_set.size) {
             try {
                 const orderChange = changesToOrder(
@@ -1522,30 +1671,37 @@ export class PosStore extends Reactive {
                     this.orderPreparationCategories,
                     cancelled
                 );
-                this.printChanges(order, orderChange);
+                isPrinted = await this.printChanges(order, orderChange);
             } catch (e) {
                 console.info("Failed in printing the changes in the order", e);
             }
         }
+
+        order.updateLastOrderChange();
+        // Ensure that other devices are aware of the changes
+        // Otherwise several devices can print the same changes
+        // We need to check if a preparation display is configured to avoid unnecessary sync
+        if (isPrinted && !this.config["<-pos_preparation_display.display.pos_config_ids"]?.length) {
+            await this.syncAllOrders({ orders: [order] });
+        }
     }
     async sendOrderInPreparationUpdateLastChange(o, cancelled = false) {
-        this.addPendingOrder([o.id]);
-        const uuid = o.uuid;
-        const orders = await this.syncAllOrders();
-        const order = orders.find((order) => order.uuid === uuid);
-
-        if (order) {
-            await this.sendOrderInPreparation(order, cancelled);
-            order.updateLastOrderChange();
-            this.addPendingOrder([order.id]);
-            await this.syncAllOrders();
+        // Always display a "ConnectionLostError" when the user tries to send an order to the kitchen while offline
+        if (this.data.network.offline) {
+            this.data.network.warningTriggered = false;
+            throw new ConnectionLostError();
         }
+        await this.checkPreparationStateAndSentOrderInPreparation(o, cancelled);
     }
 
     async printChanges(order, orderChange) {
+        let isPrinted = false;
         const unsuccedPrints = [];
-        const lastChangedLines = order.last_order_preparation_change.lines;
-        orderChange.new.sort((a, b) => {
+        const isPartOfCombo = (line) =>
+            line.isCombo || this.models["product.product"].get(line.product_id).type == "combo";
+        const comboChanges = orderChange.new.filter(isPartOfCombo);
+        const normalChanges = orderChange.new.filter((line) => !isPartOfCombo(line));
+        normalChanges.sort((a, b) => {
             const sequenceA = a.pos_categ_sequence;
             const sequenceB = b.pos_categ_sequence;
             if (sequenceA === 0 && sequenceB === 0) {
@@ -1554,56 +1710,49 @@ export class PosStore extends Reactive {
 
             return sequenceA - sequenceB;
         });
+        orderChange.new = [...comboChanges, ...normalChanges];
 
         for (const printer of this.unwatched.printers) {
             const changes = this._getPrintingCategoriesChanges(
                 printer.config.product_categories_ids,
                 orderChange
             );
-            const toPrintArray = this.preparePrintingData(order, changes);
+            const anyChangesToPrint = changes.new.length;
             const diningModeUpdate = orderChange.modeUpdate;
-            if (diningModeUpdate || !Object.keys(lastChangedLines).length) {
-                // Prepare orderlines based on the dining mode update
-                const lines =
-                    diningModeUpdate && Object.keys(lastChangedLines).length
-                        ? lastChangedLines
-                        : order.lines;
-
-                // converting in format we need to show on xml
-                const orderlines = Object.entries(lines).map(([key, value]) => ({
-                    basic_name: diningModeUpdate ? value.basic_name : value.product_id.name,
-                    isCombo: diningModeUpdate ? value.isCombo : value.combo_item_id?.id,
-                    quantity: diningModeUpdate ? value.quantity : value.qty,
-                    note: value.note,
-                    attribute_value_ids: value.attribute_value_ids,
-                }));
-
-                // Print detailed receipt
+            if (diningModeUpdate || anyChangesToPrint) {
                 const printed = await this.printReceipts(
                     order,
                     printer,
                     "New",
-                    orderlines,
+                    changes.new,
                     true,
                     diningModeUpdate
                 );
+                changes.new = [];
                 if (!printed) {
                     unsuccedPrints.push("Detailed Receipt");
+                } else {
+                    isPrinted = true;
                 }
-            } else {
-                // Print all receipts related to line changes
-                for (const [key, value] of Object.entries(toPrintArray)) {
-                    const printed = await this.printReceipts(order, printer, key, value, false);
-                    if (!printed) {
-                        unsuccedPrints.push(key);
-                    }
+            }
+
+            // Print all receipts related to line changes
+            const toPrintArray = this.preparePrintingData(order, changes);
+            for (const [key, value] of Object.entries(toPrintArray)) {
+                const printed = await this.printReceipts(order, printer, key, value, false);
+                if (!printed) {
+                    unsuccedPrints.push(key);
+                } else {
+                    isPrinted = true;
                 }
-                // Print Order Note if changed
-                if (orderChange.generalNote) {
-                    const printed = await this.printReceipts(order, printer, "Message", []);
-                    if (!printed) {
-                        unsuccedPrints.push("General Message");
-                    }
+            }
+            // Print Order Note if changed
+            if (orderChange.generalNote && anyChangesToPrint) {
+                const printed = await this.printReceipts(order, printer, "Message", []);
+                if (!printed) {
+                    unsuccedPrints.push("General Message");
+                } else {
+                    isPrinted = true;
                 }
             }
         }
@@ -1616,32 +1765,43 @@ export class PosStore extends Reactive {
                 body: _t("Failed in printing %s changes of the order", failedReceipts),
             });
         }
+
+        return isPrinted;
     }
 
-    async printReceipts(order, printer, title, lines, fullReceipt = false, diningModeUpdate) {
-        let time;
-        if (order.write_date) {
-            time = order.write_date?.split(" ")[1].split(":");
-            time = time[0] + "h" + time[1];
-        }
-
-        const printingChanges = {
+    getPrintingChanges(order, diningModeUpdate) {
+        const time = DateTime.now().toFormat("HH:mm");
+        return {
             table_name: order.table_id ? order.table_id.table_number : "",
             config_name: order.config.name,
-            time: order.write_date ? time : "",
+            time: time,
             tracking_number: order.tracking_number,
             takeaway: order.config.takeaway && order.takeaway,
             employee_name: order.employee_id?.name || order.user_id?.name,
             order_note: order.general_note,
             diningModeUpdate: diningModeUpdate,
         };
+    }
 
+    async getRenderedReceipt(order, title, lines, fullReceipt = false, diningModeUpdate) {
         const receipt = renderToElement("point_of_sale.OrderChangeReceipt", {
             operational_title: title,
-            changes: printingChanges,
+            changes: this.getPrintingChanges(order, diningModeUpdate),
             changedlines: lines,
             fullReceipt: fullReceipt,
         });
+
+        return receipt;
+    }
+
+    async printReceipts(order, printer, title, lines, fullReceipt = false, diningModeUpdate) {
+        const receipt = await this.getRenderedReceipt(
+            order,
+            title,
+            lines,
+            fullReceipt,
+            diningModeUpdate
+        );
         const result = await printer.printReceipt(receipt);
         return result.successful;
     }
@@ -1745,6 +1905,9 @@ export class PosStore extends Reactive {
             );
         });
     }
+    editPartnerContext(partner) {
+        return {};
+    }
     /**
      * @param {import("@point_of_sale/app/models/res_partner").ResPartner?} partner leave undefined to create a new partner
      */
@@ -1754,6 +1917,7 @@ export class PosStore extends Reactive {
             "point_of_sale.res_partner_action_edit_pos",
             {
                 props: { resId: partner?.id },
+                additionalContext: this.editPartnerContext(),
             }
         );
         const newPartner = await this.data.read("res.partner", record.config.resIds);
@@ -1781,23 +1945,27 @@ export class PosStore extends Reactive {
         );
     }
     async allowProductCreation() {
-        return await user.hasGroup("base.group_system");
+        return await user.checkAccessRight("product.product", "create");
     }
-    async orderDetails(order) {
-        this.dialog.add(FormViewDialog, {
+    orderDetailsProps(order) {
+        const oldPaymentIds = order.payment_ids.map((p) => p.id);
+        return {
             resModel: "pos.order",
             resId: order.id,
+            context: {
+                from_frontend: true,
+            },
             onRecordSaved: async (record) => {
                 await this.data.read("pos.order", [record.evalContext.id]);
-                await this.data.read(
-                    "pos.payment",
-                    order.payment_ids.map((p) => p.id)
-                );
+                await this.data.read("pos.payment", oldPaymentIds);
                 this.action.doAction({
                     type: "ir.actions.act_window_close",
                 });
             },
-        });
+        };
+    }
+    async orderDetails(order) {
+        this.dialog.add(FormViewDialog, this.orderDetailsProps(order));
     }
     async closePos() {
         this._resetConnectedCashier();
@@ -1813,7 +1981,6 @@ export class PosStore extends Reactive {
             ]);
 
             if (data.status === "success") {
-                await this.data.resetIndexedDB();
                 this.redirectToBackend();
             }
         }
@@ -1863,10 +2030,16 @@ export class PosStore extends Reactive {
 
         let existingLots = [];
         try {
-            existingLots = await this.data.call("pos.order.line", "get_existing_lots", [
-                this.company.id,
-                product.id,
-            ]);
+            existingLots = await this.data.call(
+                "pos.order.line",
+                "get_existing_lots",
+                [this.company.id, product.id],
+                {
+                    context: {
+                        config_id: this.config.id,
+                    },
+                }
+            );
             if (!canCreateLots && (!existingLots || existingLots.length === 0)) {
                 this.dialog.add(AlertDialog, {
                     title: _t("No existing serial/lot number"),
@@ -1892,7 +2065,43 @@ export class PosStore extends Reactive {
             canCreateLots = true;
         }
 
+        const usedLotsQty = this.models["pos.pack.operation.lot"]
+            .filter(
+                (lot) =>
+                    lot.pos_order_line_id?.product_id?.id === product.id &&
+                    lot.pos_order_line_id?.order_id?.state === "draft"
+            )
+            .reduce((acc, lot) => {
+                if (!acc[lot.lot_name]) {
+                    acc[lot.lot_name] = { total: 0, currentOrderCount: 0 };
+                }
+                acc[lot.lot_name].total += lot.pos_order_line_id?.qty || 0;
+
+                if (lot.pos_order_line_id?.order_id?.id === this.selectedOrder.id) {
+                    acc[lot.lot_name].currentOrderCount += lot.pos_order_line_id?.qty || 0;
+                }
+                return acc;
+            }, {});
+
+        // Remove lot/serial names that are already used in draft orders
+        existingLots = existingLots.filter(
+            (lot) => lot.product_qty > (usedLotsQty[lot.name]?.total || 0)
+        );
+
+        // Check if the input lot/serial name is already used in another order
+        const isLotNameUsed = (itemValue) => {
+            const totalQty = existingLots.find((lt) => lt.name == itemValue)?.product_qty || 0;
+            const usedQty = usedLotsQty[itemValue]
+                ? usedLotsQty[itemValue].total - usedLotsQty[itemValue].currentOrderCount
+                : 0;
+            return usedQty ? usedQty >= totalQty : false;
+        };
+
         const existingLotsName = existingLots.map((l) => l.name);
+        if (!packLotLinesToEdit.length && existingLotsName.length === 1) {
+            // If there's only one existing lot/serial number, automatically assign it to the order line
+            return { newPackLotLines: [{ lot_name: existingLotsName[0] }] };
+        }
         const payload = await makeAwaitable(this.dialog, EditListPopup, {
             title: _t("Lot/Serial Number(s) Required"),
             name: product.display_name,
@@ -1901,6 +2110,7 @@ export class PosStore extends Reactive {
             options: existingLotsName,
             customInput: canCreateLots,
             uniqueValues: product.tracking === "serial",
+            isLotNameUsed: isLotNameUsed,
         });
         if (payload) {
             // Segregate the old and new packlot lines
@@ -1988,7 +2198,10 @@ export class PosStore extends Reactive {
     }
 
     showSearchButton() {
-        return this.mainScreen.component === ProductScreen && this.mobile_pane === "right";
+        if (this.mainScreen.component === ProductScreen) {
+            return this.ui.isSmall ? this.mobile_pane === "right" : true;
+        }
+        return false;
     }
 
     doNotAllowRefundAndSales() {
@@ -2032,6 +2245,11 @@ export class PosStore extends Reactive {
                 return false;
             }
         }
+        payment.qrPaymentData = {
+            name: payment.payment_method_id.name,
+            amount: this.env.utils.formatCurrency(payment.amount),
+            qrCode: qr,
+        };
         return await ask(
             this.env.services.dialog,
             {
@@ -2042,25 +2260,10 @@ export class PosStore extends Reactive {
             },
             {},
             QRPopup
-        );
-    }
-
-    async onTicketButtonClick() {
-        if (this.isTicketScreenShown) {
-            this.closeScreen();
-        } else {
-            if (this._shouldLoadOrders()) {
-                try {
-                    this.setLoadingOrderState(true);
-                    await this.getServerOrders();
-                } finally {
-                    this.setLoadingOrderState(false);
-                    this.showScreen("TicketScreen");
-                }
-            } else {
-                this.showScreen("TicketScreen");
-            }
-        }
+        ).then((result) => {
+            payment.qrPaymentData = null;
+            return result;
+        });
     }
 
     get isTicketScreenShown() {
@@ -2085,6 +2288,58 @@ export class PosStore extends Reactive {
                 (p) => p.raw.product_tmpl_id === product.raw.product_tmpl_id
             ).length > 1
         );
+    }
+
+    getPaymentMethodDisplayText(pm, order) {
+        const { cash_rounding, only_round_cash_method } = this.config;
+        const amount = order.getDefaultAmountDueToPayIn(pm);
+        const fmtAmount = this.env.utils.formatCurrency(amount, false);
+        if (
+            lte(amount, 0, { decimals: this.currency.decimal_places }) ||
+            !cash_rounding ||
+            (only_round_cash_method && pm.type !== "cash")
+        ) {
+            return pm.name;
+        } else {
+            return `${pm.name} (${fmtAmount})`;
+        }
+    }
+
+    clickSaveOrder() {
+        this.syncAllOrders({ orders: [this.get_order()] });
+        this.notification.add(_t("Order saved for later"), { type: "success" });
+        this.selectEmptyOrder();
+        this.mobile_pane = "right";
+    }
+
+    selectEmptyOrder() {
+        const emptyOrders = this.models["pos.order"].filter(
+            (order) =>
+                order.is_empty() &&
+                !order.finalized &&
+                order.payment_ids.length === 0 &&
+                !order.partner_id &&
+                order.pricelist_id?.id === this.config.pricelist_id?.id &&
+                order.fiscal_position_id?.id === this.config.default_fiscal_position_id?.id
+        );
+        if (emptyOrders.length > 0) {
+            this.set_order(emptyOrders[0]);
+            return;
+        }
+        this.add_new_order();
+    }
+
+    get showSaveOrderButton() {
+        return this.isOpenOrderShareable();
+    }
+
+    async isSessionDeleted() {
+        const session = await this.data.read("pos.session", [this.session.id]);
+        return session[0] === undefined;
+    }
+
+    weighProduct() {
+        return makeAwaitable(this.env.services.dialog, ScaleScreen);
     }
 }
 

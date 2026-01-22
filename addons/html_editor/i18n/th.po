@@ -1,26 +1,29 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* html_editor
-# 
+# * html_editor
+#
 # Translators:
 # Tiffany Chang, 2024
 # Wichanon Jamwutthipreecha, 2024
-# Wil Odoo, 2024
-# Rasareeyar Lappiam, 2024
-# 
+# Wil Odoo, 2025
+# Rasareeyar Lappiam, 2025
+#
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-25 07:49+0000\n"
-"PO-Revision-Date: 2024-09-29 00:00+0000\n"
-"Last-Translator: Rasareeyar Lappiam, 2024\n"
-"Language-Team: Thai (https://app.transifex.com/odoo/teams/41243/th/)\n"
+"POT-Creation-Date: 2025-12-29 18:37+0000\n"
+"PO-Revision-Date: 2025-11-21 02:29+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Thai <https://translate.odoo.com/projects/odoo-18/html_editor/"
+"th/>\n"
+"Language: th\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: th\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 5.12.2\n"
 
 #. module: html_editor
 #. odoo-javascript
@@ -29,8 +32,8 @@ msgid ""
 "'Alt tag' specifies an alternate text for an image, if the image cannot be "
 "displayed (slow connection, missing image, screen reader ...)."
 msgstr ""
-"'แท็ก Alt' ระบุข้อความสำรองสำหรับรูปภาพ หากไม่สามารถแสดงรูปภาพได้ "
-"(การเชื่อมต่อช้า รูปภาพหายไป โปรแกรมอ่านหน้าจอ ...)"
+"'แท็ก Alt' ระบุข้อความสำรองสำหรับรูปภาพ หากไม่สามารถแสดงรูปภาพได้ (การเชื่อมต่อช้า "
+"รูปภาพหายไป โปรแกรมอ่านหน้าจอ ...)"
 
 #. module: html_editor
 #. odoo-javascript
@@ -114,17 +117,15 @@ msgstr "ยอมรับ"
 #. odoo-python
 #: code:addons/html_editor/controllers/main.py:0
 msgid "Action %s is not a window action, link preview is not available"
-msgstr ""
+msgstr "การดำเนินการ %s ไม่ใช่การดำเนินการของหน้าต่าง ไม่สามารถดูตัวอย่างลิงก์ได้"
 
 #. module: html_editor
 #. odoo-python
 #: code:addons/html_editor/controllers/main.py:0
 msgid ""
-"Action %s not found, link preview is not available, please check your url is"
-" correct"
-msgstr ""
-"ไม่พบการดำเนินการ %s ไม่สามารถดูตัวอย่างลิงก์ได้ โปรดตรวจสอบว่า URL "
-"ของคุณถูกต้อง"
+"Action %s not found, link preview is not available, please check your url is "
+"correct"
+msgstr "ไม่พบการดำเนินการ %s ไม่สามารถดูตัวอย่างลิงก์ได้ โปรดตรวจสอบว่า URL ของคุณถูกต้อง"
 
 #. module: html_editor
 #. odoo-javascript
@@ -159,6 +160,12 @@ msgstr "เพิ่มส่วนโค้ด"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/file_plugin.js:0
+msgid "Add a download box"
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_plugin.js:0
 msgid "Add a link"
 msgstr "เพิ่มลิงก์"
@@ -173,7 +180,7 @@ msgstr "เพิ่มอีโมจิ"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/others/embedded_components/core/table_of_content/table_of_content.xml:0
 msgid "Add headings in this field to fill the Table of Content"
-msgstr ""
+msgstr "เพิ่มหัวข้อในฟิลด์นี้เพื่อป้อนข้อมูลในสารบัญ"
 
 #. module: html_editor
 #. odoo-javascript
@@ -274,24 +281,28 @@ msgstr "แบนเนอร์"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/html_migrations/migration-1.2.js:0
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Banner Danger"
 msgstr "ป้ายความปลอดภัย"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/html_migrations/migration-1.2.js:0
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Banner Info"
 msgstr "ข้อมูลป้าย"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/html_migrations/migration-1.2.js:0
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Banner Success"
 msgstr "ป้ายความสำเร็จ"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/html_migrations/migration-1.2.js:0
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Banner Warning"
 msgstr "ป้ายคำเตือน"
@@ -366,12 +377,6 @@ msgstr "ล้าง"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/backend/excalidraw/excalidraw.xml:0
-msgid "Click here to update the source"
-msgstr "คลิกที่นี่เพื่ออัปเดตแหล่งที่มา"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/upload_progress_toast/upload_progress_toast.xml:0
 #: code:addons/html_editor/static/src/others/embedded_components/core/file/readonly_file.js:0
 msgid "Close"
@@ -388,16 +393,6 @@ msgstr "โค้ด"
 #: code:addons/html_editor/static/src/fields/html_field.js:0
 msgid "Code view"
 msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
-msgid ""
-"Collaborative Links require joining, while Embed Links directly show the "
-"drawing."
-msgstr ""
-"ลิงก์สำหรับการทำงานร่วมกันจำเป็นต้องเข้าร่วม "
-"ในขณะที่ลิงก์แบบฝังจะแสดงการเขียนโดยตรง"
 
 #. module: html_editor
 #. odoo-javascript
@@ -510,16 +505,9 @@ msgstr "Dailymotion"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.js:0
 #: code:addons/html_editor/static/src/main/media/image_plugin.js:0
 msgid "Default"
 msgstr "เริ่มต้น"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.js:0
-msgid "Default + Rounded"
-msgstr "ค่าเริ่มต้น + โค้งมน"
 
 #. module: html_editor
 #. odoo-javascript
@@ -545,7 +533,6 @@ msgstr "คำอธิบาย"
 #: code:addons/html_editor/static/src/main/media/image_crop.xml:0
 #: code:addons/html_editor/static/src/main/media/image_description.xml:0
 #: code:addons/html_editor/static/src/main/media/media_dialog/media_dialog.xml:0
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
 msgid "Discard"
 msgstr "ละทิ้ง"
 
@@ -555,27 +542,14 @@ msgstr "ละทิ้ง"
 msgid ""
 "Discover a world of awesomeness in our copyright-free image haven. No legal "
 "drama, just nice images!"
-msgstr ""
-"ค้นพบคลังรูปภาพที่ปลอดลิขสิทธิ์ของเรา ไม่มีดราม่าทางกฎหมาย "
-"มีแต่ภาพสวยๆเท่านั้น!"
+msgstr "ค้นพบคลังรูปภาพที่ปลอดลิขสิทธิ์ของเรา ไม่มีดราม่าทางกฎหมาย มีแต่ภาพสวยๆเท่านั้น!"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/media_dialog.js:0
+#: code:addons/html_editor/static/src/main/media/file_plugin.js:0
+#: code:addons/html_editor/static/src/main/media/media_dialog/file_media_dialog.js:0
 msgid "Documents"
 msgstr "เอกสาร"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/core/file/readonly_file.xml:0
-msgid "Download"
-msgstr "ดาวน์โหลด"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_plugin.js:0
-msgid "Drawing Board"
-msgstr "กระดานวาดภาพ"
 
 #. module: html_editor
 #. odoo-javascript
@@ -708,12 +682,6 @@ msgstr "เติม + โค้งมน"
 #: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
 msgid "First color %"
 msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.js:0
-msgid "Flat"
-msgstr "คงที่"
 
 #. module: html_editor
 #. odoo-javascript
@@ -875,12 +843,6 @@ msgstr "หัวเรื่อง 6"
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.js:0
-msgid "Hide Dailymotion logo"
-msgstr "ซ่อนโลโก้ Dailymotion"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.js:0
 msgid "Hide fullscreen button"
 msgstr "ปุ่มซ่อนเต็มหน้าจอ"
 
@@ -889,12 +851,6 @@ msgstr "ปุ่มซ่อนเต็มหน้าจอ"
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.js:0
 msgid "Hide player controls"
 msgstr "ซ่อนการควบคุมผู้เล่น"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.js:0
-msgid "Hide sharing button"
-msgstr "ซ่อนปุ่มแชร์"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1005,12 +961,6 @@ msgstr "แทรก"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
-msgid "Insert Drawing"
-msgstr "แทรกรูปวาด"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/others/embedded_components/plugins/video_plugin/video_selector_dialog/video_selector_dialog.xml:0
 msgid "Insert Video"
 msgstr "แทรกวิดีโอ"
@@ -1026,12 +976,6 @@ msgstr "แทรกวิดีโอ"
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Insert a danger banner"
 msgstr "แทรกป้ายความปลอดภัย"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
-msgid "Insert a drawing board"
-msgstr "ใส่กระดานวาดภาพ"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1089,12 +1033,6 @@ msgstr "แทรกด้านบน"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_plugin.js:0
-msgid "Insert an Excalidraw Board"
-msgstr "ใส่บอร์ด Excalidraw"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Insert an info banner"
 msgstr "แทรกป้ายข้อมูล"
@@ -1128,6 +1066,12 @@ msgstr "แทรกด้านขวา"
 #: code:addons/html_editor/static/src/main/signature_plugin.js:0
 msgid "Insert your signature"
 msgstr "แทรกลายเซ็นของคุณ"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
+msgid "Instagram"
+msgstr "Instagram"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1170,9 +1114,8 @@ msgstr "คัดลอกลิงก์ไปยังคลิปบอร์
 #. odoo-python
 #: code:addons/html_editor/controllers/main.py:0
 msgid ""
-"Link preview is not available because %s, please check if your url is "
-"correct"
-msgstr ""
+"Link preview is not available because %s, please check if your url is correct"
+msgstr "ไม่สามารถดูตัวอย่างลิงก์ได้ เนื่องจาก %s โปรดตรวจสอบว่า URL ของคุณถูกต้องหรือไม่"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1327,20 +1270,13 @@ msgstr "อุปส์ ดูเหมือนว่า AI ของเรา�
 msgid ""
 "Oops, the file %s could not be found. Please replace this file box by a new "
 "one to re-upload the file."
-msgstr ""
-"อ๊ะ ไม่พบไฟล์ %s โปรดแทนที่กล่องไฟล์นี้ด้วยกล่องใหม่เพื่ออัปโหลดไฟล์อีกครั้ง"
+msgstr "อ๊ะ ไม่พบไฟล์ %s โปรดแทนที่กล่องไฟล์นี้ด้วยกล่องใหม่เพื่ออัปโหลดไฟล์อีกครั้ง"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.xml:0
 msgid "Open in a new tab"
 msgstr "เปิดในแท็บใหม่"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/core/excalidraw/readonly_excalidraw.xml:0
-msgid "Open in new Window"
-msgstr "เปิดหน้าต่างใหม่"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1364,6 +1300,12 @@ msgstr "เค้าโครง"
 #: code:addons/html_editor/static/src/main/link/link_popover.js:0
 msgid "Outline + Rounded"
 msgstr "เค้าโครง + โค้งมน"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/font/font_plugin.js:0
+msgid "Paragraph"
+msgstr "ย่อหน้า"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1644,19 +1586,6 @@ msgid "Solid"
 msgstr "ของแข็ง"
 
 #. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/core/excalidraw/readonly_excalidraw.xml:0
-msgid "Something went wrong!"
-msgstr "มีบางอย่างผิดพลาด!"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
-msgid ""
-"Sorry, we could not find your drawing, please verify that the URL is valid."
-msgstr "ขออภัย เราไม่พบการวาดของคุณ โปรดตรวจสอบว่า URL ถูกต้อง"
-
-#. module: html_editor
 #. odoo-python
 #: code:addons/html_editor/controllers/main.py:0
 msgid "Sorry, we could not generate a response. Please try again later."
@@ -1702,7 +1631,7 @@ msgstr "สลับทิศทางของข้อความ"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/table/table_ui_plugin.js:0
 msgid "Table"
-msgstr "โต๊ะ"
+msgstr "ตาราง"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1715,12 +1644,6 @@ msgstr "สารบัญ"
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Text"
 msgstr "ข้อความ"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/core/excalidraw/readonly_excalidraw.xml:0
-msgid "The Excalidraw URL is not valid."
-msgstr "URL ของ Excalidraw ไม่ถูกต้อง"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1881,7 +1804,7 @@ msgstr "พิมพ์ \"/\" สำหรับ commands"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.xml:0
 msgid "Type your URL"
-msgstr ""
+msgstr "พิมพ์ URL ของคุณ"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1897,12 +1820,19 @@ msgstr "URL"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "Upload File"
+msgstr "อัปโหลดไฟล์"
+
+#. module: html_editor
+#. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/document_selector.js:0
 msgid "Upload a document"
 msgstr "อัปโหลดเอกสาร"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/file_plugin.js:0
 #: code:addons/html_editor/static/src/others/embedded_components/plugins/file_plugin/file_plugin.js:0
 msgid "Upload a file"
 msgstr "อัปโหลดไฟล์"
@@ -2012,12 +1942,6 @@ msgstr "คุณต้องระบุข้อมูลหรือ URL เ�
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
-msgid "Youku"
-msgstr "Youku"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/others/embedded_components/core/video/video.xml:0
 msgid "Your browser does not support iframe."
 msgstr "เบราว์เซอร์ของคุณไม่รองรับ iframe"
@@ -2048,12 +1972,6 @@ msgstr "ขยายออก"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
-msgid "all"
-msgstr "ทั้งหมด"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.xml:0
 msgid "alternatives..."
 msgstr "ทางเลือก..."
@@ -2066,27 +1984,27 @@ msgstr "และ"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
-msgid "database"
-msgstr "ฐานข้อมูล"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
 msgid "deg"
 msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
-msgid "e.g. https://link.excalidraw.com/..."
-msgstr "เช่น https://link.excalidraw.com/..."
+#: code:addons/html_editor/static/src/main/media/file_plugin.js:0
+msgid "document"
+msgstr "เอกสาร"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
-msgid "media-library"
-msgstr "media-library"
+#: code:addons/html_editor/static/src/main/media/file_plugin.js:0
+msgid "file"
+msgstr "ไฟล์"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "or"
+msgstr "หรือ"
 
 #. module: html_editor
 #. odoo-javascript
@@ -2094,20 +2012,11 @@ msgstr "media-library"
 msgid "videos"
 msgstr "วิดีโอ"
 
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
-msgid "{{state.urlDescription}}"
-msgstr ""
+#~ msgid "Hide Dailymotion logo"
+#~ msgstr "ซ่อนโลโก้ Dailymotion"
 
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
-msgid "{{state.urlTitle}}"
-msgstr ""
+#~ msgid "Hide sharing button"
+#~ msgstr "ซ่อนปุ่มแชร์"
 
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
-msgid "{{state.url}}"
-msgstr ""
+#~ msgid "Youku"
+#~ msgstr "Youku"

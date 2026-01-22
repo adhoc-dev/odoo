@@ -1,24 +1,25 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* website_forum
-# 
+#
 # Translators:
 # Wil Odoo, 2024
-# Malaz Abuidris <msea@odoo.com>, 2024
-# 
+# Malaz Abuidris <msea@odoo.com>, 2025
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
+"POT-Creation-Date: 2025-12-29 18:38+0000\n"
 "PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Malaz Abuidris <msea@odoo.com>, 2024\n"
+"Last-Translator: Malaz Abuidris <msea@odoo.com>, 2025\n"
 "Language-Team: Arabic (https://app.transifex.com/odoo/teams/41243/ar/)\n"
+"Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: ar\n"
-"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
+"&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
 
 #. module: website_forum
 #. odoo-javascript
@@ -190,7 +191,7 @@ msgstr "&amp;nbsp;"
 #. odoo-javascript
 #: code:addons/website_forum/static/src/xml/website_forum_tags_wrapper.xml:0
 msgid "'Please enter 2 or more characters'"
-msgstr ""
+msgstr "'يُرجى إدخال حرفين أو أكثر' "
 
 #. module: website_forum
 #. odoo-javascript
@@ -235,7 +236,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 msgid ""
 "<b class=\"d-block \">This answer has been flagged</b>\n"
-"                            As a moderator, you can either validate or reject this answer."
+"                            As a moderator, you can either validate or "
+"reject this answer."
 msgstr ""
 "<b class=\"d-block \">لقد تم الإبلاغ عن هذه الإجابة</b>\n"
 "                            كمنظم، يمكنك إما تصديق أو رفض هذه الإجابة. "
@@ -244,10 +246,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 msgid ""
 "<b class=\"d-block\">You have a pending post</b>\n"
-"                        Please wait for a moderator to validate your previous post to be allowed replying questions."
+"                        Please wait for a moderator to validate your "
+"previous post to be allowed replying questions."
 msgstr ""
 "<b class=\"d-block\">لديك منشور معلق</b>\n"
-"                        يرجى انتظار قيام المشرف بتصديق منشورك السابق حتى تتمكن من الرد على الأسئلة. "
+"                        يرجى انتظار قيام المشرف بتصديق منشورك السابق حتى "
+"تتمكن من الرد على الأسئلة. "
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -256,8 +260,8 @@ msgid ""
 "<b>Answers should not add or expand questions</b>. Instead either edit the "
 "question or add a question comment."
 msgstr ""
-"<b>لا ينبغي أن تضيف الإجابات أسئلة جديدة أو تزيد من غموض السؤال</b>.بدلًا من"
-" ذلك، يمكنك تحرير السؤال أو إضافة تعليق."
+"<b>لا ينبغي أن تضيف الإجابات أسئلة جديدة أو تزيد من غموض السؤال</b>.بدلًا من "
+"ذلك، يمكنك تحرير السؤال أو إضافة تعليق."
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -276,8 +280,8 @@ msgid ""
 "<b>Answers should not comment other answers</b>. Instead add a comment on "
 "the other answers."
 msgstr ""
-"<b>لا ينبغي أن تكون الإجابات تعليقات على إجابات أخرى</b>.بدلًا من ذلك، يمكنك"
-" إضافة تعليق على الإجابات الأخرى."
+"<b>لا ينبغي أن تكون الإجابات تعليقات على إجابات أخرى</b>.بدلًا من ذلك، يمكنك "
+"إضافة تعليق على الإجابات الأخرى."
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -285,8 +289,8 @@ msgstr ""
 msgid ""
 "<b>Answers should not start debates</b> This community Q&amp;A is not a "
 "discussion group. Please avoid holding debates in your answers as they tend "
-"to dilute the essence of questions and answers. For brief discussions please"
-" use commenting facility."
+"to dilute the essence of questions and answers. For brief discussions please "
+"use commenting facility."
 msgstr ""
 "<b>يجب ألا تتسبب الأسئلة في بداية مناقشات</b> صفحة الأسئلة والأجوبة "
 "المجتمعية هذه ليست مجموعة مناقشة. يرجى تفادي المناقشات في إجاباتك حيث أنها "
@@ -298,8 +302,8 @@ msgstr ""
 msgid ""
 "<b>Answers shouldn't just point to other Questions</b>. Instead add a "
 "question comment indication \"Possible duplicate of...\". However, it's ok "
-"to include links to other questions or answers providing relevant additional"
-" information."
+"to include links to other questions or answers providing relevant additional "
+"information."
 msgstr ""
 "<b>لا ينبغي أن تكون الإجابات مجرد إشارة لأسئلة أخرى</b>. بدلاً من ذلك، أضف "
 "تعليقاً على السؤال للإشارة إلى \"احتمالية كون السؤال مكرراً...\". لكن يمكنك "
@@ -309,26 +313,26 @@ msgstr ""
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<b>Answers shouldn't just point to other questions</b>.Instead add a comment"
-" indicating <i>\"Possible duplicate of...\"</i>. However, it's fine to "
+"<b>Answers shouldn't just point to other questions</b>.Instead add a comment "
+"indicating <i>\"Possible duplicate of...\"</i>. However, it's fine to "
 "include links to other questions or answers providing relevant additional "
 "information."
 msgstr ""
 "<b>لا ينبغي أن تكون الإجابات مجرد إشارة لأسئلة أخرى</b>. بدلاً من ذلك، أضف "
-"تعليقاً على السؤال للإشارة إلى <i>\"احتمالية كون السؤال مكرراً...\"</i>. لكن"
-" يمكنك إضافة روابط لأسئلة أو إجابات أخرى لتوفير معلومات إضافية ذات صلة. "
+"تعليقاً على السؤال للإشارة إلى <i>\"احتمالية كون السؤال مكرراً...\"</i>. لكن "
+"يمكنك إضافة روابط لأسئلة أو إجابات أخرى لتوفير معلومات إضافية ذات صلة. "
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<b>Answers shouldn't just provide a link a solution</b>. Instead provide the"
-" solution description text in your answer, even if it's just a copy/paste. "
+"<b>Answers shouldn't just provide a link a solution</b>. Instead provide the "
+"solution description text in your answer, even if it's just a copy/paste. "
 "Links are welcome, but should be complementary to answer, referring sources "
 "or additional reading."
 msgstr ""
-"<b>لا ينبغي أن تكون الإجابات مجرد روابط لصفحات ويب تحتوي على حلول</b>. بدلًا"
-" من ذلك، اكتب نص الحل في إجابتك، حتى لو بمجرد النسخ واللصق. يمكنك استخدام "
+"<b>لا ينبغي أن تكون الإجابات مجرد روابط لصفحات ويب تحتوي على حلول</b>. بدلًا "
+"من ذلك، اكتب نص الحل في إجابتك، حتى لو بمجرد النسخ واللصق. يمكنك استخدام "
 "الروابط، لكن ينبغي أن تكون مكملة للإجابة، لذكر المصادر أو معلومات إضافية."
 
 #. module: website_forum
@@ -336,8 +340,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
 "<b>Before you ask - please make sure to search for a similar question.</b> "
-"You can search questions by their title or tags. It’s also OK to answer your"
-" own question."
+"You can search questions by their title or tags. It’s also OK to answer your "
+"own question."
 msgstr ""
 "<b>قبل أن تسأل - تأكد من البحث عن سؤال مماثل.</b> يمكنك البحث عن الأسئلة عن "
 "طريق عناوينها أو علامات تصنيفها. لا بأس في أن تجيب على أسئلتك الخاصة. "
@@ -346,23 +350,28 @@ msgstr ""
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<b>Please avoid asking questions that are too subjective and "
-"argumentative</b> or not relevant to this community."
+"<b>Please avoid asking questions that are too subjective and argumentative</"
+"b> or not relevant to this community."
 msgstr ""
-"<b>يرجى تجنب طرح الأسئلة غير الموضوعية والأسئلة المثيرة للجدل</b> أو الأسئلة"
-" التي لا صلة لها  بهذا المجتمع. "
+"<b>يرجى تجنب طرح الأسئلة غير الموضوعية والأسئلة المثيرة للجدل</b> أو الأسئلة "
+"التي لا صلة لها  بهذا المجتمع. "
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_answer
 msgid ""
-"<b>Please try to give a substantial answer.</b> If you wanted to comment on the question or answer, just\n"
-"            <b>use the commenting tool.</b> Please remember that you can always <b>revise your answers</b>\n"
-"            - no need to answer the same question twice. Also, please <b>don't forget to vote</b>\n"
+"<b>Please try to give a substantial answer.</b> If you wanted to comment on "
+"the question or answer, just\n"
+"            <b>use the commenting tool.</b> Please remember that you can "
+"always <b>revise your answers</b>\n"
+"            - no need to answer the same question twice. Also, please "
+"<b>don't forget to vote</b>\n"
 "            - it really helps to select the best questions and answers!"
 msgstr ""
 "<b>حاول تقديم إجابات موجزة.</b> إذا أردت التعليق على السؤال أو الإجابة،\n"
-"        <b>استخدم أداة التعليق</b>. تذكر أنه بوسعك دائماً <b>مراجعة إجاباتك</b>\n"
-"        - لا حاجة للإجابة على نفس السؤال مرتين. وفضلاً، <b>لا تنسى التصويت</b>\n"
+"        <b>استخدم أداة التعليق</b>. تذكر أنه بوسعك دائماً <b>مراجعة إجاباتك</"
+"b>\n"
+"        - لا حاجة للإجابة على نفس السؤال مرتين. وفضلاً، <b>لا تنسى التصويت</"
+"b>\n"
 "        - فهو يساعد على تحديد أفضل الأسئلة والإجابات! "
 
 #. module: website_forum
@@ -379,10 +388,12 @@ msgstr "<b>لديك منشور معلق بالفعل.</b><br/> "
 #: model_terms:ir.ui.view,arch_db:website_forum.contact
 msgid ""
 "<b>|</b>\n"
-"                    <span class=\"fa fa-trophy o-text-gold ms-2\" role=\"img\" aria-label=\"Gold badge\" title=\"Gold badge\"/>"
+"                    <span class=\"fa fa-trophy o-text-gold ms-2\" "
+"role=\"img\" aria-label=\"Gold badge\" title=\"Gold badge\"/>"
 msgstr ""
 "<b>|</b>\n"
-"                    <span class=\"fa fa-trophy o-text-gold ms-2\" role=\"img\" aria-label=\"Gold badge\" title=\"الشارة الذهبية \"/>"
+"                    <span class=\"fa fa-trophy o-text-gold ms-2\" "
+"role=\"img\" aria-label=\"Gold badge\" title=\"الشارة الذهبية \"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
@@ -433,8 +444,8 @@ msgid ""
 "<i class=\"fa fa-check fa-fw me-1\"/>Be less specific in your wording for a "
 "wider search result."
 msgstr ""
-"<i class=\"fa fa-check fa-fw me-1\"/>اطرح سؤالاً عاماً أكثر لنتائج بحث شاملة"
-" أكثر. "
+"<i class=\"fa fa-check fa-fw me-1\"/>اطرح سؤالاً عاماً أكثر لنتائج بحث شاملة "
+"أكثر. "
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
@@ -443,7 +454,8 @@ msgstr "<i class=\"fa fa-check fa-fw me-1\"/>تحقق من التهجئة ثم �
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
-msgid "<i class=\"fa fa-check fa-fw me-1\"/>Try searching for one or two words."
+msgid ""
+"<i class=\"fa fa-check fa-fw me-1\"/>Try searching for one or two words."
 msgstr "<i class=\"fa fa-check fa-fw me-1\"/>جرّب البحث عن كلمة أو كلمتين. "
 
 #. module: website_forum
@@ -459,10 +471,11 @@ msgstr "<i class=\"fa fa-check\"/> قبول "
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
-msgid "<i class=\"fa fa-check\"/> How to configure TPS and TVQ's canadian taxes?"
+msgid ""
+"<i class=\"fa fa-check\"/> How to configure TPS and TVQ's canadian taxes?"
 msgstr ""
-"<i class=\"fa fa-check\"/> كيف أقوم بتهيئة ضريبة السلع والخدمات (TPS) وضريبة"
-" المبيعات في كيبيك (TVQ) الكندية؟ "
+"<i class=\"fa fa-check\"/> كيف أقوم بتهيئة ضريبة السلع والخدمات (TPS) وضريبة "
+"المبيعات في كيبيك (TVQ) الكندية؟ "
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
@@ -518,10 +531,12 @@ msgstr "<i class=\"fa fa-info-circle fa-fw\"/> حول هذا المنتدى "
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 msgid ""
 "<i class=\"fa fa-pencil\"/>\n"
-"                                Edit<span class=\"d-none d-lg-inline\"> your answer</span>"
+"                                Edit<span class=\"d-none d-lg-inline\"> your "
+"answer</span>"
 msgstr ""
 "<i class=\"fa fa-pencil\"/>\n"
-"                                تحرير<span class=\"d-none d-lg-inline\"> إجابتك</span> "
+"                                تحرير<span class=\"d-none d-lg-inline\"> "
+"إجابتك</span> "
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post
@@ -564,11 +579,11 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
 msgid ""
-"<i class=\"fa fa-thumbs-up text-success\" role=\"img\" aria-label=\"Positive"
-" votes\" title=\"Positive votes\"/>"
+"<i class=\"fa fa-thumbs-up text-success\" role=\"img\" aria-label=\"Positive "
+"votes\" title=\"Positive votes\"/>"
 msgstr ""
-"<i class=\"fa fa-thumbs-up text-success\" role=\"img\" aria-label=\"Positive"
-" votes\" title=\"تصويتات إيجابية \"/>"
+"<i class=\"fa fa-thumbs-up text-success\" role=\"img\" aria-label=\"Positive "
+"votes\" title=\"تصويتات إيجابية \"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
@@ -665,28 +680,31 @@ msgstr ""
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
-msgid "<span class=\"flex-grow-1\">What kind of questions can I ask here?</span>"
+msgid ""
+"<span class=\"flex-grow-1\">What kind of questions can I ask here?</span>"
 msgstr ""
+"<span class=\"flex-grow-1\">ما نوع الأسئلة التي يمكنني طرحها هنا؟</span> "
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid "<span class=\"flex-grow-1\">What should I avoid in my answers?</span>"
-msgstr ""
+msgstr "<span class=\"flex-grow-1\">ما الذي يجب عليَّ تجنبه في إجاباتي؟</span> "
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid "<span class=\"flex-grow-1\">What should I avoid in my questions?</span>"
-msgstr ""
+msgstr "<span class=\"flex-grow-1\">ما الذي يجب عليَّ تجنبه في أسئلتي؟</span>"
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<span class=\"flex-grow-1\">Why can other people edit my "
-"questions/answers?</span>"
+"<span class=\"flex-grow-1\">Why can other people edit my questions/answers?</"
+"span>"
 msgstr ""
+"<span class=\"flex-grow-1\">لِمَ بوسع الآخرين تعديل أسئلتي/إجاباتي؟</span> "
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
@@ -695,15 +713,14 @@ msgid ""
 "<span class=\"form-text small text-muted d-block\">consider adding an "
 "example.</span>"
 msgstr ""
-"<span class=\"form-text small text-muted d-block\">فكر في إضافة مثال.</span>"
-" "
+"<span class=\"form-text small text-muted d-block\">فكر في إضافة مثال.</span> "
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<span class=\"form-text small text-muted d-block\">select text to format "
-"it.</span>"
+"<span class=\"form-text small text-muted d-block\">select text to format it."
+"</span>"
 msgstr ""
 "<span class=\"form-text small text-muted d-block\">قم بتحديد النص الذي ترغب "
 "في تحريره.</span> "
@@ -712,21 +729,21 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<span class=\"form-text small text-muted d-block\">use '/' to insert "
-"images.</span>"
+"<span class=\"form-text small text-muted d-block\">use '/' to insert images."
+"</span>"
 msgstr ""
-"<span class=\"form-text small text-muted d-block\">استخدم '/' لإدراج "
-"الصور.</span> "
+"<span class=\"form-text small text-muted d-block\">استخدم '/' لإدراج الصور.</"
+"span> "
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<span class=\"form-text small text-muted me-1\"><i class=\"fa fa-"
-"lightbulb-o\"/> Tip:</span>"
+"<span class=\"form-text small text-muted me-1\"><i class=\"fa fa-lightbulb-"
+"o\"/> Tip:</span>"
 msgstr ""
-"<span class=\"form-text small text-muted me-1\"><i class=\"fa fa-"
-"lightbulb-o\"/> نصيحة:</span> "
+"<span class=\"form-text small text-muted me-1\"><i class=\"fa fa-lightbulb-"
+"o\"/> نصيحة:</span> "
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_forum_view_form
@@ -1454,8 +1471,7 @@ msgstr "إنشاء علامة تصنيف جديدة "
 msgid ""
 "Create an account today to enjoy exclusive features and engage with our "
 "awesome community!"
-msgstr ""
-"أنشئ حساباً اليوم لتستمتع بالخصائص الحصرية، وتفاعل مع مجتمعنا الرائع! "
+msgstr "أنشئ حساباً اليوم لتستمتع بالخصائص الحصرية، وتفاعل مع مجتمعنا الرائع! "
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_tag_create
@@ -1466,7 +1482,7 @@ msgstr "إنشاء علامات تصنيف جديدة "
 #. odoo-javascript
 #: code:addons/website_forum/static/src/xml/website_forum_tags_wrapper.xml:0
 msgid "Create option \""
-msgstr ""
+msgstr "إنشاء خيار \""
 
 #. module: website_forum
 #: model_terms:gamification.badge,description:website_forum.badge_32
@@ -1892,10 +1908,10 @@ msgid ""
 "explains reputation point requirements for each type of moderation task."
 msgstr ""
 "على سبيل المثال، إذا قمت بطرح سؤال مثير للاهتمام أو منح إجابة مفيدة، سيتم "
-"التصويت لتأييد مشاركتك. وعلى خلاف ذلك، إذا كانت إجابتك مضللة، - سيتم التصويت"
-" ضد مشاركتك. ستحصل على 10 نقاط مقابل كل تصويت لصالحك، وستفقد 10 نقاط مقابل "
-"كل تصويت سلبي. يمكنك جمع 200 نقطة كحد أقصى لكل سؤال أو جواب في اليوم الواحد."
-" يوضح الجدول المعطى في النهاية متطلبات نقاط السمعة لكل نوع من أنواع مهام "
+"التصويت لتأييد مشاركتك. وعلى خلاف ذلك، إذا كانت إجابتك مضللة، - سيتم التصويت "
+"ضد مشاركتك. ستحصل على 10 نقاط مقابل كل تصويت لصالحك، وستفقد 10 نقاط مقابل كل "
+"تصويت سلبي. يمكنك جمع 200 نقطة كحد أقصى لكل سؤال أو جواب في اليوم الواحد. "
+"يوضح الجدول المعطى في النهاية متطلبات نقاط السمعة لكل نوع من أنواع مهام "
 "الإشراف. "
 
 #. module: website_forum
@@ -2093,8 +2109,8 @@ msgstr "المساعدة"
 #: model_terms:ir.ui.view,arch_db:website_forum.user_votes
 msgid "Help moderating the forums by upvoting and downvoting posts. <br/>"
 msgstr ""
-"ساعد في الإشراف على المنتديات عن طريق التصويت مؤيداً أو معارضاً للمنشورات. "
-"<br/> "
+"ساعد في الإشراف على المنتديات عن طريق التصويت مؤيداً أو معارضاً للمنشورات. <br/"
+"> "
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -2158,8 +2174,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
 "If you fit in one of these example or if your motivation for asking the "
-"question is “I would like to participate in a discussion about ______”, then"
-" you should not be asking here but on our mailing lists. However, if your "
+"question is “I would like to participate in a discussion about ______”, then "
+"you should not be asking here but on our mailing lists. However, if your "
 "motivation is “I would like others to explain ______ to me”, then you are "
 "probably OK."
 msgstr ""
@@ -2176,7 +2192,8 @@ msgid ""
 "            them."
 msgstr ""
 "إذا علّمت هذا المنشور باعتباره مسيئاً، سيتم إخفاؤه عن معظم المستخدمين. وحدهم\n"
-"            المستخدمون الذين يملكون نقاط كارما كثيرة رؤية المنشورات المسيئة للإشراف\n"
+"            المستخدمون الذين يملكون نقاط كارما كثيرة رؤية المنشورات المسيئة "
+"للإشراف\n"
 "            عليها. "
 
 #. module: website_forum
@@ -2630,7 +2647,7 @@ msgstr "المنشورات المسيئة "
 #. odoo-javascript
 #: code:addons/website_forum/static/src/js/website_forum.js:0
 msgid "Oh no! Please <a href=\"%s\">sign in</a> to perform this action"
-msgstr ""
+msgstr "أوه لا! يرجى <a href=\"%s\">تسجيل الدخول</a> لتنفيذ هذا الإجراء "
 
 #. module: website_forum
 #. odoo-javascript
@@ -2669,8 +2686,7 @@ msgstr "محتوى بسيط"
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_model_nav
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"Please wait for a moderator to validate your previous post before "
-"continuing."
+"Please wait for a moderator to validate your previous post before continuing."
 msgstr "يرجى انتظار تصديق المشرف لمنشورك السابق قبل الاستمرار. "
 
 #. module: website_forum
@@ -2796,7 +2812,8 @@ msgstr "عام"
 msgid ""
 "Public: Forum is public\n"
 "Signed In: Forum is visible for signed in users\n"
-"Some users: Forum and their content are hidden for non members of selected group"
+"Some users: Forum and their content are hidden for non members of selected "
+"group"
 msgstr ""
 "عام: المنتدى عام \n"
 "المسجل دخولهم: المنتدى مرئي للمستخدمين المسجل دخولهم \n"
@@ -3138,15 +3155,15 @@ msgid ""
 "Share and discuss the best content and new marketing ideas, build your "
 "professional profile and become a better marketer together."
 msgstr ""
-"قم بمشاركة ومناقشة أفضل الأفكار عن المحتوى، وبناء ملفك التعريفي المهني وأصبح"
-" مسوقاً أفضل. "
+"قم بمشاركة ومناقشة أفضل الأفكار عن المحتوى، وبناء ملفك التعريفي المهني وأصبح "
+"مسوقاً أفضل. "
 
 #. module: website_forum
 #. odoo-javascript
 #: code:addons/website_forum/static/src/xml/public_templates.xml:0
 msgid ""
-"Share this content to increase your chances to be featured on the front page"
-" and attract more visitors."
+"Share this content to increase your chances to be featured on the front page "
+"and attract more visitors."
 msgstr ""
 "شارك هذا المحتوى لزيادة فرص تثبيته على الصفحة الأولى وجذب المزيد من الزوار."
 
@@ -3375,9 +3392,9 @@ msgstr "لا توجد علامات تصنيف تطابق البحث المحدد
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 #: model_terms:ir.ui.view,arch_db:website_forum.faq_karma
 msgid ""
-"Therefore questions and answers can be edited like wiki pages by experienced"
-" users of this site in order to improve the overall quality of the knowledge"
-" base content. Such privileges are granted based on user karma level: you "
+"Therefore questions and answers can be edited like wiki pages by experienced "
+"users of this site in order to improve the overall quality of the knowledge "
+"base content. Such privileges are granted based on user karma level: you "
 "will be able to do the same once your karma gets high enough."
 msgstr ""
 "ولهذا، يمكن تحرير الأسئلة والأجوبة كصفحات ويكيبيديا بواسطة المستخدمين ذوي "
@@ -3443,7 +3460,8 @@ msgstr "هذا المنشور بانتظار التصديق "
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 msgid ""
 "This post is currently awaiting moderation and is not published yet.<br/>\n"
-"                    As a moderator you can either <b>Accept</b> or <b>Reject</b> this post."
+"                    As a moderator you can either <b>Accept</b> or "
+"<b>Reject</b> this post."
 msgstr ""
 "هذا المنشور بانتظار الإشراف حالياً ولم يتم نشرة بعد.<br/>\n"
 "                    كمشرف، يمكنك إما <b>قبول</b> أو <b>رفض</b> هذا المنشور. "
@@ -3505,8 +3523,8 @@ msgid ""
 "To prevent your question from being flagged and possibly removed, avoid "
 "asking subjective questions where …"
 msgstr ""
-"لتجنب الإبلاغ عن سؤالك أو احتمالية إزالته، تجنب طرح الأسئلة غير الموضوعية "
-"... "
+"لتجنب الإبلاغ عن سؤالك أو احتمالية إزالته، تجنب طرح الأسئلة غير "
+"الموضوعية ... "
 
 #. module: website_forum
 #: model:forum.post.reason,name:website_forum.reason_9
@@ -3793,8 +3811,8 @@ msgid ""
 msgstr ""
 "عندما يتم التصويت تأييداً لسؤال أو جواب، سيكتسب المستخدم الذي قام بنشره بعض "
 "النقاط، والتي تسمى بـ \"نقاط كارما\". تمثل هذه النقاط مقياساً عاماً لثقة "
-"المجتمع بذلك المستخدم. بعد ذلك، يتم إسناد مهام إشرافية متنوعة إلى المستخدمين"
-" بناءً على تلك النقاط. "
+"المجتمع بذلك المستخدم. بعد ذلك، يتم إسناد مهام إشرافية متنوعة إلى المستخدمين "
+"بناءً على تلك النقاط. "
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
@@ -3872,9 +3890,9 @@ msgstr "يجب أن تكون لديك نقاط كارما كافية لتحري�
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"You should only ask practical, answerable questions based on actual problems"
-" that you face. Chatty, open-ended questions diminish the usefulness of this"
-" site and push other questions off the front page."
+"You should only ask practical, answerable questions based on actual problems "
+"that you face. Chatty, open-ended questions diminish the usefulness of this "
+"site and push other questions off the front page."
 msgstr ""
 "عليك فقط طرح الأسئلة العملية التي يمكن الإجابة عليها بناءً على المشاكل "
 "الفعلية التي تواجهها. تقلل الأسئلة الحوارية والمفتوحة من فائدة هذا الموقع "
@@ -4162,8 +4180,7 @@ msgid ""
 "there is no actual problem to be solved: “I’m curious if other people feel "
 "like I do.”"
 msgstr ""
-"ليس هناك مشكلة فعلية لحلها: \"أتساءل ما إن كان الآخرون يشاركونني نفس "
-"شعوري.\""
+"ليس هناك مشكلة فعلية لحلها: \"أتساءل ما إن كان الآخرون يشاركونني نفس شعوري.\""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.faq_karma

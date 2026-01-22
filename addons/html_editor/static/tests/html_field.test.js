@@ -9,15 +9,7 @@ import { READONLY_MAIN_EMBEDDINGS } from "@html_editor/others/embedded_component
 import { normalizeHTML, parseHTML } from "@html_editor/utils/html";
 import { Wysiwyg } from "@html_editor/wysiwyg";
 import { beforeEach, describe, expect, test } from "@odoo/hoot";
-import {
-    click,
-    press,
-    queryAll,
-    queryAllTexts,
-    queryOne,
-    waitFor,
-    waitUntil,
-} from "@odoo/hoot-dom";
+import { click, press, queryAll, queryAllTexts, queryOne, waitFor } from "@odoo/hoot-dom";
 import { Deferred, animationFrame, mockSendBeacon, tick } from "@odoo/hoot-mock";
 import { onWillDestroy, xml } from "@odoo/owl";
 import {
@@ -36,10 +28,13 @@ import {
 import { assets } from "@web/core/assets";
 import { browser } from "@web/core/browser/browser";
 import { patch } from "@web/core/utils/patch";
+import { delay } from "@web/core/utils/concurrency";
 import { FormController } from "@web/views/form/form_controller";
 import { Counter, EmbeddedWrapperMixin } from "./_helpers/embedded_component";
 import { moveSelectionOutsideEditor, setSelection } from "./_helpers/selection";
 import { insertText, pasteOdooEditorHtml, pasteText, undo } from "./_helpers/user_actions";
+import { unformat } from "./_helpers/format";
+import { expectElementCount } from "./_helpers/ui_expectations";
 
 class Partner extends models.Model {
     txt = fields.Html({ trim: true });
@@ -103,6 +98,11 @@ beforeEach(() => {
         onEditorLoad(editor) {
             htmlEditor = editor;
             return super.onEditorLoad(...arguments);
+        },
+        getConfig() {
+            const config = super.getConfig();
+            config.Plugins = config.Plugins.filter((Plugin) => Plugin.id !== "editorVersion");
+            return config;
         },
     });
 });
@@ -324,6 +324,54 @@ test("links should open on a new tab in readonly", async () => {
     }
 });
 
+test("XML-like self-closing elements are fixed in readonly mode", async () => {
+    Partner._records = [
+        {
+            id: 1,
+            txt: `<a href="#"/>outside<a href="#">inside</a>`,
+        },
+    ];
+    await mountView({
+        type: "form",
+        resId: 1,
+        resIds: [1, 2],
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html" readonly="1"/>
+            </form>`,
+    });
+    expect(".odoo-editor-editable").toHaveCount(0);
+    expect(`[name="txt"] .o_readonly`).toHaveCount(1);
+    expect(`[name="txt"] .o_readonly`).toHaveInnerHTML(
+        `<a href="#" target="_blank" rel="noreferrer"></a>outside<a href="#" target="_blank" rel="noreferrer">inside</a>`
+    );
+});
+
+test("XML-like self-closing elements are fixed in editable mode", async () => {
+    Partner._records = [
+        {
+            id: 1,
+            txt: `<a href="#"/>outside<a href="#">inside</a>`,
+        },
+    ];
+    await mountView({
+        type: "form",
+        resId: 1,
+        resIds: [1, 2],
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html"/>
+            </form>`,
+    });
+    expect(".odoo-editor-editable").toHaveCount(1);
+    expect(`[name="txt"] .o_readonly`).toHaveCount(0);
+    expect(`[name="txt"] .odoo-editor-editable`).toHaveInnerHTML(
+        `<div class="o-paragraph">outside<a href="#">inside</a></div>`
+    );
+});
+
 test("edit and save a html field", async () => {
     onRpc("web_save", ({ args }) => {
         expect(args[1]).toEqual({
@@ -405,13 +453,13 @@ test("edit a html field in new form view dialog and close the dialog with 'escap
             </form>`,
     });
     expect(".modal").toHaveCount(1);
-    expect(".odoo-editor-editable p").toHaveText("");
+    expect(".odoo-editor-editable div.o-paragraph").toHaveText("");
 
     await contains("[name='txt'] .odoo-editor-editable").focus();
-    setSelectionInHtmlField();
+    setSelectionInHtmlField("div.o-paragraph");
     await insertText(htmlEditor, "test");
     await animationFrame();
-    expect(".odoo-editor-editable p").toHaveText("test");
+    expect(".odoo-editor-editable div.o-paragraph").toHaveText("test");
     expect(".o_form_button_save").toBeVisible();
 
     await press("escape");
@@ -468,7 +516,7 @@ test("create new record and load it correctly", async () => {
 
         // Necessary for mobile
         _views = {
-            "kanban,false": `
+            kanban: `
                 <kanban>
                     <templates>
                         <t t-name="card">
@@ -509,6 +557,60 @@ test("create new record and load it correctly", async () => {
     await contains(".ui-menu-item:contains(second), .o_kanban_record:contains(second)").click();
     await animationFrame();
     expect(".odoo-editor-editable").toHaveInnerHTML("<p>2</p>");
+});
+
+test("edit a html field with `o-contenteditable-true` or `o-contenteditable-false` in its content should not reset the editable value when saving", async () => {
+    patchWithCleanup(HtmlField.prototype, {
+        updateValue() {
+            expect.step("update_value");
+            super.updateValue(...arguments);
+        },
+    });
+    patchWithCleanup(Wysiwyg.prototype, {
+        setup() {
+            super.setup();
+            // This should not be called again after the edit (if it is, it
+            // means that the content was reset from the server value, and that
+            // an entirely new editor replaced the previous one).
+            expect.step("setup_wysiwyg");
+        },
+    });
+    const getTxtValue = (innerContent, withContentEditable = false) =>
+        `<div class="o-contenteditable-false"${
+            withContentEditable ? ' contenteditable="false"' : ""
+        }>outside<div class="o-contenteditable-true"${
+            withContentEditable ? ' contenteditable="true"' : ""
+        }><p>${innerContent}</p></div></div>`;
+    Partner._records = [
+        {
+            id: 1,
+            txt: getTxtValue("inside"),
+        },
+    ];
+    onRpc("partner", "web_save", ({ args }) => {
+        expect.step("web_save");
+        // server representation removes `contenteditable` attribute
+        let txt = args[1].txt;
+        txt = txt.replace(` contenteditable="true"`, "");
+        txt = txt.replace(` contenteditable="false"`, "");
+        return [{ id: 1, txt }];
+    });
+    await mountView({
+        type: "form",
+        resId: 1,
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html"/>
+            </form>`,
+    });
+    expect.verifySteps(["setup_wysiwyg"]);
+    expect(`[name="txt"] .odoo-editor-editable`).toHaveInnerHTML(getTxtValue("inside", true));
+    setSelectionInHtmlField();
+    pasteOdooEditorHtml(htmlEditor, "addon");
+    expect(`[name="txt"] .odoo-editor-editable`).toHaveInnerHTML(getTxtValue("addoninside", true));
+    await clickSave();
+    expect.verifySteps(["update_value", "web_save"]);
 });
 
 test.tags("focus required");
@@ -738,7 +840,7 @@ test("A new MediaDialog after switching record in a Form view should have the co
     setSelectionInHtmlField();
     await insertText(htmlEditor, "/Media");
     await animationFrame();
-    expect(".o-we-powerbox").toHaveCount(1);
+    await expectElementCount(".o-we-powerbox", 1);
     expect(".active .o-we-command-name").toHaveText("Media");
 
     await press("Enter");
@@ -754,12 +856,10 @@ test("Embed video by pasting video URL", async () => {
         },
     ];
 
-    onRpc("/html_editor/video_url/data", async () => {
-        return {
-            platform: "youtube",
-            embed_url: "//www.youtube.com/embed/qxb74CMR748?rel=0&autoplay=0",
-        };
-    });
+    onRpc("/html_editor/video_url/data", async () => ({
+        platform: "youtube",
+        embed_url: "//www.youtube.com/embed/qxb74CMR748?rel=0&autoplay=0",
+    }));
 
     await mountView({
         type: "form",
@@ -777,7 +877,7 @@ test("Embed video by pasting video URL", async () => {
     pasteText(htmlEditor, "https://www.youtube.com/watch?v=qxb74CMR748");
     await animationFrame();
     expect(anchorNode.outerHTML).toBe("<p>https://www.youtube.com/watch?v=qxb74CMR748</p>");
-    expect(".o-we-powerbox").toHaveCount(1);
+    await expectElementCount(".o-we-powerbox", 1);
     expect(queryAllTexts(".o-we-command-name")).toEqual(["Embed Youtube Video", "Paste as URL"]);
 
     // Press Enter to select first option in the powerbox ("Embed Youtube Video").
@@ -853,8 +953,7 @@ test("link preview in Link Popover", async () => {
     });
     // Move selection outside to discard
     setSelectionInHtmlField(".test_target");
-    await waitUntil(() => !document.querySelector(".o-we-linkpopover"), { timeout: 500 });
-    expect(".o-we-linkpopover").toHaveCount(0);
+    await expectElementCount(".o-we-linkpopover", 0);
     expect(".test_target a").toHaveText("This website");
 
     // Select link label to open the floating toolbar.
@@ -900,21 +999,21 @@ test("html field with a placeholder", async () => {
     });
 
     expect(`[name="txt"] .odoo-editor-editable`).toHaveInnerHTML(
-        '<p placeholder="test" class="o-we-hint"><br></p>',
+        '<div class="o-paragraph o-we-hint" placeholder="test"><br></div>',
         { type: "html" }
     );
 
-    setSelectionInHtmlField();
+    setSelectionInHtmlField("div.o-paragraph");
     await tick();
     expect(`[name="txt"] .odoo-editor-editable`).toHaveInnerHTML(
-        '<p placeholder="Type &quot;/&quot; for commands" class="o-we-hint"><br></p>',
+        '<div class="o-paragraph o-we-hint" placeholder="Type &quot;/&quot; for commands"><br></div>',
         { type: "html" }
     );
 
     moveSelectionOutsideEditor();
     await tick();
     expect(`[name="txt"] .odoo-editor-editable`).toHaveInnerHTML(
-        '<p placeholder="test" class="o-we-hint"><br></p>',
+        '<div class="o-paragraph o-we-hint" placeholder="test"><br></div>',
         { type: "html" }
     );
 });
@@ -1099,7 +1198,6 @@ test("codeview is not available by default", async () => {
 });
 
 test("codeview is not available when not in debug mode", async () => {
-    patchWithCleanup(odoo, { debug: false });
     await mountView({
         type: "form",
         resId: 1,
@@ -1116,7 +1214,7 @@ test("codeview is not available when not in debug mode", async () => {
 });
 
 test("codeview is available when option is active and in debug mode", async () => {
-    patchWithCleanup(odoo, { debug: true });
+    serverState.debug = "1";
     await mountView({
         type: "form",
         resId: 1,
@@ -1133,7 +1231,7 @@ test("codeview is available when option is active and in debug mode", async () =
 });
 
 test("enable/disable codeview with editor toolbar", async () => {
-    patchWithCleanup(odoo, { debug: true });
+    serverState.debug = "1";
     await mountView({
         type: "form",
         resId: 1,
@@ -1162,7 +1260,7 @@ test("enable/disable codeview with editor toolbar", async () => {
 });
 
 test("edit and enable/disable codeview with editor toolbar", async () => {
-    patchWithCleanup(odoo, { debug: true });
+    serverState.debug = "1";
     onRpc("partner", "web_save", ({ args }) => {
         expect(args[1].txt).toBe("<div></div>");
         expect.step("web_save");
@@ -1220,12 +1318,8 @@ test("edit and save a html field in collaborative should keep the same wysiwyg",
             ' data-last-history-steps="12345"'
         );
     });
-    onRpc("/html_editor/get_ice_servers", () => {
-        return [];
-    });
-    onRpc("/html_editor/bus_broadcast", (params) => {
-        return { id: 10 };
-    });
+    onRpc("/html_editor/get_ice_servers", () => []);
+    onRpc("/html_editor/bus_broadcast", (params) => ({ id: 10 }));
 
     await mountView({
         type: "form",
@@ -1324,7 +1418,7 @@ describe("sandbox", () => {
     });
 
     function htmlDocumentTextTemplate(text, color) {
-        return `
+        return unformat(`
         <html>
             <head>
                 <style>
@@ -1337,7 +1431,7 @@ describe("sandbox", () => {
                 ${text}
             </body>
         </html>
-        `;
+        `);
     }
 
     test("sandboxed preview display and editing", async () => {
@@ -1776,8 +1870,8 @@ describe("save image", () => {
 
         const imageRecord = IrAttachment._records[0];
         // Method to get the html of a cropped image.
-        const getImageContainerHTML = (src, isModified) => {
-            return `
+        const getImageContainerHTML = (src, isModified) =>
+            `
             <p>
                 <img
                     class="img img-fluid o_we_custom_image o_we_image_cropped${
@@ -1798,7 +1892,6 @@ describe("save image", () => {
         `
                 .replace(/(?:\s|(?:\r\n))+/g, " ")
                 .replace(/\s?(<|>)\s?/g, "$1");
-        };
         // Promise to resolve when we want the response of the modify_image RPC.
         const modifyImagePromise = new Deferred();
         let writeCount = 0;
@@ -1812,7 +1905,6 @@ describe("save image", () => {
         // "registered".
         const newImageSrc = "/web/image/1234/cropped_transparent.png";
         onRpc("web_save", () => {
-            expect(true).toBe(false);
             throw new Error("web_save should only be called through sendBeacon");
         });
         onRpc(`/html_editor/modify_image/${imageRecord.id}`, async (request) => {
@@ -1825,7 +1917,6 @@ describe("save image", () => {
                 return newImageSrc;
             } else {
                 // Fail the test if too many modify_image are called.
-                expect(true).toBe(false);
                 throw new Error("The image should only have been modified once during this test");
             }
         });
@@ -2106,6 +2197,68 @@ describe("save image", () => {
         expect(img).not.toHaveClass("o_b64_image_to_save");
         expect.verifySteps(["add_data: partner 1", "generate_access_token: 123"]);
     });
+
+    test("Ensure a traceback is not raised when hiding an HtmlField with unsaved images", async () => {
+        Partner._records = [
+            {
+                id: 1,
+                txt: "<p class='test_target'><br></p>",
+            },
+        ];
+
+        onRpc("/html_editor/attachment/add_data", async (request) => {
+            const { params } = await request.json();
+            const { res_id, res_model } = params;
+            expect.step(`add_data-start: ${res_model} ${res_id}`);
+            // add a delay to emulate saving a big image.
+            await delay(50);
+            expect.step(`add_data-end: ${res_model} ${res_id}`);
+            return {
+                image_src: "/test_image_url.png",
+                access_token: "1234",
+                public: false,
+            };
+        });
+
+        await mountView({
+            type: "form",
+            resId: 1,
+            resModel: "partner",
+            arch: `
+            <form>
+                <notebook>
+                    <page string="html" name="html">
+                        <field name="txt" widget="html"/>
+                    </page>
+                    <page string="empty" name="empty"/>
+                </notebook>
+            </form>`,
+        });
+        setSelectionInHtmlField(".test_target");
+
+        // Paste image.
+        pasteFile(
+            htmlEditor,
+            createBase64ImageFile(
+                "iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII"
+            )
+        );
+        await waitFor("img");
+        const b64img = htmlEditor.editable.querySelector("img");
+        expect(b64img.src.startsWith("data:image/png;base64,")).toBe(true);
+        expect(b64img).toHaveClass("o_b64_image_to_save");
+
+        // Switch tab, this should trigger the image save.
+        await contains(".o_notebook_headers .nav-link:not(.active)").click();
+        await delay(50);
+        // reswitch tab, and check the image was saved properly.
+        await contains(".o_notebook_headers .nav-link:not(.active)").click();
+        const savedImg = htmlEditor.editable.querySelector("img");
+        expect(savedImg.getAttribute("src")).toBe("/test_image_url.png?access_token=1234");
+        expect(savedImg).not.toHaveClass("o_b64_image_to_save");
+
+        expect.verifySteps(["add_data-start: partner 1", "add_data-end: partner 1"]);
+    });
 });
 
 describe("translatable", () => {
@@ -2137,5 +2290,41 @@ describe("translatable", () => {
         // Click away to remove focus
         await contains(".o_form_label").click();
         expect(".o_field_html .btn.o_field_translate").not.toBeVisible();
+    });
+});
+
+describe("codeview enabled", () => {
+    test("Code view command should be available", async () => {
+        await mountView({
+            type: "form",
+            resId: 1,
+            resModel: "partner",
+            arch: `
+                <form>
+                    <field name="txt" widget="html" options="{'codeview': True}"/>
+                </form>`,
+        });
+        const anchorNode = queryOne(`[name='txt'] .odoo-editor-editable p`);
+        setSelection({ anchorNode, anchorOffset: 0 });
+        await insertText(htmlEditor, "/code");
+        await waitFor(".o-we-powerbox");
+        expect(queryAllTexts(".o-we-command-name")).toEqual(["Code"]);
+    });
+
+    test("Video command should be available when codeview enabled", async () => {
+        await mountView({
+            type: "form",
+            resId: 1,
+            resModel: "partner",
+            arch: `
+                <form>
+                    <field name="txt" widget="html" options="{'codeview': True}"/>
+                </form>`,
+        });
+        const anchorNode = queryOne(`[name='txt'] .odoo-editor-editable p`);
+        setSelection({ anchorNode, anchorOffset: 0 });
+        await insertText(htmlEditor, "/video");
+        await waitFor(".o-we-powerbox");
+        expect(queryAllTexts(".o-we-command-name")).toEqual(["Video Link"]);
     });
 });

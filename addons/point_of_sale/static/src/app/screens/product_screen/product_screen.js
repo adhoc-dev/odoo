@@ -17,7 +17,6 @@ import { Orderline } from "@point_of_sale/app/generic_components/orderline/order
 import { OrderWidget } from "@point_of_sale/app/generic_components/order_widget/order_widget";
 import { OrderSummary } from "@point_of_sale/app/screens/product_screen/order_summary/order_summary";
 import { ProductInfoPopup } from "./product_info_popup/product_info_popup";
-import { fuzzyLookup } from "@web/core/utils/search";
 import { ProductCard } from "@point_of_sale/app/generic_components/product_card/product_card";
 import {
     ControlButtons,
@@ -55,9 +54,9 @@ export class ProductScreen extends Component {
             currentOffset: 0,
             quantityByProductTmplId: {},
         });
+        this._searchTriggered = false;
         onMounted(() => {
             this.pos.openOpeningControl();
-            this.pos.addPendingOrder([this.currentOrder.id]);
             // Call `reset` when the `onMounted` callback in `numberBuffer.use` is done.
             // We don't do this in the `mounted` lifecycle method because it is called before
             // the callbacks in `onMounted` hook.
@@ -72,6 +71,7 @@ export class ProductScreen extends Component {
         });
 
         this.barcodeReader = useService("barcode_reader");
+        this.sound = useService("mail.sound_effects");
 
         useBarcodeReader({
             product: this._barcodeProductAction,
@@ -96,7 +96,7 @@ export class ProductScreen extends Component {
                     return acc;
                 }, {});
             },
-            () => [this.currentOrder.totalQuantity]
+            () => [this.currentOrder, this.currentOrder.totalQuantity]
         );
     }
     getAncestorsAndCurrent() {
@@ -124,9 +124,12 @@ export class ProductScreen extends Component {
     }
 
     getCategoriesAndSub() {
-        const rootCategories = this.pos.models["pos.category"].filter(
-            (category) => !category.parent_id
-        );
+        const { limit_categories, iface_available_categ_ids } = this.pos.config;
+        let rootCategories = this.pos.models["pos.category"].getAll();
+        if (limit_categories && iface_available_categ_ids.length > 0) {
+            rootCategories = iface_available_categ_ids;
+        }
+        rootCategories = rootCategories.filter((category) => !category.parent_id);
         const selected = this.pos.selectedCategory ? [this.pos.selectedCategory] : [];
         const allParents = selected.concat(this.pos.selectedCategory?.allParents || []).reverse();
         return this.getCategoriesList(rootCategories, allParents, 0)
@@ -142,7 +145,9 @@ export class ProductScreen extends Component {
                     ? `/web/image?model=pos.category&field=image_128&id=${category.id}`
                     : undefined,
             isSelected: this.getAncestorsAndCurrent().includes(category),
-            isChildren: this.getChildCategories(this.pos.selectedCategory).includes(category),
+            isChildren: this.pos.selectedCategory
+                ? this.pos.selectedCategory.child_ids.includes(category)
+                : !category.parent_id,
         };
     }
 
@@ -193,7 +198,10 @@ export class ProductScreen extends Component {
         return this.env.utils.formatCurrency(this.currentOrder?.get_total_with_tax() ?? 0);
     }
     get items() {
-        return this.currentOrder.lines?.reduce((items, line) => items + line.qty, 0) ?? 0;
+        return this.env.utils.formatProductQty(
+            this.currentOrder.lines?.reduce((items, line) => items + line.qty, 0) ?? 0,
+            false
+        );
     }
     getProductName(product) {
         const productTmplValIds = product.attribute_line_ids
@@ -218,9 +226,9 @@ export class ProductScreen extends Component {
                 "find_product_by_barcode",
                 [odoo.pos_session_id, code.base_code, this.pos.config.id]
             );
-            await this.pos.processProductAttributes();
 
             if (records && records["product.product"].length > 0) {
+                await this.pos.processProductAttributesByProducts(records["product.product"]);
                 product = records["product.product"][0];
                 await this.pos._loadMissingPricelistItems([product]);
             }
@@ -232,6 +240,7 @@ export class ProductScreen extends Component {
         const product = await this._getProductByBarcode(code);
 
         if (!product) {
+            this.sound.play("error");
             this.barcodeReader.showNotFoundNotification(code);
             return;
         }
@@ -275,6 +284,7 @@ export class ProductScreen extends Component {
     async _barcodeGS1Action(parsed_results) {
         const productBarcode = parsed_results.find((element) => element.type === "product");
         const lotBarcode = parsed_results.find((element) => element.type === "lot");
+        const qty = parsed_results.find((element) => element.type === "quantity");
         const product = await this._getProductByBarcode(productBarcode);
 
         if (!product) {
@@ -283,8 +293,21 @@ export class ProductScreen extends Component {
             );
             return;
         }
+        const vals = { product_id: product };
+        if (
+            qty &&
+            product.uom_id &&
+            qty.rule?.associated_uom_id &&
+            product.uom_id.id == qty.rule.associated_uom_id[0]
+        ) {
+            vals.qty = qty.value;
+        }
+        const packaging = this.pos.models["product.packaging"].getAllBy("barcode");
+        if (packaging[productBarcode.code]) {
+            vals.qty = (vals.qty || 1) * packaging[productBarcode.code].qty;
+        }
 
-        await this.pos.addLineToCurrentOrder({ product_id: product }, { code: lotBarcode });
+        await this.pos.addLineToCurrentOrder(vals, { code: lotBarcode });
         this.numberBuffer.reset();
     }
     displayAllControlPopup() {
@@ -335,6 +358,21 @@ export class ProductScreen extends Component {
     }
 
     get products() {
+        const { limit_categories, iface_available_categ_ids } = this.pos.config;
+        if (limit_categories && iface_available_categ_ids.length > 0) {
+            const productIds = new Set([]);
+            for (const categ of iface_available_categ_ids) {
+                const categoryProducts = this.getProductsByCategory(categ);
+                for (const p of categoryProducts) {
+                    productIds.add(p.id);
+                }
+            }
+            return this.pos.models["product.product"].filter(
+                (p) =>
+                    productIds.has(p.id) ||
+                    this.pos.session._pos_special_display_products_ids?.includes(p.id)
+            );
+        }
         return this.pos.models["product.product"].getAll();
     }
 
@@ -342,11 +380,18 @@ export class ProductScreen extends Component {
         let list = [];
 
         if (this.searchWord !== "") {
+            if (!this._searchTriggered) {
+                this.pos.setSelectedCategory(0);
+                this._searchTriggered = true;
+            }
             list = this.addMainProductsToDisplay(this.getProductsBySearchWord(this.searchWord));
-        } else if (this.pos.selectedCategory?.id) {
-            list = this.getProductsByCategory(this.pos.selectedCategory);
         } else {
-            list = this.products;
+            this._searchTriggered = false;
+            if (this.pos.selectedCategory?.id) {
+                list = this.getProductsByCategory(this.pos.selectedCategory);
+            } else {
+                list = this.products;
+            }
         }
 
         if (!list || list.length === 0) {
@@ -359,29 +404,34 @@ export class ProductScreen extends Component {
             ...this.pos.session._pos_special_products_ids,
         ];
 
-        list = list
-            .filter(
-                (product) => !excludedProductIds.includes(product.id) && product.available_in_pos
-            )
-            .slice(0, 100);
+        const filteredList = [];
+        for (const product of list) {
+            if (filteredList.length >= 100) {
+                break;
+            }
+            if (!excludedProductIds.includes(product.id) && product.canBeDisplayed) {
+                filteredList.push(product);
+            }
+        }
 
         return this.searchWord !== ""
-            ? list
-            : list.sort((a, b) => a.display_name.localeCompare(b.display_name));
+            ? filteredList
+            : filteredList.sort((a, b) => a.display_name.localeCompare(b.display_name));
     }
 
     getProductsBySearchWord(searchWord) {
-        const exactMatches = this.products.filter((product) => product.exactMatch(searchWord));
+        const words = unaccent(searchWord.toLowerCase(), false);
+        const products = this.pos.selectedCategory?.id
+            ? this.getProductsByCategory(this.pos.selectedCategory)
+            : this.products;
 
-        if (exactMatches.length > 0 && searchWord.length > 2) {
-            return exactMatches;
-        }
-
-        const fuzzyMatches = fuzzyLookup(unaccent(searchWord, false), this.products, (product) =>
-            unaccent(product.searchString, false)
-        );
-
-        return Array.from(new Set([...exactMatches, ...fuzzyMatches]));
+        const filteredProducts = products.filter((p) => unaccent(p.searchString).includes(words));
+        return filteredProducts.sort((a, b) => {
+            const nameA = unaccent(a.searchString);
+            const nameB = unaccent(b.searchString);
+            // Sort by match index, push non-matching items to the end, and use alphabetical order as a tiebreaker
+            return nameA.indexOf(words) - nameB.indexOf(words) || nameA.localeCompare(nameB);
+        });
     }
 
     addMainProductsToDisplay(products) {
@@ -415,13 +465,8 @@ export class ProductScreen extends Component {
             this.state.currentOffset = 0;
         }
         const result = await this.loadProductFromDB();
-        if (result.length > 0) {
-            this.notification.add(
-                _t('%s product(s) found for "%s".', result.length, searchProductWord),
-                3000
-            );
-        } else {
-            this.notification.add(_t('No more product found for "%s".', searchProductWord));
+        if (result.length === 0) {
+            this.notification.add(_t('No other products found for "%s".', searchProductWord), 3000);
         }
         if (this.state.previousSearchWord === searchProductWord) {
             this.state.currentOffset += result.length;
@@ -431,14 +476,8 @@ export class ProductScreen extends Component {
         }
     }
 
-    async loadProductFromDB() {
-        const { searchProductWord } = this.pos;
-        if (!searchProductWord) {
-            return;
-        }
-
-        this.pos.setSelectedCategory(0);
-        const domain = [
+    loadProductFromDBDomain(searchProductWord) {
+        return [
             "|",
             "|",
             ["name", "ilike", searchProductWord],
@@ -447,6 +486,16 @@ export class ProductScreen extends Component {
             ["available_in_pos", "=", true],
             ["sale_ok", "=", true],
         ];
+    }
+
+    async loadProductFromDB() {
+        const { searchProductWord } = this.pos;
+        if (!searchProductWord) {
+            return;
+        }
+
+        this.pos.setSelectedCategory(0);
+        const domain = this.loadProductFromDBDomain(searchProductWord);
 
         const { limit_categories, iface_available_categ_ids } = this.pos.config;
         if (limit_categories && iface_available_categ_ids.length > 0) {
@@ -464,11 +513,20 @@ export class ProductScreen extends Component {
             }
         );
 
-        await this.pos.processProductAttributes();
+        await this.pos.processProductAttributesByProducts(product);
         return product;
     }
 
     async addProductToOrder(product) {
+        if (this.searchWord && product.isConfigurable()) {
+            const barcode = this.searchWord;
+            const searchedProduct = product.variants.filter(
+                (p) => p.barcode && p.barcode.includes(barcode)
+            );
+            if (searchedProduct.length === 1) {
+                product = searchedProduct[0];
+            }
+        }
         await reactive(this.pos).addLineToCurrentOrder({ product_id: product }, {});
     }
 

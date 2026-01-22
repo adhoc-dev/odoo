@@ -4,6 +4,7 @@
 import logging
 import pytz
 import textwrap
+import urllib.parse
 
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
@@ -209,9 +210,11 @@ class EventEvent(models.Model):
         help='If ticketing is used, contains the earliest starting sale date of tickets.')
     # Date fields
     date_tz = fields.Selection(
-        _tz_get, string='Timezone', required=True,
-        compute='_compute_date_tz', precompute=True, readonly=False, store=True)
-    date_begin = fields.Datetime(string='Start Date', required=True, tracking=True)
+        _tz_get, string='Display Timezone', required=True,
+        compute='_compute_date_tz', precompute=True, readonly=False, store=True,
+        help="Indicates the timezone in which the event dates/times will be displayed on the website.")
+    date_begin = fields.Datetime(string='Start Date', required=True, tracking=True,
+        help="When the event is scheduled to take place (expressed in your local timezone on the form view).")
     date_end = fields.Datetime(string='End Date', required=True, tracking=True)
     date_begin_located = fields.Char(string='Start Date Located', compute='_compute_date_begin_tz')
     date_end_located = fields.Char(string='End Date Located', compute='_compute_date_end_tz')
@@ -621,9 +624,11 @@ class EventEvent(models.Model):
         sold_out_events = []
         for event in self:
             if event.seats_limited and event.seats_max and event.seats_available < minimal_availability:
-                sold_out_events.append(
-                    (_('- "%(event_name)s": Missing %(nb_too_many)i seats.',
-                        event_name=event.name, nb_too_many=-event.seats_available)))
+                sold_out_events.append(_(
+                    '- "%(event_name)s": Missing %(nb_too_many)i seats.',
+                    event_name=event.name,
+                    nb_too_many=minimal_availability - event.seats_available,
+                ))
         if sold_out_events:
             raise ValidationError(_('There are not enough seats available for:')
                                   + '\n%s\n' % '\n'.join(sold_out_events))
@@ -736,6 +741,10 @@ class EventEvent(models.Model):
         self.ensure_one()
         description = html_to_inner_content(self.description)
         return textwrap.shorten(description, 1900)
+
+    def _get_external_description_url_encoded(self):
+        """Get a url-encoded version of the description for mail templates."""
+        return urllib.parse.quote_plus(self._get_external_description())
 
     def _get_ics_file(self):
         """ Returns iCalendar file for the event invitation.

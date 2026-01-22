@@ -19,17 +19,20 @@ const isUnsplittableQWebElement = (node) =>
             "t-raw",
         ].some((attr) => node.getAttribute(attr)));
 
+const PROTECTED_QWEB_SELECTOR = "[t-esc], [t-raw], [t-out], [t-field]";
+
 export class QWebPlugin extends Plugin {
     static id = "qweb";
-    static dependencies = ["overlay", "selection"];
+    static dependencies = ["overlay", "protectedNode", "selection"];
     resources = {
         /** Handlers */
         selectionchange_handlers: this.onSelectionChange.bind(this),
         clean_handlers: this.clearDataAttributes.bind(this),
         clean_for_save_handlers: ({ root }) => {
             this.clearDataAttributes(root);
-            for (const element of root.querySelectorAll("[t-esc], [t-raw], [t-out], [t-field]")) {
+            for (const element of root.querySelectorAll(PROTECTED_QWEB_SELECTOR)) {
                 element.removeAttribute("contenteditable");
+                delete element.dataset.oeProtected;
             }
         },
         normalize_handlers: this.normalize.bind(this),
@@ -64,33 +67,32 @@ export class QWebPlugin extends Plugin {
         return true;
     }
 
+    isValidTargetForDomListener(ev) {
+        if (
+            ev.type === "click" &&
+            ev.target &&
+            closestElement(ev.target, PROTECTED_QWEB_SELECTOR)
+        ) {
+            // Allow clicking on a protected QWEB node to open the custom toolbar.
+            return true;
+        }
+        return super.isValidTargetForDomListener(ev);
+    }
+
     /**
      * @param { SelectionData } selectionData
      */
-    onSelectionChange(selectionData) {
-        const selection = selectionData.documentSelection;
-        const qwebNode =
-            selection &&
-            selection.anchorNode &&
-            closestElement(selection.anchorNode, "[t-field],[t-esc],[t-out]");
-        if (qwebNode && this.editable.contains(qwebNode)) {
-            // select the whole qweb node
-            const [anchorNode, anchorOffset] = leftPos(qwebNode);
-            const [focusNode, focusOffset] = rightPos(qwebNode);
-            this.dependencies.selection.setSelection({
-                anchorNode,
-                anchorOffset,
-                focusNode,
-                focusOffset,
-            });
+    onSelectionChange() {
+        if (this.picker.isOpen) {
+            this.picker.close();
         }
     }
 
     normalize(root) {
         this.normalizeInline(root);
 
-        for (const element of selectElements(root, "[t-esc], [t-raw], [t-out], [t-field]")) {
-            element.setAttribute("contenteditable", "false");
+        for (const element of selectElements(root, PROTECTED_QWEB_SELECTOR)) {
+            this.dependencies.protectedNode.setProtectingNode(element, true);
         }
         this.applyGroupQwebBranching(root);
     }
@@ -145,7 +147,28 @@ export class QWebPlugin extends Plugin {
     }
 
     onClick(ev) {
-        this.picker.close();
+        if (this.picker.isOpen) {
+            this.picker.close();
+        }
+        if (ev.detail > 1) {
+            const selectionData = this.dependencies.selection.getSelectionData();
+            const selection = selectionData.documentSelection;
+            const qwebNode =
+                selection &&
+                selection.anchorNode &&
+                closestElement(selection.anchorNode, "[t-field],[t-esc],[t-out]");
+            if (qwebNode && this.editable.contains(qwebNode)) {
+                // select the whole qweb node
+                const [anchorNode, anchorOffset] = leftPos(qwebNode);
+                const [focusNode, focusOffset] = rightPos(qwebNode);
+                this.dependencies.selection.setSelection({
+                    anchorNode,
+                    anchorOffset,
+                    focusNode,
+                    focusOffset,
+                });
+            }
+        }
         const targetNode = ev.target;
         if (targetNode.closest("[data-oe-t-group]")) {
             this.selectNode(targetNode);
@@ -153,6 +176,10 @@ export class QWebPlugin extends Plugin {
     }
 
     selectNode(node) {
+        const editableSelection = this.dependencies.selection.getSelectionData().editableSelection;
+        if (!editableSelection.isCollapsed) {
+            return;
+        }
         this.selectedNode = node;
         this.picker.open({
             target: node,

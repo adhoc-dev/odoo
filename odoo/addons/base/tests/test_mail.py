@@ -16,6 +16,7 @@ from odoo.tools.mail import (
     email_split, email_split_and_format, email_split_tuples,
     single_email_re,
     formataddr,
+    email_anonymize,
     prepend_html_content,
 )
 
@@ -313,6 +314,28 @@ class TestSanitizer(BaseCase):
             for text in in_lst:
                 self.assertIn(text, new_html)
 
+    def test_quote_signature_container_propagation(self):
+        """Test that applying normalization twice doesn't quote more than wanted."""
+        # quote signature with bare signature in main block
+        bare_signature_body = (
+            "<div>"
+            "<div><p>Hello</p><p>Here is your document</p></div>"
+            "<div>--<br>Mark Demo</div>"
+            "<div class=\"bg-300\"></div>"
+            "</div>"
+        )
+        expected_result = (
+            "<div data-o-mail-quote-container=\"1\">"
+            "<div><p>Hello</p><p>Here is your document</p></div>"
+            "<div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\">Mark Demo</div>"
+            "<div class=\"bg-300\" data-o-mail-quote=\"1\"></div>"
+            "</div>"
+        )
+        sanitized_once = html_sanitize(bare_signature_body)
+        sanitized_twice = html_sanitize(sanitized_once)
+        self.assertEqual(sanitized_once, expected_result)
+        self.assertEqual(sanitized_twice, expected_result)
+
     def test_quote_gmail(self):
         html = html_sanitize(test_mail_examples.GMAIL_1)
         for ext in test_mail_examples.GMAIL_1_IN:
@@ -373,13 +396,15 @@ class TestHtmlTools(BaseCase):
 
     def test_plaintext2html(self):
         cases = [
-            ("First \nSecond \nThird\n \nParagraph\n\r--\nSignature paragraph", 'div',
+            ("First \nSecond \nThird\n \nParagraph\n\r--\nSignature paragraph", 'div', True,
              "<div><p>First <br/>Second <br/>Third</p><p>Paragraph</p><p>--<br/>Signature paragraph</p></div>"),
-            ("First<p>It should be escaped</p>\nSignature", False,
-             "<p>First&lt;p&gt;It should be escaped&lt;/p&gt;<br/>Signature</p>")
+            ("First<p>It should be escaped</p>\nSignature", False, True,
+             "<p>First&lt;p&gt;It should be escaped&lt;/p&gt;<br/>Signature</p>"),
+            ("First \nSecond \nThird", False, False,
+             "First <br/>Second <br/>Third"),
         ]
-        for content, container_tag, expected in cases:
-            html = plaintext2html(content, container_tag)
+        for content, container_tag, with_paragraph, expected in cases:
+            html = plaintext2html(content, container_tag, with_paragraph)
             self.assertEqual(html, expected, 'plaintext2html is broken')
 
     def test_html_html_to_inner_content(self):
@@ -853,6 +878,34 @@ class TestEmailTools(BaseCase):
                 res, exp,
                 'Seems single_email_re is broken with %s (expected %r, received %r)' % (src, exp, res)
             )
+
+    def test_email_anonymize(self):
+        cases = [
+            # examples
+            ('admin@example.com', 'a****@example.com', 'a****@e******.com'),  # short
+            ('portal@example.com', 'p***al@example.com', 'p***al@e******.com'),  # long
+
+            # edge cases
+            ('a@example.com', 'a@example.com', 'a@e******.com'),  # single letter
+            ('joé@example.com', 'j**@example.com', 'j**@e******.com'),  # hidden unicode
+            ('élise@example.com', 'é****@example.com', 'é****@e******.com'),  # visible unicode
+            ('admin@[127.0.0.1]', 'a****@[127.0.0.1]', 'a****@[127.0.0.1]'),  # IPv4
+            ('admin@[IPv6:::1]', 'a****@[IPv6:::1]', 'a****@[IPv6:::1]'),  # IPv6
+
+            # bad cases, to show how the system behave
+            ('', '', ''),  # empty string
+            ('@example.com', '@example.com', '@e******.com'),  # missing local part
+            ('john', 'j***', 'j***'),  # missing domain
+            ('Jo <j@example.com>', 'J****@example.com>', 'J****@e******.com>'),  # non-normalized
+            ('admin@com', 'a****@com', 'a****@com'),  # dotless domain, prohibited by icann
+        ]
+        for source, expected, expected_redacted_domain in cases:
+            with self.subTest(source=source):
+                self.assertEqual(email_anonymize(source), expected)
+                self.assertEqual(
+                    email_anonymize(source, redact_domain=True),
+                    expected_redacted_domain,
+                )
 
 
 class TestMailTools(BaseCase):

@@ -26,7 +26,6 @@ import {
     defineActions,
     defineModels,
     defineParams,
-    defineStyle,
     fields,
     getMockEnv,
     getService,
@@ -274,13 +273,6 @@ beforeEach(() => {
     });
     patchWithCleanup(CalendarYearRenderer.prototype, patchFullCalendarOptions());
     patchWithCleanup(CalendarCommonRenderer.prototype, patchFullCalendarOptions());
-
-    // Disable action swiper transitions
-    defineStyle(/* css */ `
-        .o_actionswiper_target_container {
-            transition: none !important;
-        }
-    `);
 });
 
 onRpc("has_group", () => true);
@@ -616,7 +608,6 @@ test(`check the avatar of the attendee in the calendar filter panel`, async () =
     CalendarPartner._views = {
         list: `<list><field name="name"/></list>`,
         kanban: `<kanban><templates><t name="card"><field name="name"/></t></templates></kanban>`,
-        search: `<search/>`,
     };
     CalendarPartner._records.push(
         { id: 5, name: "foo partner 5" },
@@ -661,7 +652,6 @@ test.tags("desktop");
 test(`Select multiple attendees in the calendar filter panel autocomplete on desktop`, async () => {
     CalendarPartner._views = {
         list: `<list><field name="name"/></list>`,
-        search: `<search/>`,
     };
     CalendarPartner._records.push(
         { id: 5, name: "foo partner 5" },
@@ -733,7 +723,6 @@ test.tags("desktop");
 test(`add a filter with the search more dialog on desktop`, async () => {
     CalendarPartner._views = {
         list: `<list><field name="name"/></list>`,
-        search: `<search/>`,
     };
     CalendarPartner._records.push(
         { id: 5, name: "foo partner 5" },
@@ -910,7 +899,6 @@ test(`add a filter with the search more dialog on mobile`, async () => {
     CalendarPartner._views = {
         list: `<list><field name="name"/></list>`,
         kanban: `<kanban><templates><t t-name="card"><field class="o_data_row" name="name"/></t></templates></kanban>`,
-        search: `<search/>`,
     };
     CalendarPartner._records.push(
         { id: 5, name: "foo partner 5" },
@@ -1433,9 +1421,8 @@ test(`create event with timezone in week mode European locale`, async () => {
             </calendar>
         `,
     });
-
     await selectTimeRange("2016-12-13 08:00:00", "2016-12-13 10:00:00");
-    expect(`.fc-event-main .fc-event-time`).toHaveText("8:00 - 10:00");
+    expect(`.fc-event-main .fc-event-time`).toHaveText("08:00 - 10:00");
 
     await contains(`.o-calendar-quick-create--input`).edit("new event", { confirm: false });
     await contains(`.o-calendar-quick-create--create-btn`).click();
@@ -1446,6 +1433,23 @@ test(`create event with timezone in week mode European locale`, async () => {
     await contains(`.o_cw_popover_delete`).click();
     await contains(`.modal button.btn-primary`).click();
     expect(`.fc-event-main`).toHaveCount(0);
+});
+
+test(`create multi day event in week mode`, async () => {
+    mockTimeZone(2);
+
+    patchWithCleanup(CalendarCommonRenderer.prototype, {
+        get options() {
+            return { ...super.options, selectAllow: () => true };
+        },
+    });
+    await mountView({
+        resModel: "event",
+        type: "calendar",
+        arch: `<calendar date_start="start" date_stop="stop" mode="week"/>`,
+    });
+    await selectTimeRange("2016-12-13 11:00:00", "2016-12-14 16:00:00");
+    expect(`.fc-event-main .fc-event-time`).toHaveText("11:00 - 16:00");
 });
 
 test(`default week start (US)`, async () => {
@@ -2626,7 +2630,6 @@ test(`Add filters and specific color`, async () => {
     });
     expect.verifySteps([
         "get_views (event)",
-        "has_access (event)",
         "search_read (filter.partner) [partner_id]",
         "search_read (event) [display_name, start, stop, is_all_day, color, attendee_ids, type_id]",
     ]);
@@ -2943,6 +2946,69 @@ test(`Colors: dynamic filters with another color source`, async () => {
     ).toHaveClass("o_cw_filter_color_4");
 });
 
+test(`Colors: dynamic filters with no color source`, async () => {
+    Event._records = [
+        {
+            id: 8,
+            user_id: 4,
+            name: "event 8",
+            start: "2016-12-11 09:00:00",
+            stop: "2016-12-11 10:00:00",
+            is_all_day: false,
+            attendee_ids: [1, 2, 3],
+            type_id: 3,
+        },
+        {
+            id: 9,
+            user_id: 4,
+            name: "event 9",
+            start: "2016-12-11 19:00:00",
+            stop: "2016-12-11 20:00:00",
+            is_all_day: false,
+            attendee_ids: [1, 2, 3],
+            type_id: 1,
+        },
+        {
+            id: 10,
+            user_id: 4,
+            name: "event 10",
+            start: "2016-12-11 12:00:00",
+            stop: "2016-12-11 13:00:00",
+            is_all_day: false,
+            attendee_ids: [1, 2, 3],
+            type_id: 2,
+        },
+    ];
+
+    onRpc("event.type", "search_read", () => {
+        expect.step("fetching event.type filter colors");
+    });
+    await mountView({
+        resModel: "event",
+        type: "calendar",
+        arch: `
+            <calendar date_start="start" date_stop="stop">
+                <field name="attendee_ids" write_model="filter.partner" write_field="partner_id"/>
+                <field name="type_id" filters="1" color="color"/>
+            </calendar>
+        `,
+    });
+    expect.verifySteps([]);
+
+    await toggleSectionFilter("attendee_ids");
+    expect.verifySteps(["fetching event.type filter colors"]);
+    await displayCalendarPanel();
+    expect(
+        `.o_calendar_filter[data-name="type_id"] .o_calendar_filter_item[data-value="1"]`
+    ).toHaveClass("o_cw_filter_color_1");
+    expect(
+        `.o_calendar_filter[data-name="type_id"] .o_calendar_filter_item[data-value="2"]`
+    ).toHaveClass("o_cw_filter_color_2");
+    expect(
+        `.o_calendar_filter[data-name="type_id"] .o_calendar_filter_item[data-value="3"]`
+    ).toHaveClass("o_cw_filter_color_4");
+});
+
 test(`create event with filters`, async () => {
     Event._fields.user_id = fields.Many2one({ relation: "calendar.users", default: 5 });
     Event._fields.partner_id = fields.Many2one({ relation: "calendar.partner", default: 3 });
@@ -3108,7 +3174,6 @@ test(`Update event with filters on mobile`, async () => {
     CalendarUsers._records.push({ id: 5, name: "user 5", partner_id: 3 });
     CalendarUsers._views = {
         kanban: `<kanban><templates><t t-name="card"><field name="name"/></t></templates></kanban>`,
-        search: `<search/>`,
     };
     Event._views = {
         form: `
@@ -3427,8 +3492,9 @@ test(`timezone does not affect drag and drop on desktop`, async () => {
     expect(`.o_event[data-event-id="1"]`).toHaveText("08:00\nevent 1");
     expect(`.o_field_widget[name="start"]`).toHaveText("12/09/2016 08:00:00");
 });
-// TODO JUM
-test.tags("mobile").skip(`timezone does not affect drag and drop on mobile`, async () => {
+
+test.tags("mobile");
+test(`timezone does not affect drag and drop on mobile`, async () => {
     mockTimeZone(-40);
     patchWithCleanup(CalendarRenderer.prototype, {
         get actionSwiperProps() {
@@ -3453,25 +3519,26 @@ test.tags("mobile").skip(`timezone does not affect drag and drop on mobile`, asy
             </calendar>
         `,
     });
+
     await clickEvent(1);
-    expect(`.o_event[data-event-id="1"]`).toHaveText("08:00event 1");
+    expect(`.o_event[data-event-id="1"]`).toHaveText("event 1");
     expect(`.o_field_widget[name="start"]`).toHaveText("12/09/2016 08:00:00");
     await closeCwPopOver();
 
     await clickEvent(6);
-    expect(`.o_event[data-event-id="6"]`).toHaveText("16:00event 6");
+    expect(`.o_event[data-event-id="6"]`).toHaveText("event 6");
     expect(`.o_field_widget[name="start"]`).toHaveText("12/16/2016 16:00:00");
     await closeCwPopOver();
 
     await moveEventToDate(6, "2016-11-27");
     await clickEvent(6);
-    expect(`.o_event[data-event-id="6"]`).toHaveText("16:00event 6");
+    expect(`.o_event[data-event-id="6"]`).toHaveText("event 6");
     expect(`.o_field_widget[name="start"]`).toHaveText("11/27/2016 16:00:00");
     await closeCwPopOver();
     expect.verifySteps(["write"]);
 
     await clickEvent(1);
-    expect(`.o_event[data-event-id="1"]`).toHaveText("08:00event 1");
+    expect(`.o_event[data-event-id="1"]`).toHaveText("event 1");
     expect(`.o_field_widget[name="start"]`).toHaveText("12/09/2016 08:00:00");
 });
 
@@ -3719,6 +3786,8 @@ test(`form_view_id attribute works with popup (for creating events)`, async () =
 });
 
 test(`calendar fallback to form view id in action if necessary`, async () => {
+    Event._views["form,43"] = /* xml */ `<form />`;
+
     mockService("action", {
         doAction(request) {
             expect.step("doAction");
@@ -3785,7 +3854,6 @@ test(`fullcalendar initializes with right locale`, async () => {
 test(`initial_date given in the context`, async () => {
     Event._views = {
         "calendar,1": `<calendar date_start="start" date_stop="stop" mode="day"/>`,
-        search: `<search/>`,
     };
 
     defineActions([
@@ -3793,7 +3861,6 @@ test(`initial_date given in the context`, async () => {
             id: 1,
             name: "context initial date",
             res_model: "event",
-            type: "ir.actions.act_window",
             views: [[1, "calendar"]],
             context: { initial_date: "2016-01-30 08:00:00" }, // 30th of january
         },
@@ -4717,7 +4784,13 @@ test(`calendar render properties in popover`, async () => {
 
     await clickEvent(1);
     const popover = getMockEnv().isSmall ? ".modal" : ".o_popover";
-    expect(queryAllTexts(`${popover} .o_field_properties .o_card_property_field`)).toEqual([
+    // Labels:
+    expect(queryAllTexts(`${popover} .o_calendar_property_field span.fw-bold`)).toEqual([
+        "My Char",
+        "My Selection",
+    ]);
+    // Values:
+    expect(queryAllTexts(`${popover} .o_calendar_property_field div.text-truncate`)).toEqual([
         "hello",
         "B",
     ]);
@@ -4913,7 +4986,6 @@ test("sample data are not removed when switching back from calendar view", async
                 <field name="stop"/>
             </list>
         `,
-        search: `<search/>`,
     };
 
     defineActions([
@@ -4921,7 +4993,6 @@ test("sample data are not removed when switching back from calendar view", async
             id: 1,
             name: "Partners",
             res_model: "event",
-            type: "ir.actions.act_window",
             views: [
                 [false, "list"],
                 [false, "calendar"],
@@ -4950,7 +5021,7 @@ test(`Scale: scale default is fetched from localStorage`, async () => {
             }
         },
         setItem(key, value) {
-            if (key === "scaleOf-viewId-123456789") {
+            if (key === "scaleOf-viewId-19") {
                 expect.step(`scale_${value}`);
             }
         },
@@ -4960,6 +5031,7 @@ test(`Scale: scale default is fetched from localStorage`, async () => {
         resModel: "event",
         type: "calendar",
         arch: `<calendar date_start="start" mode="month"/>`,
+        viewId: 19,
     });
     expect.verifySteps(["scale_week"]);
     expect(`.scale_button_selection`).toHaveText("Week");
@@ -4975,7 +5047,6 @@ test(`Retaining the 'all' filter value on re-rendering`, async () => {
             id: 1,
             name: "Partners",
             res_model: "event",
-            type: "ir.actions.act_window",
             views: [
                 [false, "calendar"],
                 [false, "list"],
@@ -4997,7 +5068,6 @@ test(`Retaining the 'all' filter value on re-rendering`, async () => {
                 <field name="stop"/>
             </list>
         `,
-        search: `<search/>`,
     };
 
     await mountWithCleanup(WebClient);
@@ -5035,7 +5105,6 @@ test("save selected date during view switching", async () => {
             id: 1,
             name: "Partners",
             res_model: "event",
-            type: "ir.actions.act_window",
             views: [
                 [false, "list"],
                 [false, "calendar"],
@@ -5051,7 +5120,6 @@ test("save selected date during view switching", async () => {
                 <field name="stop"/>
             </list>
         `,
-        search: `<search />`,
     };
 
     await mountWithCleanup(WebClient);
@@ -5077,7 +5145,7 @@ test(`check if active fields are fetched in addition to field names in record da
 
     onRpc("event", "search_read", ({ kwargs }) => {
         expect.step("event.search_read");
-        expect(kwargs.fields.includes("delay")).toBe(true);
+        expect(kwargs.fields).toInclude("delay");
     });
 
     await mountView({
@@ -5124,6 +5192,25 @@ test("update time while drag and drop on month mode", async () => {
 
     expect(".o_field_widget[name='start'] input").toHaveValue("12/26/2016 08:00:00");
     expect(".o_field_widget[name='stop'] input").toHaveValue("12/29/2016 10:00:00");
+});
+
+test("html field on calendar shouldn't have a tooltip", async () => {
+    Event._fields.description = fields.Html();
+    Event._records[0].description = "<p>test html field</p>";
+    await mountView({
+        type: "calendar",
+        resModel: "event",
+        arch: `
+            <calendar date_start="start">
+                <field name="description"/>
+            </calendar>
+        `,
+    });
+
+    await clickEvent(MockServer.env["event"][0].id);
+    const descriptionField = queryFirst('.o_cw_popover_field .o_field_widget[name="description"]');
+    const parentLi = descriptionField.closest("li");
+    expect(parentLi).toHaveAttribute("data-tooltip", "");
 });
 
 test.tags("mobile");

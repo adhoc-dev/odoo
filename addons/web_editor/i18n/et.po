@@ -1,7 +1,7 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* web_editor
-# 
+# * web_editor
+#
 # Translators:
 # Siim Raasuke, 2024
 # Tairi Tiimann, 2024
@@ -14,21 +14,23 @@
 # Triine Aavik <triine@avalah.ee>, 2024
 # Rivo Zängov <eraser@eraser.ee>, 2024
 # Piia Paurson <piia@avalah.ee>, 2024
-# Anna, 2024
-# 
+# Anna, 2025
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-25 07:49+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Anna, 2024\n"
-"Language-Team: Estonian (https://app.transifex.com/odoo/teams/41243/et/)\n"
+"POT-Creation-Date: 2025-12-29 18:38+0000\n"
+"PO-Revision-Date: 2025-11-21 06:44+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Estonian <https://translate.odoo.com/projects/odoo-18/"
+"web_editor/et/>\n"
+"Language: et\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: et\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 5.12.2\n"
 
 #. module: web_editor
 #. odoo-javascript
@@ -1414,12 +1416,6 @@ msgstr "Kõrgus"
 #. module: web_editor
 #. odoo-javascript
 #: code:addons/web_editor/static/src/components/media_dialog/video_selector.js:0
-msgid "Hide Dailymotion logo"
-msgstr "Peida Dailymotion logo"
-
-#. module: web_editor
-#. odoo-javascript
-#: code:addons/web_editor/static/src/components/media_dialog/video_selector.js:0
 msgid "Hide fullscreen button"
 msgstr "Peida täisekraani nupp"
 
@@ -1428,12 +1424,6 @@ msgstr "Peida täisekraani nupp"
 #: code:addons/web_editor/static/src/components/media_dialog/video_selector.js:0
 msgid "Hide player controls"
 msgstr "Peida mängija juhtnupud"
-
-#. module: web_editor
-#. odoo-javascript
-#: code:addons/web_editor/static/src/components/media_dialog/video_selector.js:0
-msgid "Hide sharing button"
-msgstr "Peida jagamisnupp"
 
 #. module: web_editor
 #: model:ir.model.fields,field_description:web_editor.field_html_field_history_mixin__html_field_history
@@ -1692,6 +1682,12 @@ msgstr "Sisesta oma allkiri"
 
 #. module: web_editor
 #. odoo-javascript
+#: code:addons/web_editor/static/src/components/media_dialog/video_selector.xml:0
+msgid "Instagram"
+msgstr "Instagram"
+
+#. module: web_editor
+#. odoo-javascript
 #: code:addons/web_editor/static/src/xml/snippets.xml:0
 msgid "Install"
 msgstr "Paigalda"
@@ -1707,7 +1703,7 @@ msgstr "Installi %s"
 #. odoo-python
 #: code:addons/web_editor/models/ir_ui_view.py:0
 msgid "Invalid field value for %(field_name)s: %(value)s"
-msgstr ""
+msgstr "Välja väärtus on vigane %(field_name)s: %(value)s"
 
 #. module: web_editor
 #. odoo-javascript
@@ -2087,12 +2083,6 @@ msgstr "Mustrid"
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_background_options
 msgid "Position"
 msgstr "Amet"
-
-#. module: web_editor
-#. odoo-javascript
-#: code:addons/web_editor/static/src/xml/snippets.xml:0
-msgid "Preset #{number}"
-msgstr "Eelseadistus #{number}"
 
 #. module: web_editor
 #. odoo-javascript
@@ -2774,7 +2764,7 @@ msgstr "URL on õige."
 #. odoo-python
 #: code:addons/web_editor/models/ir_qweb_fields.py:0
 msgid "The datetime %(value)s does not match the format %(format)s"
-msgstr ""
+msgstr "Kuupäev ja kellaaeg %(value)s ei vasta formaadile %(format)s"
 
 #. module: web_editor
 #. odoo-python
@@ -2807,7 +2797,8 @@ msgstr "Sisestatud URL ei ole kehtiv."
 #: code:addons/web_editor/static/src/js/wysiwyg/conflict_dialog.xml:0
 msgid ""
 "The version from the database will be used.\n"
-"                            If you need to keep your changes, copy the content below and edit the new document."
+"                            If you need to keep your changes, copy the "
+"content below and edit the new document."
 msgstr ""
 
 #. module: web_editor
@@ -3145,6 +3136,18 @@ msgstr "Veebiredaktori konverteri test"
 
 #. module: web_editor
 #. odoo-javascript
+#: code:addons/web_editor/static/src/js/editor/snippets.options.js:0
+msgid "WebGL is not enabled on your browser."
+msgstr ""
+
+#. module: web_editor
+#. odoo-javascript
+#: code:addons/web_editor/static/src/js/editor/snippets.options.js:0
+msgid "WebP compression not supported on this browser"
+msgstr ""
+
+#. module: web_editor
+#. odoo-javascript
 #: code:addons/web_editor/static/src/js/editor/odoo-editor/src/OdooEditor.js:0
 #: code:addons/web_editor/static/src/js/wysiwyg/wysiwyg.js:0
 msgid "Widgets"
@@ -3199,7 +3202,6 @@ msgstr "Jah"
 #. module: web_editor
 #. odoo-javascript
 #: code:addons/web_editor/static/src/components/media_dialog/image_selector.js:0
-#, python-format
 msgid ""
 "You can not replace a field by this image. If you want to use this image, "
 "first save it on your computer and then upload it here."
@@ -3208,7 +3210,6 @@ msgstr ""
 #. module: web_editor
 #. odoo-javascript
 #: code:addons/web_editor/static/src/components/media_dialog/image_selector.xml:0
-#, python-format
 msgid "You can not use this image in a field"
 msgstr ""
 
@@ -3231,12 +3232,6 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/snippets.xml:0
 msgid "You might not be able to customize it anymore."
 msgstr ""
-
-#. module: web_editor
-#. odoo-javascript
-#: code:addons/web_editor/static/src/components/media_dialog/video_selector.xml:0
-msgid "Youku"
-msgstr "Youku"
 
 #. module: web_editor
 #. odoo-javascript
@@ -3276,12 +3271,6 @@ msgstr "lisa"
 
 #. module: web_editor
 #. odoo-javascript
-#: code:addons/web_editor/static/src/components/media_dialog/file_selector.xml:0
-msgid "all"
-msgstr "kõik"
-
-#. module: web_editor
-#. odoo-javascript
 #: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.xml:0
 msgid "alternatives..."
 msgstr "alternatiivid..."
@@ -3303,39 +3292,9 @@ msgid "darken"
 msgstr "tumestama"
 
 #. module: web_editor
-#. odoo-javascript
-#: code:addons/web_editor/static/src/components/media_dialog/file_selector.xml:0
-msgid "database"
-msgstr "andmebaas"
-
-#. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
 msgid "exclusion"
 msgstr "välistamine"
-
-#. module: web_editor
-#. odoo-javascript
-#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
-msgid "fill"
-msgstr "täida"
-
-#. module: web_editor
-#. odoo-javascript
-#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
-msgid "fill,rounded-circle"
-msgstr ""
-
-#. module: web_editor
-#. odoo-javascript
-#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
-msgid "flat"
-msgstr "lame"
-
-#. module: web_editor
-#. odoo-javascript
-#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
-msgid "lg"
-msgstr "lg"
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
@@ -3343,27 +3302,9 @@ msgid "lighten"
 msgstr "helendama"
 
 #. module: web_editor
-#. odoo-javascript
-#: code:addons/web_editor/static/src/components/media_dialog/file_selector.xml:0
-msgid "media-library"
-msgstr "meediakogu"
-
-#. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
 msgid "multiply"
 msgstr "korrutama"
-
-#. module: web_editor
-#. odoo-javascript
-#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
-msgid "outline"
-msgstr "kontuur"
-
-#. module: web_editor
-#. odoo-javascript
-#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
-msgid "outline,rounded-circle"
-msgstr ""
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
@@ -3377,21 +3318,9 @@ msgid "px"
 msgstr "px"
 
 #. module: web_editor
-#. odoo-javascript
-#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
-msgid "rounded-circle"
-msgstr ""
-
-#. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
 msgid "screen"
 msgstr "ekraan"
-
-#. module: web_editor
-#. odoo-javascript
-#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
-msgid "sm"
-msgstr "sm"
 
 #. module: web_editor
 #. odoo-javascript
@@ -3414,3 +3343,12 @@ msgstr "websocket sõnumite käsitlus"
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
 msgid "www.example.com"
 msgstr "www.example.com"
+
+#~ msgid "Hide Dailymotion logo"
+#~ msgstr "Peida Dailymotion logo"
+
+#~ msgid "Hide sharing button"
+#~ msgstr "Peida jagamisnupp"
+
+#~ msgid "Youku"
+#~ msgstr "Youku"

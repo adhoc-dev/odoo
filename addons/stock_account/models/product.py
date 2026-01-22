@@ -91,11 +91,14 @@ will update the cost of every lot/serial number in stock."),
         res = super(ProductTemplate, self).write(vals)
 
         for product_template, (products, description, products_orig_quantity_svl) in impacted_templates.items():
-            # Replenish the stock with the new cost method.
-            in_svl_vals_list = products._svl_replenish_stock(description, products_orig_quantity_svl)
-            in_stock_valuation_layers = SVL.create(in_svl_vals_list)
-            if product_template.valuation == 'real_time':
-                move_vals_list += Product._svl_replenish_stock_am(in_stock_valuation_layers)
+            products = products.exists()
+            if products:
+                # Replenish the stock with the new cost method.
+                in_svl_vals_list = products._svl_replenish_stock(description, products_orig_quantity_svl)
+                in_stock_valuation_layers = SVL.create(in_svl_vals_list)
+                if product_template.valuation == 'real_time':
+                    move_vals_list += Product._svl_replenish_stock_am(in_stock_valuation_layers)
+                products._update_lots_standard_price()
 
         # Check access right
         if move_vals_list and not self.env['stock.valuation.layer'].has_access('read'):
@@ -149,6 +152,9 @@ class ProductProduct(models.Model):
     def write(self, vals):
         if 'standard_price' in vals and not self.env.context.get('disable_auto_svl'):
             self.filtered(lambda p: p.cost_method != 'fifo')._change_standard_price(vals['standard_price'])
+        if 'lot_valuated' in vals:
+            # lot_valuated must be updated from the ProductTemplate
+            self.product_tmpl_id.write({'lot_valuated': vals.pop('lot_valuated')})
         return super().write(vals)
 
     @api.onchange('standard_price')
@@ -162,34 +168,55 @@ will update the cost of every lot/serial number in stock."),
                 }
             }
 
-    @api.depends('stock_valuation_layer_ids')
-    @api.depends_context('to_date', 'company')
-    def _compute_value_svl(self):
-        """Compute totals of multiple svl related values"""
-        company_id = self.env.company
-        self.company_currency_id = company_id.currency_id
+    def _get_valuation_layer_group_domain(self):
+        company_id = self.env.company.id
         domain = [
-            *self._check_company_domain(company_id),
+            *self.env['stock.valuation.layer']._check_company_domain(company_id),
             ('product_id', 'in', self.ids),
         ]
         if self.env.context.get('to_date'):
             to_date = fields.Datetime.to_datetime(self.env.context['to_date'])
             domain.append(('create_date', '<=', to_date))
-        groups = self.env['stock.valuation.layer']._read_group(
+        return domain
+
+    def _get_valuation_layer_group_fields_aggregate(self):
+        return ['value:sum', 'quantity:sum']
+
+    def _get_valuation_layer_groups(self):
+        domain = self._get_valuation_layer_group_domain()
+        group_fields_aggregate = self._get_valuation_layer_group_fields_aggregate()
+        return self.env['stock.valuation.layer']._read_group(
             domain,
             groupby=['product_id'],
-            aggregates=['value:sum', 'quantity:sum'],
+            aggregates=group_fields_aggregate,
         )
+
+    def _prepare_valuation_layer_field_values(self, aggregates):
+        self.ensure_one()
+        value_sum, quantity_sum = aggregates
+        value_svl = self.env.company.currency_id.round(value_sum)
+        avg_cost = 0
+        if not float_is_zero(quantity_sum, precision_rounding=self.uom_id.rounding):
+            avg_cost = value_svl / quantity_sum
+        return {
+            "value_svl": value_svl,
+            "quantity_svl": quantity_sum,
+            "avg_cost": avg_cost,
+            "total_value": avg_cost * self.sudo(False).qty_available if avg_cost else 0
+        }
+
+    @api.depends('stock_valuation_layer_ids')
+    @api.depends_context('to_date', 'company')
+    def _compute_value_svl(self):
+        """Compute totals of multiple svl related values"""
+        self.company_currency_id = self.env.company.currency_id
+        valuation_layer_groups = self._get_valuation_layer_groups()
         # Browse all products and compute products' quantities_dict in batch.
-        group_mapping = {product: aggregates for product, *aggregates in groups}
+        group_mapping = {product: aggregates for product, *aggregates in valuation_layer_groups}
         for product in self:
-            value_sum, quantity_sum = group_mapping.get(product._origin, (0, 0))
-            value_svl = company_id.currency_id.round(value_sum)
-            avg_cost = value_svl / quantity_sum if quantity_sum else 0
-            product.value_svl = value_svl
-            product.quantity_svl = quantity_sum
-            product.avg_cost = avg_cost
-            product.total_value = avg_cost * product.sudo(False).qty_available
+            aggregates = group_mapping.get(product._origin, (0, 0))
+            vals = product._prepare_valuation_layer_field_values(aggregates)
+            product.update(vals)
 
     # -------------------------------------------------------------------------
     # Actions
@@ -247,7 +274,7 @@ will update the cost of every lot/serial number in stock."),
         # Quantity is negative for out valuation layers.
         quantity = -1 * quantity
         cost = self.standard_price
-        if lot and lot.standard_price:
+        if lot and lot.sudo().stock_valuation_layer_ids:
             cost = lot.standard_price
         vals = {
             'product_id': self.id,
@@ -263,16 +290,17 @@ will update the cost of every lot/serial number in stock."),
             rounding_error = currency.round(
                 (cost * self.quantity_svl - self.value_svl) * abs(quantity / self.quantity_svl)
             )
-            if rounding_error:
-                # If it is bigger than the (smallest number of the currency * quantity) / 2,
-                # then it isn't a rounding error but a stock valuation error, we shouldn't fix it under the hood ...
-                if abs(rounding_error) <= max((abs(quantity) * currency.rounding) / 2, currency.rounding):
-                    vals['value'] += rounding_error
-                    vals['rounding_adjustment'] = '\nRounding Adjustment: %s%s %s' % (
-                        '+' if rounding_error > 0 else '',
-                        float_repr(rounding_error, precision_digits=currency.decimal_places),
-                        currency.symbol
-                    )
+
+            # If it is bigger than the (smallest number of the currency * quantity) / 2,
+            # then it isn't a rounding error but a stock valuation error, we shouldn't fix it under the hood ...
+            threshold = currency.round(max((abs(quantity) * currency.rounding) / 2, currency.rounding))
+            if rounding_error and abs(rounding_error) <= threshold:
+                vals['value'] += rounding_error
+                vals['rounding_adjustment'] = '\nRounding Adjustment: %s%s %s' % (
+                    '+' if rounding_error > 0 else '',
+                    float_repr(rounding_error, precision_digits=currency.decimal_places),
+                    currency.symbol
+                )
         if self.product_tmpl_id.cost_method == 'fifo':
             vals.update(fifo_vals)
         return vals
@@ -401,6 +429,24 @@ will update the cost of every lot/serial number in stock."),
             }
         return vals
 
+    def _prepare_fifo_vacuum_valuation_layer_values(self, svl_to_vacuum, corrected_value):
+        self.ensure_one()
+        move = svl_to_vacuum.stock_move_id
+        return {
+            'product_id': self.id,
+            'value': corrected_value,
+            'unit_cost': 0,
+            'quantity': 0,
+            'remaining_qty': 0,
+            'stock_move_id': move.id,
+            'company_id': move.company_id.id,
+            'description': self.env._(
+                'Revaluation of %(name)s (negative inventory)', name=(move.picking_id.name or move.name)
+            ),
+            'stock_valuation_layer_id': svl_to_vacuum.id,
+            'lot_id': svl_to_vacuum.lot_id.id,
+        }
+
     def _run_fifo_vacuum(self, company=None):
         """Compensate layer valued at an estimated price with the price of future receipts
         if any. If the estimated price is equals to the real price, no layer is created but
@@ -439,7 +485,7 @@ will update the cost of every lot/serial number in stock."),
         new_svl_vals_manual = []
         real_time_svls_to_vacuum = ValuationLayer
 
-        for product in self:
+        for product in self.with_company(company.id):
             all_candidates = all_candidates_by_product[product.id]
             current_real_time_svls = ValuationLayer
             for svl_to_vacuum in svls_to_vacuum_by_product[product.id]:
@@ -492,20 +538,8 @@ will update the cost of every lot/serial number in stock."),
 
                 corrected_value = svl_to_vacuum.currency_id.round(corrected_value)
 
-                move = svl_to_vacuum.stock_move_id
                 new_svl_vals = new_svl_vals_real_time if product.valuation == 'real_time' else new_svl_vals_manual
-                new_svl_vals.append({
-                    'product_id': product.id,
-                    'value': corrected_value,
-                    'unit_cost': 0,
-                    'quantity': 0,
-                    'remaining_qty': 0,
-                    'stock_move_id': move.id,
-                    'company_id': move.company_id.id,
-                    'description': 'Revaluation of %s (negative inventory)' % (move.picking_id.name or move.name),
-                    'stock_valuation_layer_id': svl_to_vacuum.id,
-                    'lot_id': svl_to_vacuum.lot_id.id,
-                })
+                new_svl_vals.append(product._prepare_fifo_vacuum_valuation_layer_values(svl_to_vacuum, corrected_value))
                 lot_to_update.append(svl_to_vacuum.lot_id)
                 if product.valuation == 'real_time':
                     current_real_time_svls |= svl_to_vacuum
@@ -632,6 +666,14 @@ will update the cost of every lot/serial number in stock."),
         to_reconcile_account_move_lines += new_account_move.line_ids.filtered(lambda l: not l.reconciled and l.account_id == accounts['stock_output'] and l.account_id.reconcile)
         return to_reconcile_account_move_lines.reconcile()
 
+    def _update_lots_standard_price(self):
+        grouped_lots = self.env['stock.lot']._read_group(
+            [('product_id', 'in', self.ids), ('product_id.lot_valuated', '=', True)],
+            ['product_id'], ['id:recordset']
+        )
+        for product, lots in grouped_lots:
+            lots.with_context(disable_auto_svl=True).write({"standard_price": product.standard_price})
+
     @api.model
     def _svl_empty_stock(self, description, product_category=None, product_template=None):
         impacted_product_ids = []
@@ -654,6 +696,14 @@ will update the cost of every lot/serial number in stock."),
 
         # empty out the stock for the impacted products
         empty_stock_svl_list = []
+        lots_by_product = defaultdict(lambda: self.env['stock.lot'])
+        res = self.env["stock.valuation.layer"]._read_group(
+            [("product_id", "in", impacted_products.ids), ("remaining_qty", "!=", 0)],
+            ["product_id"],
+            ["lot_id:recordset"],
+        )
+        for group in res:
+            lots_by_product[group[0].id] |= group[1]
         for product in impacted_products:
             # FIXME sle: why not use products_orig_quantity_svl here?
             if float_is_zero(product.quantity_svl, precision_rounding=product.uom_id.rounding):
@@ -661,13 +711,13 @@ will update the cost of every lot/serial number in stock."),
                 continue
             if product.lot_valuated:
                 if float_compare(product.quantity_svl, 0, precision_rounding=product.uom_id.rounding) > 0:
-                    for lot in product.stock_valuation_layer_ids.filtered(lambda l: l.remaining_qty).lot_id:
+                    for lot in lots_by_product[product.id]:
                         svsl_vals = product._prepare_out_svl_vals(lot.quantity_svl, self.env.company, lot=lot)
                         svsl_vals['description'] = description + svsl_vals.pop('rounding_adjustment', '')
                         svsl_vals['company_id'] = self.env.company.id
                         empty_stock_svl_list.append(svsl_vals)
                 else:
-                    for lot in product.stock_valuation_layer_ids.filtered(lambda l: l.remaining_qty).lot_id:
+                    for lot in lots_by_product[product.id]:
                         svsl_vals = product._prepare_in_svl_vals(abs(lot.quantity_svl), lot.value_svl / lot.quantity_svl, lot=lot)
                         svsl_vals['description'] = description + svsl_vals.pop('rounding_adjustment', '')
                         svsl_vals['company_id'] = self.env.company.id
@@ -686,12 +736,12 @@ will update the cost of every lot/serial number in stock."),
         refill_stock_svl_list = []
         lot_by_product = defaultdict(lambda: defaultdict(float))
         neg_lots = self.env['stock.quant']._read_group([
-            ('product_id', 'in', self.product_variant_ids.ids),
+            ('product_id', 'in', self.product_tmpl_id.product_variant_ids.ids),
             ('lot_id', '!=', False),
             ], ['product_id', 'location_id', 'lot_id'], ['quantity:sum'],
             having=[('quantity:sum', '<', 0)])
         lots = self.env['stock.quant']._read_group([
-            ('product_id', 'in', self.product_variant_ids.ids),
+            ('product_id', 'in', self.product_tmpl_id.product_variant_ids.ids),
             ('lot_id', '!=', False),
             ], ['product_id', 'location_id', 'lot_id'], ['quantity:sum'],
             having=[('quantity:sum', '>', 0)])
@@ -700,8 +750,26 @@ will update the cost of every lot/serial number in stock."),
                 lot_by_product[product][lot] += qty
         for product, location, lot, qty in neg_lots:
             if location._should_be_valued():
-                raise UserError(_("Lot %(lot)s has a negative quantity in stock. Correct this \
-                        quantity before enabling lot valuation", lot=lot))
+                raise UserError(_(
+                    "Lot %(lot)s has a negative quantity in stock.\n"
+                    "Correct this quantity before enabling/disabling lot valuation.",
+                    lot=lot.display_name
+                ))
+        lot_valuated_products = self.filtered("lot_valuated")
+        if lot_valuated_products:
+            no_lot_quants = self.env['stock.quant']._read_group([
+                ('product_id', 'in', lot_valuated_products.ids),
+                ('lot_id', '=', False),
+                ('quantity', '!=', 0),
+            ], ['product_id', 'location_id'])
+            for product, location in no_lot_quants:
+                if location._should_be_valued():
+                    raise UserError(_(
+                        "Product %(product)s has quantity in valued location %(location)s without any lot.\n"
+                        "Please assign lots to all your quantities before enabling lot valuation.",
+                        product=product.display_name,
+                        location=location.display_name
+                    ))
 
         for product in self:
             quantity_svl = products_orig_quantity_svl[product.id]
@@ -847,16 +915,19 @@ will update the cost of every lot/serial number in stock."),
         if not qty_to_invoice:
             return 0
 
-        candidates = stock_moves\
-            .sudo()\
-            .filtered(lambda m: is_returned == bool(m.origin_returned_move_id and sum(m.stock_valuation_layer_ids.mapped('quantity')) >= 0))\
-            .mapped('stock_valuation_layer_ids')
+        candidates = self.env['stock.valuation.layer'].sudo()
+        for move in stock_moves.sudo():
+            move_candidates = move._get_layer_candidates()
+            if is_returned != bool(move.origin_returned_move_id and sum(move_candidates.mapped('quantity')) >= 0):
+                continue
+            candidates |= move_candidates
 
         if self.env.context.get('candidates_prefetch_ids'):
             candidates = candidates.with_prefetch(self.env.context.get('candidates_prefetch_ids'))
 
         if len(candidates) > 1:
-            candidates = candidates.sorted(lambda svl: (svl.create_date, svl.id))
+            # sort candidates by create_date > existing records by id > new records without origin
+            candidates = candidates.sorted(lambda svl: (svl.create_date, not bool(svl.ids), svl.ids[0] if svl.ids else 0))
 
         value_invoiced = self.env.context.get('value_invoiced', 0)
         if 'value_invoiced' in self.env.context:
@@ -1046,6 +1117,7 @@ class ProductCategory(models.Model):
             in_stock_valuation_layers = SVL.sudo().create(in_svl_vals_list)
             if product_category.property_valuation == 'real_time':
                 move_vals_list += Product._svl_replenish_stock_am(in_stock_valuation_layers)
+            products._update_lots_standard_price()
 
         # Check access right
         if move_vals_list and not self.env['stock.valuation.layer'].has_access('read'):

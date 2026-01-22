@@ -82,21 +82,23 @@ export const datetimePickerService = {
                  * Wrapper method on the "onApply" callback to only call it when the
                  * value has changed, and set other internal variables accordingly.
                  */
-                const apply = () => {
-                    if (areDatesEqual(lastInitialProps?.value, deepCopy(pickerProps.value))) {
+                const apply = async () => {
+                    const valueCopy = deepCopy(pickerProps.value);
+                    if (areDatesEqual(lastInitialProps.value, valueCopy)) {
                         return;
                     }
 
                     inputsChanged = ensureArray(pickerProps.value).map(() => false);
 
-                    hookParams.onApply?.(pickerProps.value);
+                    await hookParams.onApply?.(pickerProps.value);
+                    lastInitialProps.value = valueCopy;
                 };
 
                 const computeBasePickerProps = () => {
                     const nextInitialProps = markValuesRaw(hookParams.pickerProps);
                     const propsCopy = deepCopy(nextInitialProps);
 
-                    if (lastInitialProps && arePropsEqual(lastInitialProps, propsCopy)) {
+                    if (arePropsEqual(lastInitialProps, propsCopy)) {
                         return;
                     }
 
@@ -353,7 +355,7 @@ export const datetimePickerService = {
                     const previousValue = pickerProps.value;
                     pickerProps.value = value;
 
-                    if (areDatesEqual(previousValue, pickerProps.value)) {
+                    if (source === "input" && areDatesEqual(previousValue, pickerProps.value)) {
                         return;
                     }
 
@@ -449,8 +451,8 @@ export const datetimePickerService = {
                 let allowOnClose = true;
                 /** @type {boolean[]} */
                 let inputsChanged = [];
-                /** @type {DateTimePickerProps | null} */
-                let lastInitialProps = null;
+                /** @type {Partial<DateTimePickerProps>} */
+                let lastInitialProps = {};
                 let lastIsRange = pickerProps.range;
                 /** @type {(() => void) | null} */
                 let restoreTargetMargin = null;

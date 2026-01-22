@@ -1001,7 +1001,10 @@ class TestExpression(SavepointCaseWithUserDemo, TransactionExpressionCase):
         with self.assertRaisesRegex(ValueError, r"^Invalid leaf \('create_date', '>>', 'foo'\)$"):
             Country.search([('create_date', '>>', 'foo')])
 
-        with self.assertRaisesRegex(ValueError, r"^stray % in format '%'$"):
+        with self.assertRaisesRegex(
+                ValueError,
+                r"^(time data 'foo' does not match|stray % in) format '%'$",
+        ):
             Country.search([]).filtered_domain([('create_date', '>>', 'foo')])
 
         with self.assertRaisesRegex(psycopg2.DataError, r"invalid input syntax"):
@@ -1813,6 +1816,20 @@ class TestMany2one(TransactionCase):
             ORDER BY "res_partner"."complete_name"asc,"res_partner"."id"desc
         ''']):
             self.Partner.search([('company_id', 'not like', "blablabla")])
+
+    def test_name_search_undefined(self):
+        """Check that if the _rec_name is not defined, we do not restrict anything.
+
+        This way the model continues to work in the web interface inside many2one fields.
+        """
+        PartnerClass = self.env.registry['res.partner']
+        with (
+            patch.object(PartnerClass, '_rec_name', ''),
+            patch.object(PartnerClass, '_rec_names_search', []),
+            mute_logger('odoo.models'),
+        ):
+            self.assertGreater(len(self.Partner.name_search()), 0)
+            self.assertGreater(len(self.Partner.name_search('test')), 0)
 
 
 class TestOne2many(TransactionCase):

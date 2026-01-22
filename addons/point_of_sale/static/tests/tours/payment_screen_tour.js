@@ -37,11 +37,15 @@ registry.category("web_tour.tours").add("PaymentScreenTour", {
             PaymentScreen.fillPaymentLineAmountMobile("Cash", "10"),
             PaymentScreen.remainingIs("42.8"),
             PaymentScreen.validateButtonIsHighlighted(false),
-            PaymentScreen.clickNumpad("+50"),
-            PaymentScreen.fillPaymentLineAmountMobile("Cash", "60"),
-            PaymentScreen.changeIs("7.2"),
+            PaymentScreen.clickNumpad("5"),
+            PaymentScreen.fillPaymentLineAmountMobile("Cash", "105"),
+            PaymentScreen.changeIs("52.2"),
             PaymentScreen.validateButtonIsHighlighted(true),
-            PaymentScreen.clickPaymentlineDelButton("Cash", "60.0"),
+            PaymentScreen.clickNumpad("+50"),
+            PaymentScreen.fillPaymentLineAmountMobile("Cash", "155"),
+            PaymentScreen.changeIs("102.2"),
+            PaymentScreen.validateButtonIsHighlighted(true),
+            PaymentScreen.clickPaymentlineDelButton("Cash", "155.0"),
 
             // Multiple paymentlines
             PaymentScreen.clickPaymentMethod("Cash"),
@@ -85,17 +89,18 @@ registry.category("web_tour.tours").add("PaymentScreenRoundingUp", {
             ProductScreen.addOrderline("Product Test", "1"),
             ProductScreen.clickPayButton(),
 
-            PaymentScreen.totalIs("2.00"),
-            PaymentScreen.clickPaymentMethod("Cash", true, { remaining: "0.0" }),
+            PaymentScreen.totalIs("1.96"),
+            PaymentScreen.clickPaymentMethod("Cash", true, { remaining: "0.0", amount: "2.00" }),
 
             Chrome.clickMenuOption("Orders"),
             Chrome.createFloatingOrder(),
 
-            ProductScreen.addOrderline("Product Test", "-1"),
+            // To get negative of existing quantity just send -
+            ProductScreen.addOrderline("Product Test", "-"),
             ProductScreen.clickPayButton(),
 
-            PaymentScreen.totalIs("-2.00"),
-            PaymentScreen.clickPaymentMethod("Cash", true, { remaining: "0.0" }),
+            PaymentScreen.totalIs("-1.96"),
+            PaymentScreen.clickPaymentMethod("Cash", true, { remaining: "0.0", amount: "-2.00" }),
         ].flat(),
 });
 
@@ -107,17 +112,18 @@ registry.category("web_tour.tours").add("PaymentScreenRoundingDown", {
             ProductScreen.addOrderline("Product Test", "1"),
             ProductScreen.clickPayButton(),
 
-            PaymentScreen.totalIs("1.95"),
-            PaymentScreen.clickPaymentMethod("Cash", true, { remaining: "0.0" }),
+            PaymentScreen.totalIs("1.98"),
+            PaymentScreen.clickPaymentMethod("Cash", true, { remaining: "0.0", amount: "1.95" }),
 
             Chrome.clickMenuOption("Orders"),
             Chrome.createFloatingOrder(),
 
-            ProductScreen.addOrderline("Product Test", "-1"),
+            // To get negative of existing quantity just send -
+            ProductScreen.addOrderline("Product Test", "-"),
             ProductScreen.clickPayButton(),
 
-            PaymentScreen.totalIs("-1.95"),
-            PaymentScreen.clickPaymentMethod("Cash", true, { remaining: "0.0" }),
+            PaymentScreen.totalIs("-1.98"),
+            PaymentScreen.clickPaymentMethod("Cash", true, { remaining: "0.0", amount: "-1.95" }),
         ].flat(),
 });
 
@@ -126,11 +132,11 @@ registry.category("web_tour.tours").add("PaymentScreenRoundingHalfUp", {
         [
             Chrome.startPoS(),
             Dialog.confirm("Open Register"),
-            ProductScreen.addOrderline("Product Test 1.2", "1"),
+            ProductScreen.addOrderline("Product Test 1.20", "1"),
             ProductScreen.clickPayButton(),
 
-            PaymentScreen.totalIs("1.00"),
-            PaymentScreen.clickPaymentMethod("Cash", true, { remaining: "0.0" }),
+            PaymentScreen.totalIs("1.20"),
+            PaymentScreen.clickPaymentMethod("Cash", true, { remaining: "0.0", amount: "1.00" }),
 
             Chrome.clickMenuOption("Orders"),
             Chrome.createFloatingOrder(),
@@ -138,8 +144,8 @@ registry.category("web_tour.tours").add("PaymentScreenRoundingHalfUp", {
             ProductScreen.addOrderline("Product Test 1.25", "1"),
             ProductScreen.clickPayButton(),
 
-            PaymentScreen.totalIs("1.5"),
-            PaymentScreen.clickPaymentMethod("Cash", true, { remaining: "0.0" }),
+            PaymentScreen.totalIs("1.25"),
+            PaymentScreen.clickPaymentMethod("Cash", true, { remaining: "0.0", amount: "1.50" }),
 
             Chrome.clickMenuOption("Orders"),
             Chrome.createFloatingOrder(),
@@ -147,16 +153,16 @@ registry.category("web_tour.tours").add("PaymentScreenRoundingHalfUp", {
             ProductScreen.addOrderline("Product Test 1.4", "1"),
             ProductScreen.clickPayButton(),
 
-            PaymentScreen.totalIs("1.5"),
-            PaymentScreen.clickPaymentMethod("Cash", true, { remaining: "0.0" }),
+            PaymentScreen.totalIs("1.4"),
+            PaymentScreen.clickPaymentMethod("Cash", true, { remaining: "0.0", amount: "1.50" }),
 
             Chrome.clickMenuOption("Orders"),
             Chrome.createFloatingOrder(),
 
-            ProductScreen.addOrderline("Product Test 1.2", "1"),
+            ProductScreen.addOrderline("Product Test 1.20", "1"),
             ProductScreen.clickPayButton(),
 
-            PaymentScreen.totalIs("1.00"),
+            PaymentScreen.totalIs("1.20"),
             PaymentScreen.clickPaymentMethod("Cash"),
             PaymentScreen.clickNumpad("2"),
             PaymentScreen.fillPaymentLineAmountMobile("Cash", "2"),
@@ -172,12 +178,11 @@ registry.category("web_tour.tours").add("PaymentScreenTotalDueWithOverPayment", 
             ProductScreen.addOrderline("Product Test", "1"),
             ProductScreen.clickPayButton(),
 
-            PaymentScreen.totalIs("1.95"),
+            PaymentScreen.totalIs("1.98"),
             PaymentScreen.clickPaymentMethod("Cash"),
             PaymentScreen.enterPaymentLineAmount("Cash", "5", true, {
                 change: "3.05",
             }),
-            PaymentScreen.totalIs("1.95"),
         ].flat(),
 });
 
@@ -206,11 +211,27 @@ registry.category("web_tour.tours").add("CashRoundingPayment", {
             ProductScreen.addOrderline("Magnetic Board", "1"),
             ProductScreen.clickPayButton(),
 
-            // Check the popup error is shown when selecting another payment method
-            PaymentScreen.totalIs("1.90"),
+            // Pay it with exact amount but with incorrect rounding so there should be an error popup.
+            PaymentScreen.totalIs("1.98"),
             PaymentScreen.clickPaymentMethod("Cash"),
-            PaymentScreen.enterPaymentLineAmount("Cash", "1.94"),
+            PaymentScreen.enterPaymentLineAmount("Cash", "1.98"),
             PaymentScreen.clickValidate(),
             Dialog.is(),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("PaymentScreenInvoiceOrder", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.addOrderline("Product Test", "1"),
+            ProductScreen.clickPartnerButton(),
+            ProductScreen.clickCustomer("Partner Test 1"),
+            ProductScreen.clickPayButton(),
+
+            PaymentScreen.clickPaymentMethod("Bank"),
+            PaymentScreen.clickInvoiceButton(),
+            PaymentScreen.clickValidate(),
         ].flat(),
 });

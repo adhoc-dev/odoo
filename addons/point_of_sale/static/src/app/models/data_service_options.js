@@ -5,34 +5,43 @@ export class DataServiceOptions {
         return {
             "pos.order": {
                 key: "uuid",
-                condition: (record) => record.finalized && typeof record.id === "number",
+                condition: (record) => record.canBeRemovedFromIndexedDB,
             },
             "pos.order.line": {
                 key: "uuid",
-                condition: (record) =>
-                    record.order_id?.finalized && typeof record.order_id.id === "number",
+                condition: (record) => record.order_id?.canBeRemovedFromIndexedDB,
             },
             "pos.payment": {
                 key: "uuid",
-                condition: (record) =>
-                    record.pos_order_id?.finalized && typeof record.pos_order_id.id === "number",
+                condition: (record) => record.pos_order_id?.canBeRemovedFromIndexedDB,
             },
             "pos.pack.operation.lot": {
                 key: "id",
                 condition: (record) =>
-                    record.pos_order_line_id?.order_id?.finalized &&
-                    typeof record.pos_order_line_id.order_id.id === "number",
+                    record.pos_order_line_id?.order_id?.canBeRemovedFromIndexedDB,
             },
             "product.attribute.custom.value": {
                 key: "id",
-                condition: (record) => {
-                    return record.models["pos.order.line"].find((l) => {
+                condition: (record) =>
+                    record.models["pos.order.line"].find((l) => {
                         const customAttrIds = l.custom_attribute_value_ids.map((v) => v.id);
                         return customAttrIds.includes(record.id);
-                    });
+                    }),
+                getRecordsBasedOnLines: (orderlines) => {
+                    return orderlines.flatMap((line) => line.custom_attribute_value_ids);
                 },
             },
         };
+    }
+
+    get dynamicModels() {
+        return [
+            "pos.order",
+            "pos.order.line",
+            "pos.payment",
+            "pos.pack.operation.lot",
+            "product.attribute.custom.value",
+        ];
     }
 
     get databaseIndex() {
@@ -43,6 +52,7 @@ export class DataServiceOptions {
             "product.product": ["barcode", "pos_categ_ids", "write_date"],
             "account.fiscal.position": ["tax_ids"],
             "product.packaging": ["barcode"],
+            "pos.payment": ["uuid"],
             "loyalty.program": ["trigger_product_ids"],
             "calendar.event": ["appointment_resource_ids"],
             "res.partner": ["barcode"],
@@ -80,5 +90,11 @@ export class DataServiceOptions {
             "product.attribute.custom.value",
             "pos.pack.operation.lot",
         ];
+    }
+
+    get prohibitedAutoLoadedFields() {
+        return {
+            "res.partner": ["property_product_pricelist"],
+        };
     }
 }

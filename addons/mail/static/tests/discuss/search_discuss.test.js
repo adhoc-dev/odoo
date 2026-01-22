@@ -141,6 +141,8 @@ test("Search a message in history", async () => {
     await insertText(".o_searchview_input", "message");
     triggerHotkey("Enter");
     await contains(".o-mail-SearchMessagesPanel .o-mail-Message");
+    await click(".o-mail-SearchMessagesPanel .o-mail-MessageCard-jump");
+    await contains(".o-mail-Thread .o-mail-Message.o-highlighted");
 });
 
 test("Should close the search panel when search button is clicked again", async () => {
@@ -253,16 +255,11 @@ test("Search a message containing round brackets", async () => {
 test("Search a message containing single quotes", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "General" });
-    pyEnv["mail.message"].create({
-        author_id: serverState.partnerId,
-        body: "I can't do it",
-        attachment_ids: [],
-        message_type: "comment",
-        model: "discuss.channel",
-        res_id: channelId,
-    });
     await start();
     await openDiscuss(channelId);
+    await insertText(".o-mail-Composer-input", "I can't do it");
+    await click(".o-mail-Composer-send:enabled");
+    await contains(".o-mail-Message");
     await click("button[title='Search Messages']");
     await insertText(".o_searchview_input", "can't");
     triggerHotkey("Enter");

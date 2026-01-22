@@ -1,6 +1,7 @@
 import { expect, test } from "@odoo/hoot";
 import {
     click,
+    edit,
     hover,
     keyDown,
     pointerDown,
@@ -10,7 +11,7 @@ import {
     queryAllValues,
     queryFirst,
 } from "@odoo/hoot-dom";
-import { Deferred, animationFrame, mockDate, mockTimeZone } from "@odoo/hoot-mock";
+import { Deferred, animationFrame, mockDate, mockTimeZone, mockTouch } from "@odoo/hoot-mock";
 import { Component, onWillUpdateProps, xml } from "@odoo/owl";
 import {
     SELECTORS,
@@ -39,9 +40,9 @@ import {
     validateSearch,
 } from "@web/../tests/web_test_helpers";
 import { browser } from "@web/core/browser/browser";
-import { pick } from "@web/core/utils/objects";
 import { SearchBar } from "@web/search/search_bar/search_bar";
 import { useSearchBarToggler } from "@web/search/search_bar/search_bar_toggler";
+
 class Partner extends models.Model {
     name = fields.Char();
     bar = fields.Many2one({ relation: "partner" });
@@ -129,12 +130,12 @@ defineActions([
         name: "Partners Action",
         res_model: "partner",
         search_view_id: [false, "search"],
-        type: "ir.actions.act_window",
         views: [[false, "list"]],
     },
 ]);
 
-test.tags`desktop`("basic rendering", async () => {
+test.tags("desktop");
+test("basic rendering", async () => {
     await mountWithSearch(SearchBar, {
         resModel: "partner",
         searchMenuTypes: [],
@@ -143,7 +144,8 @@ test.tags`desktop`("basic rendering", async () => {
     expect(queryFirst`.o_searchview input`).toBeFocused();
 });
 
-test.tags`desktop`("navigation with facets", async () => {
+test.tags("desktop");
+test("navigation with facets", async () => {
     await mountWithSearch(SearchBar, {
         resModel: "partner",
         searchMenuTypes: ["groupBy"],
@@ -163,7 +165,8 @@ test.tags`desktop`("navigation with facets", async () => {
     expect(queryFirst`.o_searchview input`).toBeFocused();
 });
 
-test.tags`desktop`("navigation with facets (2)", async () => {
+test.tags("desktop");
+test("navigation with facets (2)", async () => {
     await mountWithSearch(SearchBar, {
         resModel: "partner",
         searchMenuTypes: ["groupBy"],
@@ -222,6 +225,18 @@ test("search input is focused when being toggled", async () => {
     await contains(`button .fa-search`).click();
     expect(".o_searchview input").toHaveCount(1);
     expect(queryFirst`.o_searchview input`).toBeFocused();
+});
+
+test.tags("desktop");
+test("search input is not focused on larger touch devices", async () => {
+    mockTouch(true);
+    await mountWithSearch(SearchBar, {
+        resModel: "partner",
+        searchMenuTypes: [],
+        searchViewId: false,
+    });
+    expect(".o_searchview input").toHaveCount(1);
+    expect(".o_searchview input").not.toBeFocused();
 });
 
 test("search date and datetime fields. Support of timezones", async () => {
@@ -370,7 +385,8 @@ test("select an autocomplete field with `context` key", async () => {
     expect(searchBar.env.searchModel.context.bar).toEqual([1, 2]);
 });
 
-test.tags`desktop`("no search text triggers a reload", async () => {
+test.tags("desktop");
+test("no search text triggers a reload", async () => {
     let updateCount = 0;
     class TestComponent extends Component {
         static template = xml`<SearchBar/>`;
@@ -426,7 +442,7 @@ test("update suggested filters in autocomplete menu with Japanese IME", async ()
     // assisted composition session as possible. Some of these events are
     // not handled but are triggered to ensure they do not interfere.
     const TEST = "TEST";
-    const テスト = "テスト";
+    const TEST_JP = "テスト";
 
     await mountWithSearch(SearchBar, {
         resModel: "partner",
@@ -434,19 +450,24 @@ test("update suggested filters in autocomplete menu with Japanese IME", async ()
         searchViewId: false,
     });
 
+    await click(".o_searchview input");
+
     // Simulate typing "TEST" on search view.
-    await contains(`.o_searchview input`).edit(TEST, { composition: true, confirm: false });
+    await edit(TEST, { composition: true });
+    await animationFrame();
     expect(`.o_searchview_autocomplete`).toHaveCount(1);
-    expect(queryFirst`.o_searchview_autocomplete li`).toHaveText("Search Foo for: TEST");
+    expect(`.o_searchview_autocomplete li:first`).toHaveText(`Search Foo for: ${TEST}`);
 
     // Simulate soft-selection of another suggestion from IME through keyboard navigation.
-    await contains(`.o_searchview input`).edit(テスト, { composition: true, confirm: false });
-    expect(queryFirst`.o_searchview_autocomplete li`).toHaveText("Search Foo for: テスト");
+    await edit(TEST_JP, { composition: true });
+    await animationFrame();
+    expect(`.o_searchview_autocomplete li:first`).toHaveText(`Search Foo for: ${TEST_JP}`);
 
     // Simulate selection on suggestion item "TEST" from IME.
-    await contains(`.o_searchview input`).edit(TEST, { composition: true, confirm: false });
+    await edit(TEST, { composition: true });
+    await animationFrame();
     expect(`.o_searchview_autocomplete`).toHaveCount(1);
-    expect(queryFirst`.o_searchview_autocomplete li`).toHaveText("Search Foo for: TEST");
+    expect(`.o_searchview_autocomplete li:first`).toHaveText(`Search Foo for: ${TEST}`);
 });
 
 test("open search view autocomplete on paste value using mouse", async () => {
@@ -652,7 +673,7 @@ test("checks that an arrowDown always selects an item", async () => {
     await editSearch("rec");
     await contains(".o_expand").click();
     await click(".o_expand"); // don't wait for a frame
-    await hover(`.o_searchview_autocomplete li.o_menu_item.o_indent:last-child`);
+    await hover(".o_searchview_autocomplete li.o_menu_item.o_indent:last");
     await animationFrame();
     await keyDown("ArrowDown");
     await animationFrame();
@@ -673,7 +694,7 @@ test("checks that an arrowUp always selects an item", async () => {
     await editSearch("rec");
     await contains(".o_expand").click();
     await click(".o_expand"); // don't wait for a frame
-    await hover(`.o_searchview_autocomplete li.o_menu_item.o_indent:last-child`);
+    await hover(`.o_searchview_autocomplete li.o_menu_item.o_indent:last`);
     await animationFrame();
     await keyDown("ArrowUp");
     await animationFrame();
@@ -727,13 +748,12 @@ test("many2one_reference fields are supported in search view", async () => {
 
 test("check kwargs of a rpc call with a domain", async () => {
     onRpc("name_search", (params) => {
-        expect(pick(params, "args", "kwargs", "method", "model")).toEqual({
+        expect(params).toMatchObject({
             model: "partner",
             method: "name_search",
             args: [],
             kwargs: {
                 args: [["bool", "=", true]],
-                context: { lang: "en", uid: 7, tz: "taht", allowed_company_ids: [1] },
                 limit: 8 + 1,
                 operator: "ilike",
                 name: "F",
@@ -1247,7 +1267,7 @@ test("edit a filter", async () => {
 
     await clickOnButtonDeleteNode();
     expect(SELECTORS.condition).toHaveCount(0);
-    expect(`.modal footer button`).not.toBeEnabled();
+    expect(`.modal footer button:first`).not.toBeEnabled();
 
     await contains(`.modal ${SELECTORS.addNewRule}`).click();
     expect(SELECTORS.condition).toHaveCount(1);
@@ -1498,7 +1518,8 @@ test("no rpc for getting display_name for facets if known", async () => {
     expect(getFacetTexts()).toEqual(["Bar is in ( First record )"]);
 });
 
-test.tags`desktop`("clicking on search input trigger the search menu", async () => {
+test.tags("desktop");
+test("clicking on search input trigger the search menu", async () => {
     await mountWithSearch(SearchBar, {
         resModel: "partner",
     });
@@ -1693,9 +1714,7 @@ test("dropdown menu last element is 'Add Custom Filter'", async () => {
     });
     await editSearch("a");
     await animationFrame();
-    const dropdownMenu = queryFirst(".o_searchview_autocomplete");
-    const lastElement = dropdownMenu.querySelector("li:last-child");
-    expect(lastElement.textContent.trim()).toBe("Add Custom Filter");
+    expect(".o_searchview_autocomplete li:last").toHaveText("Add Custom Filter");
 });
 
 test("order by count resets when there is no group left", async () => {
@@ -1840,4 +1859,32 @@ test("subitems do not have a load more item if there is no more records availabl
     await contains(".o_expand").click();
     await expect(".o_searchview_autocomplete li.o_menu_item.o_indent").toHaveCount(1);
     await expect(".o_searchview_autocomplete li.o_menu_item.o_indent").toHaveText("(no result)");
+});
+
+test("single name_search call and no flicker when holding ArrowRight", async function () {
+    onRpc(({ method }) => {
+        if (method === "name_search") {
+            expect.step(method);
+        }
+    });
+
+    await mountWithSearch(SearchBar, {
+        resModel: "partner",
+        searchMenuTypes: [],
+        searchViewId: false,
+    });
+
+    await editSearch("a");
+    await press("arrowdown");
+    await press("arrowleft");
+    await animationFrame();
+
+    for (let i = 0; i < 3; i++) {
+        await press("arrowright", { repeat: i > 0 });
+        await animationFrame();
+        expect(".o_menu_item.o_indent").toHaveCount(0);
+        expect("input.o_searchview_input").toBeFocused();
+    }
+    await press("arrowright");
+    expect.verifySteps(["name_search"]);
 });

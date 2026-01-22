@@ -337,3 +337,108 @@ class TestAccountMove(TestAccountMoveStockCommon):
 
         cogs_line = move.line_ids.filtered(lambda l: l.account_id == self.product_A.property_account_expense_id)
         self.assertEqual(cogs_line.analytic_distribution, {str(analytic_account.id): 100})
+
+    def test_cogs_account_branch_company(self):
+        """Check branch company accounts are selected"""
+        branch = self.branch_a['company']
+        test_account = self.env['account.account'].with_company(branch.id).create({
+            'name': '10001 Test Account',
+            'code': 'STCKIN',
+            'reconcile': True,
+            'account_type': 'asset_current',
+        })
+        self.auto_categ.with_company(branch.id).property_valuation = "real_time"
+        self.auto_categ.with_company(branch.id).property_stock_account_input_categ_id = test_account
+
+        bill = self.env['account.move'].with_company(branch.id).with_context(default_move_type='in_invoice').create({
+            'partner_id': self.partner_a.id,
+            'invoice_date': fields.Date.today(),
+            'invoice_line_ids': [
+                Command.create({
+                    'product_id': self.product_A.id,
+                    'price_unit': 100,
+                }),
+            ],
+        })
+
+        self.assertEqual(bill.invoice_line_ids.account_id, test_account)
+
+    def test_no_currency_rate_on_cogs(self):
+        """Check that when confirming a invoice with no date and a different rate than the one
+        of the current date, no currency rate is applied to the cogs.
+        """
+        self.other_currency.rate_ids.sorted()[0].rate = 2
+
+        invoice = self._create_invoice_one_line(
+            currency_id=self.other_currency,
+            invoice_currency_rate=10,
+            product_id=self.product_A,
+            price_unit=200,
+            date=False,
+            tax_ids=[],
+        )
+
+        # check that the cost of the product is 10
+        self.assertEqual(self.product_A.standard_price, 10)
+        self.assertRecordValues(invoice.line_ids.sorted('balance'), [
+            {'credit': 20.0,    'debit': 0.0,    'balance': -20.0,   'account_id': self.company_data["default_account_revenue"].id},
+            {'credit': 0.0,     'debit': 20.0,   'balance': 20.0,    'account_id': self.company_data["default_account_receivable"].id},
+        ])
+
+        invoice._post()
+        # check that the lines generate for the cogs have a value of 10 (and other lines' value didn't change)
+        self.assertRecordValues(invoice.line_ids.sorted('balance'), [
+            {'credit': 20.0,   'debit': 0.0,    'balance': -20.0,   'account_id': self.company_data["default_account_revenue"].id},
+            {'credit': 10.0,   'debit': 0.0,    'balance': -10.0,   'account_id': self.auto_categ.property_stock_account_output_categ_id.id},
+            {'credit': 0.0,    'debit': 10.0,   'balance': 10.0,    'account_id': self.company_data["default_account_expense"].id},
+            {'credit': 0.0,    'debit': 20.0,   'balance': 20.0,    'account_id': self.company_data["default_account_receivable"].id},
+        ])
+
+    def test_apply_inventory_adjustment_on_multiple_quants_simultaneously(self):
+        products = self.product_a + self.product_b
+        products.write({'is_storable': True, 'categ_id': self.auto_categ.id})
+        stock_loc = self.env['stock.warehouse'].search([
+            ('company_id', '=', self.env.company.id),
+        ], limit=1).lot_stock_id
+        self.env['stock.quant']._update_available_quantity(self.product_a, stock_loc, 5)
+        self.env['stock.quant']._update_available_quantity(self.product_b, stock_loc, 15)
+        quants = products.stock_quant_ids
+        quants.inventory_quantity = 10.0
+        wizard = self.env['stock.inventory.adjustment.name'].create({'quant_ids': quants})
+        wizard.action_apply()
+        inv_adjustment_journal_items = self.env['account.move.line'].search([('product_id', 'in', products.ids)], order='id asc', limit=4)
+        stock_input_account, stock_valuation_account, stock_output_account = (
+            self.auto_categ.property_stock_account_input_categ_id,
+            self.auto_categ.property_stock_valuation_account_id,
+            self.auto_categ.property_stock_account_output_categ_id,
+        )
+        self.assertRecordValues(
+            inv_adjustment_journal_items,
+            [
+                {'account_id': stock_input_account.id, 'product_id': self.product_a.id},
+                {'account_id': stock_valuation_account.id, 'product_id': self.product_a.id},
+                {'account_id': stock_valuation_account.id, 'product_id': self.product_b.id},
+                {'account_id': stock_output_account.id, 'product_id': self.product_b.id},
+            ]
+        )
+
+    def test_invoice_with_journal_item_without_label(self):
+        """Test posting an invoice whose invoice lines have no label.
+        The 'name' field is optional on account.move.line and should be
+        handled safely when generating accounting entries.
+        """
+        move = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'partner_id': self.partner_a.id,
+            'invoice_line_ids': [
+                Command.create({
+                    'product_id': self.product_A.id,
+                    'name': False,
+                }),
+            ],
+        })
+        move.action_post()
+        # name should remain falsy on the invoice line
+        self.assertFalse(move.invoice_line_ids.name)
+        # ensure the invoice is posted successfully
+        self.assertEqual(move.state, 'posted')

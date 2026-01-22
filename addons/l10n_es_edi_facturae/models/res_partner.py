@@ -14,7 +14,7 @@ class AcRoleType(models.Model):
 class Partner(models.Model):
     _inherit = 'res.partner'
 
-    invoice_edi_format = fields.Selection(selection_add=[('es_facturae', 'Facturae')])
+    invoice_edi_format = fields.Selection(selection_add=[('es_facturae', 'Spain (FacturaE)')])
     type = fields.Selection(selection_add=[('facturae_ac', 'FACe Center'), ('other',)])
     l10n_es_edi_facturae_ac_center_code = fields.Char(string='Code', size=10, help="Code of the issuing department.")
     l10n_es_edi_facturae_ac_role_type_ids = fields.Many2many(
@@ -75,8 +75,13 @@ class Partner(models.Model):
             else:
                 partner.l10n_es_edi_facturae_residence_type = 'E'
 
-    def _get_suggested_invoice_edi_format(self):
-        # EXTENDS 'account'
-        if self.country_code == 'ES':
-            return 'es_facturae'
-        return super()._get_suggested_invoice_edi_format()
+    def _l10n_es_edi_facturae_export_check(self):
+        errors = {}
+        if invalid_records := self.filtered(lambda partner: not (partner.is_company or partner.vat)):
+            errors["l10n_es_edi_facturae_partner_check"] = {
+                'level': 'danger',
+                'message': _("Partner must be a company or have a VAT number"),
+                'action_text': _("View Partner(s)"),
+                'action': invalid_records._get_records_action(name=_("Check Partner(s)")),
+            }
+        return errors

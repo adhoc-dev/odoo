@@ -1,27 +1,31 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* html_editor
-# 
+# * html_editor
+#
 # Translators:
 # Andy Yiu, 2024
 # Tiffany Chang, 2024
 # Martin Trigaux, 2024
-# Wil Odoo, 2024
-# Junko Augias, 2024
-# 
+# Wil Odoo, 2025
+# Junko Augias, 2025
+#
+# "Junko Augias (juau)" <juau@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-25 07:49+0000\n"
-"PO-Revision-Date: 2024-09-29 00:00+0000\n"
-"Last-Translator: Junko Augias, 2024\n"
-"Language-Team: Japanese (https://app.transifex.com/odoo/teams/41243/ja/)\n"
+"POT-Creation-Date: 2025-12-29 18:37+0000\n"
+"PO-Revision-Date: 2025-11-21 02:29+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-18/"
+"html_editor/ja/>\n"
+"Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: ja\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 5.12.2\n"
 
 #. module: html_editor
 #. odoo-javascript
@@ -29,13 +33,15 @@ msgstr ""
 msgid ""
 "'Alt tag' specifies an alternate text for an image, if the image cannot be "
 "displayed (slow connection, missing image, screen reader ...)."
-msgstr "画像が表示できない場合 (遅い接続、見つからない画像、スクリーンリーダーなど)、「代替タグ」は画像に代替テキストを特定します。"
+msgstr ""
+"画像が表示できない場合 (遅い接続、見つからない画像、スクリーンリーダーなど)、"
+"「代替タグ」は画像に代替テキストを特定します。"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/image_description.xml:0
 msgid "'Title tag' is shown as a tooltip when you hover the picture."
-msgstr "画像の上にマウスを置くと「タイトルタグ」はツールチップとして表示されます。"
+msgstr "画像の上にマウスを置くと「件名タグ」はツールチップとして表示されます。"
 
 #. module: html_editor
 #. odoo-javascript
@@ -47,7 +53,7 @@ msgstr "(代替タグ)"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/image_description.xml:0
 msgid "(TITLE Tag)"
-msgstr "(タイトルタグ)"
+msgstr "(件名タグ)"
 
 #. module: html_editor
 #. odoo-javascript
@@ -113,15 +119,19 @@ msgstr "同意"
 #. odoo-python
 #: code:addons/html_editor/controllers/main.py:0
 msgid "Action %s is not a window action, link preview is not available"
-msgstr "アクション %s はウィンドウアクションではありません。リンクプレビューを利用できません"
+msgstr ""
+"アクション %s はウィンドウアクションではありません。リンクプレビューを利用で"
+"きません"
 
 #. module: html_editor
 #. odoo-python
 #: code:addons/html_editor/controllers/main.py:0
 msgid ""
-"Action %s not found, link preview is not available, please check your url is"
-" correct"
-msgstr "アクション %s が見つかりません、リンクプレビューを利用できません。URLが正しいか確認して下さい。"
+"Action %s not found, link preview is not available, please check your url is "
+"correct"
+msgstr ""
+"アクション %s が見つかりません、リンクプレビューを利用できません。URLが正しい"
+"か確認して下さい。"
 
 #. module: html_editor
 #. odoo-javascript
@@ -153,6 +163,12 @@ msgstr "ボタンを追加"
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Add a code section"
 msgstr "コードセクションを追加"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/file_plugin.js:0
+msgid "Add a download box"
+msgstr "ダウンロードボックスを追加する"
 
 #. module: html_editor
 #. odoo-javascript
@@ -271,27 +287,31 @@ msgstr "バナー"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/html_migrations/migration-1.2.js:0
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Banner Danger"
-msgstr "バナーの危険性"
+msgstr "危険バナー"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/html_migrations/migration-1.2.js:0
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Banner Info"
-msgstr "バナー情報"
+msgstr "情報バナー"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/html_migrations/migration-1.2.js:0
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Banner Success"
-msgstr "バナー成功"
+msgstr "成功バナー"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/html_migrations/migration-1.2.js:0
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Banner Warning"
-msgstr "バナー警告"
+msgstr "警告バナー"
 
 #. module: html_editor
 #. odoo-javascript
@@ -363,12 +383,6 @@ msgstr "クリア"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/backend/excalidraw/excalidraw.xml:0
-msgid "Click here to update the source"
-msgstr "クリックしてソースをアップロード"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/upload_progress_toast/upload_progress_toast.xml:0
 #: code:addons/html_editor/static/src/others/embedded_components/core/file/readonly_file.js:0
 msgid "Close"
@@ -385,14 +399,6 @@ msgstr "コード"
 #: code:addons/html_editor/static/src/fields/html_field.js:0
 msgid "Code view"
 msgstr "コードビュー"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
-msgid ""
-"Collaborative Links require joining, while Embed Links directly show the "
-"drawing."
-msgstr "コラボレーティブリンクは結合が必要ですが、埋込リンクはドローイングを直接表示します。"
 
 #. module: html_editor
 #. odoo-javascript
@@ -505,16 +511,9 @@ msgstr "Dailymotion"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.js:0
 #: code:addons/html_editor/static/src/main/media/image_plugin.js:0
 msgid "Default"
 msgstr "デフォルト"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.js:0
-msgid "Default + Rounded"
-msgstr "デフォルト + 丸い"
 
 #. module: html_editor
 #. odoo-javascript
@@ -540,7 +539,6 @@ msgstr "説明"
 #: code:addons/html_editor/static/src/main/media/image_crop.xml:0
 #: code:addons/html_editor/static/src/main/media/image_description.xml:0
 #: code:addons/html_editor/static/src/main/media/media_dialog/media_dialog.xml:0
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
 msgid "Discard"
 msgstr "破棄"
 
@@ -550,25 +548,16 @@ msgstr "破棄"
 msgid ""
 "Discover a world of awesomeness in our copyright-free image haven. No legal "
 "drama, just nice images!"
-msgstr "著作権フリーの画像の楽園で、素晴らしい世界を発見して下さい。法的に問題のない、素敵な画像です！"
+msgstr ""
+"著作権フリーの画像の楽園で、素晴らしい世界を発見して下さい。法的に問題のな"
+"い、素敵な画像です！"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/media_dialog.js:0
+#: code:addons/html_editor/static/src/main/media/file_plugin.js:0
+#: code:addons/html_editor/static/src/main/media/media_dialog/file_media_dialog.js:0
 msgid "Documents"
 msgstr "書類"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/core/file/readonly_file.xml:0
-msgid "Download"
-msgstr "ダウンロード"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_plugin.js:0
-msgid "Drawing Board"
-msgstr "イラストボード"
 
 #. module: html_editor
 #. odoo-javascript
@@ -704,15 +693,9 @@ msgstr "第1の色 %"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.js:0
-msgid "Flat"
-msgstr "フラット"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/image_crop.js:0
 msgid "Flexible"
-msgstr "柔軟"
+msgstr "フレキシブル"
 
 #. module: html_editor
 #. odoo-javascript
@@ -868,12 +851,6 @@ msgstr "見出し 6"
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.js:0
-msgid "Hide Dailymotion logo"
-msgstr "Dailymotionロゴを非表示"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.js:0
 msgid "Hide fullscreen button"
 msgstr "全画面表示ボタンを非表示"
 
@@ -882,12 +859,6 @@ msgstr "全画面表示ボタンを非表示"
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.js:0
 msgid "Hide player controls"
 msgstr "プレイヤーコントロールを非表示"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.js:0
-msgid "Hide sharing button"
-msgstr "共有ボタンを非表示"
 
 #. module: html_editor
 #. odoo-javascript
@@ -998,12 +969,6 @@ msgstr "挿入"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
-msgid "Insert Drawing"
-msgstr "イラストを挿入"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/others/embedded_components/plugins/video_plugin/video_selector_dialog/video_selector_dialog.xml:0
 msgid "Insert Video"
 msgstr "ビデオの挿入"
@@ -1019,12 +984,6 @@ msgstr "動画を挿入"
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Insert a danger banner"
 msgstr "危険バナーを挿入"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
-msgid "Insert a drawing board"
-msgstr "イラストボードを挿入"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1082,12 +1041,6 @@ msgstr "上に挿入"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_plugin.js:0
-msgid "Insert an Excalidraw Board"
-msgstr "Excalidrawボードの挿入"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Insert an info banner"
 msgstr "情報バナーを挿入"
@@ -1121,6 +1074,12 @@ msgstr "右に挿入"
 #: code:addons/html_editor/static/src/main/signature_plugin.js:0
 msgid "Insert your signature"
 msgstr "自分の署名を挿入"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
+msgid "Instagram"
+msgstr "Instagram"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1163,9 +1122,9 @@ msgstr "リンクはクリップボードにコピーされました。"
 #. odoo-python
 #: code:addons/html_editor/controllers/main.py:0
 msgid ""
-"Link preview is not available because %s, please check if your url is "
-"correct"
-msgstr "%sのためリンクプレビューを利用できません。URLが正しいか確認して下さい。"
+"Link preview is not available because %s, please check if your url is correct"
+msgstr ""
+"%sのためリンクプレビューを利用できません。URLが正しいか確認して下さい。"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1320,19 +1279,15 @@ msgstr "AIはアクセスできないようです！"
 msgid ""
 "Oops, the file %s could not be found. Please replace this file box by a new "
 "one to re-upload the file."
-msgstr "おっと、ファイル%sが見つかりません。ファイルを再アップロードするには、このファイルボックスを新しいものに置き換えて下さい。"
+msgstr ""
+"おっと、ファイル%sが見つかりません。ファイルを再アップロードするには、この"
+"ファイルボックスを新しいものに置き換えて下さい。"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.xml:0
 msgid "Open in a new tab"
 msgstr "新しいタブで開く"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/core/excalidraw/readonly_excalidraw.xml:0
-msgid "Open in new Window"
-msgstr "新規ウィンドウで開く"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1356,6 +1311,12 @@ msgstr "アウトライン"
 #: code:addons/html_editor/static/src/main/link/link_popover.js:0
 msgid "Outline + Rounded"
 msgstr "アウトライン + 丸い"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/font/font_plugin.js:0
+msgid "Paragraph"
+msgstr "段落"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1453,7 +1414,7 @@ msgstr "カラムを削除"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.xml:0
 msgid "Replace URL with its title?"
-msgstr "URLをそのタイトルと入替ますか？"
+msgstr "URLをその件名と入替ますか？"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1636,19 +1597,6 @@ msgid "Solid"
 msgstr "ソリッド"
 
 #. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/core/excalidraw/readonly_excalidraw.xml:0
-msgid "Something went wrong!"
-msgstr "何かの問題が発生しました！"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
-msgid ""
-"Sorry, we could not find your drawing, please verify that the URL is valid."
-msgstr "申し訳ございませんが、お客様の図面が見つかりません。URLが有効か確認して下さい。"
-
-#. module: html_editor
 #. odoo-python
 #: code:addons/html_editor/controllers/main.py:0
 msgid "Sorry, we could not generate a response. Please try again later."
@@ -1670,7 +1618,7 @@ msgstr "星"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/powerbox/powerbox_plugin.js:0
 msgid "Structure"
-msgstr "給与体系"
+msgstr "構成"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1707,12 +1655,6 @@ msgstr "目次"
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Text"
 msgstr "テキスト"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/core/excalidraw/readonly_excalidraw.xml:0
-msgid "The Excalidraw URL is not valid."
-msgstr "Excalidraw URLが無効です。"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1754,7 +1696,7 @@ msgstr "思考中..."
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.js:0
 msgid "This URL is invalid. Preview couldn't be updated."
-msgstr "このURLは無効です。プレビュー表示はアップデートできません。"
+msgstr "このURLは無効です。プレビュー表示は更新できません。"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1780,7 +1722,9 @@ msgstr "この画像は外部画像です"
 msgid ""
 "This type of image is not supported for cropping.<br/>If you want to crop "
 "it, please first download it from the original source and upload it in Odoo."
-msgstr "この画像タイプは切抜に対応してません。<br/>切抜したい場合は元のソースから画像をダウンロードしてOdooにアップロードしてください。"
+msgstr ""
+"この画像タイプは切抜に対応してません。<br/>切抜したい場合は元のソースから画像"
+"をダウンロードしてOdooにアップロードしてください。"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1887,12 +1831,19 @@ msgstr "URL"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "Upload File"
+msgstr "ファイルをアップロード"
+
+#. module: html_editor
+#. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/document_selector.js:0
 msgid "Upload a document"
 msgstr "書類をアップロード"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/file_plugin.js:0
 #: code:addons/html_editor/static/src/others/embedded_components/plugins/file_plugin/file_plugin.js:0
 msgid "Upload a file"
 msgstr "ファイルをアップロード"
@@ -1907,19 +1858,23 @@ msgstr "画像をアップロード"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/image_selector.js:0
 msgid "Uploaded image's format is not supported. Try with: "
-msgstr "アップロードされた画像のフォーマットは対応されてません。他のを試行してください:"
+msgstr ""
+"アップロードされた画像のフォーマットは対応されてません。他のを試行してくださ"
+"い:"
 
 #. module: html_editor
 #. odoo-python
 #: code:addons/html_editor/controllers/main.py:0
 msgid "Uploaded image's format is not supported. Try with: %s"
-msgstr "アップロードされた画像のフォーマットは対応されてません。他のを試行してください: %s"
+msgstr ""
+"アップロードされた画像のフォーマットは対応されてません。他のを試行してくださ"
+"い: %s"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/others/embedded_components/plugins/video_plugin/video_plugin.js:0
 msgid "Video Link"
-msgstr "ビデオリンク"
+msgstr "動画リンク"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1992,19 +1947,15 @@ msgstr "このサービスの最大リクエスト数に達しました。後で
 #: code:addons/html_editor/static/src/others/dynamic_placeholder_plugin.js:0
 msgid ""
 "You need to select a model before opening the dynamic placeholder selector."
-msgstr "ダイナミック・プレースホルダー・セレクタを開く前に、モデルを選択する必要があります。"
+msgstr ""
+"ダイナミック・プレースホルダー・セレクタを開く前に、モデルを選択する必要があ"
+"ります。"
 
 #. module: html_editor
 #. odoo-python
 #: code:addons/html_editor/controllers/main.py:0
 msgid "You need to specify either data or url to create an attachment."
 msgstr "添付ファイルを作成するにはデータかURLかを指定してください。"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
-msgid "Youku"
-msgstr "Youku"
 
 #. module: html_editor
 #. odoo-javascript
@@ -2038,12 +1989,6 @@ msgstr "ズームアウト"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
-msgid "all"
-msgstr "全て"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.xml:0
 msgid "alternatives..."
 msgstr "代替..."
@@ -2056,27 +2001,27 @@ msgstr "と"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
-msgid "database"
-msgstr "データベース"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
 msgid "deg"
 msgstr "度"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
-msgid "e.g. https://link.excalidraw.com/..."
-msgstr "例: https://link.excalidraw.com/..."
+#: code:addons/html_editor/static/src/main/media/file_plugin.js:0
+msgid "document"
+msgstr "ドキュメント"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
-msgid "media-library"
-msgstr "メディアライブラリ"
+#: code:addons/html_editor/static/src/main/media/file_plugin.js:0
+msgid "file"
+msgstr "ファイル"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "or"
+msgstr "又は"
 
 #. module: html_editor
 #. odoo-javascript
@@ -2084,20 +2029,11 @@ msgstr "メディアライブラリ"
 msgid "videos"
 msgstr "動画"
 
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
-msgid "{{state.urlDescription}}"
-msgstr "{{state.urlDescription}}"
+#~ msgid "Hide Dailymotion logo"
+#~ msgstr "Dailymotionロゴを非表示"
 
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
-msgid "{{state.urlTitle}}"
-msgstr "{{state.urlTitle}}"
+#~ msgid "Hide sharing button"
+#~ msgstr "共有ボタンを非表示"
 
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
-msgid "{{state.url}}"
-msgstr "{{state.url}}"
+#~ msgid "Youku"
+#~ msgstr "Youku"

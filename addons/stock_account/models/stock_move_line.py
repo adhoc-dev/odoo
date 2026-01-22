@@ -3,7 +3,7 @@
 
 from odoo import _, api, models
 from odoo.tools import float_compare, float_is_zero
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
 
 class StockMoveLine(models.Model):
@@ -31,9 +31,6 @@ class StockMoveLine(models.Model):
             for move_line in self:
                 move_id = vals.get('move_id', move_line.move_id.id)
                 analytic_move_to_recompute.add(move_id)
-        if 'quantity' in vals:
-            for move_line in self:
-                move_line._update_svl_quantity(vals['quantity'] - move_line.quantity)
         new_lot = False
         if 'lot_id' in vals:
             new_lot = vals.get('lot_id')
@@ -44,6 +41,23 @@ class StockMoveLine(models.Model):
             # remove quantity of old lot
             for move_line in self:
                 move_line._update_svl_quantity(-move_line.quantity)
+        elif 'quantity' in vals:
+            # directly updates the right quantity if no lot change
+            for move_line in self:
+                move_line._update_svl_quantity(vals['quantity'] - move_line.quantity)
+        if 'location_id' in vals or 'location_dest_id' in vals:
+            for move_line in self:
+                if move_line.state != 'done':
+                    continue
+                new_loc_id = vals.get('location_id', move_line.location_id.id)
+                new_loc = self.env['stock.location'].browse(new_loc_id)
+                new_dest_loc_id = vals.get('location_dest_id', move_line.location_dest_id.id)
+                new_dest_loc = self.env['stock.location'].browse(new_dest_loc_id)
+                if move_line.location_id._should_be_valued() != new_loc._should_be_valued() \
+                        or move_line.location_dest_id._should_be_valued() != new_dest_loc._should_be_valued():
+                    raise ValidationError(_("The stock valuation of a move is based on the type of the source and destination locations. "
+                                            "As the move is already processed, you cannot modify the locations in a way that changes the "
+                                            "valuation logic defined during the initial processing."))
         res = super().write(vals)
         if new_lot:
             # add quantity of new lot
@@ -63,6 +77,8 @@ class StockMoveLine(models.Model):
         self.ensure_one()
         if self.state != 'done':
             return
+        if self.product_id.lot_valuated and not self.lot_id:
+            raise UserError(_('This product is valuated by lot: an explicit Lot/Serial number is required when adding quantity'))
         product_uom = self.product_id.uom_id
         added_uom_qty = self.product_uom_id._compute_quantity(added_qty, product_uom, rounding_method='HALF-UP')
         if float_is_zero(added_uom_qty, precision_rounding=product_uom.rounding):
@@ -71,7 +87,7 @@ class StockMoveLine(models.Model):
 
     def _action_done(self):
         for line in self:
-            if not line.lot_id and not line.lot_name and line.product_id.lot_valuated:
+            if not line.lot_id and not line.lot_name and line.product_id.lot_valuated and line.quantity:
                 raise UserError(_("Lot/Serial number is mandatory for product valuated by lot"))
         return super()._action_done()
 

@@ -306,7 +306,7 @@ class TestAccountMove(AccountTestInvoicingCommon):
     def test_modify_posted_move_readonly_fields(self):
         self.test_move.action_post()
 
-        readonly_fields = ('invoice_line_ids', 'line_ids', 'invoice_date', 'date', 'partner_id', 'partner_bank_id',
+        readonly_fields = ('invoice_line_ids', 'line_ids', 'invoice_date', 'date', 'partner_id',
                            'invoice_payment_term_id', 'currency_id', 'fiscal_position_id', 'invoice_cash_rounding_id')
         for field in readonly_fields:
             with self.assertRaisesRegex(UserError, "You cannot modify the following readonly fields on a posted move"), \
@@ -762,7 +762,7 @@ class TestAccountMove(AccountTestInvoicingCommon):
         tax_line.unlink()
 
         # But creating unbalanced misc entry shouldn't be allowed otherwise
-        with self.assertRaisesRegex(UserError, r"The move \(.*\) is not balanced\."):
+        with self.assertRaisesRegex(UserError, r"The entry is not balanced."):
             self.env["account.move"].create({
                 "move_type": "entry",
                 "line_ids": [
@@ -950,14 +950,14 @@ class TestAccountMove(AccountTestInvoicingCommon):
         })
         move = self.env['account.move'].with_context(default_move_type='entry')
         with Form(move) as move_form:
-            self.assertEqual(move_form.name, 'MISC/2021/10/0001')
+            self.assertEqual(move_form.name_placeholder, 'MISC/2021/10/0001')
             move_form.journal_id, journal = journal, move_form.journal_id
-            self.assertEqual(move_form.name, 'AJ/2021/10/0001')
+            self.assertEqual(move_form.name_placeholder, 'AJ/2021/10/0001')
             # ensure we aren't burning any sequence by switching journal
             move_form.journal_id, journal = journal, move_form.journal_id
-            self.assertEqual(move_form.name, 'MISC/2021/10/0001')
+            self.assertEqual(move_form.name_placeholder, 'MISC/2021/10/0001')
             move_form.journal_id, journal = journal, move_form.journal_id
-            self.assertEqual(move_form.name, 'AJ/2021/10/0001')
+            self.assertEqual(move_form.name_placeholder, 'AJ/2021/10/0001')
 
     def test_change_journal_posted_before(self):
         """ Changes to a move posted before can only de done if move name is '/' or empty (False) """
@@ -975,6 +975,7 @@ class TestAccountMove(AccountTestInvoicingCommon):
         # Once move name in draft is changed to '/', changing the journal is allowed
         self.test_move.name = '/'
         self.test_move.journal_id = journal
+        self.test_move.action_post()
         self.assertEqual(self.test_move.name, 'AJ/2016/01/0001')
         self.assertEqual(self.test_move.journal_id, journal)
 
@@ -995,7 +996,7 @@ class TestAccountMove(AccountTestInvoicingCommon):
         with self.assertRaisesRegex(UserError, 'You cannot edit the journal of an account move with a sequence number assigned, unless the name is removed or set to "/". This might create a gap in the sequence.'):
             test_move_2.write({'journal_id': False})
         # Once move name in draft is changed to '/', changing the journal is allowed
-        test_move_2.write({'name': '/', 'journal_id': journal.id})
+        test_move_2.write({'name': False, 'journal_id': journal.id})
         test_move_2.action_post()
         # Sequence number is updated for the new journal
         self.assertEqual(test_move_2.sequence_number, 1)
@@ -1194,3 +1195,97 @@ class TestAccountMove(AccountTestInvoicingCommon):
         line.tax_ids = [Command.clear()]
         self.assertEqual(len(line.tax_ids), 0)
         self.assertEqual(len(line.tax_tag_ids), 0)
+
+    def test_balance_modification_auto_balancing(self):
+        """ Test that amount currency is correctly recomputed when, without multicurrency enabled,
+        the balance is changed """
+        account = self.company_data['default_account_revenue']
+        move = self.env['account.move'].create({
+            'line_ids': [
+                Command.create({
+                    'account_id': self.company_data['default_account_receivable'].id,
+                    'balance': 20,
+                }), Command.create({
+                    'account_id': account.id,
+                    'balance': -20,
+                })]
+        })
+        line = move.line_ids.filtered(lambda l: l.account_id == account)
+        move.write({
+            'line_ids': [
+                Command.update(line.id, {
+                    'debit': 10,
+                    'credit': 0,
+                    'balance': 10
+                }),
+                Command.create({
+                    'account_id': account.id,
+                    'balance': -30,
+                })]
+        })
+
+        self.assertRecordValues(line, [
+            {'amount_currency': 10.00, 'balance': 10.00},
+        ])
+
+    def test_no_partner_id_on_duplication(self):
+        """ Test that when a account_move is duplicated the partner_id is not included in the duplicated_move """
+        move = self.env['account.move'].create({
+            'move_type': 'entry',
+            'partner_id': self.partner_a.id,
+            'date': fields.Date.from_string('2019-01-01'),
+            'currency_id': self.other_currency.id,
+            'line_ids': [
+                Command.create(self.entry_line_vals_1),
+                Command.create(self.entry_line_vals_2),
+            ],
+        })
+        move_duplicate = move.copy()
+        self.assertTrue(move_duplicate)
+        self.assertFalse(move_duplicate.partner_id)
+
+    def test_no_recompute_when_company_address_changes(self):
+        """
+        Ensure that changing the company partner address does NOT trigger
+        any recomputation on account.move or account.move.line fields
+        """
+        # Prepare patching
+        protected_models = ['account.move', 'account.move.line']
+        original_recompute = {model: self.env[model]._recompute_field for model in protected_models}
+        fields_recomputed = []
+
+        def mock_recompute(self, field, ids=None):
+            ids_to_compute = self.env.transaction.tocompute.get(field, ())
+            ids = ids_to_compute if ids is None else [id_ for id_ in ids if id_ in ids_to_compute]
+            if field.store and (
+                (self._name == 'account.move' and invoice.id in ids)
+                or (self._name == 'account.move.line' and set(invoice.line_ids.ids) & set(ids))
+            ):
+                fields_recomputed.append(str(field))
+            original_recompute[self._name](field, ids)
+
+        # Setup data
+        invoice = self.env['account.move'].create({
+            'move_type': 'entry',
+            'partner_id': self.partner_a.id,
+            'date': fields.Date.from_string('2019-01-01'),
+            'currency_id': self.other_currency.id,
+            'line_ids': [
+                Command.create(self.entry_line_vals_1),
+                Command.create(self.entry_line_vals_2),
+            ],
+        })
+        self.env.flush_all()
+
+        # Check
+        for model in protected_models:
+            self.patch(self.env.registry[model], '_recompute_field', mock_recompute)
+
+        invoice.company_id.partner_id.write({
+            'street': 'New Street',
+            'zip': '12345',
+            'country_id': invoice.company_id.partner_id.country_id.id,
+            'vat': '12345678',
+        })
+        self.env.flush_all()
+        self.assertEqual(fields_recomputed, [])

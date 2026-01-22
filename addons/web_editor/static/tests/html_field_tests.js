@@ -3,6 +3,7 @@
 import { click, editInput, getFixture, makeDeferred, mockSendBeacon, nextTick, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
+import { contains } from "@web/../tests/utils";
 import { FileSelectorControlPanel } from "@web_editor/components/media_dialog/file_selector";
 import { FormController } from '@web/views/form/form_controller';
 import { HtmlField } from "@web_editor/js/backend/html_field";
@@ -880,6 +881,7 @@ QUnit.module("WebEditor.HtmlField", ({ beforeEach }) => {
         const node = editor.editable.querySelector('p').childNodes[0];
         newHistoryStepPromise();
         node.textContent = 'b';
+        editor.historyStep();
         await historyStepPromise;
 
         assert.equal(editor.editable.children[0].children[0].innerHTML.trim(), '<p>b</p>');
@@ -943,6 +945,7 @@ QUnit.module("WebEditor.HtmlField", ({ beforeEach }) => {
         const node = editor.editable.querySelector('p').childNodes[0];
         newHistoryStepPromise();
         node.textContent = 'b';
+        editor.historyStep();
         await historyStepPromise;
 
         assert.equal(editor.editable.children[0].children[0].innerHTML.trim(), '<p class="oe_unremovable">b</p>');
@@ -1006,6 +1009,7 @@ QUnit.module("WebEditor.HtmlField", ({ beforeEach }) => {
         const node = editor.editable.querySelector('div.oe_unremovable');
         newHistoryStepPromise();
         node.textContent = 'b';
+        editor.historyStep();
         await historyStepPromise;
 
         assert.equal(editor.editable.children[0].children[0].innerHTML.trim(), '<div class="oe_unremovable"><p class="oe_unremovable">a</p></div>');
@@ -1071,11 +1075,18 @@ QUnit.module("WebEditor.HtmlField", ({ beforeEach }) => {
     QUnit.module("Link");
 
     QUnit.test("link preview in Link Dialog", async (assert) => {
-        assert.expect(6);
+        assert.expect(7);
 
         serverData.models.partner.records.push({
             id: 1,
             txt: "<p class='test_target'><a href='/test'>This website</a></p>",
+        });
+        const wysiwygPromise = makeDeferred();
+        patchWithCleanup(HtmlField.prototype, {
+            async startWysiwyg() {
+                await super.startWysiwyg(...arguments);
+                wysiwygPromise.resolve();
+            },
         });
         await makeView({
             type: "form",
@@ -1087,6 +1098,7 @@ QUnit.module("WebEditor.HtmlField", ({ beforeEach }) => {
                     <field name="txt" widget="html_legacy"/>
                 </form>`,
         });
+        await wysiwygPromise;
 
         // Test the popover option to edit the link
         const a = document.querySelector(".test_target a");
@@ -1098,6 +1110,8 @@ QUnit.module("WebEditor.HtmlField", ({ beforeEach }) => {
         document.querySelector("a.mx-1.o_we_edit_link.text-dark").click();
         // Make sure popover is closed
         await new Promise(resolve => $(a).on('hidden.bs.popover.link_popover', resolve));
+        // Make sure modal is open
+        await contains(".modal input#o_link_dialog_label_input");
         let labelInputField = document.querySelector(".modal input#o_link_dialog_label_input");
         let linkPreview = document.querySelector(".modal a#link-preview");
         assert.strictEqual(labelInputField.value, 'This website',
@@ -1368,6 +1382,65 @@ QUnit.module("WebEditor.HtmlField", ({ beforeEach }) => {
         fontSizeOptionButtonFS3.dispatchEvent(event);
         await nextTick();
         assert.containsN(editor.editable, "td span.display-3-fs", 4);
+    });
+
+    QUnit.module("Image Delete");
+
+    QUnit.test("Image should delete without making any element", async (assert) => {
+        assert.expect(3);
+        serverData.models.partner.records.push({
+            id: 1,
+            txt: `<p class="content"><br></p><p class="content"><img></p>`,
+        });
+        let htmlField;
+        const wysiwygPromise = makeDeferred();
+        patchWithCleanup(HtmlField.prototype, {
+            async startWysiwyg() {
+                await super.startWysiwyg(...arguments);
+                htmlField = this;
+                wysiwygPromise.resolve();
+            },
+            // To prevent saving when calling onWillUnmount
+            async commitChanges() { },
+        });
+
+        await makeView({
+            type: "form",
+            resId: 1,
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="txt" widget="html_legacy"/>
+                </form>`,
+        });
+        await wysiwygPromise;
+        const editor = htmlField.wysiwyg.odooEditor;
+        const paragraph = editor.editable.querySelectorAll(".content")[1];
+        setSelection(paragraph, 0, paragraph, 0);
+        await nextTick();
+
+        const img = editor.editable.querySelector("img");
+        setSelection(paragraph, 1, paragraph, 2);
+        await nextTick();
+
+        // Trigger mouseup manually to run `_updateEditorUI`.
+        const mouseUpEvent = new MouseEvent("mouseup", {
+            view: window,
+            bubbles: true,
+            cancelable: true,
+        });
+        img.dispatchEvent(mouseUpEvent);
+        await nextTick();
+        document.querySelector("#image-delete").click();
+        await nextTick();
+        assert.equal(
+            editor.editable.innerHTML,
+            '<p class="content"><br></p><p class="content oe-hint oe-command-temporary-hint" placeholder="Type &quot;/&quot; for commands"></p>'
+        );
+        const selection = document.getSelection();
+        assert.equal(selection.anchorNode, paragraph);
+        assert.equal(selection.anchorOffset, 0);
     });
 });
 

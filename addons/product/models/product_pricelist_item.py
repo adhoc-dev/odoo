@@ -283,6 +283,11 @@ class PricelistItem(models.Model):
 
     #=== CONSTRAINT METHODS ===#
 
+    @api.constrains('base_pricelist_id', 'base')
+    def _check_base_pricelist_id(self):
+        if any(item.base == 'pricelist' and not item.base_pricelist_id for item in self):
+            raise ValidationError(_('A pricelist item with "Other Pricelist" as base must have a base_pricelist_id.'))
+
     @api.constrains('base_pricelist_id', 'pricelist_id', 'base')
     def _check_pricelist_recursion(self):
         if any(item.base == 'pricelist' and item.pricelist_id and item.pricelist_id == item.base_pricelist_id for item in self):
@@ -333,6 +338,7 @@ class PricelistItem(models.Model):
 
     @api.onchange('compute_price')
     def _onchange_compute_price(self):
+        self.base_pricelist_id = False
         if self.compute_price != 'fixed':
             self.fixed_price = 0.0
         if self.compute_price != 'percentage':
@@ -417,6 +423,14 @@ class PricelistItem(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for values in vals_list:
+            if values.get('product_id') and not values.get('product_tmpl_id'):
+                # Deduce product template from product variant if not specified.
+                # Ensures that the pricelist rule is properly configured and displayed in the UX
+                # even in case of partial/incomplete data (mostly for imports).
+                values['product_tmpl_id'] = self.env['product.product'].browse(
+                    values.get('product_id')
+                ).product_tmpl_id.id
+
             if not values.get('applied_on'):
                 values['applied_on'] = (
                     '0_product_variant' if values.get('product_id') else

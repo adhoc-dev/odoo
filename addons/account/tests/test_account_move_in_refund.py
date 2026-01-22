@@ -96,7 +96,7 @@ class TestAccountMoveInRefundOnchanges(AccountTestInvoicingCommon):
             'date_maturity': False,
         }
         cls.term_line_vals_1 = {
-            'name': '',
+            'name': False,
             'product_id': False,
             'account_id': cls.company_data['default_account_payable'].id,
             'partner_id': cls.partner_a.id,
@@ -605,6 +605,8 @@ class TestAccountMoveInRefundOnchanges(AccountTestInvoicingCommon):
         })
 
     def test_in_refund_line_onchange_currency_1(self):
+        self.other_currency.rounding = 0.001
+
         move_form = Form(self.invoice)
         move_form.currency_id = self.other_currency
         move_form.save()

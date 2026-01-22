@@ -102,7 +102,9 @@ class ResCurrency(models.Model):
         domestic_currency_companies = companies.filtered(lambda x: x.currency_id == main_company.currency_id)
         other_companies = companies - domestic_currency_companies
 
-        table_builders = [self._get_table_builder_domestic_currency(domestic_currency_companies, use_cta_rates)]
+        table_builders = []
+        if domestic_currency_companies:
+            table_builders += [self._get_table_builder_domestic_currency(domestic_currency_companies, use_cta_rates)]
 
         last_date_to = None
         for period_key, date_from, date_to in date_periods:
@@ -251,7 +253,7 @@ class ResCurrency(models.Model):
                     (
                         SELECT DISTINCT ON (other_company.id)
                             other_company.id as other_company_id,
-                            out_period_rate.rate AS rate,
+                            COALESCE(out_period_rate.rate, 1.0) AS rate,
                             EXTRACT('Day' FROM COALESCE(in_period_rate.name::TIMESTAMP, %(date_to)s::TIMESTAMP + INTERVAL '1' DAY) - %(date_from)s::TIMESTAMP) AS number_of_days
 
                         FROM res_company other_company

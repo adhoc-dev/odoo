@@ -1,9 +1,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from datetime import date
 from markupsafe import Markup
 import json
 
-from odoo import _, api, fields, models
+from odoo import _, api, fields, models, SUPERUSER_ID
 from odoo.exceptions import UserError
 
 
@@ -27,6 +28,21 @@ class StockPicking(models.Model):
     is_return_picking = fields.Boolean(compute='_compute_return_picking')
     return_label_ids = fields.One2many('ir.attachment', compute='_compute_return_label')
     destination_country_code = fields.Char(related='partner_id.country_id.code', string="Destination Country")
+
+    def button_validate(self):
+        res = super().button_validate()
+        if res is not True:
+            return res
+        for picking in self:
+            # `_get_new_picking_values` is used to propagate the carrier before a picking is created (i.e. carrier is set on an SO).
+            # Whereas this case handles the propagation of carrier after the picking validation as the carrier maybe set
+            # at later stages as well, specifically at the picking level rather than on the Sales Order.
+            # This ensures the behavior is consistent across all scenarios (push + pull, all pull, and all push rules).
+            if picking.carrier_id:
+                picking._get_next_transfers().filtered(
+                    lambda p: not p.carrier_id and any(rule.propagate_carrier for rule in p.move_ids.rule_id)
+                ).write({'carrier_id': picking.carrier_id.id, 'carrier_tracking_ref': picking.carrier_tracking_ref})
+        return res
 
     @api.depends('carrier_id', 'carrier_tracking_ref')
     def _compute_carrier_tracking_url(self):
@@ -60,11 +76,42 @@ class StockPicking(models.Model):
         for picking in self:
             picking.weight = sum(move.weight for move in picking.move_ids if move.state != 'cancel')
 
+    def _carrier_exception_note(self, exception):
+        self.ensure_one()
+        line_1 = _("Exception occurred with respect to carrier on the transfer")
+        line_2 = _("Manual actions might be needed.")
+        line_3 = _("Exception:")
+        return Markup('<div> {line_1} <a href="#" data-oe-model="stock.picking" data-oe-id="{picking_id}"> {picking_name}</a>. {line_2}<div class="mt16"><p>{line_3} {exception}</p></div></div>').format(line_1=line_1, line_2=line_2, line_3=line_3, picking_id=self.id, picking_name=self.name, exception=exception)
+
     def _send_confirmation_email(self):
+        # The carrier's API processes validity checks and parcels generation one picking at a time.
+        # However, since a UserError of any of the picking will cause a rollback of the entire batch
+        # on Odoo's side and since pickings that were already processed on the carrier's side must
+        # stay validated, UserErrors might need to be replaced by activity warnings.
+
+        processed_carrier_picking = False
+
         for pick in self:
-            if pick.carrier_id and pick.carrier_id.integration_level == 'rate_and_ship' and pick.picking_type_code != 'incoming' and not pick.carrier_tracking_ref and pick.picking_type_id.print_label:
-                pick.sudo().send_to_shipper()
-            pick._check_carrier_details_compliance()
+            try:
+                if pick.carrier_id and pick.carrier_id.integration_level == 'rate_and_ship' and pick.picking_type_code != 'incoming' and not pick.carrier_tracking_ref and pick.picking_type_id.print_label:
+                    pick.sudo().send_to_shipper()
+                pick._check_carrier_details_compliance()
+                if pick.carrier_id:
+                    processed_carrier_picking = True
+            except (UserError) as e:
+                if processed_carrier_picking:
+                    # We can not raise a UserError at this point
+                    exception_message = str(e)
+                    pick.message_post(body=exception_message, message_type='notification')
+                    pick.sudo().activity_schedule(
+                        'mail.mail_activity_data_warning',
+                        date.today(),
+                        note=pick._carrier_exception_note(exception_message),
+                        user_id=pick.user_id.id or self.env.user.id or SUPERUSER_ID,
+                        )
+                else:
+                    raise e
+
         return super(StockPicking, self)._send_confirmation_email()
 
     def _pre_put_in_pack_hook(self, move_line_ids):
@@ -74,7 +121,9 @@ class StockPicking(models.Model):
                 if len(move_line_ids.carrier_id) > 1 or any(not ml.carrier_id for ml in move_line_ids):
                     # avoid (duplicate) costs for products
                     raise UserError(_("You cannot pack products into the same package when they have different carriers (i.e. check that all of their transfers have a carrier assigned and are using the same carrier)."))
-                return self._set_delivery_package_type(batch_pack=len(move_line_ids.picking_id) > 1)
+                return self.with_context(
+                    default_move_line_ids=move_line_ids.ids
+                )._set_delivery_package_type(batch_pack=len(move_line_ids.picking_id) > 1)
         else:
             return res
 

@@ -1,30 +1,24 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* pos_restaurant
-# 
+#
 # Translators:
 # Wil Odoo, 2024
-# Rasareeyar Lappiam, 2024
-# 
+# Rasareeyar Lappiam, 2025
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-25 07:48+0000\n"
+"POT-Creation-Date: 2025-12-29 18:36+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Rasareeyar Lappiam, 2024\n"
+"Last-Translator: Rasareeyar Lappiam, 2025\n"
 "Language-Team: Thai (https://app.transifex.com/odoo/teams/41243/th/)\n"
+"Language: th\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: th\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-
-#. module: pos_restaurant
-#. odoo-javascript
-#: code:addons/pos_restaurant/static/src/overrides/components/receipt_screen/order_receipt/order_receipt.xml:0
-msgid ", Guests:"
-msgstr "แขก:"
 
 #. module: pos_restaurant
 #. odoo-javascript
@@ -44,8 +38,8 @@ msgid ""
 "200G Irish Black Angus beef, 9-month matured cheddar cheese, shredded "
 "iceberg lettuce, caramelised onions, crushed tomatoes and Chef’s sauce."
 msgstr ""
-"เนื้อไอริชแบล็กแองกัส 200 กรัม เชดดาร์ชีสบ่ม 9 เดือน ผักกาดแก้ว ผักกาดหอมฝอย"
-" หัวหอมผัด มะเขือเทศบด และซอสเชฟ"
+"เนื้อไอริชแบล็กแองกัส 200 กรัม เชดดาร์ชีสบ่ม 9 เดือน ผักกาดแก้ว ผักกาดหอมฝอย หัวหอมผัด "
+"มะเขือเทศบด และซอสเชฟ"
 
 #. module: pos_restaurant
 #: model:product.template,description_sale:pos_restaurant.pos_food_bacon_product_template
@@ -54,8 +48,8 @@ msgid ""
 "iceberg salad, red onions, grilled bacon, tomato sauce, pickles, barbecue "
 "sauce"
 msgstr ""
-"เนื้อไอริชแบล็คแองกัส 200 กรัม หัวหอมผัดปาปริก้า สลัดภูเขาน้ำแข็งสับ "
-"หัวหอมแดง เบคอนย่าง ซอสมะเขือเทศ ผักดอง ซอสบาร์บีคิว"
+"เนื้อไอริชแบล็คแองกัส 200 กรัม หัวหอมผัดปาปริก้า สลัดภูเขาน้ำแข็งสับ หัวหอมแดง เบคอนย่าง "
+"ซอสมะเขือเทศ ผักดอง ซอสบาร์บีคิว"
 
 #. module: pos_restaurant
 #: model_terms:ir.ui.view,arch_db:pos_restaurant.view_restaurant_floor_kanban
@@ -70,7 +64,8 @@ msgstr ""
 #. module: pos_restaurant
 #: model_terms:ir.actions.act_window,help:pos_restaurant.action_restaurant_floor_form
 msgid ""
-"A restaurant floor represents the place where customers are served, this is where you can\n"
+"A restaurant floor represents the place where customers are served, this is "
+"where you can\n"
 "                define and position the tables."
 msgstr ""
 "ชั้นของร้านอาหารแสดงถึงสถานที่ให้บริการแก่ลูกค้า นี่คือที่ที่คุณสามารถ\n"
@@ -133,16 +128,14 @@ msgstr "ปรับจำนวน"
 msgid ""
 "Adjust the amount authorized by payment terminals to add a tip after the "
 "customers left or at the end of the day."
-msgstr ""
-"ปรับจำนวนที่อนุญาตโดยเครื่องชำระเงินเพื่อเพิ่มทิปหลังจากที่ลูกค้าออกไปหรือเมื่อสิ้นสุดวัน"
+msgstr "ปรับจำนวนที่อนุญาตโดยเครื่องชำระเงินเพื่อเพิ่มทิปหลังจากที่ลูกค้าออกไปหรือเมื่อสิ้นสุดวัน"
 
 #. module: pos_restaurant
 #: model_terms:ir.ui.view,arch_db:pos_restaurant.res_config_settings_view_form
 msgid ""
 "Adjust the tax rate based on whether customers are dining in or opting for "
 "takeout."
-msgstr ""
-"ปรับอัตราภาษีโดยพิจารณาว่าลูกค้ากำลังรับประทานอาหารที่ร้านหรือเลือกซื้อกลับบ้าน"
+msgstr "ปรับอัตราภาษีโดยพิจารณาว่าลูกค้ากำลังรับประทานอาหารที่ร้านหรือเลือกซื้อกลับบ้าน"
 
 #. module: pos_restaurant
 #: model_terms:ir.ui.view,arch_db:pos_restaurant.res_config_settings_view_form
@@ -324,7 +317,7 @@ msgstr "โคคา-โคล่า"
 #. module: pos_restaurant
 #: model:pos.category,name:pos_restaurant.pos_category_cocktails
 msgid "Cocktails"
-msgstr ""
+msgstr "ค็อกเทล"
 
 #. module: pos_restaurant
 #: model:ir.model.fields,field_description:pos_restaurant.field_restaurant_table__color
@@ -345,7 +338,7 @@ msgstr "ต่อไป"
 #. module: pos_restaurant
 #: model:product.template,name:pos_restaurant.product_cosmopolitan_product_template
 msgid "Cosmopolitan"
-msgstr ""
+msgstr "คอสโมโพลิแทน"
 
 #. module: pos_restaurant
 #: model:product.template,description_sale:pos_restaurant.product_cosmopolitan_product_template
@@ -380,6 +373,12 @@ msgstr "ลบข้อผิดพลาด"
 #: model_terms:ir.ui.view,arch_db:pos_restaurant.res_config_settings_view_form
 msgid "Design floors and assign orders to tables"
 msgstr "ออกแบบชั้นและมอบหมายออเดอร์ให้กับโต๊ะ"
+
+#. module: pos_restaurant
+#. odoo-javascript
+#: code:addons/pos_restaurant/static/src/overrides/models/pos_store.js:0
+msgid "Dine in"
+msgstr "รับประทานอาหารในร้าน"
 
 #. module: pos_restaurant
 #: model:ir.model.fields,field_description:pos_restaurant.field_restaurant_floor__display_name
@@ -434,12 +433,6 @@ msgid "Enter a table number"
 msgstr ""
 
 #. module: pos_restaurant
-#. odoo-javascript
-#: code:addons/pos_restaurant/static/src/overrides/components/navbar/navbar.js:0
-msgid "Error"
-msgstr "ผิดพลาด"
-
-#. module: pos_restaurant
 #: model:product.template,name:pos_restaurant.espresso_product_template
 msgid "Espresso"
 msgstr "เอสเพรสโซ"
@@ -448,7 +441,7 @@ msgstr "เอสเพรสโซ"
 #: model:product.attribute.value,name:pos_restaurant.product_attribute_value_extra_cheese
 #: model:product.attribute.value,name:pos_restaurant.product_attribute_value_extra_cheese_pasta
 msgid "Extra cheese"
-msgstr ""
+msgstr "เพิ่มชีส"
 
 #. module: pos_restaurant
 #: model:product.attribute,name:pos_restaurant.product_extra_pasta
@@ -549,12 +542,6 @@ msgid "Funghi"
 msgstr "ฟุงกิ"
 
 #. module: pos_restaurant
-#. odoo-javascript
-#: code:addons/pos_restaurant/static/src/overrides/models/pos_store.js:0
-msgid "General Note"
-msgstr "หมายเหตุทั่วไป"
-
-#. module: pos_restaurant
 #: model:product.template,description_sale:pos_restaurant.product_negroni_product_template
 msgid "Gin, vermouth rosso, Campari, and an orange peel."
 msgstr "จิน เวอร์มุตรอสโซ คัมพารี และเปลือกส้ม"
@@ -567,7 +554,7 @@ msgstr "ชาเขียว"
 #. module: pos_restaurant
 #: model:product.attribute.value,name:pos_restaurant.product_attribute_value_grilled_vegetables
 msgid "Grilled vegetables"
-msgstr ""
+msgstr "ผักย่าง"
 
 #. module: pos_restaurant
 #. odoo-javascript
@@ -606,8 +593,8 @@ msgstr "ชาเย็น"
 #. module: pos_restaurant
 #: model:ir.model.fields,help:pos_restaurant.field_restaurant_table__active
 msgid ""
-"If false, the table is deactivated and will not be available in the point of"
-" sale"
+"If false, the table is deactivated and will not be available in the point of "
+"sale"
 msgstr "หากเป็นเท็จ โต๊ะจะถูกปิดใช้งานและจะไม่มีในการขายหน้าร้าน"
 
 #. module: pos_restaurant
@@ -681,7 +668,13 @@ msgstr ""
 #. module: pos_restaurant
 #: model:product.template,name:pos_restaurant.product_margarita_product_template
 msgid "Margarita"
-msgstr ""
+msgstr "มาร์การิต้า"
+
+#. module: pos_restaurant
+#. odoo-javascript
+#: code:addons/pos_restaurant/static/src/overrides/models/pos_store.js:0
+msgid "Message"
+msgstr "ข้อความ"
 
 #. module: pos_restaurant
 #: model:product.template,name:pos_restaurant.milkshake_banana_product_template
@@ -696,7 +689,7 @@ msgstr "มินิทเมด"
 #. module: pos_restaurant
 #: model:product.template,name:pos_restaurant.product_mojito_product_template
 msgid "Mojito"
-msgstr ""
+msgstr "โมจิโต้"
 
 #. module: pos_restaurant
 #: model:product.template,name:pos_restaurant.product_moscow_mule_product_template
@@ -712,12 +705,12 @@ msgstr "แซนวิชมอซซาเรลล่าชีส"
 #: model:product.attribute.value,name:pos_restaurant.product_attribute_value_mushroom
 #: model:product.attribute.value,name:pos_restaurant.product_attribute_value_mushroom_pasta
 msgid "Mushroom"
-msgstr ""
+msgstr "เห็ด"
 
 #. module: pos_restaurant
 #: model:product.template,name:pos_restaurant.product_negroni_product_template
 msgid "Negroni"
-msgstr ""
+msgstr "เนโกรนี"
 
 #. module: pos_restaurant
 #. odoo-javascript
@@ -733,9 +726,9 @@ msgstr "ไม่มีทิป"
 
 #. module: pos_restaurant
 #. odoo-javascript
-#: code:addons/pos_restaurant/static/src/overrides/components/navbar/navbar.js:0
-msgid "No table or floating order found with this number"
-msgstr ""
+#: code:addons/pos_restaurant/static/src/overrides/models/pos_store.js:0
+msgid "Note"
+msgstr "โน้ต"
 
 #. module: pos_restaurant
 #. odoo-javascript
@@ -757,8 +750,7 @@ msgstr "การจองร้านอาหารออนไลน์"
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.js:0
 msgid "Only web-compatible Image formats such as .png or .jpeg are supported."
-msgstr ""
-"รองรับเฉพาะรูปแบบรูปภาพที่เข้ากันได้กับเว็บ เช่น .png หรือ .jpeg เท่านั้น"
+msgstr "รองรับเฉพาะรูปแบบรูปภาพที่เข้ากันได้กับเว็บ เช่น .png หรือ .jpeg เท่านั้น"
 
 #. module: pos_restaurant
 #. odoo-javascript
@@ -827,7 +819,7 @@ msgstr "เปเป้ ลาเต้ กอร์กอนโซล่า โ
 #. module: pos_restaurant
 #: model:product.attribute.value,name:pos_restaurant.product_attribute_value_peperoni
 msgid "Pepperoni"
-msgstr ""
+msgstr "เปปเปอร์โรนี"
 
 #. module: pos_restaurant
 #. odoo-javascript
@@ -1061,7 +1053,7 @@ msgstr "รูปร่าง"
 #. module: pos_restaurant
 #: model:product.attribute,name:pos_restaurant.product_sides_buns_pizza
 msgid "Sides"
-msgstr ""
+msgstr "เครื่องเคียง"
 
 #. module: pos_restaurant
 #. odoo-javascript
@@ -1145,12 +1137,23 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
 #: code:addons/pos_restaurant/static/src/overrides/components/navbar/navbar.xml:0
-#: code:addons/pos_restaurant/static/src/overrides/components/receipt_screen/order_receipt/order_receipt.xml:0
 #: code:addons/pos_restaurant/static/src/overrides/components/ticket_screen/ticket_screen.js:0
 #: code:addons/pos_restaurant/static/src/overrides/components/ticket_screen/ticket_screen.xml:0
 #: model:ir.model.fields,field_description:pos_restaurant.field_pos_order__table_id
 msgid "Table"
 msgstr "โต๊ะ"
+
+#. module: pos_restaurant
+#. odoo-javascript
+#: code:addons/pos_restaurant/static/src/overrides/components/receipt_header_patch.js:0
+msgid "Table %(number)s"
+msgstr ""
+
+#. module: pos_restaurant
+#. odoo-javascript
+#: code:addons/pos_restaurant/static/src/overrides/components/receipt_header_patch.js:0
+msgid "Table %(number)s, Guests: %(count)s"
+msgstr ""
 
 #. module: pos_restaurant
 #: model:ir.model.fields,field_description:pos_restaurant.field_pos_config__module_pos_restaurant_appointment
@@ -1181,6 +1184,12 @@ msgstr "โต๊ะ"
 #: model:ir.model.fields,field_description:pos_restaurant.field_pos_order__takeaway
 msgid "Take Away"
 msgstr "ซื้อกลับบ้าน"
+
+#. module: pos_restaurant
+#. odoo-javascript
+#: code:addons/pos_restaurant/static/src/overrides/models/pos_store.js:0
+msgid "Take out"
+msgstr ""
 
 #. module: pos_restaurant
 #: model:ir.model.fields,field_description:pos_restaurant.field_pos_config__takeaway
@@ -1216,7 +1225,7 @@ msgstr "จำนวนลูกค้าเริ่มต้นที่ต้
 #. module: pos_restaurant
 #: model:ir.model.fields,help:pos_restaurant.field_restaurant_table__table_number
 msgid "The number of the table as displayed on the floor plan"
-msgstr ""
+msgstr "หมายเลขโต๊ะตามที่แสดงไว้ในแผนผังชั้น"
 
 #. module: pos_restaurant
 #: model:ir.model.fields,help:pos_restaurant.field_restaurant_table__parent_id
@@ -1236,8 +1245,7 @@ msgstr "โต๊ะที่เสิร์ฟออเดอร์นี้"
 
 #. module: pos_restaurant
 #: model:ir.model.fields,help:pos_restaurant.field_restaurant_table__color
-msgid ""
-"The table's color, expressed as a valid 'background' CSS property value"
+msgid "The table's color, expressed as a valid 'background' CSS property value"
 msgstr "สีของโต๊ะ ซึ่งแสดงเป็นค่าคุณสมบัติ CSS 'พื้นหลัง' ที่ถูกต้อง"
 
 #. module: pos_restaurant
@@ -1248,8 +1256,8 @@ msgstr "ความสูงของโต๊ะเป็นพิกเซล
 #. module: pos_restaurant
 #: model:ir.model.fields,help:pos_restaurant.field_restaurant_table__position_h
 msgid ""
-"The table's horizontal position from the left side to the table's center, in"
-" pixels"
+"The table's horizontal position from the left side to the table's center, in "
+"pixels"
 msgstr "ตำแหน่งแนวนอนของโต๊ะจากด้านซ้ายถึงกึ่งกลางโต๊ะ หน่วยเป็นพิกเซล"
 
 #. module: pos_restaurant
@@ -1267,10 +1275,9 @@ msgstr "ความกว้างของโต๊ะเป็นพิกเ
 #: model:ir.model.fields,help:pos_restaurant.field_pos_config__takeaway_fp_id
 #: model:ir.model.fields,help:pos_restaurant.field_res_config_settings__pos_takeaway_fp_id
 msgid ""
-"This is useful for restaurants with onsite and take-away services that imply"
-" specific tax rates."
-msgstr ""
-"สิ่งนี้มีประโยชน์สำหรับร้านอาหารที่มีบริการนอกสถานที่และบริการแบบซื้อกลับบ้านซึ่งระบุถึงอัตราภาษีที่เฉพาะ"
+"This is useful for restaurants with onsite and take-away services that imply "
+"specific tax rates."
+msgstr "สิ่งนี้มีประโยชน์สำหรับร้านอาหารที่มีบริการนอกสถานที่และบริการแบบซื้อกลับบ้านซึ่งระบุถึงอัตราภาษีที่เฉพาะ"
 
 #. module: pos_restaurant
 #. odoo-javascript
@@ -1278,9 +1285,7 @@ msgstr ""
 msgid ""
 "This order is not yet synced to server. Make sure it is synced then try "
 "again."
-msgstr ""
-"ออเดอร์นี้ยังไม่ได้ซิงค์กับเซิร์ฟเวอร์ "
-"ตรวจสอบให้แน่ใจว่ามีการซิงค์แล้วลองอีกครั้ง"
+msgstr "ออเดอร์นี้ยังไม่ได้ซิงค์กับเซิร์ฟเวอร์ ตรวจสอบให้แน่ใจว่ามีการซิงค์แล้วลองอีกครั้ง"
 
 #. module: pos_restaurant
 #. odoo-javascript

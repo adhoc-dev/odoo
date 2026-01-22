@@ -3,19 +3,24 @@
 # 	* website_event_meet
 #
 # Translators:
+# Wil Odoo, 2024
+# Anastasiia Koroleva, 2025
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:56+0000\n"
-"PO-Revision-Date: 2024-01-30 15:14+0400\n"
-"Last-Translator: \n"
+"POT-Creation-Date: 2025-12-29 18:38+0000\n"
+"PO-Revision-Date: 2024-09-25 09:42+0000\n"
+"Last-Translator: Anastasiia Koroleva, 2025\n"
 "Language-Team: Russian (https://app.transifex.com/odoo/teams/41243/ru/)\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
+"(n%100>=11 && n%100<=14)? 2 : 3);\n"
 
 #. module: website_event_meet
 #: model_terms:ir.ui.view,arch_db:website_event_meet.meeting_room_main
@@ -33,8 +38,12 @@ msgstr "<span class=\"badge text-bg-danger\">Неопубликованный</s
 
 #. module: website_event_meet
 #: model_terms:ir.ui.view,arch_db:website_event_meet.meeting_room_main
-msgid "<span>Oops! This room is full!</span><br/>Come back later to have a chat with us!"
-msgstr "<span>Упс! Эта комната переполнена!</span><br/>Приходите позже, чтобы пообщаться с нами!"
+msgid ""
+"<span>Oops! This room is full!</span><br/>Come back later to have a chat "
+"with us!"
+msgstr ""
+"<span>Упс! Эта комната переполнена!</span><br/>Приходите позже, чтобы "
+"пообщаться с нами!"
 
 #. module: website_event_meet
 #: model_terms:ir.ui.view,arch_db:website_event_meet.meeting_room_card
@@ -61,6 +70,11 @@ msgid "All Languages"
 msgstr "Все языки"
 
 #. module: website_event_meet
+#: model_terms:ir.ui.view,arch_db:website_event_meet.event_meet_main
+msgid "All Rooms"
+msgstr "Все комнаты"
+
+#. module: website_event_meet
 #: model:ir.model.fields,field_description:website_event_meet.field_event_event__meeting_room_allow_creation
 #: model:ir.model.fields,field_description:website_event_meet.field_event_type__meeting_room_allow_creation
 msgid "Allow Room Creation"
@@ -85,10 +99,19 @@ msgid "Audience"
 msgstr "Аудитория"
 
 #. module: website_event_meet
+#: model_terms:ir.ui.view,arch_db:website_event_meet.event_meet_main
+msgid "Back to all Rooms"
+msgstr "Вернуться к комнатам"
+
+#. module: website_event_meet
 #. odoo-javascript
 #: code:addons/website_event_meet/static/src/xml/website_event_meeting_room.xml:0
-msgid "Be sure you are ready to spend at least 10 minutes in the room if you want to initiate a new topic."
-msgstr "Убедитесь, что вы готовы провести в комнате не менее 10 минут, если хотите начать новую тему."
+msgid ""
+"Be sure you are ready to spend at least 10 minutes in the room if you want "
+"to initiate a new topic."
+msgstr ""
+"Убедитесь, что вы готовы провести в комнате не менее 10 минут, если хотите "
+"начать новую тему."
 
 #. module: website_event_meet
 #: model:event.meeting.room,name:website_event_meet.event_meeting_room_0
@@ -113,8 +136,12 @@ msgstr "Чат-комната"
 
 #. module: website_event_meet
 #: model_terms:ir.ui.view,arch_db:website_event_meet.community_main
-msgid "Choose a topic that interests you and start talking with the community. <br/> Don't forget to setup your camera and microphone."
-msgstr "Выберите интересующую вас тему и начните общаться с сообществом. <br/> Не забудьте настроить камеру и микрофон."
+msgid ""
+"Choose a topic that interests you and start talking with the community. <br/"
+"> Don't forget to setup your camera and microphone."
+msgstr ""
+"Выберите интересующую вас тему и начните общаться с сообществом. <br/> Не "
+"забудьте настроить камеру и микрофон."
 
 #. module: website_event_meet
 #: model_terms:ir.ui.view,arch_db:website_event_meet.meeting_room_card
@@ -142,12 +169,21 @@ msgstr "Создайте его, чтобы завязать разговор"
 #. module: website_event_meet
 #: model:ir.model.fields,field_description:website_event_meet.field_event_meeting_room__create_uid
 msgid "Created by"
-msgstr "Создано"
+msgstr "Создано:"
 
 #. module: website_event_meet
 #: model:ir.model.fields,field_description:website_event_meet.field_event_meeting_room__create_date
 msgid "Created on"
-msgstr "Создано"
+msgstr "Дата создания:"
+
+#. module: website_event_meet
+#: model_terms:ir.ui.view,arch_db:website_event_meet.event_meet
+msgid ""
+"DROP BUILDING BLOCKS HERE TO MAKE THEM AVAILABLE ACROSS ALL PROPOSAL PAGES "
+"OF ALL EVENTS"
+msgstr ""
+"ПЕРЕТАЩИТЕ БЛОКИ СЮДА, ЧТОБЫ ОНИ БЫЛИ ДОСТУПНЫ НА СТРАНИЦАХ ЗАЯВОК ДЛЯ ВСЕХ "
+"МЕРОПРИЯТИЙ"
 
 #. module: website_event_meet
 #. odoo-javascript
@@ -176,7 +212,7 @@ msgstr "Дублировать"
 #: model_terms:ir.ui.view,arch_db:website_event_meet.event_meeting_room_view_search
 #: model_terms:ir.ui.view,arch_db:website_event_meet.meeting_room_card
 msgid "Event"
-msgstr "Событие"
+msgstr "Мероприятие"
 
 #. module: website_event_meet
 #: model:ir.model,name:website_event_meet.model_event_meeting_room
@@ -191,7 +227,7 @@ msgstr "Меню конференц-зала"
 #. module: website_event_meet
 #: model_terms:ir.ui.view,arch_db:website_event_meet.snippet_options
 msgid "Event Page"
-msgstr "Страница событий"
+msgstr "Страница мероприятия"
 
 #. module: website_event_meet
 #: model:ir.actions.act_window,name:website_event_meet.action_meeting_room_from_event
@@ -201,7 +237,7 @@ msgstr "Залы для мероприятий"
 #. module: website_event_meet
 #: model:ir.model,name:website_event_meet.model_event_type
 msgid "Event Template"
-msgstr "Шаблон события"
+msgstr "Шаблон мероприятия"
 
 #. module: website_event_meet
 #: model_terms:ir.ui.view,arch_db:website_event_meet.meeting_room_card
@@ -259,12 +295,12 @@ msgstr "Меню языков"
 #. module: website_event_meet
 #: model:ir.model.fields,field_description:website_event_meet.field_event_meeting_room__write_uid
 msgid "Last Updated by"
-msgstr "Последнее обновление"
+msgstr "Последнее обновление:"
 
 #. module: website_event_meet
 #: model:ir.model.fields,field_description:website_event_meet.field_event_meeting_room__write_date
 msgid "Last Updated on"
-msgstr "Последнее обновление"
+msgstr "Дата последнего обновления:"
 
 #. module: website_event_meet
 #: model:ir.model.fields,field_description:website_event_meet.field_event_meeting_room__room_last_activity
@@ -303,7 +339,7 @@ msgstr "Максимальное количество участников, на
 #: model_terms:ir.ui.view,arch_db:website_event_meet.event_meeting_room_view_form
 #: model_terms:ir.ui.view,arch_db:website_event_meet.event_meeting_room_view_tree
 msgid "Meeting Room"
-msgstr "Конференц-зал"
+msgstr "Переговорная"
 
 #. module: website_event_meet
 #: model:ir.model.fields,field_description:website_event_meet.field_event_event__meeting_room_ids
@@ -384,13 +420,18 @@ msgstr "Комнаты"
 #. module: website_event_meet
 #: model_terms:ir.actions.act_window,help:website_event_meet.action_meeting_room_from_event
 #: model_terms:ir.actions.act_window,help:website_event_meet.event_meeting_room_action
-msgid "Rooms allow your event attendees to meet up and chat on different topics."
-msgstr "Комнаты позволяют посетителям вашего мероприятия встретиться и пообщаться на разные темы."
+msgid ""
+"Rooms allow your event attendees to meet up and chat on different topics."
+msgstr ""
+"Комнаты позволяют посетителям вашего мероприятия встретиться и пообщаться на "
+"разные темы."
 
 #. module: website_event_meet
 #: model:event.meeting.room,summary:website_event_meet.event_meeting_room_1
 msgid "Share your tips to reduce your ecological footprint using wood."
-msgstr "Поделитесь своими советами по уменьшению экологического следа при использовании древесины."
+msgstr ""
+"Поделитесь своими советами по уменьшению экологического следа при "
+"использовании древесины."
 
 #. module: website_event_meet
 #. odoo-javascript
@@ -424,11 +465,11 @@ msgstr "О мероприятии"
 #. odoo-python
 #: code:addons/website_event_meet/controllers/website_event_main.py:0
 msgid ""
-"The event %s starts on %s (%s). \n"
-"Join us there to chat about \"%s\"!"
+"The event %(name)s starts on %(date_begin)s (%(timezone)s).\n"
+"Join us there to chat about \"%(subject)s\"!"
 msgstr ""
-"Событие %s начинается на %s (%s).\n"
-"Присоединяйтесь к нам, чтобы поболтать о \"%s\"!"
+"Мероприятие %(name)s начнется %(date_begin)s (%(timezone)s).\n"
+"Давайте обсудим «%(subject)s»!"
 
 #. module: website_event_meet
 #: model:ir.model.fields,help:website_event_meet.field_event_meeting_room__website_url
@@ -453,7 +494,8 @@ msgstr "Неопубликованный"
 
 #. module: website_event_meet
 #: model:event.meeting.room,summary:website_event_meet.event_meeting_room_2
-msgid "Venez partager vos meubles préférés et l'utilisation que vous en faites."
+msgid ""
+"Venez partager vos meubles préférés et l'utilisation que vous en faites."
 msgstr "Расскажите о своих любимых предметах и о том, как вы их используете."
 
 #. module: website_event_meet

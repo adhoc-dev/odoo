@@ -13,6 +13,7 @@ import {
     getDropdownMenu,
     getFacetTexts,
     getService,
+    MockServer,
     mockService,
     models,
     mountView,
@@ -200,6 +201,15 @@ test('pivot view without "string" attribute', async () => {
     const model = findComponent(view, (c) => c instanceof PivotController).model;
     // this is important for export functionality.
     expect(model.metaData.title.toString()).toBe(_t("Untitled"));
+});
+
+test('pivot view with "class" attribute', async () => {
+    await mountView({
+        type: "pivot",
+        resModel: "partner",
+        arch: `<pivot class="foobar-class"/>`,
+    });
+    expect(".o_pivot_view").toHaveClass("foobar-class");
 });
 
 test("simple pivot rendering", async () => {
@@ -411,7 +421,6 @@ test("pivot view do not add number field without aggregator", async () => {
 test("clicking on a cell triggers a doAction", async () => {
     expect.assertions(2);
     Partner._views["form,2"] = `<form/>`;
-    Partner._views["list,false"] = `<list/>`;
     Partner._views["kanban,5"] = `<kanban/>`;
 
     mockService("action", {
@@ -464,8 +473,6 @@ test("clicking on a cell triggers a doAction", async () => {
 
 test.tags("desktop");
 test("row and column are highlighted when hovering a cell", async () => {
-    expect.assertions(11);
-
     await mountView({
         type: "pivot",
         resModel: "partner",
@@ -483,18 +490,16 @@ test("row and column are highlighted when hovering a cell", async () => {
     // hover third measure
     await contains("th.o_pivot_measure_row:nth-of-type(3)").hover();
     expect(".o_cell_hover").toHaveCount(3);
-    for (var i = 1; i <= 3; i++) {
-        expect(`tbody tr:nth-of-type(${i}) td:nth-of-type(3)`).toHaveClass("o_cell_hover");
-    }
+    expect(`tbody tr td:nth-of-type(3)`).toHaveCount(3);
+    expect(`tbody tr td:nth-of-type(3)`).toHaveClass("o_cell_hover");
     await contains(".o_pivot_buttons button.dropdown-toggle").hover();
     expect(".o_cell_hover").toHaveCount(0);
 
     // hover second cell, second row
     await contains("tbody tr:nth-of-type(1) td:nth-of-type(2)").hover();
     expect(".o_cell_hover").toHaveCount(3);
-    for (i = 1; i <= 3; i++) {
-        expect(`tbody tr:nth-of-type(${i}) td:nth-of-type(2)`).toHaveClass("o_cell_hover");
-    }
+    expect(`tbody tr td:nth-of-type(2)`).toHaveCount(3);
+    expect(`tbody tr td:nth-of-type(2)`).toHaveClass("o_cell_hover");
     await contains(".o_pivot_buttons button.dropdown-toggle").hover();
     expect(".o_cell_hover").toHaveCount(0);
 });
@@ -690,9 +695,9 @@ test("pivot view grouped by date field", async () => {
     expect.assertions(2);
 
     onRpc("read_group", ({ kwargs }) => {
-        const wrongFields = kwargs.fields.filter((field) => {
-            return !(field.split(":")[0] in Partner._fields);
-        });
+        const wrongFields = kwargs.fields.filter(
+            (field) => !(field.split(":")[0] in Partner._fields)
+        );
         expect(wrongFields.length).toBe(0);
     });
 
@@ -1408,11 +1413,13 @@ test("can download a file", async () => {
 test("download a file with single measure, measure row displayed in table", async () => {
     expect.assertions(2);
 
+    const downloadDef = new Deferred();
     patchWithCleanup(download, {
-        _download: ({ url, data }) => {
-            data = JSON.parse(data.data);
+        _download: async ({ url, data }) => {
+            data = JSON.parse(await data.data.text());
             expect(url).toBe("/web/pivot/export_xlsx");
             expect(data.measure_headers.length).toBe(4);
+            downloadDef.resolve();
             return Promise.resolve();
         },
     });
@@ -1429,6 +1436,7 @@ test("download a file with single measure, measure row displayed in table", asyn
     });
 
     await contains(".o_pivot_download").click();
+    await downloadDef;
 });
 
 test("download button is disabled when there is no data", async () => {
@@ -1618,10 +1626,10 @@ test("correctly remove pivot_ keys from the context", async () => {
 });
 
 test("Apply two groupby, and remove facet", async () => {
-    Partner._views["pivot,false"] = `<pivot>
+    Partner._views["pivot"] = `<pivot>
 		<field name="customer" type="row"/>
 	</pivot>`;
-    Partner._views["search,false"] = `<search>
+    Partner._views["search"] = `<search>
 		<filter name="group_by_product" string="Product" domain="[]" context="{'group_by': 'product_id'}"/>
 		<filter name="group_by_bar" string="Bar" domain="[]" context="{'group_by': 'bar'}"/>
 	</search>`;
@@ -1650,8 +1658,7 @@ test("Apply two groupby, and remove facet", async () => {
 });
 
 test("Add a group by on the CP when a favorite already exists", async () => {
-    Partner._views["pivot,false"] = `<pivot></pivot>`;
-    Partner._views["search,false"] = `<search>
+    Partner._views["search"] = `<search>
 		<filter name="groubybar" string="Bar" domain="[]" context="{'group_by': 'bar'}"/>
 	</search>`;
 
@@ -1692,11 +1699,10 @@ test("Add a group by on the CP when a favorite already exists", async () => {
 });
 
 test("Adding a Favorite at anytime should modify the row/column groupby", async () => {
-    Partner._views["pivot,false"] = `<pivot>
+    Partner._views["pivot"] = `<pivot>
 			<field name="customer" type="row"/>
 			<field name="date" interval="month" type="col" />
 		</pivot>`;
-    Partner._views["search,false"] = `<search/>`;
     Partner._filters = [
         {
             user_id: [2, "Mitchell Admin"],
@@ -2054,7 +2060,7 @@ test("clear table cells data after closeGroup", async () => {
     await contains(".o-overlay-item:nth-child(2) .o-dropdown--menu .dropdown-item:eq(3)").click();
 
     // close and reopen row groupings after changing value
-    Partner._records.find((r) => r.product_id === 37).date = "2016-10-27";
+    MockServer.env["partner"].find((r) => r.product_id === 37).date = "2016-10-27";
 
     await contains("tbody .o_pivot_header_cell_opened").click();
     await contains("tbody .o_pivot_header_cell_closed").click();
@@ -2070,12 +2076,11 @@ test("clear table cells data after closeGroup", async () => {
 });
 
 test("correctly group data after flip (1)", async () => {
-    Partner._views["pivot,false"] = `<pivot/>`;
     Partner._views[
-        "search,false"
+        "search"
     ] = `<search><filter name="bayou" string="Bayou" domain="[(1,'=',1)]"/></search>`;
-    Partner._views["list,false"] = `<list><field name="foo"/></list>`;
-    Partner._views["form,false"] = `<form><field name="foo"/></form>`;
+    Partner._views["list"] = `<list><field name="foo"/></list>`;
+    Partner._views["form"] = `<form><field name="foo"/></form>`;
 
     await mountWithCleanup(WebClient);
     await getService("action").doAction({
@@ -2099,12 +2104,11 @@ test("correctly group data after flip (1)", async () => {
 });
 
 test("correctly group data after flip (2)", async () => {
-    Partner._views["pivot,false"] = `<pivot/>`;
     Partner._views[
-        "search,false"
+        "search"
     ] = `<search><filter name="bayou" string="Bayou" domain="[(1,'=',1)]"/></search>`;
-    Partner._views["list,false"] = `<list><field name="foo"/></list>`;
-    Partner._views["form,false"] = `<form><field name="foo"/></form>`;
+    Partner._views["list"] = `<list><field name="foo"/></list>`;
+    Partner._views["form"] = `<form><field name="foo"/></form>`;
 
     await mountWithCleanup(WebClient);
     await getService("action").doAction({
@@ -2470,7 +2474,7 @@ test("pivot view should use default order for auto sorting", async () => {
 });
 
 test("pivot view can be flipped", async () => {
-    var rpcCount = 0;
+    let rpcCount = 0;
     onRpc(() => {
         rpcCount++;
     });
@@ -2620,9 +2624,10 @@ test("export data in excel with comparison", async () => {
 
     mockDate("2016-12-20T1:00:00");
 
+    const downloadDef = new Deferred();
     patchWithCleanup(download, {
-        _download: ({ url, data }) => {
-            data = JSON.parse(data.data);
+        _download: async ({ url, data }) => {
+            data = JSON.parse(await data.data.text());
             for (const l of data.col_group_headers) {
                 const titles = l.map((o) => o.title);
                 expect.step(titles);
@@ -2636,6 +2641,7 @@ test("export data in excel with comparison", async () => {
             const valuesLength = data.rows.map((o) => o.values.length);
             expect.step(valuesLength);
             expect(url).toBe("/web/pivot/export_xlsx");
+            downloadDef.resolve();
             return Promise.resolve();
         },
     });
@@ -2674,6 +2680,7 @@ test("export data in excel with comparison", async () => {
     // With the data above, the time ranges contain some records.
     // export data. Should execute 'get_file'
     await contains(".o_pivot_buttons button.o_pivot_download").click();
+    await downloadDef;
 
     expect.verifySteps([
         // col group headers
@@ -3041,14 +3048,14 @@ test.tags("desktop");
 test("Navigation list view for a group and back with breadcrumbs", async () => {
     expect.assertions(9);
 
-    Partner._views["pivot,false"] = `<pivot>
+    Partner._views["pivot"] = `<pivot>
 			<field name="customer" type="row"/>
 		</pivot>`;
-    Partner._views["search,false"] = `<search>
+    Partner._views["search"] = `<search>
 			<filter name="bayou" string="Bayou" domain="[('foo','=', 12)]"/>
 		</search>`;
-    Partner._views["list,false"] = `<list><field name="foo"/></list>`;
-    Partner._views["form,false"] = `<form><field name="foo"/></form>`;
+    Partner._views["list"] = `<list><field name="foo"/></list>`;
+    Partner._views["form"] = `<form><field name="foo"/></form>`;
 
     let readGroupCount = 0;
     onRpc("read_group", ({ kwargs }) => {
@@ -3473,11 +3480,11 @@ test("pivot rendering with boolean field", async () => {
 
 test.tags("desktop");
 test("empty pivot view with action helper", async () => {
-    Partner._views["pivot,false"] = `<pivot>
+    Partner._views["pivot"] = `<pivot>
 		<field name="product_id" type="measure"/>
 		<field name="date" interval="month" type="col"/>
 	</pivot>`;
-    Partner._views["search,false"] = `<search>
+    Partner._views["search"] = `<search>
 		<filter name="small_than_0" string="Small Than 0" domain="[('id', '&lt;', 0)]"/>
 	</search>`;
 
@@ -3500,11 +3507,11 @@ test("empty pivot view with action helper", async () => {
 
 test.tags("desktop");
 test("empty pivot view with sample data", async () => {
-    Partner._views["pivot,false"] = `<pivot sample="1">
+    Partner._views["pivot"] = `<pivot sample="1">
 		<field name="product_id" type="measure"/>
 		<field name="date" interval="month" type="col"/>
 	</pivot>`;
-    Partner._views["search,false"] = `<search>
+    Partner._views["search"] = `<search>
 		<filter name="small_than_0" string="Small Than 0" domain="[('id', '&lt;', 0)]"/>
 	</search>`;
 
@@ -3527,11 +3534,11 @@ test("empty pivot view with sample data", async () => {
 });
 
 test("non empty pivot view with sample data", async () => {
-    Partner._views["pivot,false"] = `<pivot sample="1">
+    Partner._views["pivot"] = `<pivot sample="1">
 		<field name="product_id" type="measure"/>
 		<field name="date" interval="month" type="col"/>
 	</pivot>`;
-    Partner._views["search,false"] = `<search>
+    Partner._views["search"] = `<search>
 		<filter name="small_than_0" string="Small Than 0" domain="[('id', '&lt;', 0)]"/>
 	</search>`;
 
@@ -3544,23 +3551,22 @@ test("non empty pivot view with sample data", async () => {
         },
     });
 
-    expect("document").not.toHaveClass("o_view_sample_data");
+    expect(".o_content").not.toHaveClass("o_view_sample_data");
     expect(".o_view_nocontent .abc").toHaveCount(0);
     expect("table").toHaveCount(1);
     await toggleSearchBarMenu();
     await toggleMenuItem("Small Than 0");
-    expect("document").not.toHaveClass("o_view_sample_data");
+    expect(".o_content").not.toHaveClass("o_view_sample_data");
     expect(".o_view_nocontent .abc").toHaveCount(1);
     expect("table").toHaveCount(0);
 });
 
 test.tags("desktop");
 test("pivot is reloaded when leaving and coming back", async () => {
-    Partner._views["pivot,false"] = `<pivot>
+    Partner._views["pivot"] = `<pivot>
 		<field name="customer" type="row"/>
 	</pivot>`;
-    Partner._views["search,false"] = `<search/>`;
-    Partner._views["list,false"] = `<list><field name="foo"/></list>`;
+    Partner._views["list"] = `<list><field name="foo"/></list>`;
 
     onRpc("partner", "*", ({ method }) => {
         expect.step(method);
@@ -3601,11 +3607,10 @@ test("pivot is reloaded when leaving and coming back", async () => {
 
 test.tags("desktop");
 test("expanded groups are kept when leaving and coming back", async () => {
-    Partner._views["pivot,false"] = `<pivot>
+    Partner._views["pivot"] = `<pivot>
 		<field name="customer" type="row"/>
 	</pivot>`;
-    Partner._views["search,false"] = `<search/>`;
-    Partner._views["list,false"] = `<list><field name="foo"/></list>`;
+    Partner._views["list"] = `<list><field name="foo"/></list>`;
 
     await mountWithCleanup(WebClient);
     await getService("action").doAction({
@@ -3640,12 +3645,11 @@ test("expanded groups are kept when leaving and coming back", async () => {
 
 test.tags("desktop");
 test("sorted rows are kept when leaving and coming back", async () => {
-    Partner._views["pivot,false"] = `<pivot>
+    Partner._views["pivot"] = `<pivot>
 		<field name="foo" type="measure"/>
 		<field name="product_id" type="row"/>
 	</pivot>`;
-    Partner._views["search,false"] = `<search/>`;
-    Partner._views["list,false"] = `<list><field name="foo"/></list>`;
+    Partner._views["list"] = `<list><field name="foo"/></list>`;
 
     await mountWithCleanup(WebClient);
     await getService("action").doAction({
@@ -3680,12 +3684,11 @@ test("sorted rows are kept when leaving and coming back", async () => {
 
 test.tags("desktop");
 test("correctly handle concurrent reloads", async () => {
-    Partner._views["pivot,false"] = `<pivot>
+    Partner._views["pivot"] = `<pivot>
 		<field name="foo" type="measure"/>
 		<field name="product_id" type="row"/>
 	</pivot>`;
-    Partner._views["search,false"] = `<search/>`;
-    Partner._views["list,false"] = `<list><field name="foo"/></list>`;
+    Partner._views["list"] = `<list><field name="foo"/></list>`;
 
     let def;
     let readGroupCount = 0;
@@ -4315,15 +4318,13 @@ test("no class 'o_view_sample_data' when real data are presented", async () => {
 });
 
 test("group by properties in pivot view", async () => {
-    onRpc("/web/dataset/call_kw/partner/web_search_read", async (request) => {
-        const { params } = await request.json();
-        if (params.kwargs.specification?.properties_definition) {
+    onRpc("partner", "web_search_read", ({ kwargs }) => {
+        if (kwargs.specification?.properties_definition) {
             expect.step("fetch_definition");
         }
     });
-    onRpc("/web/dataset/call_kw/partner/read_group", async (request) => {
-        const { params } = await request.json();
-        if (params.kwargs.groupby?.includes("properties.my_char")) {
+    onRpc("partner", "read_group", ({ kwargs }) => {
+        if (kwargs.groupby?.includes("properties.my_char")) {
             expect.step("read_group");
             return [
                 {
@@ -4548,4 +4549,25 @@ test("missing deleted property field definition is created", async function (ass
     });
     expect.verifySteps([`["properties.my_char"]`]);
     expect(getCurrentValues()).toBe("4,2,1");
+});
+
+test("do not count distinct a measure field if we are grouping by it", async () => {
+    onRpc("read_group", ({ kwargs }) => {
+        expect(kwargs.fields.length).toBe(1);
+        if (kwargs.groupby.length === 0) {
+            expect(kwargs.fields).toEqual(["product_id:count_distinct"]);
+        }
+        if (kwargs.groupby.length === 1) {
+            expect(kwargs.fields).toEqual(["product_id"]);
+        }
+    });
+    await mountView({
+        type: "pivot",
+        resModel: "partner",
+        arch: `
+			<pivot>
+				<field name="product_id" type="measure"/>
+			</pivot>`,
+        groupBy: ["product_id"],
+    });
 });

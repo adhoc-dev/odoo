@@ -1,5 +1,9 @@
-import { after, afterEach } from "@odoo/hoot";
 import {
+    advanceFrame,
+    advanceTime,
+    after,
+    afterEach,
+    animationFrame,
     check,
     clear,
     click,
@@ -19,21 +23,21 @@ import {
     select,
     uncheck,
     waitFor,
-} from "@odoo/hoot-dom";
-import { advanceFrame, advanceTime, animationFrame } from "@odoo/hoot-mock";
+} from "@odoo/hoot";
 import { hasTouch } from "@web/core/browser/feature_detection";
 
 /**
- * @typedef {import("@odoo/hoot-dom").DragHelpers} DragHelpers
- * @typedef {import("@odoo/hoot-dom").FillOptions} FillOptions
- * @typedef {import("@odoo/hoot-dom").InputValue} InputValue
- * @typedef {import("@odoo/hoot-dom").KeyStrokes} KeyStrokes
- * @typedef {import("@odoo/hoot-dom").PointerOptions} PointerOptions
- * @typedef {import("@odoo/hoot-dom").Position} Position
- * @typedef {import("@odoo/hoot-dom").QueryOptions} QueryOptions
- * @typedef {import("@odoo/hoot-dom").Target} Target
+ * @typedef {import("@odoo/hoot").DragHelpers} DragHelpers
+ * @typedef {import("@odoo/hoot").DragOptions} DragOptions
+ * @typedef {import("@odoo/hoot").FillOptions} FillOptions
+ * @typedef {import("@odoo/hoot").InputValue} InputValue
+ * @typedef {import("@odoo/hoot").KeyStrokes} KeyStrokes
+ * @typedef {import("@odoo/hoot").PointerOptions} PointerOptions
+ * @typedef {import("@odoo/hoot").Position} Position
+ * @typedef {import("@odoo/hoot").QueryOptions} QueryOptions
+ * @typedef {import("@odoo/hoot").Target} Target
  *
- * @typedef {PointerOptions & {
+ * @typedef {DragOptions & {
  *  initialPointerMoveDistance?: number;
  *  pointerDownDuration: number;
  * }} DragAndDropOptions
@@ -48,7 +52,7 @@ import { hasTouch } from "@web/core/browser/feature_detection";
 
 /**
  * @template T
- * @typedef {import("@odoo/hoot-dom").MaybePromise<T>} MaybePromise
+ * @typedef {T | PromiseLike<T>} MaybePromise
  */
 
 /**
@@ -120,12 +124,18 @@ const waitForTouchDelay = async (delay) => {
     }
 };
 
-let unconsumedContains = [];
+/** @type {(() => any) | null} */
+let cancelCurrentDragSequence = null;
+/** @type {Target[]} */
+const unconsumedContains = [];
 
-afterEach(() => {
+afterEach(async () => {
+    if (cancelCurrentDragSequence) {
+        await cancelCurrentDragSequence();
+    }
     if (unconsumedContains.length) {
         const targets = unconsumedContains.map(String).join(", ");
-        unconsumedContains = [];
+        unconsumedContains.length = 0;
         throw new Error(
             `called 'contains' on "${targets}" without any action: use 'waitFor' if no interaction is intended`
         );
@@ -160,7 +170,7 @@ export function contains(target, options) {
     unconsumedContains.push(target);
 
     /** @type {Promise<Element>} */
-    const nodePromise = waitFor(target, { visible: true, ...options });
+    const nodePromise = waitFor.as("contains")(target, { visible: true, ...options });
     return {
         /**
          * @param {PointerOptions} [options]
@@ -198,11 +208,11 @@ export function contains(target, options) {
          * @returns {Promise<DragHelpers>}
          */
         drag: async (options) => {
-            consumeContains();
             /** @type {typeof cancel} */
             const cancelWithDelay = async (options) => {
                 await cancel(options);
                 await advanceFrame();
+                cancelCurrentDragSequence = null;
             };
 
             /** @type {typeof drop} */
@@ -212,6 +222,7 @@ export function contains(target, options) {
                 }
                 await drop();
                 await advanceFrame();
+                cancelCurrentDragSequence = null;
             };
 
             /** @type {typeof moveTo} */
@@ -221,6 +232,11 @@ export function contains(target, options) {
 
                 return helpersWithDelay;
             };
+
+            consumeContains();
+
+            await cancelCurrentDragSequence?.();
+            cancelCurrentDragSequence = cancelWithDelay;
 
             const { cancel, drop, moveTo } = await drag(nodePromise, options);
             const helpersWithDelay = {
@@ -238,10 +254,13 @@ export function contains(target, options) {
         /**
          * @param {Target} target
          * @param {DragAndDropOptions} [dropOptions]
-         * @param {PointerOptions} [dragOptions]
+         * @param {DragOptions} [dragOptions]
          */
         dragAndDrop: async (target, dropOptions, dragOptions) => {
             consumeContains();
+
+            await cancelCurrentDragSequence?.();
+
             const [from, to] = await Promise.all([nodePromise, waitFor(target)]);
             const { drop, moveTo } = await drag(from, dragOptions);
 
@@ -320,7 +339,8 @@ export function contains(target, options) {
          */
         scroll: async (position) => {
             consumeContains();
-            await scroll(nodePromise, position);
+            // disable "scrollable" check
+            await scroll(nodePromise, position, { scrollable: false, ...options });
             await animationFrame();
         },
         /**
@@ -329,6 +349,16 @@ export function contains(target, options) {
         select: async (value) => {
             consumeContains();
             await select(value, { target: nodePromise });
+            await animationFrame();
+        },
+        /**
+         * @param {InputValue} value
+         */
+        selectDropdownItem: async (value) => {
+            consumeContains();
+            await callClick(click, queryOne(".dropdown-toggle", { root: await nodePromise }));
+            const item = await waitFor(`.dropdown-item:contains(${value})`);
+            await callClick(click, item);
             await animationFrame();
         },
         /**

@@ -40,6 +40,7 @@ class TestUi(AccountTestInvoicingHttpCommon):
             'country_id': None, # Also resets account_fiscal_country_id
             'account_sale_tax_id': None,
             'account_purchase_tax_id': None,
+            'external_report_layout_id': self.env.ref('web.external_layout_standard').id,
         })
 
         account_with_taxes = self.env['account.account'].search([('tax_ids', '!=', False), ('company_ids', '=', self.env.company.id)])
@@ -86,3 +87,11 @@ class TestUi(AccountTestInvoicingHttpCommon):
         product.supplier_taxes_id = new_tax
 
         self.start_tour("/odoo", 'account_tax_group', login="admin")
+
+    def test_section_saved_on_tab_keydown_tour(self):
+        self.env['res.partner'].create({
+            'name': 'Partner A',
+        })
+        self.start_tour('/odoo/customer-invoices', 'section_saved_on_tab_keydown_tour', login='accountman')
+        invoice = self.env['account.move'].search([('move_type', '=', 'out_invoice')])
+        self.assertEqual(invoice.invoice_line_ids[0].name, 'Section content')

@@ -1,8 +1,9 @@
 import { splitTextNode } from "@html_editor/utils/dom";
 import { Plugin } from "../plugin";
-import { CTYPES } from "../utils/content_types";
+import { CTGROUPS, CTYPES } from "../utils/content_types";
 import { getState, isFakeLineBreak, prepareUpdate } from "../utils/dom_state";
 import { DIRECTIONS, leftPos, rightPos } from "../utils/position";
+import { closestElement } from "@html_editor/utils/dom_traversal";
 
 /**
  * @typedef { Object } LineBreakShared
@@ -42,6 +43,10 @@ export class LineBreakPlugin extends Plugin {
      * @param {number} params.targetOffset
      */
     insertLineBreakNode({ targetNode, targetOffset }) {
+        const closestEl = closestElement(targetNode);
+        if (closestEl && !closestEl.isContentEditable) {
+            return;
+        }
         if (targetNode.nodeType === Node.TEXT_NODE) {
             targetOffset = splitTextNode(targetNode, targetOffset);
             targetNode = targetNode.parentElement;
@@ -60,6 +65,10 @@ export class LineBreakPlugin extends Plugin {
      * @param {number} params.targetOffset
      */
     insertLineBreakElement({ targetNode, targetOffset }) {
+        const closestEl = closestElement(targetNode);
+        if (closestEl && !closestEl.isContentEditable) {
+            return;
+        }
         const restore = prepareUpdate(targetNode, targetOffset);
 
         const brEl = this.document.createElement("br");
@@ -71,7 +80,7 @@ export class LineBreakPlugin extends Plugin {
         }
         if (
             isFakeLineBreak(brEl) &&
-            getState(...leftPos(brEl), DIRECTIONS.LEFT).cType !== CTYPES.BR
+            !(getState(...leftPos(brEl), DIRECTIONS.LEFT).cType & (CTGROUPS.BLOCK | CTYPES.BR))
         ) {
             const brEl2 = this.document.createElement("br");
             brEl.before(brEl2);

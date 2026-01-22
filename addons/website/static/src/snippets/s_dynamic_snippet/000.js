@@ -176,7 +176,11 @@ const DynamicSnippet = publicWidget.Widget.extend({
      */
     _render: function () {
         if (this.data.length > 0 || this.editableMode) {
-            this.$el.removeClass('o_dynamic_snippet_empty');
+            // Compatibility code: A dynamic snippet may end up with the
+            // `o_dynamic_empty` class or `o_dynamic_snippet_empty` or both.
+            // Remark: the `s_dynamic_empty` class was introduced by mistake
+            // and does not have any associated CSS.
+            this.$el.removeClass('o_dynamic_snippet_empty o_dynamic_empty');
             this._prepareContent();
         } else {
             this.$el.addClass('o_dynamic_snippet_empty');
@@ -197,11 +201,13 @@ const DynamicSnippet = publicWidget.Widget.extend({
         this.trigger_up('widgets_stop_request', {
             $target: $templateArea,
         });
-        const mainPageUrl = this._getMainPageUrl();
         const allContentLink = this.el.querySelector(".s_dynamic_snippet_main_page_url");
-        if (allContentLink && mainPageUrl) {
-            allContentLink.href = mainPageUrl;
-            allContentLink.classList.remove("d-none");
+        if (allContentLink?.classList.contains("d-none")) {
+            const mainPageUrl = this._getMainPageUrl();
+            if (mainPageUrl) {
+                allContentLink.href = mainPageUrl;
+                allContentLink.classList.remove("d-none");
+            }
         }
         $templateArea.html(this.renderedContent);
         // TODO this is probably not the only public widget which creates DOM

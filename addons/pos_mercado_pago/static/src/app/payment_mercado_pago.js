@@ -44,12 +44,12 @@ export class PaymentMercadoPago extends PaymentInterface {
     }
 
     async get_payment(payment_id) {
-        const line = this.pos.get_order().selected_paymentline;
+        const line = this.pos.get_order().get_selected_paymentline();
         // mp_get_payment_status will call the Mercado Pago api
         return await this.env.services.orm.silent.call(
             "pos.payment.method",
             "mp_get_payment_status",
-            [[line.payment_method.id], payment_id]
+            [[line.payment_method_id.id], payment_id]
         );
     }
 
@@ -147,7 +147,9 @@ export class PaymentMercadoPago extends PaymentInterface {
                 // that was actually canceled/finished by the user on the terminal.
                 // Then the strategy here is to ask Mercado Pago MAX_RETRY times the
                 // payment intent status, hoping going out of this status
-                if (["OPEN", "ON_TERMINAL"].includes(last_status_payment_intent.state)) {
+                if (
+                    ["OPEN", "ON_TERMINAL", "PROCESSING"].includes(last_status_payment_intent.state)
+                ) {
                     return await new Promise((resolve) => {
                         let retry_cnt = 0;
                         const s = setInterval(async () => {

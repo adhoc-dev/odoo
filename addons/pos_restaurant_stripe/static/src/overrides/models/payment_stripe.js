@@ -10,6 +10,14 @@ patch(PaymentStripe.prototype, {
         }
     },
 
+    async send_payment_adjust(uuid) {
+        const order = this.pos.get_order();
+        const line = order.get_paymentline_by_uuid(uuid);
+        this.capturePaymentStripe(line.transaction_id, line.amount, {
+            stripe_currency_rounding: line.currency_id.rounding,
+        });
+    },
+
     canBeAdjusted(uuid) {
         var order = this.pos.get_order();
         var line = order.get_paymentline_by_uuid(uuid);
@@ -17,7 +25,7 @@ patch(PaymentStripe.prototype, {
             this.pos.config.set_tip_after_payment &&
             line.payment_method_id.use_payment_terminal === "stripe" &&
             line.card_type !== "interac" &&
-            !line.card_type.includes("eftpos")
+            (!line.card_type || !line.card_type.includes("eftpos"))
         );
     },
 });

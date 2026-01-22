@@ -1,6 +1,5 @@
 import json
 import logging
-import pprint
 import time
 import urllib.parse
 import urllib3
@@ -44,24 +43,26 @@ def on_message(ws, messages):
         Synchronously handle messages received by the websocket.
     """
     messages = json.loads(messages)
-    _logger.debug("websocket received a message: %s", pprint.pformat(messages))
     iot_mac = helpers.get_mac_address()
     for message in messages:
         message_type = message['message']['type']
+        _logger.info("Received message of type %s", message_type)
         if message_type == 'iot_action':
             payload = message['message']['payload']
             if iot_mac in payload['iotDevice']['iotIdentifiers']:
                 for device in payload['iotDevice']['identifiers']:
                     device_identifier = device['identifier']
                     if device_identifier in main.iot_devices:
+                        if main.iot_devices[device_identifier]._check_idempotency(**payload):
+                            return
                         start_operation_time = time.perf_counter()
-                        _logger.debug("device '%s' action started with: %s", device_identifier, pprint.pformat(payload))
+                        _logger.info("device '%s' action started", device_identifier)
                         main.iot_devices[device_identifier].action(payload)
                         _logger.info("device '%s' action finished - %.*f", device_identifier, 3, time.perf_counter() - start_operation_time)
             else:
                 # likely intended as IoT share the same channel
                 _logger.debug("message ignored due to different iot mac: %s", iot_mac)
-        elif message_type != 'print_confirmation':  # intended to be ignored
+        elif message_type not in ['print_confirmation', 'bundle_changed']:  # intended to be ignored
             _logger.warning("message type not supported: %s", message_type)
 
 

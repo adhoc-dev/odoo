@@ -8,13 +8,15 @@ import {
 } from "@mail/../tests/mail_test_helpers";
 import { Thread } from "@mail/core/common/thread";
 import { describe, test } from "@odoo/hoot";
-import { tick } from "@odoo/hoot-dom";
+import { advanceTime, Deferred, tick } from "@odoo/hoot-dom";
+import { disableAnimations } from "@odoo/hoot-mock";
 import { patchWithCleanup } from "@web/../tests/web_test_helpers";
 
 defineMailModels();
 describe.current.tags("desktop");
 
 test("can highlight messages that are not yet loaded", async () => {
+    disableAnimations();
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "general" });
     let middleMessageId;
@@ -38,6 +40,7 @@ test("can highlight messages that are not yet loaded", async () => {
 });
 
 test("can highlight message (slow ref registration)", async () => {
+    disableAnimations();
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "general" });
     let middleMessageId;
@@ -52,21 +55,21 @@ test("can highlight message (slow ref registration)", async () => {
         }
     }
     await pyEnv["discuss.channel"].set_message_pin(channelId, middleMessageId, true);
-    let slowRegisterMessageRef = false;
+    let slowRegisterMessageDef;
     patchWithCleanup(Thread.prototype, {
-        async registerMessageRef() {
-            if (slowRegisterMessageRef) {
-                // Ensure scroll is made even when messages are mounted later.
-                await new Promise((res) => setTimeout(res, 250));
-            }
-            super.registerMessageRef(...arguments);
+        async registerMessageRef(...args) {
+            // Ensure scroll is made even when messages are mounted later.
+            await slowRegisterMessageDef;
+            return super.registerMessageRef(...args);
         },
     });
     await start();
     await openDiscuss(channelId);
     await tick(); // Wait for the scroll to first unread to complete.
     await isInViewportOf(".o-mail-Message:contains(message 199)", ".o-mail-Thread");
-    slowRegisterMessageRef = true;
+    slowRegisterMessageDef = new Deferred();
     await click("a[data-oe-type='highlight']");
+    await advanceTime(1000);
+    slowRegisterMessageDef.resolve();
     await isInViewportOf(".o-mail-Message:contains(message 100)", ".o-mail-Thread");
 });

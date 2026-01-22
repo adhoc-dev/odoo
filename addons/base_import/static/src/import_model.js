@@ -286,7 +286,7 @@ export class BaseImportModel {
         }
 
         if (!importRes.hasError) {
-            if (importRes.nextrow) {
+            if (!isTest && importRes.nextrow) {
                 this._addMessage("warning", [
                     _t(
                         "Click 'Resume' to proceed with the import, resuming at line %s.",
@@ -297,6 +297,7 @@ export class BaseImportModel {
             }
             if (isTest) {
                 this._addMessage("info", [_t("Everything seems valid.")]);
+                this.setOption("skip", 0);
             }
         } else {
             importRes.nextrow = startRow;
@@ -419,8 +420,14 @@ export class BaseImportModel {
         // Push local image to records
         await this._pushLocalImageToRecords(ids, binary_filenames, isTest);
 
-        this.setOption("skip", nextrow || 0);
-        importRes.nextrow = nextrow;
+        // Check if we should continue
+        if (nextrow) {
+            this.setOption("skip", nextrow);
+            importRes.nextrow = nextrow;
+        } else {
+            // Falsy `nextrow` signals there's nothing left to import
+            this.stopImport();
+        }
         return false;
     }
 

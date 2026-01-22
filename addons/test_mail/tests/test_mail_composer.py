@@ -118,21 +118,7 @@ class TestMailComposer(MailCommon, TestRecipients):
         :param add_web: add web context, generally making noise especially in
           mass mail mode (active_id/ids both present in context)
         """
-        base_context = {
-            'default_model': records._name,
-            'default_res_ids': records.ids,
-        }
-        if len(records) == 1:
-            base_context['default_composition_mode'] = 'comment'
-        else:
-            base_context['default_composition_mode'] = 'mass_mail'
-        if add_web:
-            base_context['active_model'] = records._name
-            base_context['active_id'] = records[0].id
-            base_context['active_ids'] = records.ids
-        if values:
-            base_context.update(**values)
-        return base_context
+        return self._get_mail_composer_web_context(records, add_web=add_web, **values)
 
 
 @tagged('mail_composer')
@@ -1552,6 +1538,29 @@ class TestComposerResultsComment(TestMailComposer, CronMixinCase):
         _mail, message = composer._action_send_mail()
         self.assertEqual(message.subtype_id, self.env.ref('mail.mt_note'))
 
+        # Check that the message created from the mail composer gets the values
+        # we passed to the composer context. When we provide a custom `body`
+        # and `email_add_signature` flag, the message should keep those values
+        # and should not add any signature to the message body.
+
+        composer = self.env['mail.compose.message'].with_context(
+            self._get_web_context(self.test_record),
+            default_body='<p>Hello world</p>',
+            default_email_add_signature=False
+        ).create({})
+        _mail, message = composer._action_send_mail()
+        self.assertFalse(message.email_add_signature)
+        self.assertEqual(message.body, '<p>Hello world</p>')
+
+        composer = self.env['mail.compose.message'].with_context(
+            self._get_web_context(self.test_record),
+            default_body='<p>Hi there</p>',
+            default_email_add_signature=True
+        ).create({})
+        _mail, message = composer._action_send_mail()
+        self.assertTrue(message.email_add_signature)
+        self.assertEqual(message.body, '<p>Hi there</p>')
+
     @users('employee')
     @mute_logger('odoo.tests', 'odoo.addons.mail.models.mail_mail', 'odoo.models.unlink')
     def test_mail_composer_recipients(self):
@@ -2836,6 +2845,8 @@ class TestComposerResultsMass(TestMailComposer):
                                             ],
                                             'body_content': exp_body,
                                             'email_from': self.partner_employee_2.email_formatted,
+                                            # profit from this test to check references are set to message_id in mailing emails
+                                            'references_message_id_check': True,
                                             'subject': exp_subject,
                                         },
                                         fields_values={

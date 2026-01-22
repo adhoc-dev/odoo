@@ -2,9 +2,9 @@
 {
     'name': 'Argentina - Accounting',
     'website': 'https://www.odoo.com/documentation/master/applications/finance/fiscal_localizations/argentina.html',
-    'icon': '/account/static/description/l10n.png',
     'countries': ['ar'],
-    'version': '3.5',
+    'icon': '/base/static/img/country_flags/ar.png',
+    'version': "3.7",
     'description': """
 Functional
 ----------
@@ -107,6 +107,7 @@ Master Data:
         'demo/respinsc_demo.xml',
         'demo/res_partner_demo.xml',
         'demo/product_product_demo.xml',
+        'demo/account_tax_demo.xml',
         'demo/account_customer_invoice_demo.xml',
         'demo/account_customer_refund_demo.xml',
         'demo/account_supplier_invoice_demo.xml',

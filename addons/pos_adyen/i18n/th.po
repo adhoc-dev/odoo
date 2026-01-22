@@ -1,22 +1,23 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* pos_adyen
-# 
+#
 # Translators:
 # Wil Odoo, 2024
-# 
+# Rasareeyar Lappiam, 2024
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
+"POT-Creation-Date: 2025-12-29 18:37+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
+"Last-Translator: Rasareeyar Lappiam, 2024\n"
 "Language-Team: Thai (https://app.transifex.com/odoo/teams/41243/th/)\n"
+"Language: th\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: th\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #. module: pos_adyen
@@ -147,8 +148,8 @@ msgid ""
 "Terminal %(terminal)s is already used in company %(company)s on payment "
 "method %(payment_method)s."
 msgstr ""
-"เทอร์มินัล %(terminal)s ถูกใช้แล้วในบริษัท %(company)s "
-"เกี่ยวกับวิธีการชำระเงิน %(pay_method)s"
+"เทอร์มินัล %(terminal)s ถูกใช้แล้วในบริษัท %(company)s เกี่ยวกับวิธีการชำระเงิน %"
+"(pay_method)s"
 
 #. module: pos_adyen
 #. odoo-python
@@ -160,16 +161,16 @@ msgstr "เทอร์มินัล %(terminal)s ถูกใช้แล้�
 #. module: pos_adyen
 #: model:ir.model.fields,help:pos_adyen.field_pos_payment_method__adyen_event_url
 msgid "This URL needs to be pasted on Adyen's portal terminal settings."
-msgstr ""
+msgstr "ต้องวาง URL นี้ลงในส่วนการตั้งค่าเทอร์มินัลพอร์ทัลของ Adyen"
 
 #. module: pos_adyen
 #: model:ir.model.fields,help:pos_adyen.field_pos_payment_method__adyen_api_key
 msgid ""
-"Used when connecting to Adyen: https://docs.adyen.com/user-management/how-"
-"to-get-the-api-key/#description"
-msgstr ""
-"ใช้เมื่อเชื่อมต่อกับ Adyen: https://docs.adyen.com/user-management/how-to-"
+"Used when connecting to Adyen: https://docs.adyen.com/user-management/how-to-"
 "get-the-api-key/#description"
+msgstr ""
+"ใช้เมื่อเชื่อมต่อกับ Adyen: https://docs.adyen.com/user-management/how-to-get-the-"
+"api-key/#description"
 
 #. module: pos_adyen
 #: model:ir.model.fields,help:pos_adyen.field_pos_payment_method__adyen_terminal_identifier

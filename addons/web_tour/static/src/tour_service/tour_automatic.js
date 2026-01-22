@@ -1,14 +1,14 @@
-import { tourState } from "./tour_state";
-import { config as transitionConfig } from "@web/core/transition";
-import { TourStepAutomatic } from "./tour_step_automatic";
-import { Macro } from "@web/core/macro";
+import * as hootDom from "@odoo/hoot-dom";
+import { enableEventLogs, setupEventActions } from "@web/../lib/hoot-dom/helpers/events";
 import { browser } from "@web/core/browser/browser";
-import { setupEventActions } from "@web/../lib/hoot-dom/helpers/events";
-import { delay } from "@odoo/hoot-dom";
+import { Macro } from "@web/core/macro";
+import { config as transitionConfig } from "@web/core/transition";
+import { tourState } from "./tour_state";
+import { TourStepAutomatic } from "./tour_step_automatic";
 
 export class TourAutomatic {
     mode = "auto";
-    pointer = null;
+    allowUnload = false;
     constructor(data) {
         Object.assign(this, data);
         this.steps = this.steps.map((step, index) => new TourStepAutomatic(step, this, index));
@@ -27,96 +27,106 @@ export class TourAutomatic {
         return this.config.debug !== false;
     }
 
-    get checkForUndeterminisms() {
-        return this.config.delayToCheckUndeterminisms > 0;
-    }
-
-    start(pointer) {
-        setupEventActions(document.createElement("div"));
+    start() {
+        setupEventActions(document.createElement("div"), { allowSubmit: true });
+        enableEventLogs(this.debugMode);
+        const { delayToCheckUndeterminisms, stepDelay } = this.config;
         const macroSteps = this.steps
             .filter((step) => step.index >= this.currentIndex)
-            .flatMap((step) => {
-                const timeout = (step.timeout || 10000) + this.config.stepDelay;
-                return [
-                    {
-                        action: async () => {
-                            if (this.debugMode) {
-                                console.groupCollapsed(step.describeMe);
-                                console.log(step.stringify);
-                            } else {
-                                console.log(step.describeMe);
-                            }
-                            if (step.break && this.debugMode) {
+            .flatMap((step) => [
+                {
+                    action: async () => {
+                        if (this.debugMode) {
+                            console.groupCollapsed(step.describeMe);
+                            console.log(step.stringify);
+                            if (step.break) {
                                 // eslint-disable-next-line no-debugger
                                 debugger;
                             }
-                            // This delay is important for making the current set of tour tests pass.
-                            // IMPROVEMENT: Find a way to remove this delay.
-                            await new Promise((resolve) => requestAnimationFrame(resolve));
-                            if (this.config.stepDelay > 0) {
-                                await delay(this.config.stepDelay);
-                            }
-                        },
+                        } else {
+                            console.log(step.describeMe);
+                        }
+                        // This delay is important for making the current set of tour tests pass.
+                        // IMPROVEMENT: Find a way to remove this delay.
+                        await new Promise((resolve) => requestAnimationFrame(resolve));
+                        if (stepDelay > 0) {
+                            await hootDom.delay(stepDelay);
+                        }
                     },
-                    {
-                        initialDelay: () => {
-                            return this.previousStepIsJustACheck ? 0 : null;
-                        },
-                        trigger: () => step.findTrigger(),
-                        timeout,
-                        action: async () => {
-                            if (this.checkForUndeterminisms) {
-                                try {
-                                    await step.checkForUndeterminisms();
-                                } catch (error) {
-                                    this.throwError([
-                                        ...this.currentStep.describeWhyIFailed,
-                                        error.message,
-                                    ]);
-                                }
+                },
+                {
+                    trigger: step.trigger ? () => step.findTrigger() : null,
+                    timeout:
+                        step.pause && this.debugMode
+                            ? 9999999
+                            : step.timeout || this.timeout || 10000,
+                    action: async (trigger) => {
+                        if (delayToCheckUndeterminisms > 0) {
+                            await step.checkForUndeterminisms(trigger, delayToCheckUndeterminisms);
+                        }
+                        if (!step.skipped && step.expectUnloadPage) {
+                            this.allowUnload = true;
+                            setTimeout(() => {
+                                const message = `
+                                    The key { expectUnloadPage } is defined but page has not been unloaded within 20000 ms.
+                                    You probably don't need it.
+                                `.replace(/^\s+/gm, "");
+                                this.throwError(message);
+                            }, 20000);
+                        }
+                        await step.doAction();
+                        if (this.debugMode) {
+                            console.log(trigger);
+                            if (step.skipped) {
+                                console.log("This step has been skipped");
+                            } else {
+                                console.log("This step has run successfully");
                             }
-                            this.previousStepIsJustACheck = !this.currentStep.hasAction;
-                            if (this.debugMode) {
-                                if (!step.skipped && this.showPointerDuration > 0 && step.element) {
-                                    // Useful in watch mode.
-                                    pointer.pointTo(step.element, this);
-                                    await delay(this.showPointerDuration);
-                                    pointer.hide();
-                                }
-                                console.log(step.element);
-                                if (step.skipped) {
-                                    console.log("This step has been skipped");
-                                } else {
-                                    console.log("This step has run successfully");
-                                }
-                                console.groupEnd();
-                            }
-                            const result = await step.doAction();
-                            if (step.pause && this.debugMode) {
+                            console.groupEnd();
+                            if (step.pause) {
                                 await this.pause();
                             }
-                            tourState.setCurrentIndex(step.index + 1);
-                            return result;
-                        },
+                        }
+                        tourState.setCurrentIndex(step.index + 1);
+                        if (this.allowUnload) {
+                            return "StopTheMacro!";
+                        }
                     },
-                ];
-            });
+                },
+            ]);
 
         const end = () => {
+            delete window[hootNameSpace];
             transitionConfig.disabled = false;
             tourState.clear();
-            pointer.stop();
             //No need to catch error yet.
-            window.addEventListener("error", (ev) => ev.preventDefault());
-            window.addEventListener("unhandledrejection", (ev) => ev.preventDefault());
+            window.addEventListener(
+                "error",
+                (ev) => {
+                    ev.preventDefault();
+                    ev.stopImmediatePropagation();
+                },
+                true
+            );
+            window.addEventListener(
+                "unhandledrejection",
+                (ev) => {
+                    ev.preventDefault();
+                    ev.stopImmediatePropagation();
+                },
+                true
+            );
         };
 
         this.macro = new Macro({
             name: this.name,
-            checkDelay: this.checkDelay || 400,
             steps: macroSteps,
             onError: (error) => {
-                this.throwError([error]);
+                if (error.type === "Timeout") {
+                    this.throwError(...this.currentStep.describeWhyIFailed, error.message);
+                } else {
+                    this.throwError(error.message);
+                }
                 end();
             },
             onComplete: () => {
@@ -129,13 +139,6 @@ export class TourAutomatic {
                 browser.console.log(`\n\n${msg.join("\n")}\n`);
                 end();
             },
-            onTimeout: (timeout) => {
-                this.throwError([
-                    ...this.currentStep.describeWhyIFailed,
-                    `TIMEOUT: The step failed to complete within ${timeout} ms.`,
-                ]);
-                end();
-            },
         });
         if (this.debugMode && this.currentIndex === 0) {
             // Starts the tour with a debugger to allow you to choose devtools configuration.
@@ -143,6 +146,8 @@ export class TourAutomatic {
             debugger;
         }
         transitionConfig.disabled = true;
+        const hootNameSpace = hootDom.exposeHelpers(hootDom);
+        console.debug(`Hoot DOM helpers available from \`window.${hootNameSpace}\``);
         this.macro.start();
     }
 
@@ -169,11 +174,11 @@ export class TourAutomatic {
     /**
      * @param {string} [error]
      */
-    throwError(errors = []) {
+    throwError(...args) {
         console.groupEnd();
         tourState.setCurrentTourOnError();
         // console.error notifies the test runner that the tour failed.
-        browser.console.error([`FAILED: ${this.currentStep.describeMe}.`, ...errors].join("\n"));
+        browser.console.error([`FAILED: ${this.currentStep.describeMe}.`, ...args].join("\n"));
         // The logged text shows the relative position of the failed step.
         // Useful for finding the failed step.
         browser.console.dir(this.describeWhereIFailed);

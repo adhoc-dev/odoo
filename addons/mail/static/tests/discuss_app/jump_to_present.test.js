@@ -15,8 +15,8 @@ import {
 import { describe, expect, test } from "@odoo/hoot";
 
 import { PRESENT_VIEWPORT_THRESHOLD } from "@mail/core/common/thread";
+import { queryFirst, tick } from "@odoo/hoot-dom";
 import { serverState } from "@web/../tests/web_test_helpers";
-import { queryFirst } from "@odoo/hoot-dom";
 
 describe.current.tags("desktop");
 defineMailModels();
@@ -157,7 +157,7 @@ test("Jump to old reply should prompt jump to present (RPC small delay)", async 
     pyEnv["discuss.channel.member"].write([selfMember.id], {
         new_message_separator: newestMessageId + 1,
     });
-    onRpcBefore("/discuss/channel/messages", async () => await new Promise(setTimeout)); // small delay
+    onRpcBefore("/discuss/channel/messages", tick); // small delay
     await start();
     await openDiscuss(channelId);
     await contains(".o-mail-Message", { count: 30 });
@@ -259,4 +259,25 @@ test("show jump to present banner after scrolling up 10 messages", async () => {
     // scroll to around 10th message before newest
     await scroll(".o-mail-Thread", queryFirst(".o-mail-Thread").scrollTop - 5 * messageHeight);
     await contains("[title='Jump to Present']");
+});
+
+test("focus composer after jump to present", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    pyEnv["mail.message"].create(
+        [...Array(40).keys()].map((i) => ({
+            body: `<p>Non Empty Message ${i}</p>`,
+            message_type: "comment",
+            model: "discuss.channel",
+            res_id: channelId,
+        }))
+    );
+    await start();
+    await openDiscuss(channelId);
+    await contains(".o-mail-Message", { count: 30 });
+    await contains(".o-mail-Composer.o-focused");
+    queryFirst(".o-mail-Composer-input").blur();
+    await contains(".o-mail-Composer.o-focused", { count: 0 });
+    await click("[title='Jump to Present']");
+    await contains(".o-mail-Composer.o-focused");
 });

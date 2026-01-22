@@ -1,12 +1,9 @@
 import { PosOrder } from "@point_of_sale/app/models/pos_order";
 import { patch } from "@web/core/utils/patch";
-import { roundDecimals, roundPrecision } from "@web/core/utils/numbers";
+import { roundDecimals, roundPrecision, floatIsZero } from "@web/core/utils/numbers";
 import { _t } from "@web/core/l10n/translation";
 import { loyaltyIdsGenerator } from "./pos_store";
-import {
-    compute_price_force_price_include,
-    getTaxesAfterFiscalPosition,
-} from "@point_of_sale/app/models/utils/tax_utils";
+import { compute_price_force_price_include } from "@point_of_sale/app/models/utils/tax_utils";
 const { DateTime } = luxon;
 
 function _newRandomRewardCode() {
@@ -75,12 +72,12 @@ patch(PosOrder.prototype, {
         this.invalidCoupons = true;
         this.uiState = {
             ...this.uiState,
-            disabledRewards: new Set(),
-            codeActivatedProgramRules: [],
-            couponPointChanges: {},
+            disabledRewards: this.uiState.disabledRewards || new Set(),
+            codeActivatedProgramRules: this.uiState.codeActivatedProgramRules || [],
+            couponPointChanges: this.uiState.couponPointChanges || {},
         };
         const oldCouponMapping = {};
-        if (this.uiState.couponPointChanges) {
+        if (Object.keys(this.uiState.couponPointChanges).length === 0) {
             for (const [key, pe] of Object.entries(this.uiState.couponPointChanges)) {
                 if (!this.models["loyalty.program"].get(pe.program_id)) {
                     // Remove points changes for programs that are not available anymore.
@@ -99,11 +96,16 @@ patch(PosOrder.prototype, {
     },
     setupState(vals) {
         super.setupState(...arguments);
-        this.uiState.disabledRewards = new Set(vals.disabledRewards);
+        this.uiState.disabledRewards = new Set(vals?.disabledRewards || []);
+        for (const [key, pe] of Object.entries(this.uiState.couponPointChanges)) {
+            if (!this.models["loyalty.program"].get(pe.program_id)) {
+                delete this.uiState.couponPointChanges[key];
+            }
+        }
     },
     serializeState() {
         const state = super.serializeState(...arguments);
-        state.disabledRewards = [...this.uiState.disabledRewards];
+        state.disabledRewards = [...(this.uiState.disabledRewards || [])];
         return state;
     },
     /** @override */
@@ -307,6 +309,24 @@ patch(PosOrder.prototype, {
             ) {
                 continue;
             }
+            if (
+                claimedReward.reward.program_id.program_type === "coupons" &&
+                this.lines.find(
+                    (rewardline) => rewardline.reward_id?.id === claimedReward.reward.id
+                )
+            ) {
+                continue;
+            }
+
+            //If there is only one possible reward we try to claim the most possible out of it
+            if (
+                claimedReward.reward.reward_product_ids?.length === 1 &&
+                allRewardsMerged.filter(
+                    (reward) => reward.reward.program_id.id === claimedReward.reward.program_id.id
+                ).length === 1
+            ) {
+                delete claimedReward.args["quantity"];
+            }
             this._applyReward(claimedReward.reward, claimedReward.coupon_id, claimedReward.args);
         }
     },
@@ -369,6 +389,15 @@ patch(PosOrder.prototype, {
      */
     _getPointsCorrection(program) {
         const rewardLines = this.lines.filter((line) => line.is_reward_line);
+        if (
+            !this._canGenerateRewards(
+                program,
+                this.get_total_with_tax(),
+                this.get_total_without_tax()
+            )
+        ) {
+            return 0;
+        }
         let res = 0;
         for (const rule of program.rule_ids) {
             for (const line of rewardLines) {
@@ -438,7 +467,7 @@ patch(PosOrder.prototype, {
             return false;
         });
         for (const line of this.get_orderlines()) {
-            if (line.is_reward_line && line.coupon_id.id === coupon_id) {
+            if (line.is_reward_line && line.coupon_id?.id === coupon_id) {
                 points -= line.points_cost;
             }
         }
@@ -483,6 +512,10 @@ patch(PosOrder.prototype, {
         }
         return true;
     },
+    isLineValidForLoyaltyPoints(line) {
+        // This method should be overriden in other modules
+        return true;
+    },
     /**
      * Computes how much points each program gives.
      *
@@ -491,7 +524,7 @@ patch(PosOrder.prototype, {
      */
     pointsForPrograms(programs) {
         pointsForProgramsCountedRules = {};
-        const orderLines = this.get_orderlines();
+        const orderLines = this.get_orderlines().filter((line) => !line.combo_parent_id);
         const linesPerRule = {};
         for (const line of orderLines) {
             const reward = line.reward_id;
@@ -499,6 +532,9 @@ patch(PosOrder.prototype, {
             const rewardProgram = reward && reward.program_id;
             // Skip lines for automatic discounts.
             if (isDiscount && rewardProgram.trigger === "auto") {
+                continue;
+            }
+            if (!this.isLineValidForLoyaltyPoints(line)) {
                 continue;
             }
             for (const program of programs) {
@@ -530,11 +566,19 @@ patch(PosOrder.prototype, {
                 }
                 const linesForRule = linesPerRule[rule.id] ? linesPerRule[rule.id] : [];
                 const amountWithTax = linesForRule.reduce(
-                    (sum, line) => sum + line.get_price_with_tax(),
+                    (sum, line) =>
+                        sum +
+                        (line.combo_line_ids.length > 0
+                            ? line.getComboTotalPrice()
+                            : line.get_price_with_tax()),
                     0
                 );
                 const amountWithoutTax = linesForRule.reduce(
-                    (sum, line) => sum + line.get_price_without_tax(),
+                    (sum, line) =>
+                        sum +
+                        (line.combo_line_ids.length > 0
+                            ? line.getComboTotalPriceWithoutTax()
+                            : line.get_price_without_tax()),
                     0
                 );
                 const amountCheck =
@@ -575,7 +619,10 @@ patch(PosOrder.prototype, {
                             qtyPerProduct[line._reward_product_id?.id || line.get_product().id] =
                                 lineQty;
                         }
-                        orderedProductPaid += line.get_price_with_tax();
+                        orderedProductPaid +=
+                            line.combo_line_ids.length > 0
+                                ? line.getComboTotalPrice()
+                                : line.get_price_with_tax();
                         if (!line.is_reward_line) {
                             totalProductQty += lineQty;
                         }
@@ -598,9 +645,9 @@ patch(PosOrder.prototype, {
                     // In this case we count the points per rule
                     if (rule.reward_point_mode === "unit") {
                         splitPoints.push(
-                            ...Array.apply(null, Array(totalProductQty)).map((_) => {
-                                return { points: rule.reward_point_amount };
-                            })
+                            ...Array.apply(null, Array(totalProductQty)).map((_) => ({
+                                points: rule.reward_point_amount,
+                            }))
                         );
                     } else if (rule.reward_point_mode === "money") {
                         for (const line of orderLines) {
@@ -625,9 +672,10 @@ patch(PosOrder.prototype, {
                                                 points: pointsPerUnit,
                                                 barcode: line._gift_barcode,
                                                 giftCardId: line._gift_card_id.id,
+                                                gift_code: line.gift_code,
                                             };
                                         }
-                                        return { points: pointsPerUnit };
+                                        return { points: pointsPerUnit, gift_code: line.gift_code };
                                     })
                                 );
                             }
@@ -709,19 +757,15 @@ patch(PosOrder.prototype, {
 
         const allCouponPrograms = Object.values(this.uiState.couponPointChanges)
             .filter((pe) => !excludedCouponIds.includes(pe.coupon_id))
-            .map((pe) => {
-                return {
-                    program_id: pe.program_id,
-                    coupon_id: pe.coupon_id,
-                };
-            })
+            .map((pe) => ({
+                program_id: pe.program_id,
+                coupon_id: pe.coupon_id,
+            }))
             .concat(
-                this._code_activated_coupon_ids.map((coupon) => {
-                    return {
-                        program_id: coupon.program_id.id,
-                        coupon_id: coupon.id,
-                    };
-                })
+                this._code_activated_coupon_ids.map((coupon) => ({
+                    program_id: coupon.program_id.id,
+                    coupon_id: coupon.id,
+                }))
             );
         const result = [];
         const totalWithTax = this.get_total_with_tax();
@@ -756,6 +800,13 @@ patch(PosOrder.prototype, {
             const points = this._getRealCouponPoints(couponProgram.coupon_id);
             for (const reward of program.reward_ids) {
                 if (points < reward.required_points) {
+                    continue;
+                }
+                // Skip if the reward program is of type 'coupons' and there is already an reward orderline linked to the current reward to avoid multiple reward apply
+                if (
+                    reward.program_id.program_type === "coupons" &&
+                    this.lines.find((rewardline) => rewardline.reward_id?.id === reward.id)
+                ) {
                     continue;
                 }
                 if (auto && this.uiState.disabledRewards.has(reward.id)) {
@@ -872,7 +923,9 @@ patch(PosOrder.prototype, {
     processGiftCard(newGiftCardCode, points, expirationDate) {
         const partner_id = this.partner_id?.id || false;
         const product_id = this.get_selected_orderline().product_id.id;
-        const program = this.models["loyalty.program"].find((p) => p.program_type === "gift_card");
+        const program =
+            this.get_selected_orderline()._e_wallet_program_id ||
+            this.models["loyalty.program"].find((p) => p.program_type === "gift_card");
 
         let couponId;
         const couponData = {
@@ -914,7 +967,10 @@ patch(PosOrder.prototype, {
             if (!line.get_quantity()) {
                 continue;
             }
-            const taxKey = line.tax_ids.map((t) => t.id);
+
+            const taxKey = ["ewallet", "gift_card"].includes(reward.program_id.program_type)
+                ? line.tax_ids.map((t) => t.id)
+                : line.tax_ids.filter((t) => t.amount_type !== "fixed").map((t) => t.id);
             discountable += line.get_price_with_tax();
             if (!discountablePerTax[taxKey]) {
                 discountablePerTax[taxKey] = 0;
@@ -1006,7 +1062,8 @@ patch(PosOrder.prototype, {
                             lineRewardApplicableProductsIds.has(product) &&
                             applicableProductIds.has(product)
                     ) &&
-                        lineReward.reward_type === "discount")
+                        lineReward.reward_type === "discount" &&
+                        lineReward.discount_mode != "percent")
                 ) {
                     linesToDiscount.push(line);
                 }
@@ -1033,26 +1090,19 @@ patch(PosOrder.prototype, {
             if (!discountedLines.length) {
                 continue;
             }
-            const commonLines = linesToDiscount.filter((line) => discountedLines.includes(line));
-            const nonCommonLines = discountedLines.filter(
-                (line) => !linesToDiscount.includes(line)
-            );
-            const discountedAmounts = lines.reduce((map, line) => {
-                map[line.tax_ids.map((t) => t.id)];
-                return map;
-            }, {});
-            const process = (line) => {
-                const key = line.tax_ids.map((t) => t.id);
-                if (!discountedAmounts[key] || line.reward_id) {
-                    return;
+            if (lineReward.discount_mode === "percent") {
+                const discount = lineReward.discount / 100;
+                for (const line of discountedLines) {
+                    if (line.reward_id) {
+                        continue;
+                    }
+                    if (lineReward.discount_applicability === "cheapest") {
+                        remainingAmountPerLine[line.uuid] *= 1 - discount / line.get_quantity();
+                    } else {
+                        remainingAmountPerLine[line.uuid] *= 1 - discount;
+                    }
                 }
-                const remaining = remainingAmountPerLine[line.uuid];
-                const consumed = Math.min(remaining, discountedAmounts[key]);
-                discountedAmounts[key] -= consumed;
-                remainingAmountPerLine[line.uuid] -= consumed;
-            };
-            nonCommonLines.forEach(process);
-            commonLines.forEach(process);
+            }
         }
 
         let discountable = 0;
@@ -1105,7 +1155,7 @@ patch(PosOrder.prototype, {
         }
         let { discountable, discountablePerTax } = getDiscountable(reward);
         discountable = Math.min(this.get_total_with_tax(), discountable);
-        if (!discountable) {
+        if (floatIsZero(discountable)) {
             return [];
         }
         let maxDiscount = reward.discount_max_amount || Infinity;
@@ -1155,66 +1205,6 @@ patch(PosOrder.prototype, {
                 },
             ];
         }
-
-        if (
-            rewardAppliesTo === "order" &&
-            ["per_point", "per_order"].includes(reward.discount_mode)
-        ) {
-            const rewardLineValues = [
-                {
-                    product_id: discountProduct,
-                    price_unit: -Math.min(maxDiscount, discountable),
-                    qty: 1,
-                    reward_id: reward,
-                    is_reward_line: true,
-                    coupon_id: coupon_id,
-                    points_cost: pointCost,
-                    reward_identifier_code: rewardCode,
-                    tax_ids: [],
-                },
-            ];
-
-            let rewardTaxes = reward.tax_ids;
-            if (rewardTaxes.length > 0) {
-                if (this.fiscal_position_id) {
-                    rewardTaxes = getTaxesAfterFiscalPosition(
-                        rewardTaxes,
-                        this.fiscal_position_id,
-                        this.models
-                    );
-                }
-
-                // Check for any order line where its taxes exactly match rewardTaxes
-                const matchingLines = this.get_orderlines().filter(
-                    (line) =>
-                        !line.is_delivery &&
-                        line.tax_ids.length === rewardTaxes.length &&
-                        line.tax_ids.every((tax_id) => rewardTaxes.includes(tax_id))
-                );
-
-                if (matchingLines.length == 0) {
-                    return _t("No product is compatible with this promotion.");
-                }
-
-                const untaxedAmount = matchingLines.reduce(
-                    (sum, line) => sum + line.get_price_without_tax(),
-                    0
-                );
-                // Discount amount should not exceed total untaxed amount of the matching lines
-                rewardLineValues[0].price_unit = Math.max(
-                    -untaxedAmount,
-                    rewardLineValues[0].price_unit
-                );
-
-                rewardLineValues[0].tax_ids = rewardTaxes;
-            }
-            // Discount amount should not exceed the untaxed amount on the order
-            if (Math.abs(rewardLineValues[0].price_unit) > this.amount_untaxed) {
-                rewardLineValues[0].price_unit = -this.amount_untaxed;
-            }
-            return rewardLineValues;
-        }
-
         const discountFactor = discountable ? Math.min(1, maxDiscount / discountable) : 1;
         const result = Object.entries(discountablePerTax).reduce((lst, entry) => {
             // Ignore 0 price lines
@@ -1226,7 +1216,7 @@ patch(PosOrder.prototype, {
 
             lst.push({
                 product_id: discountProduct,
-                price_unit: -(entry[1] * discountFactor),
+                price_unit: -(Math.min(this.get_total_with_tax(), entry[1]) * discountFactor),
                 qty: 1,
                 reward_id: reward,
                 is_reward_line: true,
@@ -1356,12 +1346,9 @@ patch(PosOrder.prototype, {
                 this._isRewardProductPartOfRules(reward, product) &&
                 reward.program_id.applies_on !== "future"
             ) {
-                const line = this.get_orderlines().find(
-                    (line) => line._reward_product_id?.id === product.id
-                );
                 // Compute the correction points once even if there are multiple reward lines.
                 // This is because _getPointsCorrection is taking into account all the lines already.
-                const claimedPoints = line ? this._getPointsCorrection(reward.program_id) : 0;
+                const claimedPoints = this._getPointsCorrection(reward.program_id);
                 return Math.floor((remainingPoints - claimedPoints) / reward.required_points) > 0
                     ? reward.reward_product_qty
                     : 0;
@@ -1441,13 +1428,12 @@ patch(PosOrder.prototype, {
     removeOrderline(lineToRemove) {
         if (lineToRemove.is_reward_line) {
             // Remove any line that is part of that same reward aswell.
-            const linesToRemove = this.get_orderlines().filter((line) => {
-                return (
+            const linesToRemove = this.get_orderlines().filter(
+                (line) =>
                     line.reward_id === lineToRemove.reward_id &&
                     line.coupon_id === lineToRemove.coupon_id &&
                     line.reward_identifier_code === lineToRemove.reward_identifier_code
-                );
-            });
+            );
             for (const line of linesToRemove) {
                 line.delete();
             }

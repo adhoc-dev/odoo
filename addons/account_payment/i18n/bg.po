@@ -1,7 +1,7 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* account_payment
-# 
+#
 # Translators:
 # Petko Karamotchev, 2024
 # Peter Petrov, 2024
@@ -16,19 +16,20 @@
 # Rosen Vladimirov <vladimirov.rosen@gmail.com>, 2024
 # Veselina Slavkova, 2024
 # Margarita Katzeva, 2024
-# 
+# Krasimir Dankov, 2025
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-25 07:48+0000\n"
+"POT-Creation-Date: 2025-12-29 18:37+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Margarita Katzeva, 2024\n"
+"Last-Translator: Krasimir Dankov, 2025\n"
 "Language-Team: Bulgarian (https://app.transifex.com/odoo/teams/41243/bg/)\n"
+"Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: bg\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: account_payment
@@ -122,11 +123,16 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_payment.payment_refund_wizard_view_form
 msgid ""
 "<strong>Warning!</strong> There is a refund pending for this payment.\n"
-"                        Wait a moment for it to be processed. If the refund is still pending in a\n"
-"                        few minutes, please check your payment provider configuration."
+"                        Wait a moment for it to be processed. If the refund "
+"is still pending in a\n"
+"                        few minutes, please check your payment provider "
+"configuration."
 msgstr ""
-"<strong>Внимание!</strong> По това плащане има сума за възстановяване в процес на изчакване.\n"
-"                        Изчакване възстановяването да бъде обработено. Ако до няколко минути възстановяването все още е в процес на изчакване, проверяване с вашия доставчик на плащания."
+"<strong>Внимание!</strong> По това плащане има сума за възстановяване в "
+"процес на изчакване.\n"
+"                        Изчакване възстановяването да бъде обработено. Ако "
+"до няколко минути възстановяването все още е в процес на изчакване, "
+"проверяване с вашия доставчик на плащания."
 
 #. module: account_payment
 #. odoo-python
@@ -137,8 +143,8 @@ msgstr "Вклщючена опция за прилагане на отстъп�
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment
 msgid ""
-"A payment has already been made on this invoice, please make sure to not pay"
-" twice."
+"A payment has already been made on this invoice, please make sure to not pay "
+"twice."
 msgstr ""
 "Плащането по тази фактура вече е направено, проверяване да не се дублира."
 
@@ -207,11 +213,6 @@ msgstr "Уловете тразакция"
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment_paid
 msgid "Close"
 msgstr "Затвори"
-
-#. module: account_payment
-#: model:ir.model.fields,field_description:account_payment.field_account_payment_register__payment_method_code
-msgid "Code"
-msgstr "Код"
 
 #. module: account_payment
 #: model:ir.model,name:account_payment.model_res_config_settings
@@ -317,7 +318,8 @@ msgid ""
 "In test mode, a fake payment is processed through a test payment interface.\n"
 "This mode is advised when setting up the provider."
 msgstr ""
-"В тестов режим фалшиво плащане се обработва чрез тестов интерфейс за плащане.\n"
+"В тестов режим фалшиво плащане се обработва чрез тестов интерфейс за "
+"плащане.\n"
 "Този режим се препоръчва при настройване на доставчика."
 
 #. module: account_payment
@@ -340,7 +342,7 @@ msgstr "Фактури"
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_home_overdue_invoice
 msgid "Invoices &amp; Bills"
-msgstr ""
+msgstr "Фактури &amp; Сметки"
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_payment_transaction__invoices_count
@@ -413,6 +415,12 @@ msgstr "Стъпка за въвеждане"
 #: model:onboarding.onboarding.step,title:account_payment.onboarding_onboarding_step_payment_provider
 msgid "Online Payments"
 msgstr "Онлайн плащания"
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/wizards/payment_link_wizard.py:0
+msgid "Online payment option is not enabled in Configuration."
+msgstr ""
 
 #. module: account_payment
 #. odoo-python
@@ -626,8 +634,8 @@ msgstr "Токенът за достъп е невалиден."
 msgid ""
 "The amount to be refunded must be positive and cannot be superior to %s."
 msgstr ""
-"Сумата за възстановяване трябва да е положителна и не може да бъде по-голяма"
-" от %s."
+"Сумата за възстановяване трябва да е положителна и не може да бъде по-голяма "
+"от %s."
 
 #. module: account_payment
 #: model:ir.model.fields,help:account_payment.field_payment_provider__journal_id
@@ -654,6 +662,18 @@ msgid "The source payment of related refund payments"
 msgstr "Плащане източник на свързани плащания за възстановяване"
 
 #. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "There are pending transactions for this invoice."
+msgstr ""
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "There is no amount to be paid."
+msgstr ""
+
+#. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_error
 msgid "There was an error processing your payment: invalid invoice."
 msgstr "При обработването на плащането възникна грешка: невалидна фактура."
@@ -671,8 +691,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_error
 msgid "There was an error processing your payment: transaction failed.<br/>"
 msgstr ""
-"При обработването на плащането възникна грешка: транзакцията не бе "
-"успешна.<br/>"
+"При обработването на плащането възникна грешка: транзакцията не бе успешна."
+"<br/>"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_error
@@ -682,9 +702,28 @@ msgstr ""
 "номер на кредитната карта."
 
 #. module: account_payment
-#: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment_paid
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "This invoice cannot be paid online."
+msgstr ""
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
 msgid "This invoice has already been paid."
 msgstr "Тази фактура вече е платена."
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "This invoice isn't posted."
+msgstr ""
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "This is not an outgoing invoice."
+msgstr ""
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_account_bank_statement_line__transaction_count
@@ -718,10 +757,12 @@ msgstr "Невалидна транзакция"
 #. odoo-python
 #: code:addons/account_payment/models/account_payment_method_line.py:0
 msgid ""
-"You can't delete a payment method that is linked to a provider in the enabled or test state.\n"
+"You can't delete a payment method that is linked to a provider in the "
+"enabled or test state.\n"
 "Linked providers(s): %s"
 msgstr ""
-"Не е възможно изтриването на метод на плащане, който е свързан с доставчик в активирано или тестово състояние.\n"
+"Не е възможно изтриването на метод на плащане, който е свързан с доставчик в "
+"активирано или тестово състояние.\n"
 "Свързан доставчик(ци)%s"
 
 #. module: account_payment
@@ -741,7 +782,8 @@ msgid ""
 "You must first deactivate a payment provider before deleting its journal.\n"
 "Linked providers: %s"
 msgstr ""
-"Първо трябва да се деактивира доставчик на плащания, преди да е възможно да се изтрие неговия дневник.\n"
+"Първо трябва да се деактивира доставчик на плащания, преди да е възможно да "
+"се изтрие неговия дневник.\n"
 "Свързани доставчици: %s"
 
 #. module: account_payment
@@ -765,3 +807,6 @@ msgstr "вече е приложено"
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
 msgid "overdue"
 msgstr "просрочено"
+
+#~ msgid "Code"
+#~ msgstr "Код"

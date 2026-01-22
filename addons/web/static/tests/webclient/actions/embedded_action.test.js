@@ -3,23 +3,22 @@ import { queryAllTexts } from "@odoo/hoot-dom";
 import {
     contains,
     defineActions,
-    defineEmbeddedActions,
     defineModels,
     fields,
     getService,
     models,
     mountWithCleanup,
     onRpc,
-    webModels,
-    toggleSearchBarMenu,
     toggleMenuItem,
+    toggleSearchBarMenu,
+    webModels,
 } from "@web/../tests/web_test_helpers";
 
+import { mockTouch, runAllTimers } from "@odoo/hoot-mock";
 import { browser } from "@web/core/browser/browser";
-import { WebClient } from "@web/webclient/webclient";
 import { router } from "@web/core/browser/router";
 import { user } from "@web/core/user";
-import { runAllTimers, mockTouch } from "@odoo/hoot-mock";
+import { WebClient } from "@web/webclient/webclient";
 
 describe.current.tags("desktop");
 
@@ -41,7 +40,7 @@ class Partner extends models.Model {
         { id: 5, display_name: "Fifth record", foo: "zoup", m2o: 1, o2m: [] },
     ];
     _views = {
-        "form,false": `
+        form: `
             <form>
                 <header>
                     <button name="object" string="Call method" type="object"/>
@@ -71,9 +70,8 @@ class Partner extends models.Model {
                     </t>
                 </templates>
             </kanban>`,
-        "list,false": `<list><field name="foo"/></list>`,
-        "pivot,false": `<pivot/>`,
-        "search,false": `<search><field name="foo" string="Foo"/></search>`,
+        list: `<list><field name="foo"/></list>`,
+        search: `<search><field name="foo" string="Foo"/></search>`,
     };
 }
 
@@ -86,19 +84,19 @@ class Pony extends models.Model {
         { id: 9, name: "Fluttershy" },
     ];
     _views = {
-        "list,false": `<list>
+        list: `<list>
                             <field name="name"/>
                             <button name="action_test" type="object" string="Action Test" column_invisible="not context.get('display_button')"/>
                         </list>`,
-        "kanban,false": `<kanban>
+        kanban: `<kanban>
                             <templates>
                                 <t t-name="card">
                                     <field name="name"/>
                                 </t>
                             </templates>
                         </kanban>`,
-        "form,false": `<form><field name="name"/></form>`,
-        "search,false": `<search>
+        form: `<form><field name="name"/></form>`,
+        search: `<search>
                             <filter name="my_filter" string="My filter" domain="[['name', '=', 'Applejack']]"/>
                         </search>`,
     };
@@ -112,7 +110,6 @@ defineActions([
         xml_id: "action_1",
         name: "Partners Action 1",
         res_model: "partner",
-        type: "ir.actions.act_window",
         views: [[1, "kanban"]],
     },
     {
@@ -120,8 +117,6 @@ defineActions([
         xml_id: "action_2",
         name: "Partners",
         res_model: "partner",
-        mobile_view_mode: "kanban",
-        type: "ir.actions.act_window",
         views: [
             [false, "list"],
             [1, "kanban"],
@@ -133,7 +128,6 @@ defineActions([
         xml_id: "action_3",
         name: "Favorite Ponies",
         res_model: "pony",
-        type: "ir.actions.act_window",
         views: [
             [false, "list"],
             [false, "kanban"],
@@ -145,18 +139,14 @@ defineActions([
         xml_id: "action_4",
         name: "Ponies",
         res_model: "pony",
-        type: "ir.actions.act_window",
         views: [
             [false, "list"],
             [false, "kanban"],
             [false, "form"],
         ],
     },
-]);
-
-defineEmbeddedActions([
     {
-        id: 2,
+        id: 102,
         xml_id: "embedded_action_2",
         name: "Embedded Action 2",
         parent_res_model: "partner",
@@ -168,7 +158,7 @@ defineEmbeddedActions([
         },
     },
     {
-        id: 3,
+        id: 103,
         name: "Embedded Action 3",
         parent_res_model: "partner",
         type: "ir.embedded.actions",
@@ -176,7 +166,7 @@ defineEmbeddedActions([
         python_method: "do_python_method",
     },
     {
-        id: 4,
+        id: 104,
         name: "Custom Embedded Action 4",
         type: "ir.embedded.actions",
         user_id: user.userId,
@@ -291,22 +281,21 @@ test("breadcrumbs are updated when clicking on embeddeds", async () => {
     ).click();
     expect(".o_control_panel .breadcrumb-item").toHaveCount(0);
     expect(".o_control_panel .o_breadcrumb .active").toHaveText("Partners Action 1");
+    expect(browser.location.href).toBe("https://www.hoot.test/odoo/action-1");
     await contains(".o_embedded_actions > button > span:contains('Embedded Action 2')").click();
     await runAllTimers();
+    expect(browser.location.href).toBe("https://www.hoot.test/odoo/action-3");
     expect(router.current.action).toBe(3, {
         message: "the current action should be the one of the embedded action previously clicked",
     });
-    expect(queryAllTexts(".breadcrumb-item, .o_breadcrumb .active")).toEqual([
-        "Partners Action 1",
-        "Favorite Ponies",
-    ]);
+    expect(queryAllTexts(".breadcrumb-item, .o_breadcrumb .active")).toEqual(["Favorite Ponies"]);
     await contains(".o_embedded_actions > button > span:contains('Embedded Action 3')").click();
     await runAllTimers();
+    expect(browser.location.href).toBe("https://www.hoot.test/odoo/action-4");
     expect(router.current.action).toBe(4, {
         message: "the current action should be the one of the embedded action previously clicked",
     });
     expect(queryAllTexts(".breadcrumb-item, .o_breadcrumb .active")).toEqual([
-        "Partners Action 1",
         "Favorite Ponies from python action",
     ]);
 });
@@ -430,6 +419,7 @@ test("the embedded actions should not be displayed when switching view", async (
 });
 
 test("User can move the main (first) embedded action", async () => {
+    mockTouch(true);
     await mountWithCleanup(WebClient);
     await getService("action").doAction(1);
     await contains(".o_control_panel_navigation > button > i.fa-sliders").click();
@@ -437,7 +427,6 @@ test("User can move the main (first) embedded action", async () => {
     await contains(
         ".o_popover.dropdown-menu .dropdown-item > div > span:contains('Embedded Action 2')"
     ).click();
-    mockTouch(true);
     await contains(".o_embedded_actions > button:first-child").dragAndDrop(
         ".o_embedded_actions > button:nth-child(2)"
     );
@@ -464,7 +453,10 @@ test("User can unselect the main (first) embedded action", async () => {
 
 test("User should be redirected to the first embedded action set in localStorage", async () => {
     await mountWithCleanup(WebClient);
-    browser.localStorage.setItem(`orderEmbedded1++${user.userId}`, JSON.stringify([2, false, 3])); // set embedded action 2 in first
+    browser.localStorage.setItem(
+        `orderEmbedded1++${user.userId}`,
+        JSON.stringify([102, false, 103])
+    ); // set embedded action 2 in first
     await getService("action").doActionButton({
         name: 1,
         type: "action",
@@ -486,7 +478,7 @@ test("User should be redirected to the first embedded action set in localStorage
 });
 
 test("execute a regular action from an embedded action", async () => {
-    Pony._views["form,false"] = `
+    Pony._views["form"] = `
         <form>
             <button type="action" name="2" string="Execute another action"/>
             <field name="name"/>
@@ -514,7 +506,7 @@ test("execute a regular action from an embedded action", async () => {
 
 test("custom embedded action loaded first", async () => {
     await mountWithCleanup(WebClient);
-    browser.localStorage.setItem(`orderEmbedded4++${user.userId}`, JSON.stringify([4, false])); // set embedded action 4 in first
+    browser.localStorage.setItem(`orderEmbedded4++${user.userId}`, JSON.stringify([104, false])); // set embedded action 4 in first
     await getService("action").doActionButton({
         name: 4,
         type: "action",

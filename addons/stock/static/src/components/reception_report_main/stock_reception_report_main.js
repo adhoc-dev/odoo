@@ -20,29 +20,58 @@ export class ReceptionReportMain extends Component {
         this.ormService = useService("orm");
         this.actionService = useService("action");
         this.reportName = "stock.report_reception";
-        const defaultDocIds = Object.entries(this.context).find(([k,v]) => k.startsWith("default_"));
-        this.contextDefaultDoc = { field: defaultDocIds[0], ids: defaultDocIds[1] };
+        this.labelReportName = "stock.report_reception_report_label";
         this.state = useState({
             sourcesToLines: {},
         });
         useBus(this.env.bus, "update-assign-state", (ev) => this._changeAssignedState(ev.detail));
 
         onWillStart(async () => {
+            // Check the URL if report was alreadu loaded.
+            let defaultDocIds;
+            const { rfield, rids } = this.props.action.context.params || {};
+            if (rfield && rids) {
+                const parsedIds = JSON.parse(rids);
+                defaultDocIds = [rfield, parsedIds instanceof Array ? parsedIds : [parsedIds]];
+            } else {
+                defaultDocIds = Object.entries(this.context).find(([k,v]) => k.startsWith("default_"));
+                if (!defaultDocIds) {
+                    // If nothing could be found, just ask for empty data.
+                    defaultDocIds = [false, [0]];
+                }
+            }
+            this.contextDefaultDoc = { field: defaultDocIds[0], ids: defaultDocIds[1] };
+
+            if (this.contextDefaultDoc.field) {
+                // Add the fields/ids to the URL, so we can properly reload them after a page refresh.
+                this.props.updateActionState({ rfield: this.contextDefaultDoc.field, rids: JSON.stringify(this.contextDefaultDoc.ids) });
+            }
             this.data = await this.getReportData();
             this.state.sourcesToLines = this.data.sources_to_lines;
+
+            const matchingReports = await this.ormService.searchRead("ir.actions.report", [
+                ["report_name", "in", [this.reportName, this.labelReportName]],
+            ]);
+            this.receptionReportAction = matchingReports.find(
+                (report) => report.report_name === this.reportName
+            );
+            this.receptionReportLabelAction = matchingReports.find(
+                (report) => report.report_name === this.labelReportName
+            );
         });
     }
 
     async getReportData() {
+        const context = { ...this.context, [this.contextDefaultDoc.field]: this.contextDefaultDoc.ids };
         const args = [
             this.contextDefaultDoc.ids,
-            { context: this.context, report_type: "html" },
+            { context, report_type: "html" },
         ];
         return this.ormService.call(
             "report.stock.report_reception",
             "get_report_data",
             args,
-            { context: this.context }
+            { context },
         );
     }
 
@@ -82,18 +111,15 @@ export class ReceptionReportMain extends Component {
 
     onClickPrint() {
         return this.actionService.doAction({
-            type: "ir.actions.report",
-            report_type: "qweb-pdf",
-            report_name: `${this.reportName}/?context={"${this.contextDefaultDoc.field}": ${JSON.stringify(this.contextDefaultDoc.ids)}}`,
-            report_file: this.reportName,
+            ...this.receptionReportAction,
+            context: { [this.contextDefaultDoc.field]: this.contextDefaultDoc.ids },
         });
     }
 
     onClickPrintLabels() {
-        const reportFile = 'stock.report_reception_report_label';
         const modelIds = [];
         const quantities = [];
-        
+
         for (const lines of Object.values(this.state.sourcesToLines)) {
             for (const line of lines) {
                 if (!line.is_assigned) continue;
@@ -106,10 +132,9 @@ export class ReceptionReportMain extends Component {
         }
 
         return this.actionService.doAction({
-            type: "ir.actions.report",
-            report_type: "qweb-pdf",
-            report_name: `${reportFile}?docids=${modelIds}&quantity=${quantities}`,
-            report_file: reportFile,
+            ...this.receptionReportLabelAction,
+            context: { active_ids: modelIds },
+            data: { docids: modelIds, quantity: quantities.join(",") },
         });
     }
 

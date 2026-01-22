@@ -25,7 +25,7 @@ class Partner extends models.Model {
         { id: 2, display_name: "Second record" },
     ];
     _views = {
-        "form,false": `
+        form: `
             <form>
                 <header>
                     <button name="object" string="Call method" type="object"/>
@@ -43,8 +43,7 @@ class Partner extends models.Model {
                     </t>
                 </templates>
             </kanban>`,
-        "list,false": `<list><field name="display_name"/></list>`,
-        "search,false": `<search/>`,
+        list: `<list><field name="display_name"/></list>`,
     };
 }
 
@@ -56,7 +55,6 @@ defineActions([
         xml_id: "action_1",
         name: "Partners Action 1",
         res_model: "partner",
-        type: "ir.actions.act_window",
         views: [[1, "kanban"]],
     },
     {
@@ -64,8 +62,6 @@ defineActions([
         xml_id: "action_3",
         name: "Partners",
         res_model: "partner",
-        mobile_view_mode: "kanban",
-        type: "ir.actions.act_window",
         views: [
             [false, "list"],
             [1, "kanban"],
@@ -79,7 +75,6 @@ defineActions([
         res_id: 2,
         res_model: "partner",
         target: "inline",
-        type: "ir.actions.act_window",
         views: [[false, "form"]],
     },
 ]);
@@ -133,7 +128,7 @@ test.tags("desktop");
 test("on close with effect in xml on desktop", async () => {
     patchWithCleanup(user, { showEffect: true });
 
-    Partner._views["form,false"] = `
+    Partner._views["form"] = `
         <form>
             <header>
             <button string="Call method" name="object" type="object"
@@ -155,7 +150,7 @@ test.tags("mobile");
 test("on close with effect in xml on mobile", async () => {
     patchWithCleanup(user, { showEffect: true });
 
-    Partner._views["form,false"] = `
+    Partner._views["form"] = `
         <form>
             <header>
             <button string="Call method" name="object" type="object"

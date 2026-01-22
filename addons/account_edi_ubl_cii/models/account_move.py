@@ -1,3 +1,9 @@
+import binascii
+
+from base64 import b64decode
+from contextlib import suppress
+from lxml import etree
+
 from odoo import _, api, fields, models, Command
 
 
@@ -8,7 +14,7 @@ class AccountMove(models.Model):
         comodel_name='ir.attachment',
         string="Attachment",
         compute=lambda self: self._compute_linked_attachment_id('ubl_cii_xml_id', 'ubl_cii_xml_file'),
-        depends=['ubl_cii_xml_id']
+        depends=['ubl_cii_xml_file']
     )
     ubl_cii_xml_file = fields.Binary(
         attachment=True,
@@ -32,6 +38,12 @@ class AccountMove(models.Model):
     # -------------------------------------------------------------------------
     # BUSINESS
     # -------------------------------------------------------------------------
+
+    def _get_fields_to_detach(self):
+        # EXTENDS account
+        fields_list = super()._get_fields_to_detach()
+        fields_list.append("ubl_cii_xml_file")
+        return fields_list
 
     def _get_invoice_legal_documents(self, filetype, allow_fallback=False):
         # EXTENDS account
@@ -69,7 +81,7 @@ class AccountMove(models.Model):
                 return self.env['account.edi.xml.ubl_20']
             if ubl_version.text in ('2.1', '2.2', '2.3'):
                 return self.env['account.edi.xml.ubl_21']
-        if customization_id is not None:
+        if customization_id is not None and customization_id.text:
             if 'xrechnung' in customization_id.text:
                 return self.env['account.edi.xml.ubl_de']
             if customization_id.text == 'urn:cen.eu:en16931:2017#compliant#urn:fdc:nen.nl:nlcius:v1.0':
@@ -81,9 +93,43 @@ class AccountMove(models.Model):
             if 'urn:cen.eu:en16931:2017' in customization_id.text:
                 return self.env['account.edi.xml.ubl_bis3']
 
+    @api.model
+    def _ubl_parse_attached_document(self, tree):
+        """
+        In UBL, an AttachedDocument file is a wrapper around multiple different UBL files.
+        According to the specifications the original document is stored within the top most
+        Attachment node either as an Attachment/EmbeddedDocumentBinaryObject or (in special cases)
+        a CDATA string stored in Attachment/ExternalReference/Description.
+
+        We must parse this before passing the original file to the decoder to figure out how best
+        to handle it.
+        """
+        attachment_node = tree.find('{*}Attachment')
+        if attachment_node is None:
+            return tree
+
+        attachment_binary_data = attachment_node.find('./{*}EmbeddedDocumentBinaryObject')
+        if attachment_binary_data is not None \
+                and attachment_binary_data.attrib.get('mimeCode') in ('application/xml', 'text/xml'):
+            with suppress(etree.XMLSyntaxError, binascii.Error):
+                text = b64decode(attachment_binary_data.text)
+                return etree.fromstring(text)
+
+        external_reference = attachment_node.find('./{*}ExternalReference')
+        if external_reference is not None:
+            description = external_reference.findtext('./{*}Description')
+            mime_code = external_reference.findtext('./{*}MimeCode')
+
+            if description and mime_code in ('application/xml', 'text/xml'):
+                with suppress(etree.XMLSyntaxError):
+                    return etree.fromstring(description.encode('utf-8'))
+        return tree
+
     def _get_edi_decoder(self, file_data, new=False):
         # EXTENDS 'account'
         if file_data['type'] == 'xml':
+            if etree.QName(file_data['xml_tree']).localname == 'AttachedDocument':
+                file_data['xml_tree'] = self._ubl_parse_attached_document(file_data['xml_tree'])
             ubl_cii_xml_builder = self._get_ubl_cii_builder_from_xml_tree(file_data['xml_tree'])
             if ubl_cii_xml_builder is not None:
                 return ubl_cii_xml_builder._import_invoice_ubl_cii
@@ -93,8 +139,12 @@ class AccountMove(models.Model):
     def _need_ubl_cii_xml(self, ubl_cii_format):
         self.ensure_one()
         return not self.ubl_cii_xml_id \
-            and self.is_sale_document() \
+            and (self.is_sale_document() or self._is_exportable_as_self_invoice()) \
             and ubl_cii_format in self.env['res.partner']._get_ubl_cii_formats()
+
+    def _is_exportable_as_self_invoice(self):
+        # To override in account_peppol_selfbilling
+        return False
 
     @api.model
     def _get_line_vals_list(self, lines_vals):

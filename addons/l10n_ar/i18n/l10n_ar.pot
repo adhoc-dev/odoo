@@ -6,14 +6,19 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-08 10:14+0000\n"
-"PO-Revision-Date: 2024-10-08 10:14+0000\n"
+"POT-Creation-Date: 2025-12-29 19:01+0000\n"
+"PO-Revision-Date: 2025-12-29 19:01+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
+
+#. module: l10n_ar
+#: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document
+msgid "% VAT"
+msgstr ""
 
 #. module: l10n_ar
 #. odoo-python
@@ -143,11 +148,6 @@ msgstr ""
 
 #. module: l10n_ar
 #: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document
-msgid "<span>% VAT</span>"
-msgstr ""
-
-#. module: l10n_ar
-#: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document
 msgid "<span>Amount</span>"
 msgstr ""
 
@@ -163,11 +163,6 @@ msgstr ""
 
 #. module: l10n_ar
 #: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document
-msgid "<strong>Supplier: </strong>"
-msgstr ""
-
-#. module: l10n_ar
-#: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document
 msgid "<strong>Due Date: </strong>"
 msgstr ""
 
@@ -179,6 +174,11 @@ msgstr ""
 #. module: l10n_ar
 #: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document
 msgid "<strong>Son: </strong>"
+msgstr ""
+
+#. module: l10n_ar
+#: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document
+msgid "<strong>Supplier: </strong>"
 msgstr ""
 
 #. module: l10n_ar
@@ -1219,6 +1219,11 @@ msgid "Fiscal Position"
 msgstr ""
 
 #. module: l10n_ar
+#: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document
+msgid "Fiscal Transparency Regime for the Final Consumer (Law 27.743)"
+msgstr ""
+
+#. module: l10n_ar
 #: model:ir.model.fields,field_description:l10n_ar.field_res_partner__l10n_ar_formatted_vat
 #: model:ir.model.fields,field_description:l10n_ar.field_res_users__l10n_ar_formatted_vat
 msgid "Formatted VAT"
@@ -1733,6 +1738,12 @@ msgid "Only numbers allowed for \"%s\""
 msgstr ""
 
 #. module: l10n_ar
+#. odoo-python
+#: code:addons/l10n_ar/models/account_move.py:0
+msgid "Other National Ind. Taxes %s"
+msgstr ""
+
+#. module: l10n_ar
 #: model:ir.model.fields,field_description:l10n_ar.field_res_country__l10n_ar_other_vat
 msgid "Other VAT"
 msgstr ""
@@ -2016,6 +2027,11 @@ msgid "Tax Group"
 msgstr ""
 
 #. module: l10n_ar
+#: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document
+msgid "Taxes"
+msgstr ""
+
+#. module: l10n_ar
 #: model:product.template,name:l10n_ar.product_product_telefonia_product_template
 msgid "Telephone service (VAT 27)"
 msgstr ""
@@ -2160,6 +2176,12 @@ msgid "VAT AFIP Code"
 msgstr ""
 
 #. module: l10n_ar
+#. odoo-python
+#: code:addons/l10n_ar/models/account_move.py:0
+msgid "VAT Content %s"
+msgstr ""
+
+#. module: l10n_ar
 #: model:l10n_latam.document.type,name:l10n_ar.dc_a_rg1415
 msgid "VOUCHERS A OF SECTION A, INC. F), G.R. Nº 1415"
 msgstr ""
@@ -2177,6 +2199,12 @@ msgstr ""
 #. module: l10n_ar
 #: model:l10n_latam.document.type,name:l10n_ar.dc_m_rg1415
 msgid "VOUCHERS M OF ANNEX I, SECTION A, INC. F), G.R. NO. 1415"
+msgstr ""
+
+#. module: l10n_ar
+#. odoo-python
+#: code:addons/l10n_ar/models/template_ar_base.py:0
+msgid "Ventas Preimpreso"
 msgstr ""
 
 #. module: l10n_ar

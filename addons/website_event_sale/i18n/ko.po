@@ -1,22 +1,23 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* website_event_sale
-# 
+#
 # Translators:
 # Wil Odoo, 2024
-# 
+# Sarah Park, 2025
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
+"POT-Creation-Date: 2025-12-29 18:38+0000\n"
 "PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
+"Last-Translator: Sarah Park, 2025\n"
 "Language-Team: Korean (https://app.transifex.com/odoo/teams/41243/ko/)\n"
+"Language: ko\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: ko\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #. module: website_event_sale
@@ -164,10 +165,11 @@ msgstr "죄송합니다. %(event)s행사 %(ticket)s티켓은 매진되었습니�
 #. odoo-python
 #: code:addons/website_event_sale/models/sale_order.py:0
 msgid ""
-"Sorry, only %(remaining_seats)d seats are still available for the %(ticket)s"
-" ticket for the %(event)s event."
+"Sorry, only %(remaining_seats)d seats are still available for the %(ticket)s "
+"ticket for the %(event)s event."
 msgstr ""
-"죄송합니다. %(event)s행사 %(ticket)s티켓에 남아있는 좌석 수는 %(remaining_seats)d 남았습니다."
+"죄송합니다. %(event)s행사 %(ticket)s티켓에 남아있는 좌석 수는 %"
+"(remaining_seats)d 남았습니다."
 
 #. module: website_event_sale
 #. odoo-python
@@ -185,7 +187,7 @@ msgstr "티켓이 이 상품에 일치하지 않습니다."
 #. odoo-python
 #: code:addons/website_event_sale/models/product_pricelist.py:0
 msgid "Warning"
-msgstr "경고"
+msgstr "주의"
 
 #. module: website_event_sale
 #: model_terms:ir.ui.view,arch_db:website_event_sale.event_confirmation

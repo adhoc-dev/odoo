@@ -4,9 +4,10 @@ import * as ProductScreen from "@point_of_sale/../tests/tours/utils/product_scre
 import * as Chrome from "@point_of_sale/../tests/tours/utils/chrome_util";
 import * as SelectionPopup from "@point_of_sale/../tests/tours/utils/selection_popup_util";
 import { registry } from "@web/core/registry";
+import * as ProductConfiguratorPopup from "@point_of_sale/../tests/tours/utils/product_configurator_util";
+import { negateStep } from "@point_of_sale/../tests/tours/utils/common";
 
 registry.category("web_tour.tours").add("PosLoyaltyFreeProductTour", {
-    checkDelay: 50,
     steps: () =>
         [
             Chrome.startPoS(),
@@ -38,6 +39,9 @@ registry.category("web_tour.tours").add("PosLoyaltyFreeProductTour", {
             ProductScreen.clickDisplayedProduct("Desk Organizer", true, "2.00"),
             ProductScreen.clickDisplayedProduct("Desk Organizer"),
             PosLoyalty.hasRewardLine("Free Product - Desk Organizer", "-5.10", "1.00"),
+            ProductScreen.clickNumpad("9"),
+            ProductScreen.selectedOrderlineHas("Desk Organizer", "9.00"),
+            PosLoyalty.hasRewardLine("Free Product - Desk Organizer", "-15.30", "3.00"),
             ProductScreen.clickNumpad("⌫"),
             ProductScreen.selectedOrderlineHas("Desk Organizer", "0.00"),
             ProductScreen.clickDisplayedProduct("Desk Organizer", true, "1.00"),
@@ -128,7 +132,6 @@ registry.category("web_tour.tours").add("PosLoyaltyFreeProductTour", {
 });
 
 registry.category("web_tour.tours").add("PosLoyaltyFreeProductTour2", {
-    checkDelay: 50,
     steps: () =>
         [
             Chrome.startPoS(),
@@ -145,8 +148,22 @@ registry.category("web_tour.tours").add("PosLoyaltyFreeProductTour2", {
         ].flat(),
 });
 
+registry.category("web_tour.tours").add("test_loyalty_free_product_rewards_2", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+
+            ProductScreen.clickDisplayedProduct("Desk Organizer"),
+            ProductScreen.clickDisplayedProduct("Desk Organizer"),
+            ProductScreen.clickDisplayedProduct("Desk Organizer"),
+            PosLoyalty.hasRewardLine("Free Product - Desk Organizer", "-5.10", "1.00"),
+            PosLoyalty.orderTotalIs("10.20"),
+            PosLoyalty.finalizeOrder("Cash", "10.20"),
+        ].flat(),
+});
+
 registry.category("web_tour.tours").add("PosLoyaltySpecificDiscountTour", {
-    checkDelay: 50,
     steps: () =>
         [
             Chrome.startPoS(),
@@ -171,7 +188,6 @@ registry.category("web_tour.tours").add("PosLoyaltySpecificDiscountTour", {
 });
 
 registry.category("web_tour.tours").add("PosLoyaltySpecificDiscountWithFreeProductTour", {
-    checkDelay: 50,
     steps: () =>
         [
             Chrome.startPoS(),
@@ -191,9 +207,12 @@ registry.category("web_tour.tours").add("PosLoyaltySpecificDiscountWithFreeProdu
 });
 
 registry.category("web_tour.tours").add("PosLoyaltySpecificDiscountWithRewardProductDomainTour", {
-    checkDelay: 50,
     steps: () =>
         [
+            // Steps to check if the alert dialog for invalid domain loyalty program is present, only then will the pos screen load correctly
+            Dialog.is("A reward could not be loaded"),
+            Dialog.confirm("Ok"),
+
             Chrome.startPoS(),
             Dialog.confirm("Open Register"),
 
@@ -204,11 +223,16 @@ registry.category("web_tour.tours").add("PosLoyaltySpecificDiscountWithRewardPro
             ProductScreen.clickDisplayedProduct("Product B"),
             ProductScreen.selectedOrderlineHas("Product B", "1.00", "50.00"),
             PosLoyalty.orderTotalIs("40.00"),
+
+            ProductScreen.clickControlButton("Reward"),
+            SelectionPopup.has("10$ on your order - Product B - Saleable", { run: "click" }),
+            ProductScreen.clickControlButton("Reward"),
+            SelectionPopup.has("10$ on your order - Product B - Not Saleable", { run: "click" }),
+            PosLoyalty.orderTotalIs("30.00"),
         ].flat(),
 });
 
 registry.category("web_tour.tours").add("PosLoyaltyRewardProductTag", {
-    checkDelay: 50,
     steps: () =>
         [
             Chrome.startPoS(),
@@ -237,5 +261,60 @@ registry.category("web_tour.tours").add("PosLoyaltyRewardProductTag", {
             SelectionPopup.has("Product B", { run: "click" }),
             PosLoyalty.hasRewardLine("Free Product", "-10", "2.00"),
             PosLoyalty.isRewardButtonHighlighted(false, true),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_loyalty_on_order_with_fixed_tax", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.clickDisplayedProduct("Product A"),
+            PosLoyalty.enterCode("563412"),
+            PosLoyalty.hasRewardLine("10% on your order", "-1.50"),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_loyalty_reward_with_variant", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+
+            ProductScreen.clickDisplayedProduct("Test Product"),
+            ProductConfiguratorPopup.pickRadio("Value 1"),
+            Dialog.confirm(),
+            ProductScreen.clickDisplayedProduct("Test Product"),
+            ProductConfiguratorPopup.pickRadio("Value 1"),
+            Dialog.confirm(),
+            ProductScreen.clickDisplayedProduct("Test Product"),
+            ProductConfiguratorPopup.pickRadio("Value 1"),
+            Dialog.confirm(),
+            PosLoyalty.hasRewardLine("Free Product", "-10", "1.00"),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_multiple_reward_line_free_product", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.clickDisplayedProduct("Product A"),
+            ProductScreen.clickDisplayedProduct("Product A"),
+            ProductScreen.clickDisplayedProduct("Product A"),
+            PosLoyalty.hasRewardLine("Free Product - Product A", "-10", "1.00"),
+            ProductScreen.clickDisplayedProduct("Product B"),
+            ProductScreen.clickDisplayedProduct("Product B"),
+            PosLoyalty.hasRewardLine("Free Product - Product B").map(negateStep),
+            ProductScreen.clickDisplayedProduct("Product B"),
+            PosLoyalty.hasRewardLine("Free Product - Product B", "-5", "1.00"),
+            PosLoyalty.hasRewardLine("Free Product - Product A", "-10", "1.00"),
+            ProductScreen.clickDisplayedProduct("Product B"),
+            ProductScreen.clickDisplayedProduct("Product B"),
+            PosLoyalty.hasRewardLine("Free Product - Product B", "-5", "1.00"),
+            PosLoyalty.hasRewardLine("Free Product - Product A", "-10", "1.00"),
+            ProductScreen.clickDisplayedProduct("Product A"),
+            PosLoyalty.hasRewardLine("Free Product - Product B", "-5", "1.00"),
+            PosLoyalty.hasRewardLine("Free Product - Product A", "-20", "2.00"),
         ].flat(),
 });

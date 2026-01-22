@@ -1,5 +1,6 @@
+import { baseContainerGlobalSelector } from "./base_container";
 import { closestBlock, isBlock } from "./blocks";
-import { closestElement, firstLeaf, lastLeaf } from "./dom_traversal";
+import { childNodes, closestElement, firstLeaf, lastLeaf } from "./dom_traversal";
 import { DIRECTIONS, nodeSize } from "./position";
 
 export function isEmpty(el) {
@@ -11,6 +12,10 @@ export function isEmpty(el) {
         return true;
     }
     return false;
+}
+
+export function isEmptyTextNode(node) {
+    return node.nodeType === Node.TEXT_NODE && node.nodeValue.length === 0;
 }
 
 /**
@@ -255,11 +260,19 @@ export function isVisible(node) {
             // @todo: handle it in resources?
             isMediaElement(node) ||
             hasVisibleContent(node) ||
-            isProtecting(node))
+            isProtecting(node) ||
+            isEmbeddedComponent(node))
     );
 }
 export function hasVisibleContent(node) {
-    return [...(node?.childNodes || [])].some((n) => isVisible(n));
+    return (node ? childNodes(node) : []).some((n) => isVisible(n));
+}
+
+export function isButton(node) {
+    if (!node || node.nodeType !== Node.ELEMENT_NODE) {
+        return false;
+    }
+    return node.nodeName === "BUTTON" || node.classList.contains("btn");
 }
 
 export function isZwnbsp(node) {
@@ -271,7 +284,7 @@ export function isTangible(node) {
 }
 
 export function hasTangibleContent(node) {
-    return [...(node?.childNodes || [])].some((n) => isTangible(n));
+    return (node ? childNodes(node) : []).some((n) => isTangible(n));
 }
 
 export const isNotEditableNode = (node) =>
@@ -292,6 +305,8 @@ export const ICON_SELECTOR = iconTags
             .join(", ");
     })
     .join(", ");
+
+export const EDITABLE_MEDIA_CLASS = "o_editable_media";
 
 /**
  * Indicates if the given node is an icon element.
@@ -390,6 +405,41 @@ export function isPhrasingContent(node) {
     return false;
 }
 
+export function containsAnyInline(element) {
+    if (!element) {
+        return false;
+    }
+    let child = element.firstChild;
+    while (child) {
+        if (
+            (!isBlock(child) && child.nodeType === Node.ELEMENT_NODE) ||
+            (child.nodeType === Node.TEXT_NODE && child.textContent.trim() !== "")
+        ) {
+            return true;
+        }
+        child = child.nextSibling;
+    }
+    return false;
+}
+
+export function containsAnyNonPhrasingContent(element) {
+    if (!element) {
+        return false;
+    }
+    let child = element.firstChild;
+    while (child) {
+        if (!isPhrasingContent(child)) {
+            return true;
+        }
+        child = child.nextSibling;
+    }
+    return false;
+}
+
+export function isEmbeddedComponent(node) {
+    return node.nodeType === Node.ELEMENT_NODE && node.matches("[data-embedded]");
+}
+
 /**
  * A "protected" node will have its mutations filtered and not be registered
  * in an history step. Some editor features like selection handling, command
@@ -439,18 +489,9 @@ export function isUnprotecting(node) {
 }
 
 // This is a list of "paragraph-related elements", defined as elements that
-// behave like paragraphs.
-export const paragraphRelatedElements = [
-    "P",
-    "H1",
-    "H2",
-    "H3",
-    "H4",
-    "H5",
-    "H6",
-    "PRE",
-    "BLOCKQUOTE",
-];
+// behave like paragraphs. It is non-exhaustive and should not be used as a
+// standalone. @see isParagraphRelatedElement
+export const paragraphRelatedElements = ["P", "H1", "H2", "H3", "H4", "H5", "H6", "PRE"];
 
 /**
  * Return true if the given node allows "paragraph-related elements".
@@ -460,15 +501,16 @@ export const paragraphRelatedElements = [
  * @returns {boolean}
  */
 export function allowsParagraphRelatedElements(node) {
-    return isBlock(node) && !["P", "H1", "H2", "H3", "H4", "H5", "H6"].includes(node.nodeName);
+    return isBlock(node) && !isParagraphRelatedElement(node);
 }
 
 export const phrasingContent = new Set(["#text", ...phrasingTagNames]);
 const flowContent = new Set([...phrasingContent, ...paragraphRelatedElements, "DIV", "HR"]);
 export const listItem = new Set(["LI"]);
+const listContainers = new Set(["UL", "OL"]);
 
 const allowedContent = {
-    BLOCKQUOTE: phrasingContent, // HTML spec: flow content
+    BLOCKQUOTE: flowContent,
     DIV: flowContent,
     H1: phrasingContent,
     H2: phrasingContent,
@@ -486,17 +528,48 @@ const allowedContent = {
     TR: new Set(["TD"]),
 };
 
+export function isParagraphRelatedElement(node) {
+    if (!node) {
+        return false;
+    }
+    return (
+        paragraphRelatedElements.includes(node.nodeName) ||
+        (node.nodeType === Node.ELEMENT_NODE && node.matches(baseContainerGlobalSelector))
+    );
+}
+
+export const paragraphRelatedElementsSelector = [
+    ...paragraphRelatedElements,
+    baseContainerGlobalSelector,
+].join(",");
+
+export function isListItemElement(node) {
+    return [...listItem].includes(node.nodeName);
+}
+
+export const listItemElementSelector = [...listItem].join(",");
+
+export function isListElement(node) {
+    return [...listContainers].includes(node.nodeName);
+}
+
+export const listElementSelector = [...listContainers].join(",");
+
 /**
  * @param {Element} parentBlock
  * @param {Node[]} nodes
  * @returns {boolean}
  */
 export function isAllowedContent(parentBlock, nodes) {
-    const allowedContentSet = allowedContent[parentBlock.nodeName];
+    let allowedContentSet = allowedContent[parentBlock.nodeName];
     if (!allowedContentSet) {
         // Spec: a block not listed in allowedContent allows anything.
         // See "custom-block" in tests.
         return true;
+    }
+    if (parentBlock.matches(baseContainerGlobalSelector)) {
+        // A baseContainer DIV can only have phrasingContent, as a P would.
+        allowedContentSet = phrasingContent;
     }
     return nodes.every((node) => allowedContentSet.has(node.nodeName));
 }
@@ -562,8 +635,9 @@ export function getDeepestPosition(node, offset) {
                 [node, offset] = [next, direction ? 0 : nodeSize(next)];
             }
             // First switch direction to left if offset is at the end.
-            direction = offset < node.childNodes.length;
-            next = node.childNodes[direction ? offset : offset - 1];
+            const childrenNodes = childNodes(node);
+            direction = offset < childrenNodes.length;
+            next = childrenNodes[direction ? offset : offset - 1];
         } else if (direction && next.nextSibling && closestBlock(node).contains(next.nextSibling)) {
             // Invalid node: skip to next sibling (without crossing blocks).
             next = next.nextSibling;
@@ -646,6 +720,11 @@ export function areSimilarElements(node, node2) {
     }
     const nodeStyle = getComputedStyle(node);
     const node2Style = getComputedStyle(node2);
+    if (node.matches("code.o_inline_code")) {
+        if (nodeStyle.padding === node2Style.padding && nodeStyle.margin === node2Style.margin) {
+            return true;
+        }
+    }
     return (
         !+nodeStyle.padding.replace(NOT_A_NUMBER, "") &&
         !+node2Style.padding.replace(NOT_A_NUMBER, "") &&
@@ -664,5 +743,89 @@ export function isElement(node) {
 
 export function isContentEditable(node) {
     const element = isTextNode(node) ? node.parentElement : node;
-    return element.isContentEditable;
+    return element && element.isContentEditable;
+}
+
+export function isContentEditableAncestor(node) {
+    if (node.nodeType !== Node.ELEMENT_NODE) {
+        return false;
+    }
+    return node.isContentEditable && node.matches("[contenteditable]");
+}
+
+/**
+ * Checks if all classes in node are present in node2 (subset check)
+ */
+function hasClassesSubset(node, node2) {
+    const getNodeClasses = (n) => (n || "").trim().split(/\s+/).filter(Boolean);
+    const [nodeClasses, node2Classes] = [node, node2].map(getNodeClasses);
+    return nodeClasses.every((cls) => node2Classes.includes(cls));
+}
+
+/**
+ * Checks if all styles in node are present in node2 (subset check)
+ */
+function hasStylesSubset(node, node2) {
+    const getNodeStyles = (n) =>
+        (n || "")
+            .split(";")
+            .map((s) => s.trim())
+            .filter(Boolean);
+    const [nodeStyles, node2Styles] = [node, node2].map(getNodeStyles);
+    return nodeStyles.every((style) => node2Styles.includes(style));
+}
+
+/**
+ * Checks if a node is redundant based on its closest element with same tag.
+ *
+ * A node is considered redundant if:
+ * - It is an Element node with a parent.
+ * - There is a closest element with the same tag name.
+ * - All of the node's attributes are present in that closest element:
+ *   - All classes exist in the closest element's class list (subset check).
+ *   - All inline styles are present in the closest element's style attribute (subset check).
+ *   - All other attributes must have identical values.
+ *
+ * @param {Node} node - The DOM node to evaluate.
+ * @returns {boolean} True if the node is redundant, false otherwise.
+ */
+export function isRedundantElement(node) {
+    // Check for valid element node and existence of a parent.
+    if (!node || node.nodeType !== Node.ELEMENT_NODE || !node.parentElement) {
+        return false;
+    }
+
+    // Find the closest element with the same tag name.
+    const closestEl = closestElement(node.parentElement, node.tagName);
+    if (!closestEl) {
+        return false;
+    }
+
+    // Check each attribute from node.
+    for (const { name: attrName, value: nodeAttrVal } of node.attributes) {
+        const closestElAttrVal = closestEl.getAttribute(attrName);
+
+        if (!closestElAttrVal) {
+            return false; // Attribute missing in closest element.
+        }
+
+        if (attrName === "class") {
+            // All classes on the node must exist in closest element.
+            if (!hasClassesSubset(nodeAttrVal, closestElAttrVal)) {
+                return false;
+            }
+        } else if (attrName === "style") {
+            // All inline styles on the node must exist in closest element.
+            if (!hasStylesSubset(nodeAttrVal, closestElAttrVal)) {
+                return false;
+            }
+        } else {
+            // For other attributes, values must match exactly.
+            if (nodeAttrVal !== closestElAttrVal) {
+                return false;
+            }
+        }
+    }
+
+    return true;
 }

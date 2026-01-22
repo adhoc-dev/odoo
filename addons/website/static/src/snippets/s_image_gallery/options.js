@@ -119,7 +119,9 @@ options.registry.GalleryLayout = options.registry.CarouselHandler.extend({
      */
     async _setMode(modeName) {
         modeName = modeName || 'slideshow'; // FIXME should not be needed
-        this.$target.css('height', '');
+        if (modeName !== "slideshow") {
+            this.$target.css("height", "");
+        }
         this.$target
             .removeClass('o_nomode o_masonry o_grid o_slideshow')
             .addClass('o_' + modeName);
@@ -175,8 +177,12 @@ options.registry.GalleryLayout = options.registry.CarouselHandler.extend({
         // Since there is no versioning for this snippet we use the last version
         // of "website.gallery.slideshow" called "website.s_image_gallery_mirror"
         if (this.$target[0].dataset.vcss === '002') {
-            let carouselEl = this.$target[0].querySelector('.carousel');
-            params.colorContrast  = carouselEl && carouselEl.classList.contains('carousel-dark') ? 'carousel-dark' : ' ';
+            const carouselEl = this.$target[0].querySelector(".carousel");
+            const addImagesEl = this.$target[0].querySelector(".o_add_images");
+            const isCarouselDark = carouselEl
+                ? carouselEl.classList.contains("carousel-dark")
+                : addImagesEl?.hasAttribute("data-carousel-dark");
+            params.colorContrast = isCarouselDark ? "carousel-dark" : " ";
         }
         let $slideshow = $(renderToElement('website.s_image_gallery_mirror', params));
         const carouselItemEls = $slideshow[0].querySelectorAll(".carousel-item");
@@ -188,7 +194,6 @@ options.registry.GalleryLayout = options.registry.CarouselHandler.extend({
         this.$("img").toArray().forEach((img, index) => {
             $(img).attr({contenteditable: true, 'data-index': index});
         });
-        this.$target.css('height', Math.round(window.innerHeight * 0.7));
 
         // Apply layout animation
         this.$target.off('slide.bs.carousel').off('slid.bs.carousel');
@@ -469,6 +474,13 @@ options.registry.GalleryImageList = options.registry.GalleryLayout.extend({
         this._super(...arguments);
         this.$target.off('.gallery');
     },
+    /**
+     * @override
+     */
+    onRemove() {
+        this.isBeingRemoved = true;
+        this._super(...arguments);
+    },
 
     //--------------------------------------------------------------------------
     // Options
@@ -554,6 +566,9 @@ options.registry.GalleryImageList = options.registry.GalleryLayout.extend({
             style: 'cursor: pointer;',
             text: _t(" Add Images"),
         });
+        if (this.$target[0].querySelector(".carousel-dark")) {
+            $text[0].dataset.carouselDark = "";
+        }
         const $icon = $('<i>', {
             class: ' fa fa-plus-circle',
         });
@@ -571,7 +586,7 @@ options.registry.GalleryImageList = options.registry.GalleryLayout.extend({
      */
     notify(name, data) {
         this._super(...arguments);
-        if (name === 'image_removed') {
+        if (name === 'image_removed' && !this.isBeingRemoved) {
             data.$image.remove(); // Force the removal of the image before reset
             this.trigger_up('snippet_edition_request', {exec: () => {
                 return this._relayout();

@@ -19,7 +19,7 @@ class Partner extends models.Model {
         { id: 2, display_name: "Second record" },
     ];
     _views = {
-        "form,false": `
+        form: `
         <form>
             <header>
                 <button name="object" string="Call method" type="object"/>
@@ -37,7 +37,6 @@ class Partner extends models.Model {
                     </t>
                 </templates>
             </kanban>`,
-        "search,false": `<search/>`,
     };
 }
 
@@ -54,7 +53,6 @@ test("can execute server actions from db ID", async () => {
             xml_id: "action_1",
             name: "Partners Action 1",
             res_model: "partner",
-            type: "ir.actions.act_window",
             views: [[1, "kanban"]],
         },
     ]);
@@ -90,7 +88,6 @@ test("handle server actions returning false", async function (assert) {
             name: "Create a Partner",
             res_model: "partner",
             target: "new",
-            type: "ir.actions.act_window",
             views: [[false, "form"]],
         },
     ]);

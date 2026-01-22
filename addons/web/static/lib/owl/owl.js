@@ -279,13 +279,39 @@
         const rootNode = el.getRootNode();
         return rootNode instanceof ShadowRoot && el.ownerDocument.contains(rootNode.host);
     }
+    /**
+     * Determine whether the given element is contained in a specific root documnet:
+     * either directly or with a shadow root in between or in an iframe.
+     */
+    function isAttachedToDocument(element, documentElement) {
+        let current = element;
+        const shadowRoot = documentElement.defaultView.ShadowRoot;
+        while (current) {
+            if (current === documentElement) {
+                return true;
+            }
+            if (current.parentNode) {
+                current = current.parentNode;
+            }
+            else if (current instanceof shadowRoot && current.host) {
+                current = current.host;
+            }
+            else {
+                return false;
+            }
+        }
+        return false;
+    }
     function validateTarget(target) {
         // Get the document and HTMLElement corresponding to the target to allow mounting in iframes
         const document = target && target.ownerDocument;
         if (document) {
+            if (!document.defaultView) {
+                throw new OwlError("Cannot mount a component: the target document is not attached to a window (defaultView is missing)");
+            }
             const HTMLElement = document.defaultView.HTMLElement;
             if (target instanceof HTMLElement || target instanceof ShadowRoot) {
-                if (!document.body.contains(target instanceof HTMLElement ? target : target.host)) {
+                if (!isAttachedToDocument(target, document)) {
                     throw new OwlError("Cannot mount a component on a detached dom node");
                 }
                 return;
@@ -322,12 +348,40 @@
      */
     class Markup extends String {
     }
-    /*
-     * Marks a value as safe, that is, a value that can be injected as HTML directly.
-     * It should be used to wrap the value passed to a t-out directive to allow a raw rendering.
-     */
-    function markup(value) {
-        return new Markup(value);
+    function htmlEscape(str) {
+        if (str instanceof Markup) {
+            return str;
+        }
+        if (str === undefined) {
+            return markup("");
+        }
+        if (typeof str === "number") {
+            return markup(String(str));
+        }
+        [
+            ["&", "&amp;"],
+            ["<", "&lt;"],
+            [">", "&gt;"],
+            ["'", "&#x27;"],
+            ['"', "&quot;"],
+            ["`", "&#x60;"],
+        ].forEach((pairs) => {
+            str = String(str).replace(new RegExp(pairs[0], "g"), pairs[1]);
+        });
+        return markup(str);
+    }
+    function markup(valueOrStrings, ...placeholders) {
+        if (!Array.isArray(valueOrStrings)) {
+            return new Markup(valueOrStrings);
+        }
+        const strings = valueOrStrings;
+        let acc = "";
+        let i = 0;
+        for (; i < placeholders.length; ++i) {
+            acc += strings[i] + htmlEscape(placeholders[i]);
+        }
+        acc += strings[i];
+        return new Markup(acc);
     }
 
     function createEventHandler(rawEvent) {
@@ -3741,6 +3795,7 @@
             index: 0,
             forceNewBlock: true,
             translate: parentCtx.translate,
+            translationCtx: parentCtx.translationCtx,
             tKeyExpr: null,
             nameSpace: parentCtx.nameSpace,
             tModelSelectedExpr: parentCtx.tModelSelectedExpr,
@@ -3798,7 +3853,16 @@
             return key;
         }
     }
-    const TRANSLATABLE_ATTRS = ["label", "title", "placeholder", "alt"];
+    const TRANSLATABLE_ATTRS = [
+        "alt",
+        "aria-label",
+        "aria-placeholder",
+        "aria-roledescription",
+        "aria-valuetext",
+        "label",
+        "placeholder",
+        "title",
+    ];
     const translationRE = /^(\s*)([\s\S]+?)(\s*)$/;
     class CodeGenerator {
         constructor(ast, options) {
@@ -3843,6 +3907,7 @@
                 forceNewBlock: false,
                 isLast: true,
                 translate: true,
+                translationCtx: "",
                 tKeyExpr: null,
             });
             // define blocks and utility functions
@@ -3980,9 +4045,9 @@
             })
                 .join("");
         }
-        translate(str) {
+        translate(str, translationCtx) {
             const match = translationRE.exec(str);
-            return match[1] + this.translateFn(match[2]) + match[3];
+            return match[1] + this.translateFn(match[2], translationCtx) + match[3];
         }
         /**
          * @returns the newly created block name, if any
@@ -4023,7 +4088,9 @@
                     return this.compileTSlot(ast, ctx);
                 case 16 /* TTranslation */:
                     return this.compileTTranslation(ast, ctx);
-                case 17 /* TPortal */:
+                case 17 /* TTranslationContext */:
+                    return this.compileTTranslationContext(ast, ctx);
+                case 18 /* TPortal */:
                     return this.compileTPortal(ast, ctx);
             }
         }
@@ -4061,7 +4128,7 @@
             let { block, forceNewBlock } = ctx;
             let value = ast.value;
             if (value && ctx.translate !== false) {
-                value = this.translate(value);
+                value = this.translate(value, ctx.translationCtx);
             }
             if (!ctx.inPreTag) {
                 value = value.replace(whitespaceRE, " ");
@@ -4096,6 +4163,7 @@
             return `[${modifiersCode}${this.captureExpression(handler)}, ctx]`;
         }
         compileTDomNode(ast, ctx) {
+            var _a;
             let { block, forceNewBlock } = ctx;
             const isNewBlock = !block || forceNewBlock || ast.dynamicTag !== null || ast.ns;
             let codeIdx = this.target.code.length;
@@ -4151,7 +4219,8 @@
                     }
                 }
                 else if (this.translatableAttributes.includes(key)) {
-                    attrs[key] = this.translateFn(ast.attrs[key]);
+                    const attrTranslationCtx = ((_a = ast.attrsTranslationCtx) === null || _a === void 0 ? void 0 : _a[key]) || ctx.translationCtx;
+                    attrs[key] = this.translateFn(ast.attrs[key], attrTranslationCtx);
                 }
                 else {
                     expr = `"${ast.attrs[key]}"`;
@@ -4473,7 +4542,7 @@
             const isNewBlock = !block || forceNewBlock;
             let codeIdx = this.target.code.length;
             if (isNewBlock) {
-                const n = ast.content.filter((c) => c.type !== 6 /* TSet */).length;
+                const n = ast.content.filter((c) => !c.hasNoRepresentation).length;
                 let result = null;
                 if (n <= 1) {
                     for (let child of ast.content) {
@@ -4487,15 +4556,15 @@
             let index = 0;
             for (let i = 0, l = ast.content.length; i < l; i++) {
                 const child = ast.content[i];
-                const isTSet = child.type === 6 /* TSet */;
+                const forceNewBlock = !child.hasNoRepresentation;
                 const subCtx = createContext(ctx, {
                     block,
                     index,
-                    forceNewBlock: !isTSet,
+                    forceNewBlock,
                     isLast: ctx.isLast && i === l - 1,
                 });
                 this.compileAST(child, subCtx);
-                if (!isTSet) {
+                if (forceNewBlock) {
                     index++;
                 }
             }
@@ -4595,7 +4664,7 @@
             else {
                 let value;
                 if (ast.defaultValue) {
-                    const defaultValue = toStringExpression(ctx.translate ? this.translate(ast.defaultValue) : ast.defaultValue);
+                    const defaultValue = toStringExpression(ctx.translate ? this.translate(ast.defaultValue, ctx.translationCtx) : ast.defaultValue);
                     if (ast.value) {
                         value = `withDefault(${expr}, ${defaultValue})`;
                     }
@@ -4629,9 +4698,10 @@
          * "some-prop"       "state"          "'some-prop': ctx['state']"
          * "onClick.bind"    "onClick"        "onClick: bind(ctx, ctx['onClick'])"
          */
-        formatProp(name, value) {
+        formatProp(name, value, attrsTranslationCtx, translationCtx) {
             if (name.endsWith(".translate")) {
-                value = toStringExpression(this.translateFn(value));
+                const attrTranslationCtx = (attrsTranslationCtx === null || attrsTranslationCtx === void 0 ? void 0 : attrsTranslationCtx[name]) || translationCtx;
+                value = toStringExpression(this.translateFn(value, attrTranslationCtx));
             }
             else {
                 value = this.captureExpression(value);
@@ -4647,14 +4717,14 @@
                     case "translate":
                         break;
                     default:
-                        throw new OwlError("Invalid prop suffix");
+                        throw new OwlError(`Invalid prop suffix: ${suffix}`);
                 }
             }
             name = /^[a-z_]+$/i.test(name) ? name : `'${name}'`;
             return `${name}: ${value || undefined}`;
         }
-        formatPropObject(obj) {
-            return Object.entries(obj).map(([k, v]) => this.formatProp(k, v));
+        formatPropObject(obj, attrsTranslationCtx, translationCtx) {
+            return Object.entries(obj).map(([k, v]) => this.formatProp(k, v, attrsTranslationCtx, translationCtx));
         }
         getPropString(props, dynProps) {
             let propString = `{${props.join(",")}}`;
@@ -4667,7 +4737,9 @@
             let { block } = ctx;
             // props
             const hasSlotsProp = "slots" in (ast.props || {});
-            const props = ast.props ? this.formatPropObject(ast.props) : [];
+            const props = ast.props
+                ? this.formatPropObject(ast.props, ast.propsTranslationCtx, ctx.translationCtx)
+                : [];
             // slots
             let slotDef = "";
             if (ast.slots) {
@@ -4690,7 +4762,7 @@
                         params.push(`__scope: "${scope}"`);
                     }
                     if (ast.slots[slotName].attrs) {
-                        params.push(...this.formatPropObject(ast.slots[slotName].attrs));
+                        params.push(...this.formatPropObject(ast.slots[slotName].attrs, ast.slots[slotName].attrsTranslationCtx, ctx.translationCtx));
                     }
                     const slotInfo = `{${params.join(", ")}}`;
                     slotStr.push(`'${slotName}': ${slotInfo}`);
@@ -4795,15 +4867,16 @@
                 isMultiple = isMultiple || this.slotNames.has(ast.name);
                 this.slotNames.add(ast.name);
             }
-            const dynProps = ast.attrs ? ast.attrs["t-props"] : null;
-            if (ast.attrs) {
-                delete ast.attrs["t-props"];
-            }
+            const attrs = { ...ast.attrs };
+            const dynProps = attrs["t-props"];
+            delete attrs["t-props"];
             let key = this.target.loopLevel ? `key${this.target.loopLevel}` : "key";
             if (isMultiple) {
                 key = this.generateComponentKey(key);
             }
-            const props = ast.attrs ? this.formatPropObject(ast.attrs) : [];
+            const props = ast.attrs
+                ? this.formatPropObject(attrs, ast.attrsTranslationCtx, ctx.translationCtx)
+                : [];
             const scope = this.getPropString(props, dynProps);
             if (ast.defaultContent) {
                 const name = this.compileInNewTarget("defaultContent", ast.defaultContent, ctx);
@@ -4833,6 +4906,12 @@
         compileTTranslation(ast, ctx) {
             if (ast.content) {
                 return this.compileAST(ast.content, Object.assign({}, ctx, { translate: false }));
+            }
+            return null;
+        }
+        compileTTranslationContext(ast, ctx) {
+            if (ast.content) {
+                return this.compileAST(ast.content, Object.assign({}, ctx, { translationCtx: ast.translationCtx }));
             }
             return null;
         }
@@ -4901,10 +4980,11 @@
             parseTPortal(node, ctx) ||
             parseTCall(node, ctx) ||
             parseTCallBlock(node) ||
+            parseTTranslation(node, ctx) ||
+            parseTTranslationContext(node, ctx) ||
+            parseTKey(node, ctx) ||
             parseTEscNode(node, ctx) ||
             parseTOutNode(node, ctx) ||
-            parseTKey(node, ctx) ||
-            parseTTranslation(node, ctx) ||
             parseTSlot(node, ctx) ||
             parseComponent(node, ctx) ||
             parseDOMNode(node, ctx) ||
@@ -4972,19 +5052,29 @@
     function parseTDebugLog(node, ctx) {
         if (node.hasAttribute("t-debug")) {
             node.removeAttribute("t-debug");
-            return {
+            const content = parseNode(node, ctx);
+            const ast = {
                 type: 12 /* TDebug */,
-                content: parseNode(node, ctx),
+                content,
             };
+            if (content === null || content === void 0 ? void 0 : content.hasNoRepresentation) {
+                ast.hasNoRepresentation = true;
+            }
+            return ast;
         }
         if (node.hasAttribute("t-log")) {
             const expr = node.getAttribute("t-log");
             node.removeAttribute("t-log");
-            return {
+            const content = parseNode(node, ctx);
+            const ast = {
                 type: 13 /* TLog */,
                 expr,
-                content: parseNode(node, ctx),
+                content,
             };
+            if (content === null || content === void 0 ? void 0 : content.hasNoRepresentation) {
+                ast.hasNoRepresentation = true;
+            }
+            return ast;
         }
         return null;
     }
@@ -5013,6 +5103,7 @@
         node.removeAttribute("t-ref");
         const nodeAttrsNames = node.getAttributeNames();
         let attrs = null;
+        let attrsTranslationCtx = null;
         let on = null;
         let model = null;
         for (let attr of nodeAttrsNames) {
@@ -5073,6 +5164,11 @@
             else if (attr === "xmlns") {
                 ns = value;
             }
+            else if (attr.startsWith("t-translation-context-")) {
+                const attrName = attr.slice(22);
+                attrsTranslationCtx = attrsTranslationCtx || {};
+                attrsTranslationCtx[attrName] = value;
+            }
             else if (attr !== "t-name") {
                 if (attr.startsWith("t-") && !attr.startsWith("t-att")) {
                     throw new OwlError(`Unknown QWeb directive: '${attr}'`);
@@ -5094,6 +5190,7 @@
             tag: tagName,
             dynamicTag,
             attrs,
+            attrsTranslationCtx,
             on,
             ref,
             content: children,
@@ -5207,11 +5304,19 @@
         }
         const key = node.getAttribute("t-key");
         node.removeAttribute("t-key");
-        const body = parseNode(node, ctx);
-        if (!body) {
+        const content = parseNode(node, ctx);
+        if (!content) {
             return null;
         }
-        return { type: 10 /* TKey */, expr: key, content: body };
+        const ast = {
+            type: 10 /* TKey */,
+            expr: key,
+            content,
+        };
+        if (content.hasNoRepresentation) {
+            ast.hasNoRepresentation = true;
+        }
+        return ast;
     }
     // -----------------------------------------------------------------------------
     // t-call
@@ -5234,7 +5339,15 @@
             if (ast && ast.type === 11 /* TComponent */) {
                 return {
                     ...ast,
-                    slots: { default: { content: tcall, scope: null, on: null, attrs: null } },
+                    slots: {
+                        default: {
+                            content: tcall,
+                            scope: null,
+                            on: null,
+                            attrs: null,
+                            attrsTranslationCtx: null,
+                        },
+                    },
                 };
             }
         }
@@ -5312,7 +5425,7 @@
         if (node.textContent !== node.innerHTML) {
             body = parseChildren(node, ctx);
         }
-        return { type: 6 /* TSet */, name, value, defaultValue, body };
+        return { type: 6 /* TSet */, name, value, defaultValue, body, hasNoRepresentation: true };
     }
     // -----------------------------------------------------------------------------
     // Components
@@ -5349,9 +5462,15 @@
         node.removeAttribute("t-slot-scope");
         let on = null;
         let props = null;
+        let propsTranslationCtx = null;
         for (let name of node.getAttributeNames()) {
             const value = node.getAttribute(name);
-            if (name.startsWith("t-")) {
+            if (name.startsWith("t-translation-context-")) {
+                const attrName = name.slice(22);
+                propsTranslationCtx = propsTranslationCtx || {};
+                propsTranslationCtx[attrName] = value;
+            }
+            else if (name.startsWith("t-")) {
                 if (name.startsWith("t-on-")) {
                     on = on || {};
                     on[name.slice(5)] = value;
@@ -5395,12 +5514,18 @@
                 const slotAst = parseNode(slotNode, ctx);
                 let on = null;
                 let attrs = null;
+                let attrsTranslationCtx = null;
                 let scope = null;
                 for (let attributeName of slotNode.getAttributeNames()) {
                     const value = slotNode.getAttribute(attributeName);
                     if (attributeName === "t-slot-scope") {
                         scope = value;
                         continue;
+                    }
+                    else if (attributeName.startsWith("t-translation-context-")) {
+                        const attrName = attributeName.slice(22);
+                        attrsTranslationCtx = attrsTranslationCtx || {};
+                        attrsTranslationCtx[attrName] = value;
                     }
                     else if (attributeName.startsWith("t-on-")) {
                         on = on || {};
@@ -5412,17 +5537,32 @@
                     }
                 }
                 slots = slots || {};
-                slots[name] = { content: slotAst, on, attrs, scope };
+                slots[name] = { content: slotAst, on, attrs, attrsTranslationCtx, scope };
             }
             // default slot
             const defaultContent = parseChildNodes(clone, ctx);
             slots = slots || {};
             // t-set-slot="default" has priority over content
             if (defaultContent && !slots.default) {
-                slots.default = { content: defaultContent, on, attrs: null, scope: defaultSlotScope };
+                slots.default = {
+                    content: defaultContent,
+                    on,
+                    attrs: null,
+                    attrsTranslationCtx: null,
+                    scope: defaultSlotScope,
+                };
             }
         }
-        return { type: 11 /* TComponent */, name, isDynamic, dynamicProps, props, slots, on };
+        return {
+            type: 11 /* TComponent */,
+            name,
+            isDynamic,
+            dynamicProps,
+            props,
+            propsTranslationCtx,
+            slots,
+            on,
+        };
     }
     // -----------------------------------------------------------------------------
     // Slots
@@ -5434,12 +5574,18 @@
         const name = node.getAttribute("t-slot");
         node.removeAttribute("t-slot");
         let attrs = null;
+        let attrsTranslationCtx = null;
         let on = null;
         for (let attributeName of node.getAttributeNames()) {
             const value = node.getAttribute(attributeName);
             if (attributeName.startsWith("t-on-")) {
                 on = on || {};
                 on[attributeName.slice(5)] = value;
+            }
+            else if (attributeName.startsWith("t-translation-context-")) {
+                const attrName = attributeName.slice(22);
+                attrsTranslationCtx = attrsTranslationCtx || {};
+                attrsTranslationCtx[attrName] = value;
             }
             else {
                 attrs = attrs || {};
@@ -5450,19 +5596,59 @@
             type: 14 /* TSlot */,
             name,
             attrs,
+            attrsTranslationCtx,
             on,
             defaultContent: parseChildNodes(node, ctx),
         };
+    }
+    // -----------------------------------------------------------------------------
+    // Translation
+    // -----------------------------------------------------------------------------
+    function wrapInTTranslationAST(r) {
+        const ast = { type: 16 /* TTranslation */, content: r };
+        if (r === null || r === void 0 ? void 0 : r.hasNoRepresentation) {
+            ast.hasNoRepresentation = true;
+        }
+        return ast;
     }
     function parseTTranslation(node, ctx) {
         if (node.getAttribute("t-translation") !== "off") {
             return null;
         }
         node.removeAttribute("t-translation");
-        return {
-            type: 16 /* TTranslation */,
-            content: parseNode(node, ctx),
+        const result = parseNode(node, ctx);
+        if ((result === null || result === void 0 ? void 0 : result.type) === 3 /* Multi */) {
+            const children = result.content.map(wrapInTTranslationAST);
+            return makeASTMulti(children);
+        }
+        return wrapInTTranslationAST(result);
+    }
+    // -----------------------------------------------------------------------------
+    // Translation Context
+    // -----------------------------------------------------------------------------
+    function wrapInTTranslationContextAST(r, translationCtx) {
+        const ast = {
+            type: 17 /* TTranslationContext */,
+            content: r,
+            translationCtx,
         };
+        if (r === null || r === void 0 ? void 0 : r.hasNoRepresentation) {
+            ast.hasNoRepresentation = true;
+        }
+        return ast;
+    }
+    function parseTTranslationContext(node, ctx) {
+        const translationCtx = node.getAttribute("t-translation-context");
+        if (!translationCtx) {
+            return null;
+        }
+        node.removeAttribute("t-translation-context");
+        const result = parseNode(node, ctx);
+        if ((result === null || result === void 0 ? void 0 : result.type) === 3 /* Multi */) {
+            const children = result.content.map((c) => wrapInTTranslationContextAST(c, translationCtx));
+            return makeASTMulti(children);
+        }
+        return wrapInTTranslationContextAST(result, translationCtx);
     }
     // -----------------------------------------------------------------------------
     // Portal
@@ -5481,7 +5667,7 @@
             };
         }
         return {
-            type: 17 /* TPortal */,
+            type: 18 /* TPortal */,
             target,
             content,
         };
@@ -5507,6 +5693,13 @@
         }
         return children;
     }
+    function makeASTMulti(children) {
+        const ast = { type: 3 /* Multi */, content: children };
+        if (children.every((c) => c.hasNoRepresentation)) {
+            ast.hasNoRepresentation = true;
+        }
+        return ast;
+    }
     /**
      * Parse all the child nodes of a given node and return an ast if possible.
      * In the case there are multiple children, they are wrapped in a astmulti.
@@ -5519,7 +5712,7 @@
             case 1:
                 return children[0];
             default:
-                return { type: 3 /* Multi */, content: children };
+                return makeASTMulti(children);
         }
     }
     /**
@@ -5623,7 +5816,7 @@
     }
 
     // do not modify manually. This file is generated by the release script.
-    const version = "2.5.2";
+    const version = "2.8.1";
 
     // -----------------------------------------------------------------------------
     //  Scheduler
@@ -5718,13 +5911,6 @@
     Scheduler.requestAnimationFrame = window.requestAnimationFrame.bind(window);
 
     let hasBeenLogged = false;
-    const DEV_MSG = () => {
-        const hash = window.owl ? window.owl.__info__.hash : "master";
-        return `Owl is running in 'dev' mode.
-
-This is not suitable for production use.
-See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration for more information.`;
-    };
     const apps = new Set();
     window.__OWL_DEVTOOLS__ || (window.__OWL_DEVTOOLS__ = { apps, Fiber, RootFiber, toRaw, reactive });
     class App extends TemplateSet {
@@ -5741,7 +5927,7 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
             }
             this.warnIfNoStaticProps = config.warnIfNoStaticProps || false;
             if (this.dev && !config.test && !hasBeenLogged) {
-                console.info(DEV_MSG());
+                console.info(`Owl is running in 'dev' mode.`);
                 hasBeenLogged = true;
             }
             const env = config.env || {};
@@ -6105,6 +6291,7 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
     exports.__info__ = __info__;
     exports.batched = batched;
     exports.blockDom = blockDom;
+    exports.htmlEscape = htmlEscape;
     exports.loadFile = loadFile;
     exports.markRaw = markRaw;
     exports.markup = markup;
@@ -6138,8 +6325,8 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.date = '2024-12-02T15:51:07.157Z';
-    __info__.hash = '1c5b6f2';
+    __info__.date = '2025-09-23T07:17:45.055Z';
+    __info__.hash = '5211116';
     __info__.url = 'https://github.com/odoo/owl';
 
 

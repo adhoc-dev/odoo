@@ -1,29 +1,35 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* mail_plugin
-# 
+# * mail_plugin
+#
 # Translators:
 # Martin Trigaux, 2024
-# 
+# Wil Odoo, 2024
+# Manav Shah, 2025
+# Ujjawal Pathak, 2025
+#
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Martin Trigaux, 2024\n"
-"Language-Team: Hindi (https://app.transifex.com/odoo/teams/41243/hi/)\n"
+"POT-Creation-Date: 2025-12-29 18:37+0000\n"
+"PO-Revision-Date: 2025-12-19 16:13+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Hindi <https://translate.odoo.com/projects/odoo-18/"
+"mail_plugin/hi/>\n"
+"Language: hi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: hi\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Weblate 5.14.3\n"
 
 #. module: mail_plugin
 #. odoo-javascript
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 msgid "%s employees"
-msgstr ""
+msgstr "%s कर्मचारी"
 
 #. module: mail_plugin
 #. odoo-python
@@ -43,7 +49,7 @@ msgstr ""
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 #: code:addons/mail_plugin/static/src/to_translate/translations_outlook.xml:0
 msgid "Address"
-msgstr ""
+msgstr "पता"
 
 #. module: mail_plugin
 #: model_terms:ir.ui.view,arch_db:mail_plugin.app_auth
@@ -110,7 +116,7 @@ msgstr "बंद"
 #. odoo-javascript
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 msgid "Company"
-msgstr ""
+msgstr "संस्था"
 
 #. module: mail_plugin
 #. odoo-javascript
@@ -149,13 +155,13 @@ msgstr ""
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 #: model:ir.model,name:mail_plugin.model_res_partner
 msgid "Contact"
-msgstr ""
+msgstr "संपर्क"
 
 #. module: mail_plugin
 #. odoo-javascript
 #: code:addons/mail_plugin/static/src/to_translate/translations_outlook.xml:0
 msgid "Contact Details"
-msgstr ""
+msgstr "संपर्क करने की जानकारी"
 
 #. module: mail_plugin
 #. odoo-javascript
@@ -214,18 +220,18 @@ msgstr ""
 #. module: mail_plugin
 #: model:ir.model.fields,field_description:mail_plugin.field_res_partner_iap__create_uid
 msgid "Created by"
-msgstr ""
+msgstr "द्वारा निर्मित"
 
 #. module: mail_plugin
 #: model:ir.model.fields,field_description:mail_plugin.field_res_partner_iap__create_date
 msgid "Created on"
-msgstr ""
+msgstr "इस तारीख को बनाया गया"
 
 #. module: mail_plugin
 #. odoo-javascript
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 msgid "Debug"
-msgstr ""
+msgstr "डीबग"
 
 #. module: mail_plugin
 #. odoo-javascript
@@ -242,18 +248,18 @@ msgstr ""
 #. module: mail_plugin
 #: model_terms:ir.ui.view,arch_db:mail_plugin.app_auth
 msgid "Deny"
-msgstr ""
+msgstr "इंकार करें"
 
 #. module: mail_plugin
 #. odoo-javascript
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 msgid "Description"
-msgstr ""
+msgstr "विवरण"
 
 #. module: mail_plugin
 #: model:ir.model.fields,field_description:mail_plugin.field_res_partner_iap__display_name
 msgid "Display Name"
-msgstr ""
+msgstr "डिस्प्ले नाम"
 
 #. module: mail_plugin
 #: model:ir.model.fields,help:mail_plugin.field_res_partner_iap__iap_search_domain
@@ -271,7 +277,7 @@ msgstr ""
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 #: code:addons/mail_plugin/static/src/to_translate/translations_outlook.xml:0
 msgid "Employees"
-msgstr ""
+msgstr "कर्मचारी"
 
 #. module: mail_plugin
 #. odoo-javascript
@@ -313,7 +319,7 @@ msgstr ""
 #. module: mail_plugin
 #: model:ir.model,name:mail_plugin.model_ir_http
 msgid "HTTP Routing"
-msgstr ""
+msgstr "एचटीपीपी राउटिंग"
 
 #. module: mail_plugin
 #: model:ir.model.fields,field_description:mail_plugin.field_res_partner__iap_enrich_info
@@ -344,20 +350,20 @@ msgstr ""
 #. module: mail_plugin
 #: model:ir.model.fields,field_description:mail_plugin.field_res_partner_iap__id
 msgid "ID"
-msgstr ""
+msgstr "आईडी"
 
 #. module: mail_plugin
 #. odoo-javascript
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 #: code:addons/mail_plugin/static/src/to_translate/translations_outlook.xml:0
 msgid "Industry"
-msgstr ""
+msgstr "इंडस्ट्री"
 
 #. module: mail_plugin
 #. odoo-javascript
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 msgid "Invalid URL"
-msgstr ""
+msgstr "अमान्य यूआरएल"
 
 #. module: mail_plugin
 #. odoo-javascript
@@ -369,12 +375,12 @@ msgstr ""
 #. module: mail_plugin
 #: model:ir.model.fields,field_description:mail_plugin.field_res_partner_iap__write_uid
 msgid "Last Updated by"
-msgstr ""
+msgstr "इन्होंने आखिरी बार अपडेट किया"
 
 #. module: mail_plugin
 #: model:ir.model.fields,field_description:mail_plugin.field_res_partner_iap__write_date
 msgid "Last Updated on"
-msgstr ""
+msgstr "आखिरी बार अपडेट हुआ"
 
 #. module: mail_plugin
 #: model_terms:ir.ui.view,arch_db:mail_plugin.app_auth
@@ -405,20 +411,20 @@ msgstr ""
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 #: code:addons/mail_plugin/static/src/to_translate/translations_outlook.xml:0
 msgid "Login"
-msgstr ""
+msgstr "लॉगिन करें"
 
 #. module: mail_plugin
 #. odoo-javascript
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 #: code:addons/mail_plugin/static/src/to_translate/translations_outlook.xml:0
 msgid "Logout"
-msgstr ""
+msgstr "लॉगआउट"
 
 #. module: mail_plugin
 #. odoo-python
 #: code:addons/mail_plugin/controllers/mail_plugin.py:0
 msgid "No Access"
-msgstr ""
+msgstr "कोई ऐक्सेस नहीं"
 
 #. module: mail_plugin
 #. odoo-javascript
@@ -490,7 +496,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/mail_plugin/controllers/mail_plugin.py:0
 msgid "Notification"
-msgstr ""
+msgstr "नोटिफ़िकेशन"
 
 #. module: mail_plugin
 #. odoo-javascript
@@ -532,7 +538,7 @@ msgstr ""
 #. module: mail_plugin
 #: model:ir.model.fields,field_description:mail_plugin.field_res_partner_iap__partner_id
 msgid "Partner"
-msgstr ""
+msgstr "साथी"
 
 #. module: mail_plugin
 #: model:ir.model,name:mail_plugin.model_res_partner_iap
@@ -543,7 +549,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/mail_plugin/static/src/to_translate/translations_outlook.xml:0
 msgid "Phone"
-msgstr ""
+msgstr "फ़ोन"
 
 #. module: mail_plugin
 #. odoo-javascript
@@ -555,13 +561,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 msgid "Read more"
-msgstr ""
+msgstr "ज़्यादा जानें"
 
 #. module: mail_plugin
 #. odoo-javascript
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 msgid "Refresh"
-msgstr ""
+msgstr "रीफ्रेश करें"
 
 #. module: mail_plugin
 #. odoo-javascript
@@ -573,7 +579,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/mail_plugin/static/src/to_translate/translations_outlook.xml:0
 msgid "Revenues"
-msgstr ""
+msgstr "रेवेन्यू"
 
 #. module: mail_plugin
 #. odoo-javascript
@@ -591,7 +597,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 msgid "Search"
-msgstr ""
+msgstr "सर्च"
 
 #. module: mail_plugin
 #: model:ir.model.fields,field_description:mail_plugin.field_res_partner__iap_search_domain
@@ -696,7 +702,7 @@ msgstr ""
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 #: code:addons/mail_plugin/static/src/to_translate/translations_outlook.xml:0
 msgid "Website"
-msgstr ""
+msgstr "वेबसाइट"
 
 #. module: mail_plugin
 #. odoo-javascript
@@ -725,4 +731,4 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 msgid "employees"
-msgstr ""
+msgstr "कर्मचारी"

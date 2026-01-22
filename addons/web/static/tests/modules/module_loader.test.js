@@ -1,5 +1,15 @@
-import { expect, getFixture, test } from "@odoo/hoot";
+import { beforeEach, expect, getFixture, test } from "@odoo/hoot";
 import { microTick, tick } from "@odoo/hoot-dom";
+import { patchWithCleanup } from "@web/../tests/web_test_helpers";
+
+beforeEach(() => {
+    patchWithCleanup(document.head, {
+        appendChild: (el) => expect.step(["APPENDCHILD", el.tagName, el.className]),
+    });
+    patchWithCleanup(console, {
+        error: (...args) => expect.step(["ERROR", ...args]),
+    });
+});
 
 /** @type {typeof OdooModuleLoader} */
 const ModuleLoader = Object.getPrototypeOf(odoo.loader.constructor);
@@ -7,6 +17,7 @@ const ModuleLoader = Object.getPrototypeOf(odoo.loader.constructor);
 test.tags("headless");
 test("define: simple case", async () => {
     const loader = new ModuleLoader();
+    loader.debug = false;
 
     const modA = {};
     const modC = {};
@@ -40,6 +51,7 @@ test("define: simple case", async () => {
 test.tags("headless");
 test("define: invalid module error handling", async () => {
     const loader = new ModuleLoader(getFixture());
+    loader.debug = false;
 
     expect(() => loader.define(null, null, null)).toThrow(/Module name should be a string/);
     expect(() => loader.define("a", null, null)).toThrow(
@@ -53,6 +65,7 @@ test("define: invalid module error handling", async () => {
 test.tags("headless");
 test("define: duplicate name", async () => {
     const loader = new ModuleLoader(getFixture());
+    loader.debug = false;
 
     loader.define("a", [], () => ":)");
     loader.define("a", [], () => {
@@ -66,19 +79,30 @@ test("define: duplicate name", async () => {
 
 test("define: missing module", async () => {
     const loader = new ModuleLoader(getFixture());
+    loader.debug = false;
 
     loader.define("b", ["a"], () => {});
     loader.define("c", ["a"], () => {});
 
     await microTick();
 
-    expect(".o_module_error").toHaveCount(1);
-    expect(".o_module_error ul:first").toHaveText("a");
-    expect(".o_module_error ul:last").toHaveText("b\nc");
+    expect.verifySteps([
+        [
+            "ERROR",
+            "The following modules are needed by other modules but have not been defined, they may not be present in the correct asset bundle:",
+            ["a"],
+        ],
+        [
+            "ERROR",
+            "The following modules could not be loaded because they have unmet dependencies, this is a secondary error which is likely caused by one of the above problems:",
+            ["b", "c"],
+        ],
+    ]);
 });
 
 test("define: dependency cycle", async () => {
     const loader = new ModuleLoader(getFixture());
+    loader.debug = true;
 
     loader.define("a", ["b"], () => {});
     loader.define("b", ["c"], () => {});
@@ -86,6 +110,17 @@ test("define: dependency cycle", async () => {
 
     await microTick();
 
-    expect(".o_module_error").toHaveCount(1);
-    expect(".o_module_error ul:first").toHaveText(`"a" => "b" => "c" => "a"`);
+    expect.verifySteps([
+        [
+            "ERROR",
+            "The following modules could not be loaded because they form a dependency cycle:",
+            `"a" => "b" => "c" => "a"`,
+        ],
+        [
+            "ERROR",
+            "The following modules could not be loaded because they have unmet dependencies, this is a secondary error which is likely caused by one of the above problems:",
+            ["a", "b", "c"],
+        ],
+        ["APPENDCHILD", "STYLE", "o_module_error_banner"],
+    ]);
 });

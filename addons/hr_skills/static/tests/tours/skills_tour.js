@@ -28,6 +28,11 @@ registry.category("web_tour.tours").add("hr_skills_tour", {
             run: "click",
         },
         {
+        content: "Open the Resume tab",
+        trigger: ".o_notebook_headers a.nav-link[name='skills_resume']",
+        run: "click",
+        },
+        {
             content: "Add a new Resume experience",
             trigger: ".o_field_resume_one2many tr.o_resume_group_header button.btn-secondary",
             run: "click",
@@ -45,7 +50,7 @@ registry.category("web_tour.tours").add("hr_skills_tour", {
         },
         {
             content: "Give some description",
-            trigger: ".modal:contains(new resume line) .o_field_html[name='description'] p",
+            trigger: `.modal:contains(new resume line) .o_field_html[name='description'] div.o-paragraph`,
             run: "editor Sang some songs and played some music",
         },
         {

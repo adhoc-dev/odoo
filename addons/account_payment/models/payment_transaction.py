@@ -88,7 +88,7 @@ class PaymentTransaction(models.Model):
             invoice_ids = self._fields['invoice_ids'].convert_to_cache(command_list, self)
             invoices = self.env['account.move'].browse(invoice_ids).exists()
             if len(invoices) == len(invoice_ids):  # All ids are valid
-                prefix = separator.join(invoices.mapped('name'))
+                prefix = separator.join(invoices.filtered(lambda inv: inv.name).mapped('name'))
                 if name := values.get('name_next_installment'):
                     prefix = name
                 return prefix
@@ -189,6 +189,10 @@ class PaymentTransaction(models.Model):
                         payment_values['write_off_line_vals'] += [aml_vl]
                 break
 
+        payment_term_lines = self.invoice_ids.line_ids.filtered(lambda line: line.display_type == 'payment_term')
+        if payment_term_lines:
+            payment_values['destination_account_id'] = payment_term_lines[0].account_id.id
+
         payment = self.env['account.payment'].create(payment_values)
         payment.action_post()
 
@@ -200,6 +204,7 @@ class PaymentTransaction(models.Model):
             invoices = self.source_transaction_id.invoice_ids
         else:
             invoices = self.invoice_ids
+        invoices = invoices.filtered(lambda inv: inv.state != 'cancel')
         if invoices:
             invoices.filtered(lambda inv: inv.state == 'draft').action_post()
 
@@ -224,12 +229,19 @@ class PaymentTransaction(models.Model):
         :return: None
         """
         self.ensure_one()
-        author = self.env.user.partner_id if self.env.uid == SUPERUSER_ID else self.partner_id
+        if self.env.uid == SUPERUSER_ID or self.env.context.get('payment_backend_action'):
+            author = self.env.user.partner_id
+        else:
+            author = self.partner_id
         if self.source_transaction_id:
             for invoice in self.source_transaction_id.invoice_ids:
                 invoice.message_post(body=message, author_id=author.id)
             payment_id = self.source_transaction_id.payment_id
             if payment_id:
                 payment_id.message_post(body=message, author_id=author.id)
-        for invoice in self.invoice_ids:
+        for invoice in self._get_invoices_to_notify():
             invoice.message_post(body=message, author_id=author.id)
+
+    def _get_invoices_to_notify(self):
+        """ Return the invoices on which to log payment-related messages. """
+        return self.invoice_ids

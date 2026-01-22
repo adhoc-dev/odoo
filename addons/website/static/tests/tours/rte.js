@@ -13,7 +13,6 @@ registerWebsitePreviewTour('rte_translator', {
     url: '/',
     edition: true,
     wait_for: whenReady(),
-    checkDelay: 100,
 }, () => [
 ...goToTheme(),
 {
@@ -248,7 +247,7 @@ registerWebsitePreviewTour('rte_translator', {
     run: "click",
 }, {
     content: "Check body",
-    trigger: ":iframe body:not(:has(#wrap p font:first:contains(/^paragraphs <b>describing</b>$/)))",
+    trigger: ":iframe body:not(:has(#wrap p font:first:text(paragraphs <b>describing</b>)))",
 },
 ...clickOnEditAndWaitEditMode(),
 {

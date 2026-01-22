@@ -1,25 +1,27 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* repair
-# 
+# * repair
+#
 # Translators:
 # Wil Odoo, 2024
-# Erwin van der Ploeg <erwin@odooexperts.nl>, 2024
-# Manon Rondou, 2024
-# 
+# Manon Rondou, 2025
+# Erwin van der Ploeg <erwin@odooexperts.nl>, 2025
+# "Manon Rondou (ronm)" <ronm@odoo.com>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Manon Rondou, 2024\n"
-"Language-Team: Dutch (https://app.transifex.com/odoo/teams/41243/nl/)\n"
+"POT-Creation-Date: 2025-12-29 18:37+0000\n"
+"PO-Revision-Date: 2025-08-19 22:20+0000\n"
+"Last-Translator: \"Manon Rondou (ronm)\" <ronm@odoo.com>\n"
+"Language-Team: Dutch <https://translate.odoo.com/projects/odoo-18/repair/nl/"
+">\n"
+"Language: nl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: nl\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 5.12.2\n"
 
 #. module: repair
 #. odoo-python
@@ -31,12 +33,17 @@ msgstr "%(name)s Volgorde reparatie"
 #. odoo-python
 #: code:addons/repair/models/repair.py:0
 msgid "%(product)s: Insufficient Quantity To Repair"
-msgstr "%(product)s: Onvoldoende hoeveelheid om te repareren"
+msgstr "%(product)s: Onvoldoende aantal om te repareren"
 
 #. module: repair
 #: model:ir.actions.report,print_report_name:repair.action_report_repair_order
 msgid "('Repair Order - %s' % (object.name))"
 msgstr "('Reparatieorder - %s' % (object.name))"
+
+#. module: repair
+#: model_terms:ir.ui.view,arch_db:repair.report_repairorder
+msgid "(<i>Recycle</i>)"
+msgstr "(<i>Hergebruiken</i>)"
 
 #. module: repair
 #: model_terms:ir.ui.view,arch_db:repair.report_repairorder
@@ -46,17 +53,21 @@ msgstr "(<i>Verwijder</i>)"
 #. module: repair
 #: model:ir.model.fields,help:repair.field_repair_order__state
 msgid ""
-"* The 'New' status is used when a user is encoding a new and unconfirmed repair order.\n"
+"* The 'New' status is used when a user is encoding a new and unconfirmed "
+"repair order.\n"
 "* The 'Confirmed' status is used when a user confirms the repair order.\n"
 "* The 'Under Repair' status is used when the repair is ongoing.\n"
 "* The 'Repaired' status is set when repairing is completed.\n"
 "* The 'Cancelled' status is used when user cancel repair order."
 msgstr ""
-"* De status 'Nieuw' wordt gebruikt wanneer een gebruiker een nieuwe en onbevestigde reparatieorder aan het ingeven is.\n"
-"* De status 'Bevestigd' wordt gebruikt wanneer een gebruiker de reparatieorder bevestigt.\n"
+"* De status 'Nieuw' wordt gebruikt wanneer een gebruiker een nieuwe en "
+"onbevestigde reparatieorder aan het ingeven is.\n"
+"* De status 'Bevestigd' wordt gebruikt wanneer een gebruiker de "
+"reparatieorder bevestigt.\n"
 "* De status 'In reparatie' wordt gebruikt wanneer de reparatie lopende is.\n"
 "* De status 'gerepareerd' wordt gebruikt wanneer de reparatie voltooid is.\n"
-"* De status 'Geannuleerd' wordt gebruikt wanneer de gebruiker de reparatieorder annuleert."
+"* De status 'Geannuleerd' wordt gebruikt wanneer de gebruiker de "
+"reparatieorder annuleert."
 
 #. module: repair
 #: model_terms:ir.ui.view,arch_db:repair.report_repairorder
@@ -319,7 +330,7 @@ msgstr "Onderdeel bronlocatie"
 #. module: repair
 #: model:ir.model.fields,field_description:repair.field_repair_order__parts_availability
 msgid "Component Status"
-msgstr "Onderdeel status"
+msgstr "Onderdeelstatus"
 
 #. module: repair
 #: model:ir.ui.menu,name:repair.repair_menu_config
@@ -448,8 +459,8 @@ msgstr "Stop reparatie"
 #: model:ir.model.fields,help:repair.field_repair_order__tracking
 msgid "Ensure the traceability of a storable product in your warehouse."
 msgstr ""
-"Zorg voor de traceerbaarheid van een product dat kan worden opgeslagen in je"
-" magazijn."
+"Zorg voor de traceerbaarheid van een product dat kan worden opgeslagen in je "
+"magazijn."
 
 #. module: repair
 #. odoo-python
@@ -484,8 +495,7 @@ msgid ""
 "the actual quantity that was used. Are you sure you want to confirm ?"
 msgstr ""
 "Voor sommige onderdelen is er een verschil tussen de oorspronkelijke vraag "
-"en de werkelijk gebruikte hoeveelheid. Weet je zeker dat je dit wilt "
-"bevestigen?"
+"en het werkelijk gebruikte aantal. Weet je zeker dat je dit wilt bevestigen?"
 
 #. module: repair
 #: model_terms:ir.ui.view,arch_db:repair.view_repair_order_form
@@ -566,7 +576,8 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:repair.action_repair_order_tree
 msgid ""
 "In a repair order, you can detail the components you remove,\n"
-"                add or replace and record the time you spent on the different\n"
+"                add or replace and record the time you spent on the "
+"different\n"
 "                operations."
 msgstr ""
 "Bij een reparatieorder kun je de onderdelen opgeven om te verwijderen,\n"
@@ -668,6 +679,7 @@ msgid "Location"
 msgstr "Locatie"
 
 #. module: repair
+#: model_terms:ir.ui.view,arch_db:repair.repair_view_picking_type_form
 #: model_terms:ir.ui.view,arch_db:repair.view_repair_order_form
 msgid "Locations"
 msgstr "Locaties"
@@ -807,8 +819,7 @@ msgstr "Bewerkingssoort"
 
 #. module: repair
 #. odoo-python
-#: code:addons/repair/models/product.py:0
-#: code:addons/repair/models/repair.py:0
+#: code:addons/repair/models/product.py:0 code:addons/repair/models/repair.py:0
 msgid "Operation not supported"
 msgstr "Bewerking niet ondersteund"
 
@@ -906,7 +917,7 @@ msgstr "Productverplaatstingen (voorraadverplaatsingsregels)"
 #. module: repair
 #: model:ir.model.fields,field_description:repair.field_repair_order__product_qty
 msgid "Product Quantity"
-msgstr "Producthoeveelheid"
+msgstr "Productaantal"
 
 #. module: repair
 #: model:ir.model.fields,field_description:repair.field_repair_order__product_location_src_id
@@ -964,7 +975,7 @@ msgstr "Hvh"
 #: model_terms:ir.ui.view,arch_db:repair.report_repairorder
 #: model_terms:ir.ui.view,arch_db:repair.view_repair_order_tree
 msgid "Quantity"
-msgstr "Hoeveelheid"
+msgstr "Aantal"
 
 #. module: repair
 #: model_terms:ir.ui.view,arch_db:repair.report_repairorder
@@ -1280,7 +1291,7 @@ msgid ""
 msgstr ""
 "Status gebaseerd op activiteiten\n"
 "Te laat: Datum is al gepasseerd\n"
-"Vandaag: Activiteit datum is vandaag\n"
+"Vandaag: Datum van activiteit is vandaag\n"
 "Gepland: Toekomstige activiteiten."
 
 #. module: repair
@@ -1336,8 +1347,8 @@ msgid ""
 "The product unit of measure you chose has a different category than the "
 "product unit of measure."
 msgstr ""
-"De productmaateenheid die je hebt gekozen heeft een andere categorie dan het"
-" productmaateenheid."
+"De productmaateenheid die je hebt gekozen heeft een andere categorie dan het "
+"productmaateenheid."
 
 #. module: repair
 #: model_terms:ir.ui.view,arch_db:repair.report_repairorder
@@ -1374,8 +1385,8 @@ msgstr ""
 #. module: repair
 #: model:ir.model.fields,help:repair.field_stock_picking_type__default_product_location_src_id
 msgid ""
-"This is the default source location for the product to be repaired in repair"
-" orders with this operation type."
+"This is the default source location for the product to be repaired in repair "
+"orders with this operation type."
 msgstr ""
 "Dit is de standaardbronlocatie voor het te repareren product in "
 "reparatieopdrachten met deze bewerkingssoort."
@@ -1482,7 +1493,7 @@ msgstr "Maateenheid"
 #. module: repair
 #: model_terms:ir.ui.view,arch_db:repair.report_repairorder
 msgid "Units"
-msgstr "Stuks"
+msgstr "Stuk(s)"
 
 #. module: repair
 #: model_terms:ir.ui.view,arch_db:repair.view_repair_order_form
@@ -1507,7 +1518,7 @@ msgstr "Magazijn"
 #. module: repair
 #: model:ir.model,name:repair.model_stock_warn_insufficient_qty_repair
 msgid "Warn Insufficient Repair Quantity"
-msgstr "Waarschuwing onvoldoende reparatiehoeveelheid"
+msgstr "Waarschuwing onvoldoende reparatieaantal"
 
 #. module: repair
 #. odoo-python
@@ -1541,17 +1552,19 @@ msgstr "Je mag geen negatieve waardes ingeven."
 #. odoo-python
 #: code:addons/repair/models/repair.py:0
 msgid "You cannot cancel a Repair Order that's already been completed"
-msgstr "Je kan geen reparatieorder annuleren die al voltooid is"
+msgstr "Je kunt geen reparatieorder annuleren die al voltooid is"
 
 #. module: repair
 #. odoo-python
 #: code:addons/repair/models/repair.py:0
 msgid ""
-"You cannot create a quotation for a repair order that is already linked to an existing sale order.\n"
+"You cannot create a quotation for a repair order that is already linked to "
+"an existing sale order.\n"
 "Concerned repair order(s):\n"
 "%(ref_str)s"
 msgstr ""
-"Je kunt geen offerte maken voor een reparatieorder die al is gekoppeld aan een bestaande verkooporder.\n"
+"Je kunt geen offerte maken voor een reparatieorder die al is gekoppeld aan "
+"een bestaande verkooporder.\n"
 "Betreffende reparatieorder(s):\n"
 "%(ref_str)s"
 
@@ -1559,11 +1572,13 @@ msgstr ""
 #. odoo-python
 #: code:addons/repair/models/repair.py:0
 msgid ""
-"You need to define a customer for a repair order in order to create an associated quotation.\n"
+"You need to define a customer for a repair order in order to create an "
+"associated quotation.\n"
 "Concerned repair order(s):\n"
 "%(ref_str)s"
 msgstr ""
-"Je moet een klant definiëren voor een reparatieorder om een bijbehorende offerte te kunnen maken.\n"
+"Je moet een klant definiëren voor een reparatieorder om een bijbehorende "
+"offerte te kunnen maken.\n"
 "Betreffende reparatieopdracht(en):\n"
 "%(ref_str)s"
 

@@ -152,7 +152,7 @@
 
         <!-- Email template for new users that used a signup token -->
         <record id="mail_template_user_signup_account_created" model="mail.template">
-            <field name="name">Settings: New User Invite</field>
+            <field name="name">Settings: New Portal Sign Up</field>
             <field name="model_id" ref="base.model_res_users"/>
             <field name="subject">Welcome to {{ object.company_id.name }}!</field>
             <field name="email_from">{{ (object.company_id.email_formatted or user.email_formatted) }}</field>
@@ -219,12 +219,10 @@
                 <tr><td valign="middle" align="left" style="opacity: 0.7;">
                     <t t-out="object.company_id.phone or ''">+1 650-123-4567</t>
                     <t t-if="object.company_id.email">
-                        | <a t-attf-href="'mailto:%s' % {{ object.company_id.email }}" style="text-decoration:none; color: #454748;"><t t-out="object.company_id.email or ''">info@yourcompany.com</t></a>
+                        | <a t-attf-href="mailto:{{object.company_id.email}}" style="text-decoration:none; color: #454748;" t-out="object.company_id.email or ''">info@yourcompany.com</a>
                     </t>
                     <t t-if="object.company_id.website">
-                        | <a t-attf-href="'%s' % {{ object.company_id.website }}" style="text-decoration:none; color: #454748;">
-                            <t t-out="object.company_id.website or ''">http://www.example.com</t>
-                        </a>
+                        | <a t-att-href="object.company_id.website" style="text-decoration:none; color: #454748;" t-out="object.company_id.website or ''">http://www.example.com</a>
                     </t>
                 </td></tr>
             </table>

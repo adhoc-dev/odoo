@@ -23,7 +23,7 @@ def test_get_data(self, template_code):
     return {
         'template_data': {
             'code_digits': 6,
-            'currency_id': 'base.EUR',
+            'currency_id': self.env.ref('base.EUR').id,
             'property_account_income_categ_id': 'test_account_income_template',
             'property_account_expense_categ_id': 'test_account_expense_template',
             'property_account_receivable_id': 'test_account_receivable_template',
@@ -41,6 +41,7 @@ def test_get_data(self, template_code):
                 'bank_account_code_prefix': '1000',
                 'cash_account_code_prefix': '2000',
                 'transfer_account_code_prefix': '3000',
+                'account_sale_tax_id': 'test_tax_1_template',
             },
         },
         'account.account.tag': {
@@ -294,6 +295,25 @@ class TestChartTemplate(AccountTestInvoicingCommon):
             ])
             return data
 
+        # First try with `force_create=False` (during an upgrade)
+        with patch.object(AccountChartTemplate, '_get_chart_template_data', side_effect=local_get_data, autospec=True):
+            self.env['account.chart.template'].try_loading('test', company=self.company, install_demo=False, force_create=False)
+
+        taxes = self.env['account.tax'].search([('company_id', '=', self.company.id)])
+        self.assertRecordValues(taxes, [
+            {'name': 'Tax 1'},
+            {'name': 'Tax 2'},
+        ])
+
+        fiscal_position = self.env['account.fiscal.position'].search([])
+        self.assertRecordValues(fiscal_position.tax_ids.tax_src_id, [
+            {'name': 'Tax 1'},
+        ])
+        self.assertRecordValues(fiscal_position.tax_ids.tax_dest_id, [
+            {'name': 'Tax 2'},
+        ])
+
+        # then try with `force_create=True` (when updating the CoA manually)
         with patch.object(AccountChartTemplate, '_get_chart_template_data', side_effect=local_get_data, autospec=True):
             self.env['account.chart.template'].try_loading('test', company=self.company, install_demo=False)
 
@@ -316,6 +336,122 @@ class TestChartTemplate(AccountTestInvoicingCommon):
             {'name': 'Tax 1'},
             {'name': 'Tax 4'},
         ])
+
+    def test_remove_fiscal_position_try_loading_force_create_false(self):
+        """Test that removing a fiscal position and calling try_loading with force_create=False does not recreate it."""
+
+        # Ensure the fiscal position exists
+        fiscal_position = self.env['account.fiscal.position'].search([
+            ('name', '=', 'Fiscal Position'),
+        ])
+        self.assertTrue(fiscal_position, "Fiscal Position should exist before deletion")
+
+        # Now remove the fiscal position safely
+        fiscal_position.unlink()
+
+        # Ensure the fiscal position is removed
+        self.assertFalse(fiscal_position.exists(), "Fiscal Position should be deleted")
+
+        # Call try_loading with force_create=False`
+        with patch.object(AccountChartTemplate, '_get_chart_template_data', side_effect=test_get_data, autospec=True):
+            self.env['account.chart.template'].try_loading('test', company=self.company, install_demo=False,
+                                                           force_create=False)
+
+        # Ensure the fiscal position was NOT recreated
+        fiscal_position_after_reload = self.env['account.fiscal.position'].search([
+            ('name', '=', 'Fiscal Position'),
+        ])
+        self.assertFalse(fiscal_position_after_reload,
+                         "Fiscal Position should not be recreated when force_create=False")
+
+        # Call try_loading with force_create=True
+        with patch.object(AccountChartTemplate, '_get_chart_template_data', side_effect=test_get_data, autospec=True):
+            self.env['account.chart.template'].try_loading('test', company=self.company, install_demo=False,
+                                                           force_create=True)
+
+        # Ensure the fiscal position was NOT recreated
+        fiscal_position_after_reload = self.env['account.fiscal.position'].search([
+            ('name', '=', 'Fiscal Position'),
+        ])
+        self.assertTrue(fiscal_position_after_reload, "Fiscal Position should be recreated when force_create=True")
+
+    def test_new_tax_rate(self):
+        """Test the flow to replace taxes from an old to a new rate.
+
+        This test aims at defining more clearly how to update the taxes when the rate changes.
+        There are some constraints to take into account:
+        * There is a transition period where both taxes need to be usable
+        * Some reports might need to keep the references to the old tax i.e. on the fiscal positions (OSS)
+
+        The procedure for the code change is:
+        * Create the new report section if needed.
+        * Remove the taxes from the template.
+          This will not delete the taxes from the company when updating the template on the company.
+        * Add the new taxes with a xmlid different from the ones deleted.
+          The taxes will be created when updating the template on the company.
+        * Update all the references to the old taxes to the new ones.
+          - Fiscal positions: The previous mappings won't be deleted but the new ones will be created.
+                              This ensures that reports still work.
+        * If such a tax was part of a group, a new group must be created and the old one removed from the template.
+
+        The procedure for the users, when they are ready, is:
+        * When the old taxes are not needed anymore (i.e. tax period closed), archive them
+        * Update the taxes on
+          - products
+          - accounts
+          - reconcile models
+        """
+        def local_get_data(self, template_code):
+            # Delete the existing tax and create a new one with a different rate
+            data = test_get_data(self, template_code)
+            del data['account.tax']['test_tax_1_template']
+            data['account.tax']['test_tax_3_template'] = _tax_vals('Tax 3', 30)
+            for fpos in data['account.fiscal.position'].values():
+                for _command, _id, tax in fpos['tax_ids']:
+                    if tax['tax_src_id'] == 'test_tax_1_template':
+                        tax['tax_src_id'] = 'test_tax_3_template'
+                    if tax['tax_dest_id'] == 'test_tax_1_template':
+                        tax['tax_dest_id'] = 'test_tax_3_template'
+            data['res.company'][self.env.company.id]['account_sale_tax_id'] = 'test_tax_3_template'
+            return data
+
+        with patch.object(AccountChartTemplate, '_get_chart_template_data', side_effect=local_get_data, autospec=True):
+            self.env['account.chart.template'].try_loading('test', company=self.company, install_demo=False)
+
+        # On an existing company all the taxes are still present.
+        # The user has to deactivate them manually when not needed anymore (if they needed to encode things in the past)
+        taxes = self.env['account.tax'].search([('company_id', '=', self.company.id)])
+        self.assertRecordValues(taxes, [
+            {'name': 'Tax 1'},
+            {'name': 'Tax 2'},
+            {'name': 'Tax 3'},
+        ])
+
+        tax_1, tax_2, tax_3  = taxes
+        fiscal_position = self.env['account.fiscal.position'].search([('company_id', '=', self.company.id)])
+        self.assertRecordValues(fiscal_position.tax_ids, [
+            {'tax_src_id': tax_1.id, 'tax_dest_id': tax_2.id},
+            {'tax_src_id': tax_3.id, 'tax_dest_id': tax_2.id},
+        ])
+        # On a new company you would never see the old tax.
+        # In case users need it, they can duplicate the new one and change the rate.
+        new_company = self.env['res.company'].create({'name': 'New Company'})
+        with patch.object(AccountChartTemplate, '_get_chart_template_data', side_effect=local_get_data, autospec=True):
+            self.env['account.chart.template'].try_loading('test', company=new_company, install_demo=False)
+
+        taxes = self.env['account.tax'].search([('company_id', '=', new_company.id)])
+        self.assertRecordValues(taxes, [
+            {'name': 'Tax 2'},
+            {'name': 'Tax 3'},
+        ])
+
+        tax_2, tax_3 = taxes
+        fiscal_position = self.env['account.fiscal.position'].search([('company_id', '=', new_company.id)])
+        self.assertRecordValues(fiscal_position.tax_ids, [
+            {'tax_src_id': tax_3.id, 'tax_dest_id': tax_2.id},
+        ])
+        self.assertEqual(new_company.account_sale_tax_id, tax_3)
+
 
     def test_update_taxes_update(self):
         """ When a tax is close enough from an existing tax we want to update that tax with the new values. """
@@ -587,6 +723,8 @@ class TestChartTemplate(AccountTestInvoicingCommon):
             return data
 
         company = self.company
+        # force first load since company data is removed on reload
+        company.chart_template = False
 
         with patch.object(AccountChartTemplate, '_get_chart_template_data', side_effect=local_get_data, autospec=True):
             # hard fail the loading if the context key is set to ensure `test_all_l10n` works as expected
@@ -851,14 +989,14 @@ class TestChartTemplate(AccountTestInvoicingCommon):
             'no_translation.test_chart_template_company_test_free_account_group.name@fr_BE': 'Free Account Group account/FR',  # fallback to account
             'tax_group_taxes.name@en_US': 'Taxes',
             'tax_group_taxes.name@fr_BE': 'Taxes FR',
-            'test_tax_1_template.description@en_US': Markup('<p>Tax 1 Description</p>'),
+            'test_tax_1_template.description@en_US': Markup('Tax 1 Description'),
             'test_tax_1_template.description@fr_BE': Markup('Tax 1 Description translation2/FR'),
             'test_tax_1_template.name@en_US': 'Tax 1',
             'test_tax_1_template.name@fr_BE': 'Tax 1 FR',
             'translation.test_chart_template_company_test_free_account.name@en_US': 'Free Account',
             'translation.test_chart_template_company_test_free_account.name@fr_BE': 'Free Account FR_BE',  # do not use generic lang
-            'translation.test_chart_template_company_test_free_tax.description@en_US': Markup('<p>Free Tax Description</p>'),
-            'translation.test_chart_template_company_test_free_tax.description@fr_BE': Markup('<p>Free Tax Description</p>'),
+            'translation.test_chart_template_company_test_free_tax.description@en_US': Markup('Free Tax Description'),
+            'translation.test_chart_template_company_test_free_tax.description@fr_BE': Markup('Free Tax Description FR'),
             'translation.test_chart_template_company_test_free_tax.name@en_US': 'Free Tax',
             'translation.test_chart_template_company_test_free_tax.name@fr_BE': 'Free Tax FR',
         })
@@ -949,3 +1087,18 @@ class TestChartTemplate(AccountTestInvoicingCommon):
         with patch.object(AccountChartTemplate, '_get_chart_template_data', side_effect=test_get_data, autospec=True):
             self.env['account.chart.template'].try_loading('test', company=company, install_demo=False)
         self.assertEqual(company.country_id.code, "BE")
+
+    def test_bank_account_code_prefix(self):
+        """
+            Test that chart template loading works correctly with default value of bank_account_code_prefix.
+        """
+        company = self.env['res.company'].create({'name': 'Test Company Without Bank Prefix'})
+
+        def local_get_data(self, template_code):
+            data = test_get_data(self, template_code)
+            del data['res.company'][company.id]['bank_account_code_prefix']  # use field's default value, which is 'False' instead of ''
+            return data
+
+        with patch.object(AccountChartTemplate, '_get_chart_template_data', side_effect=local_get_data, autospec=True):
+            self.env['account.chart.template'].try_loading('test', company=company, install_demo=False)
+        self.assertEqual(company.chart_template, 'test')

@@ -9,6 +9,7 @@ import {
 } from "@odoo/owl";
 
 import { browser } from "@web/core/browser/browser";
+import { _t } from "@web/core/l10n/translation";
 import { Deferred } from "@web/core/utils/concurrency";
 import { makeDraggableHook } from "@web/core/utils/draggable_hook_builder_owl";
 import { useService } from "@web/core/utils/hooks";
@@ -71,6 +72,10 @@ export function onExternalClick(refName, cb) {
 }
 
 /**
+ * Hook that allows to determine precisely when refs are (mouse-)hovered.
+ * Should provide a list of ref names, and can add callbacks when elements are
+ * hovered-in (onHover), hovered-out (onAway), hovering for some time (onHovering).
+ *
  * @param {string | string[]} refNames name of refs that determine whether this is in state "hovering".
  *   ref name that end with "*" means it takes parented HTML node into account too. Useful for floating
  *   menu where dropdown menu container is not accessible.
@@ -79,14 +84,18 @@ export function onExternalClick(refName, cb) {
  * @param {() => void} [param1.onAway] callback when stop hovering the ref names.
  * @param {number, () => void} [param1.onHovering] array where 1st param is duration until start hovering
  *   and function to be executed at this delay duration after hovering is kept true.
+ * @param {() => Array} [param1.stateObserver] when provided, function that, when called, returns list of
+ *   reactive state related to presence of targets' el. This is used to help the hook detect when the targets
+ *   are removed from DOM, to properly mark the hovered target as non-hovered.
  * @returns {({ isHover: boolean })}
  */
-export function useHover(refNames, { onHover, onAway, onHovering } = {}) {
+export function useHover(refNames, { onHover, onAway, stateObserver, onHovering } = {}) {
     refNames = Array.isArray(refNames) ? refNames : [refNames];
     const targets = [];
     let wasHovering = false;
     let hoveringTimeout;
     let awayTimeout;
+    let lastHoveredTarget;
     for (const refName of refNames) {
         targets.push({
             ref: refName.endsWith("*")
@@ -144,6 +153,7 @@ export function useHover(refNames, { onHover, onAway, onHovering } = {}) {
             }
             if (target.ref.el.contains(ev.target)) {
                 setHover(true);
+                lastHoveredTarget = target;
                 return;
             }
         }
@@ -161,6 +171,7 @@ export function useHover(refNames, { onHover, onAway, onHovering } = {}) {
             }
         }
         setHover(false);
+        lastHoveredTarget = null;
     }
 
     for (const target of targets) {
@@ -176,6 +187,15 @@ export function useHover(refNames, { onHover, onAway, onHovering } = {}) {
             (ev) => onmouseleave(ev),
             true
         );
+    }
+
+    if (stateObserver) {
+        useEffect(() => {
+            if (lastHoveredTarget && !lastHoveredTarget.ref.el) {
+                setHover(false);
+                lastHoveredTarget = null;
+            }
+        }, stateObserver);
     }
     return state;
 }
@@ -237,6 +257,7 @@ export function useVisible(refName, cb, { ready = true } = {}) {
 
 export function useMessageHighlight(duration = 2000) {
     let timeout;
+    const notification = useState(useService("notification"));
     const state = useState({
         clearHighlight() {
             if (this.highlightedMessageId) {
@@ -250,10 +271,14 @@ export function useMessageHighlight(duration = 2000) {
          * @param {import("models").Thread} thread
          */
         async highlightMessage(message, thread) {
-            if (thread.notEq(message.thread)) {
+            if (thread.model !== "mail.box" && thread.notEq(message.thread)) {
                 return;
             }
             await thread.loadAround(message.id);
+            if (message.isEmpty) {
+                notification.add(_t("The message has been deleted."));
+                return;
+            }
             const lastHighlightedMessageId = state.highlightedMessageId;
             this.clearHighlight();
             if (lastHighlightedMessageId === message.id) {

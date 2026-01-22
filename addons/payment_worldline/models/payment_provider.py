@@ -1,16 +1,17 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import base64
-import datetime
 import hashlib
 import hmac
 import logging
 import pprint
+from wsgiref.handlers import format_date_time
 
 import requests
 
 from odoo import _, fields, models
 from odoo.exceptions import ValidationError
+from odoo.fields import Datetime
 
 from odoo.addons.payment_worldline import const
 
@@ -65,8 +66,7 @@ class PaymentProvider(models.Model):
         api_url = self._worldline_get_api_url()
         url = f'{api_url}/v2/{self.worldline_pspid}/{endpoint}'
         content_type = 'application/json; charset=utf-8' if method == 'POST' else ''
-        tz = datetime.timezone(datetime.timedelta(hours=0), 'GMT')
-        dt = datetime.datetime.now(tz).strftime('%a, %d %b %Y %H:%M:%S %Z')  # Datetime in RFC1123.
+        dt = format_date_time(Datetime.now().timestamp())  # Datetime in locale-independent RFC1123
         signature = self._worldline_calculate_signature(
             method, endpoint, content_type, dt, idempotency_key=idempotency_key
         )
@@ -81,7 +81,8 @@ class PaymentProvider(models.Model):
         try:
             response = requests.request(method, url, json=payload, headers=headers, timeout=10)
             try:
-                response.raise_for_status()
+                if response.status_code not in const.VALID_RESPONSE_CODES:
+                    response.raise_for_status()
             except requests.exceptions.HTTPError:
                 _logger.exception(
                     "Invalid API request at %s with data:\n%s", url, pprint.pformat(payload)

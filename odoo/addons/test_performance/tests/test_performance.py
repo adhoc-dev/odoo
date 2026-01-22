@@ -168,6 +168,19 @@ class TestPerformance(SavepointCaseWithUserDemo):
             #  on 'value', and none of them are in cache
             records.fetch(['indirect_computed_value'])
 
+        # Test that new/false records are ignored. We generally make the assumption that
+        # new records and real record shouldn't mix together but for the sake of robustness
+        # we ignore new/false records in fetch.
+        real_record = records[0]
+        new_record_origin = records.new(origin=real_record)
+        new_record_ref = records.new(ref='virtual_')
+        new_record = records.new({'name': 'aaa'})
+        # Because the ORM "works" for records.browse([False]).name, fetch should "work" too.
+        false_record = records.browse([False])
+        records = real_record + new_record_origin + new_record_ref + new_record + false_record
+        with self.assertQueryCount(1):
+            records.fetch(['name'])
+
     @warmup
     def test_search_fetch(self):
         """ Search and fetch all at once. """
@@ -616,6 +629,26 @@ class TestPerformance(SavepointCaseWithUserDemo):
 
         result = list(zip(result_name, result_value, result_value_pc))
         self.assertEqual(result, [('1', 1, 0.01), ('2', 42, 0.42), ('3', 3, 0.03)])
+
+    def test_prefetch_new(self):
+        model = self.env['test_performance.base']
+        records = model.create([
+            {'name': str(i), 'line_ids': [Command.create({'value': i})]} for i in [1, 2, 3]
+        ])
+        self.env.flush_all()
+        self.env.invalidate_all()
+
+        # make a new recordset corresponding to those records, and access it
+        new_record = model.new({'line_ids': [Command.create({'value': 4})]})
+        new_records_ids = [model.new(origin=record).id for record in records]
+        new_records_ids.append(new_record.id)
+        new_records = model.browse(new_records_ids)
+
+        # fetch 'line_ids' on all records (2 queries), fetch 'value' on all lines (1 query)
+        with self.assertQueryCount(3):
+            for record in new_records:
+                for line in record.line_ids:
+                    line.value
 
     def expected_read_group(self):
         groups = defaultdict(list)

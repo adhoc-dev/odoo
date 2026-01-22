@@ -1,4 +1,7 @@
+from collections import Counter
+
 from odoo import _, api, Command, fields, models
+from odoo.exceptions import RedirectWarning, UserError
 
 
 class AccountMoveSendBatchWizard(models.TransientModel):
@@ -30,24 +33,33 @@ class AccountMoveSendBatchWizard(models.TransientModel):
 
     @api.depends('move_ids')
     def _compute_summary_data(self):
+        extra_edis = self._get_all_extra_edis()
         sending_methods = dict(self.env['res.partner']._fields['invoice_sending_method'].selection)
+        sending_methods['manual'] = _('Manually')  # in batch sending, everything is done asynchronously, we never "Download"
+
         for wizard in self:
-            wizard.summary_data = {
-                sending_method: {'count': len(moves), 'label': sending_methods[sending_method]}
-                for sending_method, moves in wizard.move_ids.grouped(self._get_default_sending_method).items()
-            }
+            edi_counter = Counter()
+            sending_method_counter = Counter()
+
+            for move in wizard.move_ids:
+                edi_counter += Counter([edi for edi in self._get_default_extra_edis(move)])
+                sending_settings = self._get_default_sending_settings(move)
+                sending_method = next(iter(sending_settings['sending_methods']))  # In batch sending & in 18.0 there can only have !one sending method per move.
+                if self._is_applicable_to_move(sending_method, move, **sending_settings):
+                    sending_method_counter[sending_method] += 1
+
+            summary_data = dict()
+            for edi, edi_count in edi_counter.items():
+                summary_data[edi] = {'count': edi_count, 'label': _("by %s", extra_edis[edi]['label'])}
+            for sending_method, sending_method_count in sending_method_counter.items():
+                summary_data[sending_method] = {'count': sending_method_count, 'label': sending_methods[sending_method]}
+
+            wizard.summary_data = summary_data
 
     @api.depends('summary_data')
     def _compute_alerts(self):
         for wizard in self:
-            moves_data = {
-                move: {
-                    'sending_methods': {self._get_default_sending_method(move)},
-                    'invoice_edi_format': self._get_default_invoice_edi_format(move),
-                    'extra_edis': self._get_default_extra_edis(move),
-                }
-                for move in wizard.move_ids
-            }
+            moves_data = {move: self._get_default_sending_settings(move) for move in wizard.move_ids}
             wizard.alerts = self._get_alerts(wizard.move_ids, moves_data)
 
     # -------------------------------------------------------------------------
@@ -72,11 +84,27 @@ class AccountMoveSendBatchWizard(models.TransientModel):
             self.env['account.move.send']._generate_and_send_invoices(self.move_ids, allow_fallback_pdf=allow_fallback_pdf)
             return
 
+        account_move_send_cron = self.env.ref('account.ir_cron_account_move_send')
+        if not account_move_send_cron.sudo().active:
+            if self.env.user.has_group('base.group_system'):
+                raise RedirectWarning(
+                    _("Batch invoice sending is unavailable. Please, activate the cron to enable batch sending of invoices."),
+                    {
+                        'views': [(False, 'form')],
+                        'res_model': 'ir.cron',
+                        'type': 'ir.actions.act_window',
+                        'res_id': account_move_send_cron.id,
+                        'target': 'current',
+                    },
+                    _("Go to cron configuration"),
+                )
+            raise UserError(_("Batch invoice sending is unavailable. Please, contact your system administrator to activate the cron to enable batch sending of invoices."))
+
         self.move_ids.sending_data = {
             'author_user_id': self.env.user.id,
             'author_partner_id': self.env.user.partner_id.id,
         }
-        self.env.ref('account.ir_cron_account_move_send')._trigger()
+        account_move_send_cron._trigger()
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',

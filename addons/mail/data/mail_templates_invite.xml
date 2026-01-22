@@ -7,10 +7,6 @@
                     <t t-set="subtitles" t-value="False" />
                 </t>
             </xpath>
-            <xpath expr="//div[@t-out='message.body']" position="before">
-                <hr width="100%"
-    style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0;margin: 10px 0px;"/>
-            </xpath>
             <xpath expr="//div[@t-out='message.body']" position="replace">
                 <div style="font-size:13px;">
                     <div>
@@ -22,7 +18,6 @@
                     </div>
                 </div>
             </xpath>
-            <xpath expr="//tr[td/p[@t-if='subtype_internal']]" position="replace"/>
             <xpath expr="//span[@id='mail_unfollow']" position="replace"/>
             <xpath expr="//div[@style='margin-top:16px;']/hr" position="before">
                 <span id="mail_unfollow" style="font-size: 13px;">

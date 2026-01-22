@@ -67,6 +67,7 @@ test("can post a message on a record thread", async () => {
             context: args.context,
             post_data: {
                 body: "hey",
+                email_add_signature: true,
                 message_type: "comment",
                 subtype_xmlid: "mail.mt_comment",
             },
@@ -97,6 +98,7 @@ test("can post a note on a record thread", async () => {
             context: args.context,
             post_data: {
                 body: "hey",
+                email_add_signature: true,
                 message_type: "comment",
                 subtype_xmlid: "mail.mt_note",
             },
@@ -190,11 +192,11 @@ test("chatter: drop attachments", async () => {
     await contains(".o-Dropzone");
     await contains(".o-mail-AttachmentCard", { count: 0 });
     await dropFiles(".o-Dropzone", files);
-    await contains(".o-mail-AttachmentCard", { count: 2 });
+    await contains(".o-mail-AttachmentCard:not(.o-isUploading)", { count: 2 });
     const extraFiles = [text3];
     await dragenterFiles(".o-mail-Chatter", extraFiles);
     await dropFiles(".o-Dropzone", extraFiles);
-    await contains(".o-mail-AttachmentCard", { count: 3 });
+    await contains(".o-mail-AttachmentCard:not(.o-isUploading)", { count: 3 });
 });
 
 test("chatter: drop attachment should refresh thread data with hasParentReloadOnAttachmentsChange prop", async () => {
@@ -645,7 +647,6 @@ test("form views in dialogs do not have chatter", async () => {
             id: 1,
             name: "Partner",
             res_model: "res.partner",
-            type: "ir.actions.act_window",
             views: [[false, "form"]],
             target: "new",
         },

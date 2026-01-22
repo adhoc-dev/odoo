@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 from odoo import Command
 
-from odoo.exceptions import AccessError, UserError
+from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.osv import expression
 from odoo.tests import Form, TransactionCase, users
 from odoo.tools import mute_logger, get_lang
@@ -1658,6 +1658,30 @@ class PropertiesCase(TestPropertiesMixin):
         self.assertEqual(values['value'], (tag.id, 'Test Tag'))
 
     @users('test')
+    def test_properties_field_update_parent(self):
+        """ Check that the user does not get an `AccessError` when modifying the
+        parent of a record and thereby making it forbidden. The default values
+        of the new property definition should be added should be added even if
+        the record is not accessible.
+        """
+        self.env['ir.rule'].sudo().create({
+            'name': 'only discussion_1',
+            'model_id': self.env['ir.model']._get('test_new_api.message').id,
+            'domain_force': [('discussion', '=', self.discussion_1.id)],
+        })
+
+        message = self.env['test_new_api.message'].create({
+            'name': 'Test Message',
+            'discussion': self.discussion_1.id,
+            'author': self.user.id,
+        })
+        self.env.invalidate_all()
+
+        # this makes message inaccessible, but flush_all() should not crash
+        message.discussion = self.discussion_2
+        self.env.flush_all()
+
+    @users('test')
     def test_properties_field_no_parent_access(self):
         """We can read the child, but not the definition record.
 
@@ -1698,11 +1722,29 @@ class PropertiesCase(TestPropertiesMixin):
                 'value': 'red',
             }],
         })
+        email.invalidate_recordset()
 
         values = email.read(['attributes'])
         self.assertEqual(values[0]['attributes'][0]['value'], 'red')
         values = email.message.read(['attributes'])
         self.assertEqual(values[0]['attributes'][0]['value'], 'red')
+
+    def test_properties_server_action_path_traversal(self):
+        action = self.env['ir.actions.server'].create({
+            'name': 'TestAction',
+            'model_id': self.env['ir.model'].search([
+                ('model', '=', 'test_new_api.emailmessage'),
+            ]).id,
+            'model_name': 'test_new_api.emailmessage',
+            'state': 'object_write',
+        })
+        with self.assertRaises(ValidationError):
+            action.update_path = 'attributes.discussion_color_code'
+            # call _stringify_path directly because it's only called for
+            # server action linked to a base_automation
+            self.assertEqual(action._stringify_path(),
+                'Properties > discussion_color_code'
+            )
 
 
 class PropertiesSearchCase(TestPropertiesMixin):

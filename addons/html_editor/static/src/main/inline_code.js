@@ -1,13 +1,22 @@
 import { Plugin } from "@html_editor/plugin";
 import { splitTextNode } from "@html_editor/utils/dom";
-import { closestElement } from "@html_editor/utils/dom_traversal";
+import { closestElement, selectElements } from "@html_editor/utils/dom_traversal";
 import { DIRECTIONS } from "@html_editor/utils/position";
 
 export class InlineCodePlugin extends Plugin {
     static id = "inlineCode";
-    static dependencies = ["selection", "history", "input"];
+    static dependencies = ["selection", "history", "input", "feff"];
     resources = {
         input_handlers: this.onInput.bind(this),
+        normalize_handlers: this.normalize.bind(this),
+        feff_providers: (root, cursors) => {
+            const result = [];
+            for (const node of selectElements(root, "code.o_inline_code:last-child")) {
+                const feff = this.dependencies.feff.addFeff(node, "after", cursors);
+                result.push(feff);
+            }
+            return result;
+        },
     };
 
     onInput(ev) {
@@ -33,10 +42,13 @@ export class InlineCodePlugin extends Plugin {
             sibling.remove();
             sibling = textNode.nextSibling;
         }
-        this.dependencies.selection.setSelection({ anchorNode: textNode, anchorOffset: offset });
         const textHasTwoTicks = /`.*`/.test(textNode.textContent);
         // We don't apply the code tag if there is no content between the two `
         if (textHasTwoTicks && textNode.textContent.replace(/`/g, "").length) {
+            this.dependencies.selection.setSelection({
+                anchorNode: textNode,
+                anchorOffset: offset,
+            });
             this.dependencies.history.addStep();
             const insertedBacktickIndex = offset - 1;
             const textBeforeInsertedBacktick = textNode.textContent.substring(
@@ -94,5 +106,11 @@ export class InlineCodePlugin extends Plugin {
             }
         }
         this.dependencies.history.addStep();
+    }
+
+    normalize(rootEl) {
+        for (const el of selectElements(rootEl, "code.o_inline_code[data-oe-zws-empty-inline]")) {
+            el.remove();
+        }
     }
 }

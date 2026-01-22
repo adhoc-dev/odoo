@@ -33,6 +33,12 @@ class PosSession(models.Model):
     def _load_pos_self_data_domain(self, data):
         return [('config_id', '=', data['pos.config']['data'][0]['id']), ('state', '=', 'opened')]
 
+    def _load_pos_self_data(self, data):
+        result = super()._load_pos_self_data(data)
+        if result['data']:
+            result['data'][0]['_base_url'] = self.get_base_url()
+        return result
+
     def _load_pos_data(self, data):
         sessions = super()._load_pos_data(data)
         sessions['data'][0]['_self_ordering'] = (
@@ -49,3 +55,8 @@ class PosSession(models.Model):
             > 0
         )
         return sessions
+
+    def _get_gc_sequence_prefix(self):
+        res = super()._get_gc_sequence_prefix()
+        res.append('pos.order_')
+        return res

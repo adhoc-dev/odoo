@@ -45,6 +45,7 @@ class TestConfigManager(TransactionCase):
             'pidfile': '',
             'addons_path': f'{ROOT_PATH}/odoo/addons,{ROOT_PATH}/addons',
             'upgrade_path': '',
+            'pre_upgrade_scripts': '',
             'server_wide_modules': 'base,web',
             'data_dir': _get_default_datadir(),
 
@@ -113,10 +114,12 @@ class TestConfigManager(TransactionCase):
             # advanced
             'dev_mode': [],
             'shell_interface': None,
+            'skip_auto_install': False,
             'stop_after_init': False,
             'osv_memory_count_limit': 0,
             'transient_age_limit': 1.0,
             'max_cron_threads': 2,
+            'limit_time_worker_cron': 0,
             'unaccent': False,
             'geoip_city_db': '/usr/share/GeoIP/GeoLite2-City.mmdb',
             'geoip_country_db': '/usr/share/GeoIP/GeoLite2-Country.mmdb',
@@ -164,6 +167,7 @@ class TestConfigManager(TransactionCase):
             'pidfile': '/tmp/pidfile',
             'addons_path': '/tmp/odoo',
             'upgrade_path': '/tmp/upgrade',
+            'pre_upgrade_scripts': '/tmp/pre-custom.py',
             'server_wide_modules': 'base,mail',
             'data_dir': '/tmp/data-dir',
 
@@ -232,10 +236,12 @@ class TestConfigManager(TransactionCase):
             # advanced
             'dev_mode': [],  # blacklist for save, ignored from the config file
             'shell_interface': 'ipython',  # blacklist for save, read from the config file
+            'skip_auto_install': False,
             'stop_after_init': True,  # blacklist for save, read from the config file
             'osv_memory_count_limit': 71,
             'transient_age_limit': 4.0,
             'max_cron_threads': 4,
+            'limit_time_worker_cron': 600,
             'unaccent': True,
             'geoip_city_db': '/tmp/city.db',
             'geoip_country_db': '/tmp/country.db',
@@ -338,6 +344,7 @@ class TestConfigManager(TransactionCase):
             'unaccent': False,
             'update': {},
             'upgrade_path': '',
+            'pre_upgrade_scripts': '',
             'without_demo': False,
 
             # options that are not taken from the file (also in 14.0)
@@ -350,6 +357,7 @@ class TestConfigManager(TransactionCase):
             'publisher_warranty_url': 'http://services.odoo.com/publisher-warranty/',
             'save': None,
             'shell_interface': None,
+            'skip_auto_install': False,
             'stop_after_init': False,
             'root_path': f'{ROOT_PATH}/odoo',
             'translate_in': '',
@@ -368,6 +376,7 @@ class TestConfigManager(TransactionCase):
             'websocket_rate_limit_burst': '10',
             'websocket_rate_limit_delay': '0.2',
             'x_sendfile': False,
+            'limit_time_worker_cron': 0,
         }
         if IS_POSIX:
             # multiprocessing
@@ -425,6 +434,7 @@ class TestConfigManager(TransactionCase):
             'pidfile': '/tmp/pidfile',
             'addons_path': f'{ROOT_PATH}/odoo/addons,{ROOT_PATH}/addons',
             'upgrade_path': '',
+            'pre_upgrade_scripts': '',
             'server_wide_modules': 'base,mail',
             'data_dir': '/tmp/data-dir',
 
@@ -499,10 +509,12 @@ class TestConfigManager(TransactionCase):
             # advanced
             'dev_mode': ['xml', 'reload'],
             'shell_interface': 'ipython',
+            'skip_auto_install': False,
             'stop_after_init': True,
             'osv_memory_count_limit': 71,
             'transient_age_limit': 4.0,
             'max_cron_threads': 4,
+            'limit_time_worker_cron': 0,
             'unaccent': True,
             'geoip_city_db': '/tmp/city.db',
             'geoip_country_db': '/tmp/country.db',

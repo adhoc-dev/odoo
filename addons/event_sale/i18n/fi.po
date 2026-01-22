@@ -1,7 +1,7 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* event_sale
-# 
+#
 # Translators:
 # Tiffany Chang, 2024
 # Miku Laitinen <miku.laitinen@gmail.com>, 2024
@@ -14,27 +14,27 @@
 # Svante Suominen <svante.suominen@web-veistamo.fi>, 2024
 # Martin Trigaux, 2024
 # Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2024
-# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2024
-# 
+# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2025
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-25 07:49+0000\n"
+"POT-Creation-Date: 2025-12-29 18:37+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2024\n"
+"Last-Translator: Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2025\n"
 "Language-Team: Finnish (https://app.transifex.com/odoo/teams/41243/fi/)\n"
+"Language: fi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: fi\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: event_sale
 #. odoo-python
 #: code:addons/event_sale/models/sale_order.py:0
 msgid "%(event_name)s - Tickets"
-msgstr ""
+msgstr "%(event_name)s - Liput"
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_ticket_id_change_exception
@@ -48,7 +48,7 @@ msgstr ""
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_configurator_view_form
 msgid "<i class=\"fa fa-arrow-right\"/> Configure Events &amp; Tickets"
-msgstr ""
+msgstr "<i class=\"fa fa-arrow-right\"/> Tapahtumien ja lippujen määrittäminen"
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_registration_ticket_view_form
@@ -160,7 +160,7 @@ msgstr "Vahvistettu"
 #. odoo-python
 #: code:addons/event_sale/models/product_template.py:0
 msgid "Create an Attendee for the selected Event."
-msgstr ""
+msgstr "Luo osallistuja valittuun tapahtumaan."
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.view_event_registration_editor_form
@@ -303,7 +303,7 @@ msgstr "Ilmainen"
 #. odoo-python
 #: code:addons/event_sale/models/sale_order.py:0
 msgid "Get Your Tickets"
-msgstr ""
+msgstr "Hanki liput"
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_sale_report_view_search
@@ -313,7 +313,7 @@ msgstr "Ryhmittely"
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_event_configurator__has_available_tickets
 msgid "Has Available Tickets"
-msgstr ""
+msgstr "On saatavilla lippuja"
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_event_configurator__id
@@ -328,8 +328,8 @@ msgstr "ID"
 #: code:addons/event_sale/wizard/event_configurator.py:0
 msgid "Invalid ticket choice \"%(ticket_name)s\" for event \"%(event_name)s\"."
 msgstr ""
-"Virheellinen lipun valinta \"%(ticket_name)s\" tapahtumalle "
-"\"%(event_name)s\"."
+"Virheellinen lipun valinta \"%(ticket_name)s\" tapahtumalle \"%"
+"(event_name)s\"."
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_sale_report__invoice_partner_id
@@ -544,7 +544,7 @@ msgstr "Myyjä"
 #. module: event_sale
 #: model:ir.actions.act_window,name:event_sale.event_configurator_action
 msgid "Select an Event"
-msgstr ""
+msgstr "Valitse tapahtuma"
 
 #. module: event_sale
 #: model:ir.model.fields.selection,name:event_sale.selection__event_registration__sale_status__sold
@@ -571,6 +571,8 @@ msgid ""
 "The sale order line with the product %(product_name)s needs an event and a "
 "ticket."
 msgstr ""
+"Myyntitilausrivi, jossa on tuote %(product_name)s, tarvitsee tapahtuman ja "
+"lipun."
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_sale_report_view_search
@@ -611,14 +613,17 @@ msgstr "Vahvistamaton"
 #. module: event_sale
 #: model:ir.model.fields,help:event_sale.field_event_registration__state
 msgid ""
-"Unconfirmed: registrations in a pending state waiting for an action (specific case, notably with sale status)\n"
+"Unconfirmed: registrations in a pending state waiting for an action "
+"(specific case, notably with sale status)\n"
 "Registered: registrations considered taken by a client\n"
 "Attended: registrations for which the attendee attended the event\n"
 "Cancelled: registrations cancelled manually"
 msgstr ""
-"Vahvistamattomat: rekisteröinnit, jotka odottavat toimenpiteitä (erityistapaus, erityisesti myyntitilanne)\n"
+"Vahvistamattomat: rekisteröinnit, jotka odottavat toimenpiteitä "
+"(erityistapaus, erityisesti myyntitilanne)\n"
 "Rekisteröity: rekisteröinnit, jotka asiakas on ottanut vastaan\n"
-"Osallistuneet: rekisteröinnit, joiden osalta osallistuja osallistui tapahtumaan\n"
+"Osallistuneet: rekisteröinnit, joiden osalta osallistuja osallistui "
+"tapahtumaan\n"
 "Peruutettu: manuaalisesti peruutetut rekisteröinnit"
 
 #. module: event_sale
@@ -639,12 +644,12 @@ msgstr "Tulossa/Meneillään"
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_configurator_view_form
 msgid "We could not find a matching event ticket for this product. <br/>"
-msgstr ""
+msgstr "Emme löytäneet vastaavaa tapahtumalippua tälle tuotteelle. <br/>"
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.view_event_registration_editor_form
 msgid "please provide attendee details."
-msgstr ""
+msgstr "ilmoita osallistujan tiedot."
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_ticket_id_change_exception

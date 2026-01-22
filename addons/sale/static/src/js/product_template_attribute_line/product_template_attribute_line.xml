@@ -2,22 +2,21 @@
 <templates xml:space="preserve">
     <!-- Attributes line template -->
     <t t-name="sale.ProductTemplateAttributeLine">
-        <div name="ptal" t-attf-class="#{this.props.attribute_values.length === 1 &amp;&amp; hasPTAVCustom() ? 'd-flex' : ''}">
+        <div name="ptal" t-attf-class="#{this.props.attribute_values.length === 1 &amp;&amp; hasPTAVCustom() ? 'd-lg-flex' : ''}">
         <!-- If the attribute line contains only one attribute value, we don't show the attribute
              value template or the attribute line title unless the single attribute value is custom,
              whereas in this case, only the title of the attribute line and the custom value
              template are rendered. -->
             <div class="d-flex flex-column flex-lg-row gap-2 mb-2">
                 <label
-                    t-if="showValuesChoice || (
-                        this.props.attribute_values.length === 1 &amp;&amp; isSelectedPTAVCustom())"
+                    t-if="showValuesChoice || isSelectedPTAVCustom()"
                     t-out="this.props.attribute.name"
                     t-attf-class="fw-bold text-break #{this.props.attribute_values.length === 1
                         &amp;&amp; hasPTAVCustom() ? '' : 'col-lg-3'}"/>
                 <t t-if="showValuesChoice" t-call="{{getPTAVTemplate()}}"/>
             </div>
             <input
-                class="o_input w-lg-75 mb-4 ms-lg-auto"
+                class="o_input w-100 w-lg-75 mb-4 ms-lg-auto"
                 type="text"
                 t-att-placeholder="customValuePlaceholder"
                 t-if="hasPTAVCustom &amp;&amp; isSelectedPTAVCustom()"

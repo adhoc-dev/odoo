@@ -1,23 +1,23 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* delivery
-# 
+#
 # Translators:
 # Wil Odoo, 2024
 # Daye Jeong, 2024
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:55+0000\n"
+"POT-Creation-Date: 2025-12-29 18:37+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
 "Last-Translator: Daye Jeong, 2024\n"
 "Language-Team: Korean (https://app.transifex.com/odoo/teams/41243/ko/)\n"
+"Language: ko\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: ko\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #. module: delivery
@@ -56,14 +56,16 @@ msgid ""
 "                </p>"
 msgstr ""
 "<p class=\"o_view_nocontent\">\n"
-"                    지금 Odoo 유료버전을 구입하여 더 많은 공급자를 확보하세요.\n"
+"                    지금 Odoo 유료버전을 구입하여 더 많은 공급자를 확보하세"
+"요.\n"
 "                </p>"
 
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
 msgid ""
 "<span class=\"o_stat_text o_warning_text fw-bold\">Test</span>\n"
-"                                <span class=\"o_stat_text\">Environment</span>"
+"                                <span class=\"o_stat_text\">Environment</"
+"span>"
 msgstr ""
 "<span class=\"o_stat_text o_warning_text fw-bold\">테스트</span>\n"
 "                                <span class=\"o_stat_text\">환경</span>"
@@ -82,7 +84,8 @@ msgstr "<span class=\"text-success\">디버그 요청</span>"
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
 msgid ""
 "<span class=\"text-success\">Production</span>\n"
-"                                <span class=\"o_stat_text\">Environment</span>"
+"                                <span class=\"o_stat_text\">Environment</"
+"span>"
 msgstr ""
 "<span class=\"text-success\">생산</span>\n"
 "                                <span class=\"o_stat_text\">환경</span>"
@@ -98,7 +101,9 @@ msgid ""
 "A description of the delivery method that you want to communicate to your "
 "customers on the Sales Order and sales confirmation email.E.g. instructions "
 "for customers to follow."
-msgstr "판매주문 및 확인 이메일에서 고객에게 배송 방법을 설명하는 내용입니다. (예: 고객이 따라야 하는 지침 등)"
+msgstr ""
+"판매주문 및 확인 이메일에서 고객에게 배송 방법을 설명하는 내용입니다. (예: 고"
+"객이 따라야 하는 지침 등)"
 
 #. module: delivery
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__integration_level
@@ -182,9 +187,9 @@ msgstr "운송업체"
 #. odoo-python
 #: code:addons/delivery/models/delivery_carrier.py:0
 msgid ""
-"Carrier %s cannot have the same tag in both Must Have Tags and Excluded "
-"Tags."
-msgstr "운송업체 %s는 필수 태그와 제외 태그 모두에 동일한 태그를 가질 수 없습니다."
+"Carrier %s cannot have the same tag in both Must Have Tags and Excluded Tags."
+msgstr ""
+"운송업체 %s는 필수 태그와 제외 태그 모두에 동일한 태그를 가질 수 없습니다."
 
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__carrier_description
@@ -199,14 +204,14 @@ msgstr "픽업 지점 선택"
 
 #. module: delivery
 #. odoo-javascript
-#: code:addons/delivery/static/src/js/location_selector/location_selector_dialog/location_selector_dialog.xml:0
-#: code:addons/delivery/static/src/js/location_selector/map_container/map_container.xml:0
+#: code:addons/delivery/static/src/js/location_selector/location_selector_dialog/location_selector_dialog.js:0
+#: code:addons/delivery/static/src/js/location_selector/map_container/map_container.js:0
 msgid "Choose this location"
 msgstr "이 위치를 선택하세요."
 
 #. module: delivery
 #. odoo-javascript
-#: code:addons/delivery/static/src/js/location_selector/location_schedule/location_schedule.xml:0
+#: code:addons/delivery/static/src/js/location_selector/location_schedule/location_schedule.js:0
 msgid "Closed"
 msgstr "마감됨"
 
@@ -420,11 +425,14 @@ msgstr "오류: 이 배송 방법은 사용할 수 없습니다."
 #. module: delivery
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__invoice_policy
 msgid ""
-"Estimated Cost: the customer will be invoiced the estimated cost of the shipping.\n"
-"Real Cost: the customer will be invoiced the real cost of the shipping, the cost of theshipping will be updated on the SO after the delivery."
+"Estimated Cost: the customer will be invoiced the estimated cost of the "
+"shipping.\n"
+"Real Cost: the customer will be invoiced the real cost of the shipping, the "
+"cost of theshipping will be updated on the SO after the delivery."
 msgstr ""
 "예상 비용: 고객에게 예상 배송 비용을 청구합니다.\n"
-"실제 비용: 고객에게 실제 배송 비용을 청구하며, 배송 비용은 배송 후 판매주문서에 업데이트됩니다."
+"실제 비용: 고객에게 실제 배송 비용을 청구하며, 배송 비용은 배송 후 판매주문서"
+"에 업데이트됩니다."
 
 #. module: delivery
 #: model:ir.model.fields.selection,name:delivery.selection__delivery_carrier__invoice_policy__estimated
@@ -444,9 +452,11 @@ msgstr "선적된 실제 수량을 기준으로 송장을 작성하려면 이 �
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
 msgid ""
-"Filling this form allows you to make the shipping method available according"
-" to the content of the order or its destination."
-msgstr "이 양식을 작성하면 주문의 콘텐츠 또는 목적지에 따라 배송 방법을 사용할 수 있습니다."
+"Filling this form allows you to make the shipping method available according "
+"to the content of the order or its destination."
+msgstr ""
+"이 양식을 작성하면 주문의 콘텐츠 또는 목적지에 따라 배송 방법을 사용할 수 있"
+"습니다."
 
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__fixed_margin
@@ -497,14 +507,17 @@ msgstr "ID"
 msgid ""
 "If the order total amount (shipping excluded) is above or equal to this "
 "value, the customer benefits from a free shipping"
-msgstr "주문 총액 (배송비 제외)이 이 가격 이상인 경우 고객에게 무료 배송 혜택이 제공됩니다."
+msgstr ""
+"주문 총액 (배송비 제외)이 이 가격 이상인 경우 고객에게 무료 배송 혜택이 제공"
+"됩니다."
 
 #. module: delivery
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__max_volume
 msgid ""
 "If the total volume of the order is over this volume, the method won't be "
 "available."
-msgstr "주문의 총 거래량이 이 거래량을 초과하는 경우 이 방법을 사용할 수 없습니다."
+msgstr ""
+"주문의 총 거래량이 이 거래량을 초과하는 경우 이 방법을 사용할 수 없습니다."
 
 #. module: delivery
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__max_weight
@@ -561,13 +574,13 @@ msgstr "최근 갱신 일자"
 
 #. module: delivery
 #. odoo-javascript
-#: code:addons/delivery/static/src/js/location_selector/location_selector_dialog/location_selector_dialog.xml:0
+#: code:addons/delivery/static/src/js/location_selector/location_selector_dialog/location_selector_dialog.js:0
 msgid "List view"
 msgstr "목록 보기"
 
 #. module: delivery
 #. odoo-javascript
-#: code:addons/delivery/static/src/js/location_selector/location_selector_dialog/location_selector_dialog.xml:0
+#: code:addons/delivery/static/src/js/location_selector/location_selector_dialog/location_selector_dialog.js:0
 msgid "Loading..."
 msgstr "불러오는 중..."
 
@@ -588,7 +601,7 @@ msgstr "배송 우편번호 앞자리 관리"
 
 #. module: delivery
 #. odoo-javascript
-#: code:addons/delivery/static/src/js/location_selector/location_selector_dialog/location_selector_dialog.xml:0
+#: code:addons/delivery/static/src/js/location_selector/location_selector_dialog/location_selector_dialog.js:0
 msgid "Map view"
 msgstr "지도 보기"
 
@@ -646,7 +659,7 @@ msgstr "이 배송 주소에는 픽업 지점을 이용할 수 없습니다."
 
 #. module: delivery
 #. odoo-javascript
-#: code:addons/delivery/static/src/js/location_selector/location_selector_dialog/location_selector_dialog.xml:0
+#: code:addons/delivery/static/src/js/location_selector/location_selector_dialog/location_selector_dialog.js:0
 msgid "No result"
 msgstr "결과 없음"
 
@@ -658,8 +671,8 @@ msgstr "현재 주문에 사용할 수 없습니다"
 
 #. module: delivery
 #. odoo-javascript
-#: code:addons/delivery/static/src/js/location_selector/location/location.xml:0
-#: code:addons/delivery/static/src/js/location_selector/map_container/map_container.xml:0
+#: code:addons/delivery/static/src/js/location_selector/location/location.js:0
+#: code:addons/delivery/static/src/js/location_selector/map_container/map_container.js:0
 msgid "Opening hours"
 msgstr "영업 시간"
 
@@ -701,9 +714,10 @@ msgid ""
 "i.e. '$' can be added to end of prefix to match the exact zip (e.g. '100$' "
 "will only match '100' and not '1000')"
 msgstr ""
-"이 운송업체에 적용되는 우편번호 앞자리입니다. 국가마다 다양한 우편번호 숫자 길이를 지원하기 위해 정규식을 사용하실 수 있습니다. 즉, "
-"정확하게 우편번호가 일치하도록 하려면 앞자리 뒤에 '$' 를 추가하시면 됩니다 (예: '100$'의 경우 '100'에만 일치하고 "
-"'1000'에는 일치하지 않게 됩니다)"
+"이 운송업체에 적용되는 우편번호 앞자리입니다. 국가마다 다양한 우편번호 숫자 "
+"길이를 지원하기 위해 정규식을 사용하실 수 있습니다. 즉, 정확하게 우편번호가 "
+"일치하도록 하려면 앞자리 뒤에 '$' 를 추가하시면 됩니다 (예: '100$'의 경우 "
+"'100'에만 일치하고 '1000'에는 일치하지 않게 됩니다)"
 
 #. module: delivery
 #: model:ir.model.fields.selection,name:delivery.selection__delivery_price_rule__variable__price
@@ -818,7 +832,9 @@ msgstr "선적 중량"
 msgid ""
 "Shipping insurance is a service which may reimburse senders whose parcels "
 "are lost, stolen, and/or damaged in transit."
-msgstr "운송 보험은 운송 중에 물품이 분실, 도난 및/또는 파손될 경우 발송하신 분께서 보상받으실 수 있는 서비스입니다."
+msgstr ""
+"운송 보험은 운송 중에 물품이 분실, 도난 및/또는 파손될 경우 발송하신 분께서 "
+"보상받으실 수 있는 서비스입니다."
 
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
@@ -826,8 +842,8 @@ msgid ""
 "Shipping method details to be included at bottom sales orders and their "
 "confirmation emails. E.g. Instructions for customers to follow."
 msgstr ""
-"하단의 판매주문서 및 관련된 확인 이메일을 포함하고 있는 배송 방법에 대한 세부 내용입니다. 예를 들어 고객이 따라야 하는 지침 "
-"등입니다."
+"하단의 판매주문서 및 관련된 확인 이메일을 포함하고 있는 배송 방법에 대한 세"
+"부 내용입니다. 예를 들어 고객이 따라야 하는 지침 등입니다."
 
 #. module: delivery
 #: model:delivery.carrier,name:delivery.free_delivery_carrier
@@ -856,14 +872,18 @@ msgstr "우편 배송"
 msgid ""
 "The method is NOT available if at least one product of the order has one of "
 "these tags."
-msgstr "주문의 모든 제품에 이러한 태그 중 하나가 있는 경우 이 방법을 사용할 수 없습니다."
+msgstr ""
+"주문의 모든 제품에 이러한 태그 중 하나가 있는 경우 이 방법을 사용할 수 없습니"
+"다."
 
 #. module: delivery
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__must_have_tag_ids
 msgid ""
-"The method is available only if at least one product of the order has one of"
-" these tags."
-msgstr "이 방법은 주문의 제품 중 하나 이상에 이러한 태그 중 하나가 있는 경우에만 사용할 수 있습니다."
+"The method is available only if at least one product of the order has one of "
+"these tags."
+msgstr ""
+"이 방법은 주문의 제품 중 하나 이상에 이러한 태그 중 하나가 있는 경우에만 사용"
+"할 수 있습니다."
 
 #. module: delivery
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__get_return_label_from_portal
@@ -889,7 +909,7 @@ msgstr " 주문량이 %.2f를 초과하여 선적이 무료입니다."
 
 #. module: delivery
 #. odoo-javascript
-#: code:addons/delivery/static/src/js/location_selector/map_container/map_container.xml:0
+#: code:addons/delivery/static/src/js/location_selector/map_container/map_container.js:0
 msgid "There was an error loading the map"
 msgstr "지도를 불러오는 동안 오류가 발생했습니다."
 
@@ -915,8 +935,8 @@ msgid ""
 "This option adds a link for the customer in the portal to track their "
 "package easily. Use <shipmenttrackingnumber> as a placeholder in your URL."
 msgstr ""
-"이 옵션은 고객이 포털에서 패키지를 쉽게 추적할 수 있는 링크를 제공합니다. URL의 자리 표시자로 "
-"<shipmenttrackingnumber>을 사용합니다."
+"이 옵션은 고객이 포털에서 패키지를 쉽게 추적할 수 있는 링크를 제공합니다. URL"
+"의 자리 표시자로 <shipmenttrackingnumber>을 사용합니다."
 
 #. module: delivery
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__margin
@@ -992,9 +1012,11 @@ msgstr "무게 단위 꼬리표"
 #. odoo-python
 #: code:addons/delivery/models/sale_order.py:0
 msgid ""
-"You can not update the shipping costs on an order where it was already invoiced!\n"
+"You can not update the shipping costs on an order where it was already "
+"invoiced!\n"
 "\n"
-"The following delivery lines (product, invoiced quantity and price) have already been processed:\n"
+"The following delivery lines (product, invoiced quantity and price) have "
+"already been processed:\n"
 "\n"
 msgstr ""
 "이미 청구서가 발행된 주문에 대해서는 배송비를 변경할 수 없습니다!\n"
@@ -1008,11 +1030,13 @@ msgstr ""
 msgid ""
 "You cannot delete the deliveries product category as it is used on the "
 "delivery carriers products."
-msgstr "배송업체 품목 카테고리는 현재 배송업체와 연결된 제품에서 사용되고 있으므로 삭제할 수 없습니다."
+msgstr ""
+"배송업체 품목 카테고리는 현재 배송업체와 연결된 제품에서 사용되고 있으므로 삭"
+"제할 수 없습니다."
 
 #. module: delivery
 #. odoo-javascript
-#: code:addons/delivery/static/src/js/location_selector/location_selector_dialog/location_selector_dialog.xml:0
+#: code:addons/delivery/static/src/js/location_selector/location_selector_dialog/location_selector_dialog.js:0
 msgid "Your postal code"
 msgstr "우편 번호"
 

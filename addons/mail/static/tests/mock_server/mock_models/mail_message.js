@@ -218,12 +218,12 @@ export class MailMessage extends models.ServerModel {
             if (message.author_guest_id) {
                 data.author = mailDataHelpers.Store.one(
                     MailGuest.browse(message.author_guest_id),
-                    makeKwArgs({ fields: ["name", "write_date"] })
+                    makeKwArgs({ fields: ["avatar_128", "name"] })
                 );
             } else if (message.author_id) {
                 data.author = mailDataHelpers.Store.one(
                     ResPartner.browse(message.author_id),
-                    makeKwArgs({ fields: ["name", "is_company", "user", "write_date"] })
+                    makeKwArgs({ fields: ["avatar_128", "is_company", "name", "user"] })
                 );
             }
             store.add(this.browse(message.id), data);
@@ -310,6 +310,7 @@ export class MailMessage extends models.ServerModel {
         const ResPartner = this.env["res.partner"];
 
         const messages = this.browse(ids);
+        const store = new mailDataHelpers.Store();
         for (const message of messages) {
             const wasStarred = message.starred_partner_ids.includes(this.env.user.partner_id);
             this.write([message.id], {
@@ -324,7 +325,9 @@ export class MailMessage extends models.ServerModel {
                 message_ids: [message.id],
                 starred: !wasStarred,
             });
+            store.add(this.browse(message.id), { starred: !wasStarred });
         }
+        return store.get_result();
     }
 
     unstar_all() {
@@ -513,7 +516,13 @@ export class MailMessage extends models.ServerModel {
                 ),
                 thread: mailDataHelpers.Store.one(
                     message.model ? this.env[message.model].browse(message.res_id) : false,
-                    makeKwArgs({ as_thread: true, fields: ["modelName"] })
+                    makeKwArgs({
+                        as_thread: true,
+                        fields: [
+                            "modelName",
+                            message.model === "discuss.channel" ? "name" : "display_name",
+                        ],
+                    })
                 ),
             });
         }

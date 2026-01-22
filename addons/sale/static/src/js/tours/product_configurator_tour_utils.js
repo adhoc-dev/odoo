@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { queryAttribute, queryValue, waitUntil } from '@odoo/hoot-dom';
 
 function productSelector(productName) {
@@ -31,6 +29,18 @@ function addOptionalProduct(productName) {
             ${optionalProductSelector(productName)}
             td.o_sale_product_configurator_price
             button:contains("Add")
+        `,
+        run: 'click',
+    };
+}
+
+function removeOptionalProduct(productName) {
+    return {
+        content: `Remove ${productName}`,
+        trigger: `
+            ${productSelector(productName)}
+            td.o_sale_product_configurator_qty
+            a:contains("Remove")
         `,
         run: 'click',
     };
@@ -88,6 +98,11 @@ function selectAttribute(productName, attributeName, attributeValue, attributeTy
                 run: 'click',
             };
         case 'multi':
+            return {
+                content: content,
+                trigger: `${ptalSelector}:has(label:text(${attributeValue})) input[type="checkbox"]`,
+                run: "click",
+            };
         case 'pills':
         case 'radio':
             return {
@@ -124,7 +139,7 @@ function selectAndSetCustomAttribute(
     return [
         selectAttribute(productName, attributeName, attributeValue, attributeType),
         setCustomAttribute(productName, attributeName, customValue),
-    ]
+    ];
 }
 
 function assertPriceTotal(total) {
@@ -167,6 +182,7 @@ function assertProductPriceInfo(productName, priceInfo) {
         `,
     };
 }
+
 function assertOptionalProductPriceInfo(productName, priceInfo) {
     return {
         content: `Assert that the price info of ${productName} is ${priceInfo}`,
@@ -188,20 +204,20 @@ function assertProductNameContains(productName) {
 function assertFooterButtonsDisabled() {
     return {
         content: "Assert that the footer buttons are disabled",
-        trigger: 'footer.modal-footer button:disabled',
+        trigger: '.o_sale_product_configurator_dialog footer.modal-footer button:disabled',
     };
 }
 
 function saveConfigurator() {
     return [
         {
-            trigger: '.modal button:contains(Confirm)',
+            trigger: '.o_sale_product_configurator_dialog button:contains(Confirm)',
             run: 'click',
         }, {
             content: "Wait until the modal is closed",
-            trigger: 'body:not(:has(.modal))',
+            trigger: 'body:not(:has(.o_sale_product_configurator_dialog))',
         }
-    ]
+    ];
 }
 
 export default {
@@ -209,6 +225,7 @@ export default {
     optionalProductSelector,
     optionalProductImageSrc,
     addOptionalProduct,
+    removeOptionalProduct,
     increaseProductQuantity,
     setProductQuantity,
     assertProductQuantity,

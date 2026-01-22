@@ -1,23 +1,25 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* product_expiry
-# 
+#
 # Translators:
 # Wil Odoo, 2024
-# Odoo哥 <vnsoft.he@gmail.com>, 2024
-# 
+# Chloe Wang, 2025
+# 何彬 <vnsoft.he@gmail.com>, 2025
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:55+0000\n"
+"POT-Creation-Date: 2025-12-29 18:37+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Odoo哥 <vnsoft.he@gmail.com>, 2024\n"
-"Language-Team: Chinese (China) (https://app.transifex.com/odoo/teams/41243/zh_CN/)\n"
+"Last-Translator: 何彬 <vnsoft.he@gmail.com>, 2025\n"
+"Language-Team: Chinese (China) (https://app.transifex.com/odoo/teams/41243/"
+"zh_CN/)\n"
+"Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: zh_CN\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #. module: product_expiry
@@ -26,18 +28,18 @@ msgid ""
 "<span class=\"badge text-bg-danger\" invisible=\"not "
 "product_expiry_alert\">Expiration Alert</span>"
 msgstr ""
-"<span class=\"badge text-bg-danger\" invisible=\"not "
-"product_expiry_alert\">到期提醒</span>"
+"<span class=\"badge text-bg-danger\" invisible=\"not product_expiry_alert\">"
+"到期提醒</span>"
 
 #. module: product_expiry
 #: model_terms:ir.ui.view,arch_db:product_expiry.view_production_lot_view_kanban
 msgid ""
-"<span title=\"Alert\" class=\"fa fa-exclamation-triangle text-danger ms-2\" "
+"<span title=\"Alert\" class=\"fa fa-exclamation-triangle text-danger me-2\" "
 "invisible=\"product_qty &lt;= 0 or not product_expiry_alert or not "
 "expiration_date\"/>"
 msgstr ""
-"<span title=\"Alert\" class=\"fa fa-exclamation-triangle text-danger ms-2\" "
-"invisible=\"product_qty &lt;= 0 or not product_expiry_alert or not "
+"<span title=\"警报\" class=\"fa fa-exclamation-triangle text-danger me-2\" "
+"invisible=\"product_qty <= 0 or not product_expiry_alert or not "
 "expiration_date\"/>"
 
 #. module: product_expiry
@@ -115,7 +117,7 @@ msgstr "创建日期"
 msgid ""
 "Date to determine the expired lots and serial numbers using the filter "
 "\"Expiration Alerts\"."
-msgstr "使用到期“到期警报”确定到期批次和序列号的日期。"
+msgstr "使用到期“到期警报”确定到期批次 / 序列号的日期。"
 
 #. module: product_expiry
 #: model_terms:ir.ui.view,arch_db:product_expiry.view_move_form_expiry
@@ -227,7 +229,9 @@ msgid ""
 "Number of days after the receipt of the products (from the vendor or in "
 "stock after production) after which the goods may become dangerous and must "
 "not be consumed. It will be computed on the lot/serial number."
-msgstr "产品收到后天数(从供应商处或生产后入库)，货物可能变危险且不得食用。它将在批号/序列号上计算。"
+msgstr ""
+"产品收到后天数(从供应商处或生产后入库)，货物可能变危险且不得食用。它将在批号/"
+"序列号上计算。"
 
 #. module: product_expiry
 #: model:ir.model.fields,help:product_expiry.field_product_product__alert_time
@@ -251,8 +255,8 @@ msgstr "到期日期之前应从库存中移除的天数。将在批号/序列�
 #: model:ir.model.fields,help:product_expiry.field_product_template__use_time
 msgid ""
 "Number of days before the Expiration Date after which the goods starts "
-"deteriorating, without being dangerous yet. It will be computed on the "
-"lot/serial number."
+"deteriorating, without being dangerous yet. It will be computed on the lot/"
+"serial number."
 msgstr "产品开始变质至到期日期之间的天数。将在批号/序列号上计算。"
 
 #. module: product_expiry
@@ -346,14 +350,17 @@ msgstr "该批次/序列号的产品的保质期过期日期，包含产品将�
 msgid ""
 "This is the date on which the goods with this Serial Number should be "
 "removed from the stock. This date will be used in FEFO removal strategy."
-msgstr "这是有此序列号的货物应该从库存中移除的日期。这个日期将被用于FEFO移除策略中。"
+msgstr ""
+"这是有此序列号的货物应该从库存中移除的日期。这个日期将被用于FEFO移除策略中。"
 
 #. module: product_expiry
 #: model:ir.model.fields,help:product_expiry.field_stock_lot__use_date
 msgid ""
 "This is the date on which the goods with this Serial Number start "
 "deteriorating, without being dangerous yet."
-msgstr "该批次/序列号的产品的最佳食用日期，此日期后将开始变坏，但没有过期，仍在质保期内。"
+msgstr ""
+"该批次/序列号的产品的最佳食用日期，此日期后将开始变坏，但没有过期，仍在质保期"
+"内。"
 
 #. module: product_expiry
 #: model:ir.model,name:product_expiry.model_stock_picking
@@ -378,10 +385,12 @@ msgstr "使用到期日"
 #: model:ir.model.fields,help:product_expiry.field_stock_move_line__use_expiration_date
 #: model:ir.model.fields,help:product_expiry.field_stock_quant__use_expiration_date
 msgid ""
-"When this box is ticked, you have the possibility to specify dates to manage"
-" product expiration, on the product and on the corresponding lot/serial "
+"When this box is ticked, you have the possibility to specify dates to manage "
+"product expiration, on the product and on the corresponding lot/serial "
 "numbers"
-msgstr "选中该复选框后，您就可以在产品和相应的批号/序列号上指定日期，以管理产品的过期时间。"
+msgstr ""
+"选中该复选框后，您就可以在产品和相应的批号/序列号上指定日期，以管理产品的过期"
+"时间。"
 
 #. module: product_expiry
 #. odoo-python
@@ -397,7 +406,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/product_expiry/wizard/confirm_expiry.py:0
 msgid ""
-"You are going to deliver the product %(product_name)s, %(lot_name)s which is expired.\n"
+"You are going to deliver the product %(product_name)s, %(lot_name)s which is "
+"expired.\n"
 "Do you confirm you want to proceed?"
 msgstr ""
 "您要交付的产品%(product_name)s、%(lot_name)s 已过期。\n"

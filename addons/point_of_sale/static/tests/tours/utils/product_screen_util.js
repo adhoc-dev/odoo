@@ -5,6 +5,7 @@ import * as PartnerList from "@point_of_sale/../tests/tours/utils/partner_list_u
 import * as TextInputPopup from "@point_of_sale/../tests/tours/utils/text_input_popup_util";
 import * as Dialog from "@point_of_sale/../tests/tours/utils/dialog_util";
 import * as Chrome from "@point_of_sale/../tests/tours/utils/chrome_util";
+import * as PaymentScreen from "@point_of_sale/../tests/tours/utils/payment_screen_util";
 
 export function clickLine(productName, quantity = "1.0") {
     return [
@@ -25,6 +26,47 @@ export function clickReview() {
         run: "click",
     };
 }
+export function selectFloatingOrder(index) {
+    return [
+        {
+            isActive: ["mobile"],
+            trigger: ".fa-caret-down",
+            run: "click",
+        },
+        {
+            trigger: `.list-container-items .btn:eq(${index})`,
+            run: "click",
+        },
+    ];
+}
+
+export function checkFloatingOrderCount(expectedCount) {
+    return [
+        {
+            isActive: ["mobile"],
+            trigger: ".fa-caret-down",
+            run: "click",
+        },
+        {
+            content: `check there are ${expectedCount} floating order`,
+            trigger: ".list-container-items .btn",
+            run: () => {
+                const btns = document.querySelectorAll(".list-container-items .btn");
+                if (btns.length !== expectedCount) {
+                    throw new Error(
+                        `Expected ${expectedCount} floating order buttons, found ${btns.length}`
+                    );
+                }
+            },
+        },
+        {
+            isActive: ["mobile"],
+            trigger: ".modal-header .oi-arrow-left",
+            run: "click",
+        },
+    ];
+}
+
 /**
  * Generates a sequence of actions to click on a displayed product, with optional additional
  * checks based on specific needs such as the next quantity and the next price.
@@ -107,9 +149,6 @@ export function clickSubcategory(name) {
 }
 /**
  * Press the numpad in sequence based on the given space-separated keys.
- * NOTE: Maximum of 2 characters because NumberBuffer only allows 2 consecutive
- * fast inputs. Fast inputs is the case in tours.
- *
  * @param {...String} keys space-separated numpad keys
  */
 export function clickNumpad(...keys) {
@@ -161,6 +200,32 @@ export function customerIsSelected(name) {
         {
             content: `customer '${name}' is selected`,
             trigger: `.product-screen .set-partner:contains("${name}")`,
+        },
+    ];
+}
+export function inputCustomerSearchbar(value) {
+    return [
+        {
+            isActive: ["mobile"],
+            content: "click more button",
+            trigger: ".modal-header .fa-search",
+            run: "click",
+        },
+        {
+            trigger: ".modal-header .input-group input",
+            run: "edit " + value,
+        },
+        {
+            /**
+             * Manually trigger keyup event to show the search field list
+             * because the previous step do not trigger keyup event.
+             */
+            trigger: ".modal-header .input-group input",
+            run: function () {
+                document
+                    .querySelector(".modal-header .input-group input")
+                    .dispatchEvent(new KeyboardEvent("keyup", { key: "" }));
+            },
         },
     ];
 }
@@ -331,6 +396,26 @@ export function clickFiscalPosition(name, checkIsNeeded = false) {
 
     return [...step, { ...back(), isActive: ["mobile"] }];
 }
+export function checkFiscalPosition(name) {
+    return [
+        clickReview(),
+        ...clickControlButtonMore(),
+        {
+            content: `check fiscal position '${name}' is selected`,
+            trigger: `.o_fiscal_position_button:contains("${name}")`,
+            run: () => {},
+        },
+        Dialog.cancel(),
+    ];
+}
+export function checkFiscalPositionButton() {
+    return [
+        {
+            content: "click fiscal position button",
+            trigger: ".o_fiscal_position_button",
+        },
+    ];
+}
 export function closeWithCashAmount(val) {
     return [
         {
@@ -378,6 +463,30 @@ export function enterLastLotNumber(number) {
         },
         Dialog.confirm(),
     ];
+}
+
+export function enterLotNumbers(numbers) {
+    return numbers
+        .map((number) => [
+            {
+                content: "enter lot number",
+                trigger: ".list-line-input:last()",
+                run: "edit " + number,
+            },
+            {
+                content: "Press Enter",
+                trigger: ".list-line-input:last()",
+                run: "press Enter",
+            },
+        ])
+        .flat()
+        .concat([
+            {
+                content: "click validate lot number",
+                trigger: ".modal-content button:contains(Ok)",
+                run: "click",
+            },
+        ]);
 }
 
 export function isShown() {
@@ -507,6 +616,10 @@ export function addOrderline(productName, quantity = 1, unitPrice, expectedTotal
         }
         return key;
     };
+
+    // Press +/- to set a negative quantity. For example, pressing +/- followed by "1" will result in "-11".
+    // To adjust the quantity from "-1" to "-3," first press "0" followed by "3" since pressing +/- will initially set it to "-1,"
+    // and entering "3" directly would result in "-13." so send 0(num) when want to change sign and set a number
     const numpadWrite = (val) =>
         val
             .toString()
@@ -572,18 +685,7 @@ export function closePos() {
 
 export function finishOrder() {
     return [
-        {
-            isActive: ["desktop"],
-            content: "validate the order",
-            trigger: ".payment-screen .button.next.highlight:visible",
-            run: "click",
-        },
-        {
-            isActive: ["mobile"],
-            content: "validate the order",
-            trigger: ".payment-screen .btn-switchpane:contains('Validate')",
-            run: "click",
-        },
+        ...PaymentScreen.clickValidate(),
         Chrome.isSyncStatusConnected(),
         {
             isActive: ["desktop"],
@@ -608,4 +710,22 @@ export function checkTaxAmount(amount) {
     return {
         trigger: `.tax:contains(${amount})`,
     };
+}
+
+export function checkProductExtraPrice(productName, extraAmount) {
+    return {
+        content: `'${productName}' should have '${extraAmount}' extra price`,
+        trigger: `article.product:has(.product-name:contains("${productName}")):has(.price-extra:contains("${extraAmount}"))`,
+    };
+}
+
+export function addDiscount(discount) {
+    return [
+        Numpad.click("%"),
+        Numpad.isActive("%"),
+        discount
+            .toString()
+            .split("")
+            .flatMap((key) => Numpad.click(key)),
+    ].flat();
 }

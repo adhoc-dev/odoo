@@ -1,10 +1,11 @@
 import { expect, test } from "@odoo/hoot";
-import { click, press, queryOne, waitFor, waitUntil, dblclick } from "@odoo/hoot-dom";
+import { click, dblclick, pointerUp, press, queryOne, waitFor, waitForNone } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
-import { setupEditor } from "./_helpers/editor";
 import { contains } from "@web/../tests/web_test_helpers";
-import { setContent } from "./_helpers/selection";
-import { undo } from "./_helpers/user_actions";
+import { setupEditor } from "./_helpers/editor";
+import { getContent, moveSelectionOutsideEditor, setContent } from "./_helpers/selection";
+import { insertText, undo } from "./_helpers/user_actions";
+import { expectElementCount } from "./_helpers/ui_expectations";
 
 const base64Img =
     "data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAAUA\n        AAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO\n            9TXL0Y4OHwAAAABJRU5ErkJggg==";
@@ -18,7 +19,7 @@ test("image can be selected", async () => {
     await waitFor(".o-we-toolbar");
     expect(".btn-group[name='image_shape']").toHaveCount(1);
     const selectionPlugin = plugins.get("selection");
-    expect(selectionPlugin.getSelectedNodes()[0].tagName).toBe("IMG");
+    expect(selectionPlugin.getTargetedNodes()[0].tagName).toBe("IMG");
 });
 
 test("can shape an image", async () => {
@@ -62,7 +63,7 @@ test("can shape an image", async () => {
 
 test("shape_circle and shape_rounded are mutually exclusive", async () => {
     await setupEditor(`
-        <img src="${base64Img}">
+        <p><img src="${base64Img}"></p>
     `);
     const img = queryOne("img");
     await click(img);
@@ -93,6 +94,7 @@ test("shape_circle and shape_rounded are mutually exclusive", async () => {
     expect(img).not.toHaveClass("rounded-circle");
 });
 
+test.tags("mobile");
 test("can undo a shape", async () => {
     const { editor } = await setupEditor(`
         <img src="${base64Img}">
@@ -101,12 +103,10 @@ test("can undo a shape", async () => {
     await waitFor(".o-we-toolbar");
 
     await click(".o-we-toolbar button[name='shape_rounded']");
-    await animationFrame();
-    expect(".o-we-toolbar button[name='shape_rounded']").toHaveClass("active");
+    await expectElementCount(".o-we-toolbar button[name='shape_rounded'].active", 1);
     expect("img").toHaveClass("rounded");
     undo(editor);
-    await animationFrame();
-    expect(".o-we-toolbar button[name='shape_rounded']").not.toHaveClass("active");
+    await expectElementCount(".o-we-toolbar button[name='shape_rounded'].active", 0);
     expect("img").not.toHaveClass("rounded");
 });
 
@@ -299,7 +299,7 @@ test("Image transformation dissapear when selection change", async () => {
         `<img class="img-fluid test-image" src="/web/static/img/logo.png">
         <p> [Hello] world </p> `
     );
-    await waitUntil(() => !document.querySelector(".transfo-container"));
+    await waitForNone(".transfo-container");
     transfoContainers = document.querySelectorAll(".transfo-container");
     expect(transfoContainers).toHaveCount(0);
     // Remove the transfoContainer element if not destroyed by the selection change
@@ -326,6 +326,37 @@ test("Image transformation disappear on escape", async () => {
     await animationFrame();
     transfoContainers = document.querySelectorAll(".transfo-container");
     expect(transfoContainers.length).toBe(0);
+});
+
+test("Image transformation disappears on backspace/delete", async () => {
+    const { editor } = await setupEditor(`
+        <img class="img-fluid test-image" src="${base64Img}">
+    `);
+    click("img.test-image");
+    await expectElementCount(".o-we-toolbar", 1);
+    await contains(".o-we-toolbar div[name='image_transform'] button").click();
+    await expectElementCount(".transfo-container", 1);
+    press("backspace");
+    await expectElementCount(".transfo-container", 0);
+    undo(editor);
+    click("img.test-image");
+    await expectElementCount(".o-we-toolbar", 1);
+    await contains(".o-we-toolbar div[name='image_transform'] button").click();
+    await expectElementCount(".transfo-container", 1);
+    press("delete");
+    await expectElementCount(".transfo-container", 0);
+});
+
+test("Image transformation disappears on character key press", async () => {
+    const { editor } = await setupEditor(`
+        <img class="img-fluid test-image" src="${base64Img}">
+    `);
+    click("img.test-image");
+    await expectElementCount(".o-we-toolbar", 1);
+    await contains(".o-we-toolbar div[name='image_transform'] button").click();
+    await expectElementCount(".transfo-container", 1);
+    insertText(editor, "a");
+    await expectElementCount(".transfo-container", 0);
 });
 
 test("Image transformation scalers position", async () => {
@@ -355,11 +386,10 @@ test("Image transformation scalers position", async () => {
         }
     };
     click("img.test-image");
-    await waitFor(".o-we-toolbar");
-    expect(".o-we-toolbar").toHaveCount(1);
+    await expectElementCount(".o-we-toolbar", 1);
     click(".o-we-toolbar div[name='image_transform'] button");
     await animationFrame();
-    expect(".o-we-toolbar").toHaveCount(1);
+    await expectElementCount(".o-we-toolbar", 1);
     expect(".transfo-container").toHaveCount(1);
     checkScalersPositions(queryOne("img"));
     // resize by 25% update the position of the scalers
@@ -406,6 +436,30 @@ test("Can delete an image", async () => {
     await click("button[name='image_delete']");
     await animationFrame();
     expect(".test-image").toHaveCount(0);
+});
+
+test("Deleting an image that is alone inside `p` should set selection at start of `p`", async () => {
+    const { el } = await setupEditor(`<p><img>[]</p>`);
+    await click("img");
+    await waitFor(".o-we-toolbar");
+    expect("button[name='image_delete']").toHaveCount(1);
+    await click("button[name='image_delete']");
+    await animationFrame();
+    expect(".test-image").toHaveCount(0);
+    expect(getContent(el)).toBe(
+        `<p placeholder='Type "/" for commands' class="o-we-hint">[]<br></p>`
+    );
+});
+
+test("Deleting an image that is the only content inside a <p> tag should place the selection at the start of the <p>", async () => {
+    const { el } = await setupEditor(`<p>abc<img>[]</p>`);
+    await click("img");
+    await waitFor(".o-we-toolbar");
+    expect("button[name='image_delete']").toHaveCount(1);
+    await click("button[name='image_delete']");
+    await animationFrame();
+    expect(".test-image").toHaveCount(0);
+    expect(getContent(el)).toBe(`<p>abc[]</p>`);
 });
 
 test("Toolbar detect image namespace even if it is the only child of a p", async () => {
@@ -467,7 +521,7 @@ test("can undo adding link to image", async () => {
 
     undo(editor);
     await animationFrame();
-    expect(img.parentElement.tagName).toBe("P");
+    expect(img.parentElement.tagName).toBe("DIV");
 });
 
 test("can remove the link of an image", async () => {
@@ -480,8 +534,8 @@ test("can remove the link of an image", async () => {
     expect("button[name='unlink']").toHaveCount(1);
     await click("button[name='unlink']");
     await animationFrame();
-    expect(img.parentElement.tagName).toBe("P");
-    expect(".o-we-linkpopover").toHaveCount(0);
+    expect(img.parentElement.tagName).toBe("DIV");
+    await expectElementCount(".o-we-linkpopover", 0);
 });
 
 test("can undo link removing of an image", async () => {
@@ -493,14 +547,29 @@ test("can undo link removing of an image", async () => {
     await waitFor(".o-we-toolbar");
     await click("button[name='unlink']");
     await animationFrame();
-    expect(img.parentElement.tagName).toBe("P");
+    expect(img.parentElement.tagName).toBe("DIV");
 
     undo(editor);
     await animationFrame();
     expect(img.parentElement.tagName).toBe("A");
 });
 
-test.tags("desktop")("Preview an image on dblclick", async () => {
+test("image toolbar should open on click even if selection is not in editable", async () => {
+    const { el, editor } = await setupEditor(`
+        <img src="${base64Img}">
+    `);
+
+    el.focus();
+    moveSelectionOutsideEditor();
+    const selectionData = editor.shared.selection.getSelectionData();
+    expect(document.activeElement).toBe(el);
+    expect(selectionData.documentSelectionIsInEditable).toBe(false);
+    await pointerUp("img");
+    await expectElementCount(".o-we-toolbar", 1);
+});
+
+test.tags("desktop");
+test("Preview an image on dblclick", async () => {
     await setupEditor(`
         <img class="img-fluid test-image" src="${base64Img}">
     `);

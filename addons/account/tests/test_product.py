@@ -16,6 +16,11 @@ class TestProduct(AccountTestInvoicingCommon):
             login="internal_user",
             groups="base.group_user",
         )
+        cls.account_manager_user = new_test_user(
+            cls.env,
+            login="account_manager_user",
+            groups="account.group_account_manager",
+        )
 
     def test_internal_user_can_read_product_with_tax_and_tags(self):
         """Internal users need read access to products, no matter their taxes."""
@@ -52,3 +57,36 @@ class TestProduct(AccountTestInvoicingCommon):
             'taxes_id': self.company_data['company'].account_sale_tax_id.ids,
             'supplier_taxes_id': self.company_data['company'].account_purchase_tax_id.ids,
         }])
+
+    def test_account_manager_user_can_create_product(self):
+        """Test that a user with group_account_manager can create a product."""
+        product = self.env['product.product'].with_user(self.account_manager_user).create({
+            'name': 'Test Accountant', 'type': 'consu', 'list_price': 50.0,
+        })
+        self.assertTrue(product)
+
+    def test_product_tax_with_company_and_branch(self):
+        """Ensure that setting a tax on a product overrides the default tax of branch companies.
+            as branches share taxes with their parent company."""
+        parent_company = self.env.company
+        # Create a branch company and set a default sales tax.
+        self.env['res.company'].create({
+            'name': 'Branch Company',
+            'parent_id': parent_company.id,
+            'account_sale_tax_id': parent_company.account_sale_tax_id.id,
+        })
+
+        tax_new = self.env['account.tax'].create({
+            'name': "tax_new",
+            'amount_type': 'percent',
+            'amount': 21.0,
+            'type_tax_use': 'sale',
+        })
+
+        # Create a product in the parent company and set its sales tax to the new tax
+        product = self.env['product.template'].with_context(allowed_company_ids=[parent_company.id]).create({
+            'name': 'Product with new Tax',
+            'taxes_id': tax_new.ids,
+        })
+
+        self.assertEqual(product.taxes_id, tax_new, "The branch company default tax shouldn't be set if we set a different tax on the product from the parent company.")

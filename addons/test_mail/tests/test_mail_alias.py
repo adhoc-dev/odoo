@@ -24,6 +24,17 @@ class TestMailAliasCommon(MailCommon):
             'alias_name': 'test.alias',
         })
 
+        cls.company_no_alias = cls.env['res.company'].create({
+            'alias_domain_id': False,
+            'country_id': cls.env.ref('base.be').id,
+            'currency_id': cls.env.ref('base.EUR').id,
+            'email': 'company_no_alias@test.example.com',
+            'name': 'No Alias Company',
+        })
+        cls.user_erp_manager.write({
+            'company_ids': [(4, cls.company_no_alias.id)],
+        })
+
 
 @tagged('mail_gateway', 'mail_alias', 'multi_company')
 class TestMailAlias(TestMailAliasCommon):
@@ -504,6 +515,7 @@ class TestAliasCompany(TestMailAliasCommon):
         """ Test initial setup values: currently all companies share the same
         alias configuration as it is unique. """
         self.assertEqual(self.test_alias_mc.alias_domain_id, self.mail_alias_domain)
+        self.assertFalse(self.company_no_alias.alias_domain_id)
 
         self.assertEqual(self.company_admin.alias_domain_id, self.mail_alias_domain)
         self.assertEqual(self.company_admin.bounce_email, f'{self.alias_bounce}@{self.alias_domain}')
@@ -769,15 +781,15 @@ class TestMailAliasMixin(TestMailAliasCommon):
         """ Various base checks on alias mixin behavior """
         self.assertEqual(self.env.company.alias_domain_id, self.mail_alias_domain)
 
-        record = self.env['mail.test.container'].create({
+        record = self.env['mail.test.gateway.groups'].create({
             'name': 'Test Record',
             'alias_name': 'alias.test',
             'alias_contact': 'followers',
         })
         self.assertEqual(record.alias_id.alias_domain_id, self.mail_alias_domain)
-        self.assertEqual(record.alias_id.alias_model_id, self.env['ir.model']._get('mail.test.container'))
+        self.assertEqual(record.alias_id.alias_model_id, self.env['ir.model']._get('mail.test.gateway.groups'))
         self.assertEqual(record.alias_id.alias_force_thread_id, record.id)
-        self.assertEqual(record.alias_id.alias_parent_model_id, self.env['ir.model']._get('mail.test.container'))
+        self.assertEqual(record.alias_id.alias_parent_model_id, self.env['ir.model']._get('mail.test.gateway.groups'))
         self.assertEqual(record.alias_id.alias_parent_thread_id, record.id)
         self.assertEqual(record.alias_id.alias_name, 'alias.test')
         self.assertEqual(record.alias_id.alias_contact, 'followers')
@@ -804,7 +816,7 @@ class TestMailAliasMixin(TestMailAliasCommon):
         with self.assertRaises(exceptions.ValidationError):
             record.write({'alias_defaults': "{'custom_field': brokendict"})
 
-        rec = self.env['mail.test.container'].create({
+        rec = self.env['mail.test.gateway.groups'].create({
             'name': 'Test Record2',
             'alias_name': 'alias.test',
             'alias_domain_id': self.mail_alias_domain_c2.id,
@@ -897,7 +909,7 @@ class TestMailAliasMixin(TestMailAliasCommon):
             self.env.user.has_group('base.group_system'),
             'Test user should not have Administrator access')
 
-        record = self.env['mail.test.container'].create({
+        record = self.env['mail.test.gateway.groups'].create({
             'name': 'Test Record',
             'alias_name': 'test.record',
             'alias_contact': 'followers',
@@ -942,6 +954,8 @@ class TestMailAliasMixin(TestMailAliasCommon):
             (False, self.env['res.company'], self.mail_alias_domain_c2),
             (self.env.user.company_id.id, self.company_2, self.mail_alias_domain_c2),
             (self.company_admin.id, self.company_admin, self.mail_alias_domain),
+            # company without alias domain -> set False on alias also, to avoid MC issues
+            (self.company_no_alias.id, self.company_no_alias, self.env['mail.alias.domain']),
         ]:
             with self.subTest(create_cid=create_cid, exp_company=exp_company, exp_alias_domain=exp_alias_domain):
                 counter += 1

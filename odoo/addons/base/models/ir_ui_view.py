@@ -18,8 +18,8 @@ from markupsafe import Markup
 from odoo import api, fields, models, tools, _
 from odoo.exceptions import ValidationError, AccessError, UserError
 from odoo.http import request
-from odoo.models import check_method_name
 from odoo.modules.module import get_resource_from_path
+from odoo.service.model import get_public_method
 from odoo.osv.expression import expression
 from odoo.tools import config, lazy_property, frozendict, SQL
 from odoo.tools.convert import _fix_multiple_roots
@@ -250,6 +250,7 @@ actual arch.
 
     def _inverse_arch(self):
         for view in self:
+            self._validate_xml_encoding(view.arch)
             data = dict(arch_db=view.arch)
             if 'install_filename' in self._context:
                 # we store the relative path to the resource instead of the absolute path, if found
@@ -276,6 +277,7 @@ actual arch.
 
     def _inverse_arch_base(self):
         for view, view_wo_lang in zip(self, self.with_context(lang=None)):
+            self._validate_xml_encoding(view.arch_base)
             view_wo_lang.arch = view.arch_base
 
     def reset_arch(self, mode='soft'):
@@ -360,7 +362,7 @@ actual arch.
             try:
                 # verify the view is valid xml and that the inheritance resolves
                 if view.inherit_id:
-                    view_arch = etree.fromstring(view.arch)
+                    view_arch = etree.fromstring(view.arch or '<data/>')
                     view._valid_inheritance(view_arch)
                 combined_arch = view._get_combined_arch()
                 if view.type == 'qweb':
@@ -423,7 +425,7 @@ actual arch.
 
         return True
 
-    @api.constrains('type', 'groups_id', 'inherit_id')
+    @api.constrains('groups_id', 'inherit_id', 'mode')
     def _check_groups(self):
         for view in self:
             if (view.groups_id and
@@ -476,8 +478,16 @@ actual arch.
             except (etree.ParseError, ValueError) as e:
                 view.warning_info = str(e)
 
+    def _validate_xml_encoding(self, text):
+        if isinstance(text, str) and re.search(r'<\?xml[^>]*encoding=.*?\?>', text, re.IGNORECASE):
+            raise UserError(_(
+                "Unicode strings with encoding declaration are not supported in XML.\n"
+                "Remove the encoding declaration."
+            ))
+
     @api.model_create_multi
     def create(self, vals_list):
+        valid_types = self._fields['type']._selection
         for values in vals_list:
             if 'arch_db' in values and not values['arch_db']:
                 # delete empty arch_db to avoid triggering _check_xml before _inverse_arch_base is called
@@ -492,7 +502,14 @@ actual arch.
                         if not values.get('arch') and not values.get('arch_base'):
                             raise ValidationError(_('Missing view architecture.'))
                         values['type'] = etree.fromstring(values.get('arch') or values.get('arch_base')).tag
-                    except LxmlError:
+                        if values['type'] not in valid_types:
+                            raise ValidationError(_(
+                                "Invalid view type: '%(view_type)s'.\n"
+                                "You might have used an invalid starting tag in the architecture.\n"
+                                "Allowed types are: %(valid_types)s",
+                                view_type=values['type'], valid_types=', '.join(valid_types)
+                            ))
+                    except (etree.ParseError, ValueError):
                         # don't raise here, the constraint that runs `self._check_xml` will
                         # do the job properly.
                         pass
@@ -1304,6 +1321,8 @@ actual arch.
                 if isinstance(domain, str):
                     vnames = get_expression_field_names(domain)
                     name_manager.must_have_fields(node, vnames, node_info, ('domain', domain))
+            if field.type == 'properties':
+                name_manager.must_have_fields(node, [field.definition_record], node_info, ('fieldname', field.name))
             context = node.get('context')
             if context:
                 vnames = get_expression_field_names(context)
@@ -1641,8 +1660,8 @@ actual arch.
                     )
                     self._raise_view_error(msg, node)
                 try:
-                    check_method_name(name)
-                except AccessError:
+                    get_public_method(name_manager.model, name)
+                except (AttributeError, AccessError):
                     msg = _(
                         "%(method)s on %(model)s is private and cannot be called from a button",
                         method=name, model=name_manager.model._name,
@@ -2122,6 +2141,12 @@ actual arch.
 
         node_path = e.get('data-oe-xpath')
         if node_path is None:
+            # Handle special case for jump points defined by the magic template
+            # <t>$0</t>. No branding is allowed in this case since it points to
+            # a generic template.
+            if e.get('data-oe-no-branding'):
+                e.attrib.pop('data-oe-no-branding')
+                return
             node_path = "%s/%s[%d]" % (parent_xpath, e.tag, index_map[e.tag])
         if branding:
             if e.get('t-field'):
@@ -2425,6 +2450,8 @@ class Model(models.AbstractModel):
         for fname, field in self._fields.items():
             if field.automatic:
                 continue
+            elif field.type == "binary" and not isinstance(field, fields.Image) and not field.store:
+                continue
             elif field.type in ('one2many', 'many2many', 'text', 'html'):
                 # append to sheet left and right group if needed
                 if len(left_group) > 0:
@@ -2675,6 +2702,29 @@ class Model(models.AbstractModel):
                 raise UserError(_("No default view of type '%s' could be found!", view_type))
         return arch, view
 
+    def _get_view_postprocessed(self, view, arch, **options):
+        """
+        Get the post-processed view architecture and the corresponding fields.
+
+        This method uses the view's ``postprocess_and_fields`` function to process
+        the view architecture. It applies access control rules, field modifiers,
+        and tag-specific logic. It also automatically embeds subviews for
+        ``one2many`` and ``many2many`` fields when required, and collects all
+        fields used across the view and its subviews.
+
+        :param view: an ``ir.ui.view`` record
+        :param arch: the view architecture as a string
+        :param options: bool options to return additional features:
+                        ``mobile`` (bool): true if the web client is currently using
+                        the responsive mobile view (to use kanban views instead of
+                        list views for x2many fields)
+        :return: a tuple containing:
+                - the post-processed view architecture as a string
+                - a dictionary of models and the fields used in the view
+        :rtype: tuple(str, dict)
+        """
+        return view.postprocess_and_fields(arch, model=self._name, **options)
+
     @api.model
     def _get_view_cache_key(self, view_id=None, view_type='form', **options):
         """ Get the key to use for caching `_get_view_cache`.
@@ -2721,7 +2771,7 @@ class Model(models.AbstractModel):
         arch, view = self._get_view(view_id, view_type, **options)
 
         # Apply post processing, groups and modifiers etc...
-        arch, models = view.postprocess_and_fields(arch, model=self._name, **options)
+        arch, models = self._get_view_postprocessed(view, arch, **options)
         models = self._get_view_fields(view_type or view.type, models)
         result = {
             'arch': arch,

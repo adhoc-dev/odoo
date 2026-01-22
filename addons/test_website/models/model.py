@@ -28,6 +28,7 @@ class TestModel(models.Model):
         sanitize_overridable=True,
         sanitize_attributes=False,
         sanitize_form=False,
+        default="""<div class="o_test_website_description"><p>A simple website description content.</p></div>""",
     )
     tag_id = fields.Many2one('test.tag')
 
@@ -45,6 +46,10 @@ class TestModel(models.Model):
             'icon': 'fa-check-square-o',
             'order': 'name asc, id desc',
         }
+
+    def open_website_url(self):
+        self.ensure_one()
+        return self.env['website'].get_client_action(f'/test_model/{self.id}')
 
 
 class TestSubModel(models.Model):

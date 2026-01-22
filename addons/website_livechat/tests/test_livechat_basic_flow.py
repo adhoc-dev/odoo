@@ -40,9 +40,30 @@ class TestLivechatBasicFlowHttpCase(HttpCaseWithUserDemo, TestLivechatCommon):
             self.env.ref('website.contactus_page').name,
             self.env.ref('website.homepage_page').name,
         )
+        handmade_history_data = [
+            (
+                self.env.ref("website.homepage_page").name,
+                (self.base_datetime - datetime.timedelta(minutes=20)).strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                ),
+            ),
+            (
+                self.env.ref("website.contactus_page").name,
+                (self.base_datetime - datetime.timedelta(minutes=10)).strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                ),
+            ),
+            (
+                self.env.ref("website.homepage_page").name,
+                self.base_datetime.strftime("%Y-%m-%d %H:%M:%S"),
+            ),
+        ]
+
         history = self.env['discuss.channel']._get_visitor_history(self.visitor)
+        history_data = self.env['discuss.channel']._get_visitor_history_data(self.visitor)
 
         self.assertEqual(history, handmade_history)
+        self.assertEqual(history_data, handmade_history_data)
 
     def test_livechat_username(self):
         # Open a new live chat
@@ -146,3 +167,12 @@ class TestLivechatBasicFlowHttpCase(HttpCaseWithUserDemo, TestLivechatCommon):
 
     def test_user_known_after_reload(self):
         self.start_tour('/', 'website_livechat_user_known_after_reload')
+
+
+@tests.tagged('post_install', '-at_install')
+class TestLivechatBasicFlowHttpCaseMobile(HttpCaseWithUserDemo, TestLivechatCommon):
+    browser_size = '375x667'
+    touch_enabled = True
+
+    def test_mobile_user_interaction(self):
+        self.start_tour('/', 'im_livechat_request_chat_and_send_message', login=None)

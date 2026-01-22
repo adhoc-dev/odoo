@@ -26,6 +26,7 @@ import {
     onPatched,
     onWillPatch,
     onWillRender,
+    status,
     useExternalListener,
     useRef,
 } from "@odoo/owl";
@@ -214,7 +215,9 @@ export class ListRenderer extends Component {
             // HACK: we need to wait for the next tick to be sure that the Field components are patched.
             // OWL don't wait the patch for the children components if the children trigger a patch by himself.
             await Promise.resolve();
-
+            if (status(this) === "destroyed") {
+                return;
+            }
             if (this.activeElement !== this.uiService.activeElement) {
                 return;
             }
@@ -833,7 +836,8 @@ export class ListRenderer extends Component {
     getFormattedValue(column, record) {
         const fieldName = column.name;
         if (column.options.enable_formatting === false) {
-            return record.data[fieldName];
+            const value = record.data[fieldName];
+            return value === false ? "" : value;
         }
         return getFormattedValue(record, fieldName, column);
     }
@@ -1050,7 +1054,8 @@ export class ListRenderer extends Component {
             return;
         }
         element.dataset.clicked = true;
-
+        // re-enable the button after a while (this is a manual debounce, but record by record)
+        setTimeout(() => delete element.dataset.clicked, 500);
         this.onDeleteRecord(record, ev);
     }
 
@@ -1847,11 +1852,14 @@ export class ListRenderer extends Component {
         await this.props.list.leaveEditMode();
         element.classList.remove("o_row_draggable");
         const refId = previous ? previous.dataset.id : null;
-        this.resequencePromise = this.props.list.resequence(dataRowId, refId, {
-            handleField: this.props.list.handleField,
-        });
-        await this.resequencePromise;
-        element.classList.add("o_row_draggable");
+        try {
+            this.resequencePromise = this.props.list.resequence(dataRowId, refId, {
+                handleField: this.props.list.handleField,
+            });
+            await this.resequencePromise;
+        } finally {
+            element.classList.add("o_row_draggable");
+        }
     }
 
     /**

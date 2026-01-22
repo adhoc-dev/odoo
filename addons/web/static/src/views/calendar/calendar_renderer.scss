@@ -26,7 +26,7 @@
         // `web/lib/fullcalendar/core/main.css` gives events with links and draggable events a hand mouse pointer,
         // but doesn't take into account that events have popovers.
         cursor: pointer;
-        --fc-event-text-color: $body-color;
+        --fc-event-text-color: #{$body-color};
         --fc-event-bg-color: #{$o-view-background-color};
         overflow: hidden;
 
@@ -116,6 +116,12 @@
             &:hover {
                 --o-bg-opacity: 1;
             }
+
+            &.o_event_hatched:before {
+                --o-event-bg: var(--fc-event-text-color);
+
+                content: "\f1db"; // fa-circle-thin
+            }
         }
     }
 
@@ -150,6 +156,10 @@
             background: map-get($grays, "400");
         }
 
+        .fc-scrollgrid {
+            border-top: 0;
+        }
+
         .fc-scrollgrid-section-header {
             .fc-timegrid-axis-frame.fc-scrollgrid-shrink-frame.fc-timegrid-axis-frame-liquid {
                 > a.fc-timegrid-axis-cushion.fc-scrollgrid-shrink-cushion.fc-scrollgrid-sync-inner {
@@ -170,10 +180,28 @@
                 max-height: 500px;
                 overflow: auto;
             }
+
+            &.o_calendar_disabled {
+                background-color: $gray-200;
+            }
         }
 
         .o_calendar_disabled {
             background-color: rgba($gray-200, .5);
+        }
+
+        .fc-daygrid-day-bottom {
+            display: flex;
+            justify-content: center;
+
+            .fc-more-link {
+                color: $link-color;
+                cursor: pointer;
+
+                &:hover {
+                    background: none;
+                }
+            }
         }
 
         // ======  Specific agenda types ======
@@ -218,6 +246,16 @@
         // ====== Both Day and Week agenda
         .fc-timeGridDay-view,
         .fc-timeGridWeek-view {
+            .fc-scrollgrid-section-body {
+                &:not(.fc-scrollgrid-section-liquid) .fc-scroller-harness {
+                    background-color: $o-view-background-color;
+                }
+
+                &:first-child td {
+                    border-bottom: 0;
+                }
+            }
+
             .fc-col-header-cell {
                 a {
                     display: flex;
@@ -434,8 +472,8 @@
                         content: "";
                         z-index: -1;
                         display: none;
-                        @include o_position-absolute($top: 0%, $left: 50%);
-                        transform: translateX(-50%);
+                        @include o_position-absolute($top: 50%, $left: 50%);
+                        transform: translate(-50%, -50%);
                         aspect-ratio: 1/1;
                         height: 100%;
                         border-radius: 100%;
@@ -462,15 +500,6 @@
                 background: none;
             }
 
-            .fc-more-cell {
-                text-align: center;
-
-                .fc-more-link {
-                    color: $link-color;
-                    cursor: pointer;
-                }
-            }
-
             .fc-event {
                 padding: 0 map-get($spacers, 1);
 
@@ -479,6 +508,7 @@
                     justify-content: start;
                     flex-direction: row;
                     max-height: 1.2em;
+                    line-height: 100%;
                 }
             }
         }
@@ -521,6 +551,10 @@
                             &:before {
                                 display: block;
                             }
+                        }
+
+                        .fc-daygrid-day-number:before {
+                            height: 120%;
                         }
                     }
                 }
@@ -569,7 +603,10 @@
 
                     .fc-daygrid-body tr {
                         .fc-daygrid-day-frame {
+                            display: flex;
+                            place-content: center;
                             min-height: 2rem;
+                            line-height: 1;
                         }
 
                         .o-fc-week {
@@ -686,6 +723,10 @@
                     color: var(--o-event-bg, #{$info});
                 }
             }
+        }
+
+        &:has(.fc-dayGridYear-view){
+            border-right: $border-width solid $border-color;
         }
     }
 

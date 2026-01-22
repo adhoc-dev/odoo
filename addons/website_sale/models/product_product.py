@@ -8,6 +8,7 @@ from odoo.exceptions import ValidationError
 
 class Product(models.Model):
     _inherit = 'product.product'
+    _mail_post_access = 'read'
 
     variant_ribbon_id = fields.Many2one(string="Variant Ribbon", comodel_name='product.ribbon')
     website_id = fields.Many2one(related='product_tmpl_id.website_id', readonly=False)
@@ -146,3 +147,13 @@ class Product(models.Model):
             self.website_published = True
         else:
             self.website_published = False
+
+    def write(self, vals):
+        if 'active' in vals and not vals['active']:
+            # unlink draft lines containing the archived product
+            self.env['sale.order.line'].sudo().search([
+                ('state', '=', 'draft'),
+                ('product_id', 'in', self.ids),
+                ('order_id', 'any', [('website_id', '!=', False)]),
+            ]).unlink()
+        return super().write(vals)

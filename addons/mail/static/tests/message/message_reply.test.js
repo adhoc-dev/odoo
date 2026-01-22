@@ -7,7 +7,8 @@ import {
     startServer,
 } from "@mail/../tests/mail_test_helpers";
 import { describe, test } from "@odoo/hoot";
-import { patchWithCleanup, serverState } from "@web/../tests/web_test_helpers";
+import { disableAnimations } from "@odoo/hoot-mock";
+import { serverState } from "@web/../tests/web_test_helpers";
 import { deserializeDateTime } from "@web/core/l10n/dates";
 
 import { getOrigin } from "@web/core/utils/urls";
@@ -40,12 +41,7 @@ test("click on message in reply to highlight the parent message", async () => {
 });
 
 test("click on message in reply to scroll to the parent message", async () => {
-    // make scroll behavior instantaneous.
-    patchWithCleanup(Element.prototype, {
-        scrollIntoView() {
-            return super.scrollIntoView(true);
-        },
-    });
+    disableAnimations();
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "general" });
     const [oldestMessageId] = pyEnv["mail.message"].create(
@@ -99,4 +95,32 @@ test("reply shows correct author avatar", async () => {
             serverState.partnerId
         }/avatar_128?unique=${deserializeDateTime(partner.write_date).ts}`}`
     );
+});
+
+test("reply with only attachment shows parent message context", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "general" });
+    const originalMessageId = pyEnv["mail.message"].create({
+        body: "Original message content",
+        message_type: "comment",
+        model: "discuss.channel",
+        res_id: channelId,
+    });
+    const attachmentId = pyEnv["ir.attachment"].create({
+        name: "test_image.png",
+        mimetype: "image/png",
+    });
+    pyEnv["mail.message"].create({
+        attachment_ids: [attachmentId],
+        body: "",
+        message_type: "comment",
+        model: "discuss.channel",
+        parent_id: originalMessageId,
+        res_id: channelId,
+    });
+    await start();
+    await openDiscuss(channelId);
+    await contains(".o-mail-MessageInReply-message", {
+        text: "Original message content",
+    });
 });

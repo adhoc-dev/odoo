@@ -1,7 +1,7 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* sales_team
-# 
+# * sales_team
+#
 # Translators:
 # Kim Asplund <kim.asplund@gmail.com>, 2024
 # Kristoffer Grundström <lovaren@gmail.com>, 2024
@@ -15,28 +15,31 @@
 # Levi Siuzdak (sile), 2024
 # Chrille Hedberg <hedberg.chrille@gmail.com>, 2024
 # Anders Wallenquist <anders.wallenquist@vertel.se>, 2024
-# Jakob Krabbe <jakob.krabbe@vertel.se>, 2024
 # Simon S, 2024
 # Lasse L, 2024
-# 
+# Jakob Krabbe <jakob.krabbe@vertel.se>, 2024, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Lasse L, 2024\n"
-"Language-Team: Swedish (https://app.transifex.com/odoo/teams/41243/sv/)\n"
+"POT-Creation-Date: 2025-12-29 18:38+0000\n"
+"PO-Revision-Date: 2025-08-12 22:21+0000\n"
+"Last-Translator: Jakob Krabbe <jakob.krabbe@vertel.se>\n"
+"Language-Team: Swedish <https://translate.odoo.com/projects/odoo-18/"
+"sales_team/sv/>\n"
+"Language: sv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: sv\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 5.12.2\n"
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_kanban
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_view_form
-msgid "<i class=\"fa fa-envelope me-1\" role=\"img\" aria-label=\"Email\" title=\"Email\"/>"
+msgid ""
+"<i class=\"fa fa-envelope me-1\" role=\"img\" aria-label=\"Email\" "
+"title=\"Email\"/>"
 msgstr ""
 "<i class=\"fa fa-envelope me-1\" role=\"img\" aria-label=\"E-post\" "
 "title=\"E-post\"/>"
@@ -80,41 +83,10 @@ msgstr "Lägg till en teammedlem"
 
 #. module: sales_team
 #: model:ir.model.fields,help:sales_team.field_crm_team__crm_team_member_ids
-msgid ""
-"Add members to automatically assign their documents to this sales team."
+msgid "Add members to automatically assign their documents to this sales team."
 msgstr ""
 "Lägg till medlemmar för att automatiskt tilldela deras dokument till detta "
 "säljteam."
-
-#. module: sales_team
-#. odoo-python
-#: code:addons/sales_team/models/crm_team.py:0
-msgid ""
-"Adding %(user_name)s in this team would remove him/her from its current team"
-" %(team_name)s."
-msgstr ""
-"Att lägga till %(user_name)s i detta team skulle ta bort honom/henne från "
-"dess nuvarande team %(team_name)s."
-
-#. module: sales_team
-#. odoo-python
-#: code:addons/sales_team/models/crm_team_member.py:0
-msgid ""
-"Adding %(user_name)s in this team would remove him/her from its current "
-"teams %(team_names)s."
-msgstr ""
-"Att lägga till %(user_name)s i detta team skulle ta bort honom/henne från "
-"dess nuvarande team %(team_names)s."
-
-#. module: sales_team
-#. odoo-python
-#: code:addons/sales_team/models/crm_team.py:0
-msgid ""
-"Adding %(user_names)s in this team would remove them from their current "
-"teams (%(team_names)s)."
-msgstr ""
-"Att lägga till %(user_names)s i detta team skulle ta bort dem från deras "
-"nuvarande team (%(team_names)s)."
 
 #. module: sales_team
 #. odoo-python
@@ -123,6 +95,9 @@ msgid ""
 "Adding %(user_name)s in this team will remove them from %(team_names)s. "
 "Working in multiple teams? Activate the option under Configuration>Settings."
 msgstr ""
+"Lägga till %(user_name)s till detta laget kommer att ta bort dom från %"
+"(team_names)s. Arbeta i flera lag? Aktivera valet under Konfiguration > "
+"Inställningar."
 
 #. module: sales_team
 #. odoo-python
@@ -130,6 +105,8 @@ msgstr ""
 msgid ""
 "Adding %(user_names)s in this team will remove them from %(team_names)s."
 msgstr ""
+"Lägga till %(user_names)s till detta laget kommer att t bort dom från %"
+"(team_names)s."
 
 #. module: sales_team
 #: model:res.groups,name:sales_team.group_sale_manager
@@ -275,8 +252,7 @@ msgstr "Favoritmedlemmar"
 
 #. module: sales_team
 #: model:ir.model.fields,help:sales_team.field_crm_team__is_favorite
-msgid ""
-"Favorite teams to display them in the dashboard and access them easily."
+msgid "Favorite teams to display them in the dashboard and access them easily."
 msgstr "Favoritteam för att visa dem i anslagstavlan och enkelt komma åt dem."
 
 #. module: sales_team
@@ -386,8 +362,8 @@ msgid ""
 "Main user sales team. Used notably for pipeline, or to set sales team in "
 "invoicing or subscription."
 msgstr ""
-"Huvudsaklig användare säljteam. Används särskilt för pipeline, eller för att"
-" ställa in säljteam i fakturering eller prenumeration."
+"Huvudsaklig användare säljteam. Används särskilt för pipeline, eller för att "
+"ställa in säljteam i fakturering eller prenumeration."
 
 #. module: sales_team
 #: model:ir.model.fields,field_description:sales_team.field_crm_team__member_company_ids
@@ -474,7 +450,7 @@ msgstr "Telefon"
 #. module: sales_team
 #: model:crm.team,name:sales_team.pos_sales_team
 msgid "Point of Sale"
-msgstr "Point of Sale"
+msgstr "Försäljningsställe"
 
 #. module: sales_team
 #: model:crm.team,name:sales_team.crm_team_1
@@ -636,6 +612,14 @@ msgid "The default company for this user."
 msgstr "Standardföretaget för den här användaren."
 
 #. module: sales_team
+#. odoo-python
+#: code:addons/sales_team/models/crm_team.py:0
+msgid ""
+"The following team members are not allowed in company '%(company)s' of the "
+"Sales Team '%(team)s': %(users)s"
+msgstr ""
+
+#. module: sales_team
 #: model_terms:ir.actions.act_window,help:sales_team.mail_activity_type_action_config_sales
 msgid ""
 "Those represent the different categories of things you have to do (e.g. "
@@ -643,16 +627,6 @@ msgid ""
 msgstr ""
 "Dessa representerar de olika kategorierna av saker du måste göra (t.ex. "
 "\"Ringa\" eller \"Förbereda möte\")."
-
-#. module: sales_team
-#. odoo-python
-#: code:addons/sales_team/models/crm_team.py:0
-msgid ""
-"To add a Salesperson into multiple Teams, activate the Multi-Team option in "
-"settings."
-msgstr ""
-"För att lägga till en säljare i flera team, aktivera alternativet Flera team"
-" i inställningarna."
 
 #. module: sales_team
 #: model:crm.tag,name:sales_team.categ_oppor6
@@ -681,8 +655,7 @@ msgstr "Odefinierad grafmodell för säljteam: %s"
 
 #. module: sales_team
 #: model_terms:ir.actions.act_window,help:sales_team.crm_team_action_config
-msgid ""
-"Use Sales Teams to organize your sales departments and draw up reports."
+msgid "Use Sales Teams to organize your sales departments and draw up reports."
 msgstr ""
 "Använd säljteamen för att organisera dina försäljningsavdelningar och ta "
 "fram rapporter."
@@ -710,6 +683,14 @@ msgstr ""
 #: model:ir.model,name:sales_team.model_res_users
 msgid "User"
 msgstr "Användare"
+
+#. module: sales_team
+#. odoo-python
+#: code:addons/sales_team/models/crm_team_member.py:0
+msgid ""
+"User '%(user)s' is not allowed in the company '%(company)s' of the Sales "
+"Team '%(team)s'."
+msgstr ""
 
 #. module: sales_team
 #: model:ir.model.fields,field_description:sales_team.field_crm_team_member__user_company_ids
@@ -752,13 +733,14 @@ msgstr "Webbplats"
 msgid ""
 "Working in multiple teams? Activate the option under Configuration>Settings."
 msgstr ""
+"Arbeta i flera lag? Aktivera valet under Konfiguration > Inställningar."
 
 #. module: sales_team
 #. odoo-python
 #: code:addons/sales_team/models/crm_team_member.py:0
 msgid ""
-"You are trying to create duplicate membership(s). We found that "
-"%(duplicates)s already exist(s)."
+"You are trying to create duplicate membership(s). We found that %"
+"(duplicates)s already exist(s)."
 msgstr ""
 "Du försöker skapa dubbla medlemskap. Vi fann att %(duplicates)s redan "
 "existerar."
@@ -792,8 +774,8 @@ msgstr ""
 #. module: sales_team
 #: model:res.groups,comment:sales_team.group_sale_manager
 msgid ""
-"the user will have an access to the sales configuration as well as statistic"
-" reports."
+"the user will have an access to the sales configuration as well as statistic "
+"reports."
 msgstr ""
 "användaren kommer att ha tillgång till försäljningsinställningar samt "
 "statistiska rapporter."

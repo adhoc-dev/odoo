@@ -1,9 +1,3 @@
-export const excalidrawWebsiteDomainList = [
-    "excalidraw.com",
-    "link.excalidraw.com",
-    "app.excalidraw.com",
-];
-
 /**
  * Checks if the given URL contains the specified hostname and returns a reconstructed URL if it does.
  *
@@ -55,9 +49,6 @@ export function getVideoUrl(platform, videoId, params) {
             break;
         case "instagram":
             url = new URL(`https://www.instagram.com/p/${videoId}/embed`);
-            break;
-        case "youku":
-            url = new URL(`https://player.youku.com/embed/${videoId}`);
             break;
         default:
             throw new Error(`Unsupported platform: ${platform}`);

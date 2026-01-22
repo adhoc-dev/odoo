@@ -4,6 +4,7 @@
 from odoo import Command
 from odoo.tests import Form
 from odoo.addons.mrp_subcontracting.tests.common import TestMrpSubcontractingCommon
+from odoo.addons.mrp_subcontracting.tests.test_subcontracting import TestSubcontractingPortal
 
 
 class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon):
@@ -459,3 +460,154 @@ class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon):
         self.assertEqual(component_lines[0]['route_name'], 'Buy', 'Outside of the subcontracted context, it should try to resupply stock.')
         self.assertEqual(component_lines[1]['product_id'], compo_rr.id)
         self.assertEqual(component_lines[1]['route_name'], 'Buy')
+
+    def test_partner_id_no_overwrite(self):
+        subcontract_location = self.env.company.subcontracting_location_id
+        p1, p2 = self.env['res.partner'].create([
+            {'name': 'partner 1', 'property_stock_subcontractor': subcontract_location.id},
+            {'name': 'partner 2', 'property_stock_subcontractor': subcontract_location.id},
+        ])
+        route_resupply = self.env['stock.route'].create({
+            'name': 'Resupply Subcontractor',
+            'rule_ids': [(0, False, {
+                'name': 'Stock -> Subcontractor',
+                'location_src_id': self.env.ref('stock.stock_location_stock').id,
+                'location_dest_id': subcontract_location.id,
+                'company_id': self.env.company.id,
+                'action': 'pull',
+                'auto': 'manual',
+                'picking_type_id': self.env.ref('stock.picking_type_out').id,
+                'partner_address_id': p1.id,
+            })],
+        })
+        self.env['stock.warehouse.orderpoint'].create({
+            'name': 'Resupply Subcontractor',
+            'location_id': subcontract_location.id,
+            'route_id': route_resupply.id,
+            'product_id': self.comp1.id,
+            'product_min_qty': 2,
+            'product_max_qty': 2,
+        })
+        self.env['procurement.group'].run_scheduler()
+        delivery = self.env["stock.move"].search([("product_id", "=", self.comp1.id)]).picking_id
+        self.assertEqual(delivery.partner_id, p1)
+
+    def test_mrp_subcontracting_dropshipping_svl(self):
+        """Check that svls created from a subcontracted dropshipped product delivery
+        do not a have a remainging value  and quantity (just like svls created from a
+        dropshipped product delivery would not have a remaining value and quantity)
+        """
+
+        dropship_route = self.env['stock.route'].search([('name', '=', 'Dropship')])
+        self.finished.write({'route_ids': [(4, dropship_route.id)]})
+        self.finished.standard_price = 5
+        self.comp1.type = "consu"
+        self.comp2.type = "consu"
+        warehouse = self.env['stock.warehouse'].create({
+            'name': 'Warehouse For subcontract',
+            'code': 'WFS'
+        })
+        self.env['product.supplierinfo'].create({
+            'product_tmpl_id': self.finished.product_tmpl_id.id,
+            'partner_id': self.subcontractor_partner1.id
+        })
+        partner = self.env['res.partner'].create({
+            'name': 'Toto'
+        })
+
+        so_form = Form(self.env['sale.order'])
+        so_form.partner_id = partner
+        so_form.warehouse_id = warehouse
+        with so_form.order_line.new() as line:
+            line.product_id = self.finished
+            line.product_uom_qty = 1
+        so = so_form.save()
+        so.action_confirm()
+
+        po = self.env['purchase.order'].search([('origin', 'ilike', so.name)])
+        self.assertTrue(po)
+        po.button_approve()
+
+        picking_dropshipped = po.picking_ids
+        picking_dropshipped.button_validate()
+        subcontracted_svl = self.env['mrp.production'].search([('incoming_picking', '=', picking_dropshipped.id)]).move_finished_ids.stock_valuation_layer_ids
+        dropship_svl = picking_dropshipped.move_ids.stock_valuation_layer_ids
+        self.assertRecordValues(dropship_svl, [
+            {'product_id': self.finished.id, 'value': -5.0, 'unit_cost': 5.0, 'quantity': -1.0, 'remaining_qty': 0, 'remaining_value': 0},
+        ])
+        self.assertRecordValues(subcontracted_svl, [
+            {'product_id': self.finished.id, 'value': 5.0, 'unit_cost': 5.0, 'quantity': 1.0, 'remaining_qty': 0, 'remaining_value': 0},
+        ])
+
+
+class TestSubcontractingDropshippingPortal(TestSubcontractingPortal):
+
+    def test_portal_subcontractor_record_production_with_dropship(self):
+        """
+        Check that a portal subcontractor is able to set serial numbers for
+        the final product (with a dropshipped component).
+        """
+        subcontractor, vendor = self.portal_user.partner_id | self.env['res.partner'].create([
+            {'name': 'SuperVendor'},
+        ])
+        routes = self.env.ref('purchase_stock.route_warehouse0_buy') | self.env.ref('mrp_subcontracting_dropshipping.route_subcontracting_dropshipping')
+        finished_product, component = self.env['product.product'].create([
+            {
+                'name': 'Robot',
+                'is_storable': True,
+                'tracking': 'serial',
+                'seller_ids':[Command.create({'partner_id': subcontractor.id})],
+            },
+            {
+                'name': 'Robot parts',
+                'is_storable': True,
+                'route_ids': [Command.set(routes.ids)],
+                'seller_ids':[Command.create({'partner_id': vendor.id})],
+            },
+        ])
+        bom_form = Form(self.env['mrp.bom'])
+        bom_form.type = 'subcontract'
+        bom_form.subcontractor_ids.add(subcontractor)
+        bom_form.product_tmpl_id = finished_product.product_tmpl_id
+        with bom_form.bom_line_ids.new() as bom_line:
+            bom_line.product_id = component
+            bom_line.product_qty = 1
+        bom = bom_form.save()
+        finished_serial = self.env['stock.lot'].create({
+            'name': 'SN404',
+            'product_id': finished_product.id,
+        })
+        po = self.env['purchase.order'].create({
+            "partner_id": subcontractor.id,
+            "dest_address_id": subcontractor.id,
+            "order_line": [Command.create({
+                'product_id': finished_product.id,
+                'name': finished_product.name,
+                'product_qty': 2,
+            })],
+        })
+        po.button_confirm()
+        subcontracted_mo = self.env['mrp.production'].search([('bom_id', '=', bom.id)], limit=1)
+        # confirm the po to resuply the subcontractor
+        po_dropship_subcontractor = self.env['purchase.order'].search([('partner_id', '=', vendor.id)], limit=1)
+        po_dropship_subcontractor.button_confirm()
+        # check that the dropship is linked to the subcontracted MO
+        self.assertEqual(po_dropship_subcontractor.picking_ids.picking_type_id, self.env.company.dropship_subcontractor_pick_type_id)
+        self.assertEqual(po_dropship_subcontractor.picking_ids, subcontracted_mo.picking_ids)
+
+        # check that your subcontractor is able to modify the lot of the finished product
+        action = subcontracted_mo.incoming_picking.with_user(self.portal_user).with_context(is_subcontracting_portal=True).move_ids.action_show_details()
+        mo = self.env['mrp.production'].with_user(self.portal_user).browse(action['res_id'])
+        mo_form = Form(mo.with_context(action['context']), view=action['view_id'])
+        # Registering components for the first manufactured product
+        mo_form.lot_producing_id = finished_serial
+        mo = mo_form.save()
+        mo.subcontracting_record_component()
+        self.assertRecordValues(mo, [{
+            'qty_producing': 1.0, 'lot_producing_id': finished_serial.id, 'state': 'to_close',
+        }])
+        # Check that the initial MO has been splitted in 2
+        self.assertTrue("-001" in mo.name)
+        self.assertRecordValues(mo.procurement_group_id.mrp_production_ids - mo, [{
+            'qty_producing': 1.0, 'lot_producing_id': False, 'state': 'to_close',
+        }])

@@ -4,6 +4,7 @@ import { registry } from '@web/core/registry';
 import { user } from "@web/core/user";
 import { loadBundle } from "@web/core/assets";
 import { ensureJQuery } from "@web/core/ensure_jquery";
+import { isVisible } from "@web/core/utils/ui";
 
 import { FullscreenIndication } from '../components/fullscreen_indication/fullscreen_indication';
 import { WebsiteLoader } from '../components/website_loader/website_loader';
@@ -11,8 +12,9 @@ import { reactive, EventBus } from "@odoo/owl";
 
 const websiteSystrayRegistry = registry.category('website_systray');
 
+// TODO this is duplicated in website_root at least, it should be a shared util
 export const unslugHtmlDataObject = (repr) => {
-    const match = repr && repr.match(/(.+)\((\d+),(.*)\)/);
+    const match = repr && repr.match(/(.+)\((-?\d+),(.*)\)/);
     if (!match) {
         return null;
     }
@@ -57,10 +59,14 @@ export const websiteService = {
 
         hotkey.add("escape", () => {
             // Toggle fullscreen mode when pressing escape.
-            if (!currentWebsiteId && !fullscreen) {
+            if (
+                (!currentWebsiteId && !fullscreen)
+                || (pageDocument && isVisible(pageDocument.querySelector(".modal")))
+            ) {
                 // Only allow to use this feature while on the website app, or
                 // while it is already fullscreen (in case you left the website
-                // app in fullscreen mode, thanks to CTRL-K).
+                // app in fullscreen mode, thanks to CTRL-K), or if a modal
+                // is open within the preview and could be closed with escape.
                 return;
             }
             fullscreen = !fullscreen;

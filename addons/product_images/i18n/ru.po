@@ -3,44 +3,59 @@
 # 	* product_images
 #
 # Translators:
+# Wil Odoo, 2024
+# Anastasiia Koroleva, 2025
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2024-01-30 15:14+0400\n"
-"Last-Translator: \n"
+"POT-Creation-Date: 2025-12-29 18:37+0000\n"
+"PO-Revision-Date: 2024-09-25 09:41+0000\n"
+"Last-Translator: Anastasiia Koroleva, 2025\n"
 "Language-Team: Russian (https://app.transifex.com/odoo/teams/41243/ru/)\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
+"(n%100>=11 && n%100<=14)? 2 : 3);\n"
 
 #. module: product_images
 #. odoo-python
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
-msgid "%(matching_images_count)s matching images have been found for %(product_count)s products."
-msgstr "для %(product_count)s товаров найдено %(matching_images_count)s подходящих изображений."
+msgid ""
+"%(matching_images_count)s matching images have been found for %"
+"(product_count)s products."
+msgstr ""
+"для %(product_count)s товаров найдено %(matching_images_count)s подходящих "
+"изображений."
 
 #. module: product_images
 #: model_terms:ir.ui.view,arch_db:product_images.product_fetch_image_wizard_view_form
 msgid ""
 "<span invisible=\"nb_products_selected &lt;= 10000\">\n"
-"                            As only 10,000 products can be processed per day, the remaining will be\n"
+"                            As only 10,000 products can be processed per "
+"day, the remaining will be\n"
 "                            done tomorrow.\n"
 "                        </span>"
 msgstr ""
 "<span invisible=\"nb_products_selected &lt;= 10000\">\n"
-"                            Поскольку в день может быть обработано только 10 000 товаров, оставшиеся будут\n"
+"                            Поскольку в день может быть обработано только 10 "
+"000 товаров, оставшиеся будут\n"
 "                            будут обработаны завтра.\n"
 "                        </span>"
 
 #. module: product_images
 #. odoo-python
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
-msgid "A task to process products in the background is already running. Please try againlater."
-msgstr "Задача по обработке продуктов в фоновом режиме уже запущена. Пожалуйста, повторите попытку позже."
+msgid ""
+"A task to process products in the background is already running. Please try "
+"againlater."
+msgstr ""
+"Задача по обработке продуктов в фоновом режиме уже запущена. Пожалуйста, "
+"повторите попытку позже."
 
 #. module: product_images
 #: model_terms:ir.ui.view,arch_db:product_images.res_config_settings_view_form
@@ -60,12 +75,12 @@ msgstr "Параметры конфигурации"
 #. module: product_images
 #: model:ir.model.fields,field_description:product_images.field_product_fetch_image_wizard__create_uid
 msgid "Created by"
-msgstr "Создано"
+msgstr "Создано:"
 
 #. module: product_images
 #: model:ir.model.fields,field_description:product_images.field_product_fetch_image_wizard__create_date
 msgid "Created on"
-msgstr "Создано"
+msgstr "Дата создания:"
 
 #. module: product_images
 #: model:ir.model.fields,field_description:product_images.field_product_fetch_image_wizard__display_name
@@ -74,8 +89,12 @@ msgstr "Отображаемое имя"
 
 #. module: product_images
 #: model:ir.model,name:product_images.model_product_fetch_image_wizard
-msgid "Fetch product images from Google Images based on the product's barcode number."
-msgstr "Получение изображений продуктов из Google Images на основе номера штрих-кода продукта."
+msgid ""
+"Fetch product images from Google Images based on the product's barcode "
+"number."
+msgstr ""
+"Получение изображений продуктов из Google Images на основе номера штрих-кода "
+"продукта."
 
 #. module: product_images
 #: model_terms:ir.ui.view,arch_db:product_images.product_fetch_image_wizard_view_form
@@ -106,12 +125,12 @@ msgstr "Ожидается получение изображения"
 #. module: product_images
 #: model:ir.model.fields,field_description:product_images.field_product_fetch_image_wizard__write_uid
 msgid "Last Updated by"
-msgstr "Последнее обновление"
+msgstr "Последнее обновление:"
 
 #. module: product_images
 #: model:ir.model.fields,field_description:product_images.field_product_fetch_image_wizard__write_date
 msgid "Last Updated on"
-msgstr "Последнее обновление"
+msgstr "Дата последнего обновления:"
 
 #. module: product_images
 #: model:ir.model.fields,field_description:product_images.field_product_fetch_image_wizard__nb_products_unable_to_process
@@ -134,7 +153,8 @@ msgid ""
 "Please note that some images might not be royalty-free. You should not\n"
 "                        publish these on your website."
 msgstr ""
-"Обратите внимание, что некоторые изображения не могут быть свободны от авторских прав. Вам не следует\n"
+"Обратите внимание, что некоторые изображения не могут быть свободны от "
+"авторских прав. Вам не следует\n"
 "                        публиковать их на своем сайте."
 
 #. module: product_images
@@ -161,8 +181,12 @@ msgstr "Продукты для обработки"
 #. module: product_images
 #. odoo-python
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
-msgid "Products are processed in the background. Images will be updated progressively."
-msgstr "Продукты обрабатываются в фоновом режиме. Изображения будут обновляться постепенно."
+msgid ""
+"Products are processed in the background. Images will be updated "
+"progressively."
+msgstr ""
+"Продукты обрабатываются в фоновом режиме. Изображения будут обновляться "
+"постепенно."
 
 #. module: product_images
 #: model_terms:ir.ui.view,arch_db:product_images.res_config_settings_view_form
@@ -173,13 +197,22 @@ msgstr "Идентификатор поисковой системы"
 #. odoo-python
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
 msgid "The API Key and Search Engine ID must be set in the General Settings."
-msgstr "Ключ API и идентификатор поисковой системы должны быть заданы в общих настройках."
+msgstr ""
+"Ключ API и идентификатор поисковой системы должны быть заданы в общих "
+"настройках."
 
 #. module: product_images
 #. odoo-python
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
-msgid "The Custom Search API is not enabled in your Google project. Please visit your Google Cloud Platform project page and enable it, then retry. If you enabled this API recently, please wait a few minutes and retry."
-msgstr "API пользовательского поиска не включен в вашем проекте Google. Посетите страницу проекта Google Cloud Platform и включите его, а затем повторите попытку. Если вы включили этот API недавно, подождите несколько минут и повторите попытку."
+msgid ""
+"The Custom Search API is not enabled in your Google project. Please visit "
+"your Google Cloud Platform project page and enable it, then retry. If you "
+"enabled this API recently, please wait a few minutes and retry."
+msgstr ""
+"API пользовательского поиска не включен в вашем проекте Google. Посетите "
+"страницу проекта Google Cloud Platform и включите его, а затем повторите "
+"попытку. Если вы включили этот API недавно, подождите несколько минут и "
+"повторите попытку."
 
 #. module: product_images
 #: model:ir.model.fields,field_description:product_images.field_res_config_settings__google_pse_id
@@ -188,14 +221,24 @@ msgstr "Идентификатор программируемой поисков
 
 #. module: product_images
 #: model:ir.model.fields,help:product_images.field_product_fetch_image_wizard__products_to_process
-msgid "The list of selected products that meet the criteria (have a barcode and no image)"
-msgstr "Список отобранных товаров, которые соответствуют заданным критериям (имеют штрихкод и не имеют изображения)"
+msgid ""
+"The list of selected products that meet the criteria (have a barcode and no "
+"image)"
+msgstr ""
+"Список отобранных товаров, которые соответствуют заданным критериям (имеют "
+"штрихкод и не имеют изображения)"
 
 #. module: product_images
 #. odoo-python
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
-msgid "The scheduled action \"Product Images: Get product images from Google\" has been deleted. Please contact your administrator to have the action restored or to reinstall the module \"product_images\"."
-msgstr "Запланированное действие \"Изображения продуктов: Получение изображений товаров из Google\" было удалено. Обратитесь к администратору, чтобы восстановить действие или переустановить модуль \"product_images\"."
+msgid ""
+"The scheduled action \"Product Images: Get product images from Google\" has "
+"been deleted. Please contact your administrator to have the action restored "
+"or to reinstall the module \"product_images\"."
+msgstr ""
+"Запланированное действие \"Изображения продуктов: Получение изображений "
+"товаров из Google\" было удалено. Обратитесь к администратору, чтобы "
+"восстановить действие или переустановить модуль \"product_images\"."
 
 #. module: product_images
 #. odoo-python
@@ -211,7 +254,8 @@ msgstr "Запущенные действия"
 #. module: product_images
 #: model:ir.model.fields,help:product_images.field_product_product__image_fetch_pending
 msgid "Whether an image must be fetched for this product. Handled by a cron."
-msgstr "Должно ли быть получено изображение для этого продукта. Обрабатывается cron."
+msgstr ""
+"Должно ли быть получено изображение для этого продукта. Обрабатывается cron."
 
 #. module: product_images
 #: model_terms:ir.ui.view,arch_db:product_images.product_fetch_image_wizard_view_form
@@ -233,11 +277,13 @@ msgstr "из которых будут обработаны."
 #: model_terms:ir.ui.view,arch_db:product_images.product_fetch_image_wizard_view_form
 msgid ""
 "products will not be\n"
-"                            processed because they either already have an image or their barcode\n"
+"                            processed because they either already have an "
+"image or their barcode\n"
 "                            number is not set."
 msgstr ""
 "продукты не будут\n"
-"                            потому что на них либо уже есть изображение, либо их штрихкод\n"
+"                            потому что на них либо уже есть изображение, "
+"либо их штрихкод\n"
 "                            номер штрихкода не установлен."
 
 #. module: product_images

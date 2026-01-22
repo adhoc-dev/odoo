@@ -1,14 +1,20 @@
 import { before, destroy, expect, getFixture, test } from "@odoo/hoot";
-import { manuallyDispatchProgrammaticEvent, queryOne, scroll } from "@odoo/hoot-dom";
+import {
+    manuallyDispatchProgrammaticEvent,
+    queryOne,
+    queryRect,
+    resize,
+    scroll,
+} from "@odoo/hoot-dom";
 import { Deferred, animationFrame } from "@odoo/hoot-mock";
-import { Component, xml, useRef, onMounted } from "@odoo/owl";
+import { Component, onMounted, useRef, xml } from "@odoo/owl";
 import { defineParams, mountWithCleanup } from "@web/../tests/web_test_helpers";
 import { usePosition } from "@web/core/position/position_hook";
 
 before(
     () =>
-        document.readyState !== "loading" ||
-        new Promise((resolve) => addEventListener("load", resolve, { once: true }))
+        document.readyState === "complete" ||
+        new Promise((resolve) => window.addEventListener("load", resolve, { once: true }))
 );
 
 function getTestComponent(popperOptions, styles = {}, target = false) {
@@ -487,7 +493,7 @@ test("iframe: popper is outside, target inside", async () => {
     // Scrolling inside the iframe should reposition the popover accordingly
     const previousPositionSolution = onPositionedArgs.solution;
     const scrollOffset = 100;
-    await scroll(queryOne("iframe").contentDocument.documentElement, { y: scrollOffset });
+    await scroll(":iframe html", { y: scrollOffset }, { scrollable: false });
     await animationFrame();
     expect.verifySteps(["bottom-middle"]);
     expect(previousPositionSolution.top).toBe(onPositionedArgs.solution.top + scrollOffset);
@@ -574,7 +580,7 @@ test("iframe: both popper and target inside", async () => {
     // Scrolling inside the iframe should reposition the popover accordingly
     const previousPositionSolution = onPositionedArgs.solution;
     const scrollOffset = 100;
-    await scroll(iframe.contentDocument.documentElement, { y: scrollOffset });
+    await scroll(":iframe html", { y: scrollOffset }, { scrollable: false });
     await animationFrame();
     expect.verifySteps(["bottom-middle"]);
     expect(previousPositionSolution.top).toBe(onPositionedArgs.solution.top + scrollOffset);
@@ -705,17 +711,26 @@ test("popper as child of another", async () => {
     }
 
     await mountWithCleanup(Parent);
-    const parentPopBox1 = queryOne("#popper").getBoundingClientRect();
-    const childPopBox1 = queryOne("#child .popper").getBoundingClientRect();
-    await scroll("#container", { y: 150 });
 
-    const parentPopBox2 = queryOne("#popper").getBoundingClientRect();
-    const childPopBox2 = queryOne("#child .popper").getBoundingClientRect();
+    // TODO: needed in mobile for initial positionning, probably a bug to investigate
+    await resize();
+    await animationFrame();
 
-    expect(parentPopBox1.top).toBe(parentPopBox2.top);
-    expect(childPopBox1.top).toBe(childPopBox2.top);
-    expect(parentPopBox2.left).toBe(parentPopBox1.left);
-    expect(childPopBox2.left).toBe(childPopBox1.left);
+    const container = queryOne("#container");
+    const parentRect = queryRect("#popper");
+    const childRect = queryRect("#child .popper");
+    const scrollTop = container.scrollHeight - container.offsetHeight;
+
+    await scroll("#container", { top: scrollTop });
+
+    expect("#popper").toHaveRect({
+        x: parentRect.x,
+        y: parentRect.y - scrollTop,
+    });
+    expect("#child .popper").toHaveRect({
+        x: childRect.x,
+        y: childRect.y - scrollTop,
+    });
 });
 
 test("batch update call", async () => {
@@ -914,7 +929,7 @@ test(
 );
 test(
     "reposition from top-start to top-start",
-    getRepositionTest("top-start", "top-start", "slimfit")
+    getRepositionTest("top-start", "top-start", "bottom")
 );
 test(
     "reposition from top-start to top-middle",
@@ -1003,7 +1018,9 @@ test(
 );
 test("reposition from top-end to top-start", getRepositionTest("top-end", "top-start", "left"));
 test("reposition from top-end to top-middle", getRepositionTest("top-end", "top-middle", "w125"));
-test("reposition from top-end to top-end", getRepositionTest("top-end", "top-end", "slimfit"));
+test(
+    "reposition from top-end to top-end",
+    getRepositionTest("top-end", "top-end", "bottom"));
 // -----------------------------------------------------------------------------
 test(
     "reposition from left-start to bottom-start",
@@ -1031,7 +1048,7 @@ test(
 );
 test(
     "reposition from left-start to left-start",
-    getRepositionTest("left-start", "left-start", "slimfit")
+    getRepositionTest("left-start", "left-start", "top")
 );
 test(
     "reposition from left-start to left-middle",
@@ -1141,11 +1158,13 @@ test(
     "reposition from left-end to left-middle",
     getRepositionTest("left-end", "left-middle", "h125")
 );
-test("reposition from left-end to left-end", getRepositionTest("left-end", "left-end", "slimfit"));
+test(
+    "reposition from left-end to left-end",
+    getRepositionTest("left-end", "left-end", "bottom"));
 // -----------------------------------------------------------------------------
 test(
     "reposition from bottom-start to bottom-start",
-    getRepositionTest("bottom-start", "bottom-start", "slimfit")
+    getRepositionTest("bottom-start", "bottom-start", "top")
 );
 test(
     "reposition from bottom-start to bottom-middle",
@@ -1251,7 +1270,7 @@ test(
 );
 test(
     "reposition from bottom-end to bottom-end",
-    getRepositionTest("bottom-end", "bottom-end", "slimfit")
+    getRepositionTest("bottom-end", "bottom-end", "top")
 );
 test(
     "reposition from bottom-end to right-start",
@@ -1301,7 +1320,7 @@ test(
 );
 test(
     "reposition from right-start to right-start",
-    getRepositionTest("right-start", "right-start", "slimfit")
+    getRepositionTest("right-start", "right-start", "top")
 );
 test(
     "reposition from right-start to right-middle",
@@ -1407,7 +1426,7 @@ test(
 );
 test(
     "reposition from right-end to right-end",
-    getRepositionTest("right-end", "right-end", "slimfit")
+    getRepositionTest("right-end", "right-end", "bottom")
 );
 test(
     "reposition from right-end to left-start",

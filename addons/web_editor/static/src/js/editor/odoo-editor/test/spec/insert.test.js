@@ -1,7 +1,14 @@
 /** @odoo-module */
 
 import { parseHTML, setCursorEnd } from '../../src/utils/utils.js';
-import { BasicEditor, testEditor, unformat, insertText, deleteBackward } from '../utils.js';
+import {
+    BasicEditor,
+    testEditor,
+    unformat,
+    insertText,
+    deleteBackward,
+    nextTick,
+} from '../utils.js';
 
 const span = text => {
     const span = document.createElement('span');
@@ -265,7 +272,12 @@ describe('insert HTML', () => {
                         <tr><td>gh</td><td>ij</td></tr>
                     </tbody></table>`,
                 ),
-                stepFunction: editor => editor.execCommand('insert', span('TEST')),
+                stepFunction: async editor => {
+                    // Table selection happens on selectionchange event which is
+                    // fired in the next tick.
+                    await nextTick();
+                    editor.execCommand('insert', span('TEST'));
+                },
                 contentAfter: `<p><span class="a">TEST</span>[]</p>`,
             });
         });
@@ -315,6 +327,24 @@ describe('insert HTML', () => {
                 ),
                 stepFunction: editor => editor.execCommand('insert', span('TEST')),
                 contentAfter: `<p><span class="a">TEST</span>[]</p>`,
+            });
+        });
+        it("Should properly insert two blocks content with selection in inline", async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: unformat(`
+                                    <p>
+                                        <span class="display-4"></span>
+                                        <span class="h4-fs">[a]</span>
+                                    </p>`),
+                stepFunction: (editor) =>
+                    editor.execCommand("insert", parseHTML(editor.document, `<p></p><p></p>`)),
+                contentAfter: unformat(`<p>
+                                <span class="display-4"></span>
+                              </p>
+                              <p><br>[]</p>
+                              <p>
+                                <span class="h4-fs">\u200b</span>
+                                </p>`),
             });
         });
     });

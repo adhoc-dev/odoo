@@ -7,6 +7,7 @@ registry.category("web_tour.tours").add("self_attribute_selector", {
     steps: () => [
         Utils.clickBtn("Order Now"),
         ProductPage.clickProduct("Desk Organizer"),
+        ProductPage.checkAttributePrice("Size", "S", "$ 0.25"),
         ...ProductPage.setupAttribute([
             { name: "Size", value: "M" },
             { name: "Fabric", value: "Leather" },
@@ -54,7 +55,6 @@ registry.category("web_tour.tours").add("self_multi_attribute_selector", {
 });
 
 registry.category("web_tour.tours").add("selfAlwaysAttributeVariants", {
-    test: true,
     steps: () => [
         Utils.clickBtn("Order Now"),
         ProductPage.clickProduct("Chair"),
@@ -72,5 +72,20 @@ registry.category("web_tour.tours").add("selfAlwaysAttributeVariants", {
         Utils.clickBtn("Pay"),
         Utils.clickBtn("Ok"),
         Utils.checkIsNoBtn("Order Now"),
+    ],
+});
+
+registry.category("web_tour.tours").add("self_order_product_info", {
+    steps: () => [
+        Utils.clickBtn("Order Now"),
+        {
+            trigger:
+                ".self_order_product_card:contains('Product Info Test') .product-information-tag",
+            run: "click",
+        },
+        {
+            trigger: '.modal-body p:contains("Nice Product")',
+            run: () => {},
+        },
     ],
 });

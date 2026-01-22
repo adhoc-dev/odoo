@@ -1,5 +1,6 @@
 import { MAIN_PLUGINS } from "./plugin_sets";
-import { removeClass } from "./utils/dom";
+import { createBaseContainer } from "./utils/base_container";
+import { fillShrunkPhrasingParent, removeClass } from "./utils/dom";
 import { isEmpty } from "./utils/dom_info";
 import { resourceSequenceSymbol, withSequence } from "./utils/resource";
 import { fixInvalidHTML, initElementForEdition } from "./utils/sanitize";
@@ -22,6 +23,7 @@ import { fixInvalidHTML, initElementForEdition } from "./utils/sanitize";
  * @typedef { Object } EditorConfig
  * @property { string } [content]
  * @property { boolean } [allowInlineAtRoot]
+ * @property { string } [baseContainer]
  * @property { PluginConstructor[] } [Plugins]
  * @property { boolean } [disableFloatingToolbar]
  * @property { string[] } [classList]
@@ -94,10 +96,11 @@ export class Editor {
         this.editable = editable;
         this.document = editable.ownerDocument;
         if (this.config.content) {
-            const content = fixInvalidHTML(this.config.content);
-            editable.innerHTML = content;
+            editable.innerHTML = fixInvalidHTML(this.config.content);
             if (isEmpty(editable)) {
-                editable.innerHTML = "<p><br></p>";
+                const baseContainer = createBaseContainer(this.config.baseContainer, this.document);
+                fillShrunkPhrasingParent(baseContainer);
+                editable.replaceChildren(baseContainer);
             }
         }
         this.preparePlugins();

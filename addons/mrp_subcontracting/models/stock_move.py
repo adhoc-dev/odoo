@@ -34,12 +34,12 @@ class StockMove(models.Model):
         for move in self:
             if not move.is_subcontract:
                 continue
-            if not move.picked or float_is_zero(move.quantity, precision_rounding=move.product_uom.rounding):
+            if float_is_zero(move.quantity, precision_rounding=move.product_uom.rounding):
                 continue
             productions = move._get_subcontract_production()
             if not productions or (productions[:1].consumption == 'strict' and not productions[:1]._has_tracked_component()):
                 continue
-            move.show_subcontracting_details_visible = True
+            move.show_subcontracting_details_visible = move.picked or any(p.subcontracting_has_been_recorded and p.state != 'done' for p in productions)
 
     def _compute_show_details_visible(self):
         """ If the move is subcontract and the components are tracked. Then the
@@ -57,6 +57,11 @@ class StockMove(models.Model):
                 continue
             move.show_details_visible = True
         return res
+
+    def _compute_is_quantity_done_editable(self):
+        not_editable = self.filtered(lambda m: m.is_subcontract and (m.move_orig_ids.production_id._has_tracked_component() or m.has_tracking != "none"))
+        not_editable.is_quantity_done_editable = False
+        super(StockMove, self - not_editable)._compute_is_quantity_done_editable()
 
     def _set_quantity_done(self, qty):
         to_set_moves = self
@@ -141,7 +146,7 @@ class StockMove(models.Model):
             for move in self:
                 if move.state in ('done', 'cancel') or not move.is_subcontract:
                     continue
-                move.move_orig_ids.production_id.filtered(lambda p: p.state not in ('done', 'cancel')).write({
+                move.move_orig_ids.production_id.with_context(from_subcontract=True).filtered(lambda p: p.state not in ('done', 'cancel')).write({
                     'date_start': move.date,
                     'date_finished': move.date,
                 })
@@ -216,9 +221,13 @@ class StockMove(models.Model):
             bom = move._get_subcontract_bom()
             if not bom:
                 continue
+            company = move.company_id
+            subcontracting_location = \
+                move.picking_id.partner_id.with_company(company).property_stock_subcontractor \
+                or company.subcontracting_location_id
             move.write({
                 'is_subcontract': True,
-                'location_id': move.picking_id.partner_id.with_company(move.company_id).property_stock_subcontractor.id
+                'location_id': subcontracting_location.id
             })
             move._action_assign()  # Re-reserve as the write on location_id will break the link
         res = super()._action_confirm(merge=merge, merge_into=merge_into)
@@ -297,6 +306,9 @@ class StockMove(models.Model):
             return True
         return should_bypass_reservation
 
+    def _get_available_move_lines(self, assigned_moves_ids, partially_available_moves_ids):
+        return super(StockMove, self.filtered(lambda m: not m.is_subcontract))._get_available_move_lines(assigned_moves_ids, partially_available_moves_ids)
+
     def _update_subcontract_order_qty(self, new_quantity):
         for move in self:
             quantity_to_remove = move.product_uom_qty - new_quantity
@@ -317,7 +329,12 @@ class StockMove(models.Model):
 
         # Cancel productions until reach new_quantity
         for production in (productions - wip_production):
-            if quantity_to_remove >= production.product_qty:
+            if float_compare(quantity_to_remove, production.product_qty, precision_rounding=production.product_uom_id.rounding) >= 0:
+                if len(productions + wip_production) == 1:
+                    production.qty_producing = 0
+                    production.subcontracting_has_been_recorded = False
+                    production._set_qty_producing()
+                    break  # Never cancel the last MO if there's still a subcontracting move
                 quantity_to_remove -= production.product_qty
                 production.with_context(skip_activity=True).action_cancel()
             else:

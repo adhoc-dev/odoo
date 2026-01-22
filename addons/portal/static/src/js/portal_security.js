@@ -32,13 +32,23 @@ publicWidget.registry.NewAPIKeyButton = publicWidget.Widget.extend({
             this.dialog
         );
 
+        const { duration } = await this.bindService("field").loadFields("res.users.apikeys.description", {
+            fieldNames: ["duration"],
+        });
+
         this.call("dialog", "add", InputConfirmationDialog, {
             title: _t("New API Key"),
-            body: renderToMarkup("portal.keydescription"),
+            body: renderToMarkup("portal.keydescription", {
+                // Remove `'Custom Date'` selection for portal user
+                duration_selection: duration.selection.filter((option) => option[0] !== "-1"),
+            }),
             confirmLabel: _t("Confirm"),
             confirm: async ({ inputEl }) => {
-                const description = inputEl.value;
-                const wizard_id = await this.orm.create("res.users.apikeys.description", [{ name: description }]);
+                const formData = Object.fromEntries(new FormData(inputEl.closest("form")));
+                const wizard_id = await this.orm.create("res.users.apikeys.description", [{
+                    name: formData['description'],
+                    duration: formData['duration']
+                }]);
                 const res = await handleCheckIdentity(
                     this.orm.call("res.users.apikeys.description", "make_key", [wizard_id]),
                     this.orm,
@@ -164,7 +174,7 @@ export async function handleCheckIdentity(wrapped, ormService, dialogService) {
                         return false;
                     }
                     let result;
-                    await ormService.write("res.users.identitycheck", [checkId], { password: inputEl.value });
+                    await ormService.write("res.users.identitycheck", [checkId], { password: inputEl.value, 'auth_method': 'password' });
                     try {
                         result = await ormService.call("res.users.identitycheck", "run_check", [checkId]);
                     } catch {

@@ -2,7 +2,6 @@ import { Reactive } from "@web/core/utils/reactive";
 import { ConnectionLostError, RPCError, rpc } from "@web/core/network/rpc";
 import { _t } from "@web/core/l10n/translation";
 import { formatCurrency as webFormatCurrency } from "@web/core/currency";
-import { attributeFormatter } from "@pos_self_order/app/utils";
 import { useState, markup } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
@@ -13,12 +12,20 @@ import { OrderReceipt } from "@point_of_sale/app/screens/receipt_screen/receipt/
 import { HWPrinter } from "@point_of_sale/app/printer/hw_printer";
 import { renderToElement } from "@web/core/utils/render";
 import { TimeoutPopup } from "@pos_self_order/app/components/timeout_popup/timeout_popup";
-import { getOnNotified, constructFullProductName, deduceUrl } from "@point_of_sale/utils";
+import {
+    constructFullProductName,
+    deduceUrl,
+    random5Chars,
+    computeProductPricelistCache,
+} from "@point_of_sale/utils";
 import { computeComboItems } from "@point_of_sale/app/models/utils/compute_combo_items";
 import {
     getTaxesAfterFiscalPosition,
     getTaxesValues,
 } from "@point_of_sale/app/models/utils/tax_utils";
+import { initLNA } from "@point_of_sale/app/utils/init_lna";
+
+const { DateTime } = luxon;
 
 export class SelfOrder extends Reactive {
     constructor(...args) {
@@ -59,7 +66,6 @@ export class SelfOrder extends Reactive {
         this.selectedOrderUuid = null;
         this.ordering = false;
         this.orderTakeAwayState = {};
-        this.orderSubscribtion = new Set();
         this.kitchenPrinters = [];
         this.productCategories = [];
         this.currentCategory = null;
@@ -74,12 +80,12 @@ export class SelfOrder extends Reactive {
             await this.initMobileData();
         }
 
-        this.onNotified = getOnNotified(this.bus, this.access_token);
-        this.onNotified("PRODUCT_CHANGED", (payload) => {
+        this.data.connectWebSocket("ORDER_STATE_CHANGED", () => this.getOrdersFromServer());
+        this.data.connectWebSocket("PRODUCT_CHANGED", (payload) => {
             this.models.loadData(payload);
         });
         if (this.config.self_ordering_mode === "kiosk") {
-            this.onNotified("STATUS", ({ status }) => {
+            this.data.connectWebSocket("STATUS", ({ status }) => {
                 if (status === "closed") {
                     this.pos_session = null;
                     this.ordering = false;
@@ -89,7 +95,7 @@ export class SelfOrder extends Reactive {
                     window.location.reload();
                 }
             });
-            this.onNotified("PAYMENT_STATUS", ({ payment_result, data }) => {
+            this.data.connectWebSocket("PAYMENT_STATUS", ({ payment_result, data }) => {
                 if (payment_result === "Success") {
                     this.models.loadData(data);
                     const order = this.models["pos.order"].find(
@@ -132,51 +138,19 @@ export class SelfOrder extends Reactive {
                 });
                 return;
             }
-            if (product.attributes.length) {
+            if (product.isConfigurable()) {
                 this.router.navigate("product", { id: product.id });
                 return;
             }
             this.addToCart(product, 1, "", {}, {});
             this.router.navigate("cart");
         });
-    }
 
-    subscribeToOrderChannel(order) {
-        if (!order.access_token || this.orderSubscribtion.has(order.access_token)) {
-            return;
+        if (this.config.self_ordering_mode === "kiosk") {
+            initLNA(this.notification);
+        } else {
+            odoo.use_lna = false;
         }
-
-        const handleMessage = (data) => {
-            let message = "";
-            this.models.loadData(data);
-            const oUpdated = data["pos.order"].find((o) => o.uuid === this.selectedOrderUuid);
-
-            if (["paid", "invoiced", "done"].includes(oUpdated?.state)) {
-                message = _t("Your order has been paid");
-            } else if (oUpdated?.state === "cancel") {
-                message = _t("Your order has been cancelled");
-            }
-
-            if (message) {
-                this.notification.add(message, {
-                    type: "success",
-                });
-            }
-
-            if (["paid", "invoiced", "done"].includes(oUpdated?.state)) {
-                this.selectedOrderUuid = null;
-                this.router.navigate("default");
-            }
-        };
-
-        this.orderSubscribtion.add(order.access_token);
-        const onNotified = getOnNotified(this.bus, order.access_token);
-        onNotified("ORDER_STATE_CHANGED", (data) => {
-            handleMessage(data);
-        });
-        onNotified("ORDER_CHANGED", (data) => {
-            handleMessage(data);
-        });
     }
 
     computeAvailableCategories() {
@@ -189,7 +163,18 @@ export class SelfOrder extends Reactive {
 
         this.categoryList = new Set(availableCategories);
         this.availableCategories = availableCategories.filter((c) => {
-            return now > c.hour_after && now < c.hour_until;
+            const hourStart = c.hour_after;
+            const hourUntil = c.hour_until;
+            if (hourStart === hourUntil || (hourStart === 0 && hourUntil === 24)) {
+                // if equal, it means open the whole day
+                return true;
+            } else if (hourStart < hourUntil) {
+                // in this case, if current time is in between, then shop is open
+                return now >= hourStart && now <= hourUntil;
+            } else {
+                // in this case, if current time is in between, then shop is closed
+                return !(now >= hourStart && now <= hourUntil);
+            }
         });
         this.currentCategory = this.productCategories[0] || null;
     }
@@ -218,6 +203,7 @@ export class SelfOrder extends Reactive {
             note: customer_note || "",
             price_unit: product.lst_price,
             price_extra: 0,
+            price_type: "original",
         };
 
         if (Object.entries(selectedValues).length > 0) {
@@ -269,7 +255,8 @@ export class SelfOrder extends Reactive {
                 comboValues,
                 this.currentOrder.pricelist_id,
                 this.models["decimal.precision"].getAll(),
-                this.models["product.template.attribute.value"].getAllBy("id")
+                this.models["product.template.attribute.value"].getAllBy("id"),
+                this.currency
             );
 
             values.price_unit = 0;
@@ -285,16 +272,14 @@ export class SelfOrder extends Reactive {
                     combo_item_id: comboItem.combo_item_id,
                     price_unit: comboItem.price_unit,
                     order_id: this.currentOrder,
-                    qty: 1,
+                    qty: values.qty,
                     attribute_value_ids: comboItem.attribute_value_ids?.map((attr) => [
                         "link",
                         attr,
                     ]),
                     custom_attribute_value_ids: Object.entries(
                         comboItem.attribute_custom_values
-                    ).map(([id, cus]) => {
-                        return ["create", cus];
-                    }),
+                    ).map(([id, cus]) => ["create", cus]),
                 },
             ]);
         }
@@ -322,7 +307,7 @@ export class SelfOrder extends Reactive {
 
         if (lineToMerge) {
             lineToMerge.setDirty();
-            lineToMerge.qty += newLine.qty;
+            lineToMerge.set_quantity(lineToMerge.qty + newLine.qty);
             newLine.delete();
         } else {
             newLine.setDirty();
@@ -352,11 +337,8 @@ export class SelfOrder extends Reactive {
         const paymentMethods = this.filterPaymentMethods(
             this.models["pos.payment.method"].getAll()
         ); // Stripe, Adyen, Online
-        const order = await this.sendDraftOrderToServer();
 
-        if (!order) {
-            return;
-        }
+        let order = this.currentOrder;
 
         // Stand number page will recall this function after the stand number is set
         if (
@@ -369,9 +351,15 @@ export class SelfOrder extends Reactive {
             return;
         }
 
+        order = await this.sendDraftOrderToServer(paymentMethods.length > 0);
+
+        if (!order) {
+            return;
+        }
+
         // When no payment methods redirect to confirmation page
         // the client will be able to pay at counter
-        if (paymentMethods.length === 0) {
+        if (paymentMethods.length === 0 || order.amount_total === 0) {
             let screenMode = "pay";
 
             if (Object.keys(order.changes).length > 0) {
@@ -385,7 +373,7 @@ export class SelfOrder extends Reactive {
             // if the order is already saved on the server, we redirect him to the payment page
             // In each mode, we redirect the customer to the payment page directly
             if (payAfter === "meal" && Object.keys(order.changes).length > 0) {
-                await this.sendDraftOrderToServer();
+                await this.sendDraftOrderToServer(paymentMethods.length > 0);
                 this.confirmationPage("order", device, order.access_token);
             } else {
                 this.router.navigate("payment");
@@ -414,17 +402,19 @@ export class SelfOrder extends Reactive {
             return existingOrder;
         }
 
-        const fiscalPosition = this.models["account.fiscal.position"].find((fp) => {
-            return fp.id === this.config.default_fiscal_position_id?.id;
-        });
+        const fiscalPosition = this.models["account.fiscal.position"].find(
+            (fp) => fp.id === this.config.default_fiscal_position_id?.id
+        );
 
         const newOrder = this.models["pos.order"].create({
             company_id: this.company,
+            ticket_code: random5Chars(),
             session_id: this.session,
             config_id: this.config,
             fiscal_position_id: fiscalPosition,
         });
         this.selectedOrderUuid = newOrder.uuid;
+        newOrder.set_pricelist(this.config.pricelist_id);
 
         return this.models["pos.order"].getBy("uuid", this.selectedOrderUuid);
     }
@@ -445,7 +435,11 @@ export class SelfOrder extends Reactive {
             const productTmplIds = new Set();
             this.productByCategIds[category_id] = this.productByCategIds[category_id].filter(
                 (p) => {
-                    if (!isSpecialProduct(p) && !productTmplIds.has(p.raw.product_tmpl_id)) {
+                    if (
+                        !isSpecialProduct(p) &&
+                        p.self_order_available &&
+                        !productTmplIds.has(p.raw.product_tmpl_id)
+                    ) {
                         productTmplIds.add(p.raw.product_tmpl_id);
                         p.available_in_pos = false;
                         return true;
@@ -454,6 +448,9 @@ export class SelfOrder extends Reactive {
                 }
             );
         }
+
+        computeProductPricelistCache(this);
+
         const productWoCat = this.models["product.product"].filter(
             (p) => p.pos_categ_ids.length === 0 && !isSpecialProduct(p)
         );
@@ -537,35 +534,6 @@ export class SelfOrder extends Reactive {
         }
     }
 
-    saveOrdersAccessTokens() {
-        if (this.self_ordering_mode === "kiosk") {
-            return new Set();
-        }
-
-        const localStorageKey = `self_order_${this.access_token}`;
-        const orderAccessToken = localStorage.getItem(localStorageKey);
-        const orderAccessTokenSet = new Set();
-
-        if (typeof orderAccessToken === "string") {
-            const oldAccessToken = JSON.parse(orderAccessToken);
-
-            if (oldAccessToken.length) {
-                for (const at of oldAccessToken) {
-                    if (at) {
-                        orderAccessTokenSet.add(at);
-                    }
-                }
-            }
-        }
-
-        this.models["pos.order"]
-            .filter((o) => o.access_token && o.finalized)
-            .forEach((o) => orderAccessTokenSet.add(o.access_token));
-
-        localStorage.setItem(localStorageKey, JSON.stringify([...orderAccessTokenSet]));
-        return orderAccessTokenSet;
-    }
-
     initKioskData() {
         if (this.session && this.access_token) {
             this.ordering = true;
@@ -587,6 +555,11 @@ export class SelfOrder extends Reactive {
                 }
             }, 1 * 1000 * 60);
         });
+    }
+
+    resetTableIdentifier() {
+        this.router.deleteTableIdentifier();
+        this.currentTable = null;
     }
 
     async initMobileData() {
@@ -655,7 +628,7 @@ export class SelfOrder extends Reactive {
         }
     }
 
-    async sendDraftOrderToServer() {
+    async sendDraftOrderToServer(to_pay_on_kiosk = false) {
         if (
             Object.keys(this.currentOrder.changes).length === 0 ||
             this.currentOrder.lines.length === 0
@@ -667,16 +640,22 @@ export class SelfOrder extends Reactive {
             const uuid = this.currentOrder.uuid;
             this.currentOrder.recomputeOrderData();
             const data = await rpc(
-                `/pos-self-order/process-order/${this.config.self_ordering_mode}`,
+                `/pos-self-order/process-order-args/${this.config.self_ordering_mode}`,
                 {
                     order: this.currentOrder.serialize({ orm: true }),
                     access_token: this.access_token,
                     table_identifier: this.currentOrder?.table_id?.identifier || false,
+                    context: {
+                        to_pay_on_kiosk,
+                    },
                 }
             );
-            this.models.loadData(data);
-            for (const order of data["pos.order"]) {
-                this.subscribeToOrderChannel(order);
+            const result = this.models.loadData(data);
+            if (result["pos.order"][0].uuid !== this.selectedOrderUuid) {
+                this.orderTakeAwayState[result["pos.order"][0].uuid] =
+                    this.orderTakeAwayState[this.selectedOrderUuid];
+                delete this.orderTakeAwayState[this.selectedOrderUuid];
+                this.currentOrder.delete();
             }
 
             if (this.config.self_ordering_pay_after === "each") {
@@ -684,8 +663,10 @@ export class SelfOrder extends Reactive {
             }
 
             this.currentOrder.recomputeChanges();
-            this.saveOrdersAccessTokens();
-            return this.models["pos.order"].getBy("uuid", uuid);
+            const originalOrder = this.models["pos.order"].getBy("uuid", uuid);
+            return this.config.self_ordering_mode === "mobile" && originalOrder?.amount_total === 0
+                ? originalOrder
+                : this.currentOrder;
         } catch (error) {
             const order = this.models["pos.order"].getBy("uuid", this.selectedOrderUuid);
             this.handleErrorNotification(error, [order.access_token]);
@@ -693,23 +674,65 @@ export class SelfOrder extends Reactive {
         }
     }
 
-    async getOrdersFromServer() {
-        const localAccessToken = [...this.saveOrdersAccessTokens()];
-        const accessTokens = this.models["pos.order"]
-            .map((order) => order.access_token)
-            .filter(Boolean);
+    async getOrdersFromServer(tokens = []) {
+        const tableIdentifier = this.router.getTableIdentifier([]);
+        const dbAccessToken = this.models["pos.order"]
+            .filter((o) => o.state === "draft" && typeof o.id === "number")
+            .map((order) => {
+                const dateTime = DateTime.fromSQL(order.write_date).toUTC();
+                const newDateTime = dateTime.plus({ seconds: 1 });
+                return {
+                    access_token: order.access_token,
+                    write_date: newDateTime.toFormat("yyyy-MM-dd HH:mm:ss", {
+                        numberingSystem: "latn",
+                    }),
+                };
+            })
+            .filter((order) => order.access_token);
 
-        if (accessTokens.length === 0 && localAccessToken.length === 0) {
+        // Token given in argument are probably not in the local database
+        // so write_date is set to 1970-01-01 00:00:00
+        const argTokens = tokens.map((token) => ({
+            access_token: token,
+            write_date: "1970-01-01 00:00:00",
+        }));
+
+        const accessTokens = [...dbAccessToken, ...argTokens];
+        if (Object.keys(accessTokens).length === 0 && !tableIdentifier) {
             return;
         }
 
         try {
             const data = await rpc(`/pos-self-order/get-orders/`, {
                 access_token: this.access_token,
-                order_access_tokens: [...accessTokens, ...localAccessToken],
+                order_access_tokens: accessTokens,
+                table_identifier: tableIdentifier,
             });
-            this.models.loadData(data);
-            this.selectedOrderUuid = null;
+
+            if (Object.keys(data).length === 0) {
+                return;
+            }
+
+            const result = this.models.loadData(data, [], false, true);
+            this.data.syncDataWithIndexedDB(result);
+            const openOrder = result["pos.order"].find((o) => o.state === "draft");
+            if (openOrder) {
+                this.selectedOrderUuid = openOrder.uuid;
+
+                // Remove all other open orders in draft and add orderline in the current order
+                const lineCmd = [];
+                for (const order of this.models["pos.order"].filter((o) => o.state === "draft")) {
+                    if (order.uuid !== openOrder.uuid) {
+                        lineCmd.push(...order.lines);
+                        order.delete();
+                    }
+                }
+
+                openOrder.update({
+                    lines: [["link", lineCmd]],
+                });
+                openOrder.recomputeChanges();
+            }
         } catch (error) {
             this.handleErrorNotification(
                 error,
@@ -746,10 +769,6 @@ export class SelfOrder extends Reactive {
         this.router.navigate("default");
     }
 
-    updateOrderFromServer(order) {
-        this.currentOrder.updateDataFromServer(order);
-    }
-
     isOrder() {
         if (!this.currentOrder || !this.currentOrder.lines.length) {
             this.router.navigate("default");
@@ -769,6 +788,9 @@ export class SelfOrder extends Reactive {
             } else if (error.data.name === "werkzeug.exceptions.NotFound") {
                 message = _t("Orders not found on server");
                 cleanOrders = true;
+            } else if (error?.data?.name === "odoo.exceptions.UserError") {
+                message = error.data.message;
+                this.resetTableIdentifier();
             }
         } else if (error instanceof ConnectionLostError) {
             message = _t("Connection lost, please try again later");
@@ -828,6 +850,16 @@ export class SelfOrder extends Reactive {
         return result;
     }
 
+    verifyPriceLoading() {
+        if (this.priceLoading) {
+            this.notification.add(_t("Please wait until the price is loaded"), {
+                type: "danger",
+            });
+            return false;
+        }
+        return true;
+    }
+
     getProductDisplayPrice(product) {
         const pricelist = this.config.pricelist_id;
         const price = product.get_price(pricelist, 1, 0, false, product.list_price);
@@ -859,20 +891,6 @@ export class SelfOrder extends Reactive {
     }
     getLinePrice(line) {
         return this.config.iface_tax_included ? line.price_subtotal_incl : line.price_subtotal;
-    }
-    getSelectedAttributes(line) {
-        const attributeValues = line.attribute_value_ids;
-        const customAttr = line.custom_attribute_value_ids;
-        return attributeFormatter(
-            this.models["product.attribute"].getAllBy("id"),
-            attributeValues,
-            customAttr
-        );
-    }
-    getFullProductName(line) {
-        const attrs = this.getSelectedAttributes(line);
-        const attrsStr = " (" + attrs.map((a) => a.value).join(", ") + ")";
-        return line.full_product_name + (attrs.length ? attrsStr : "");
     }
     showDownloadButton(order) {
         return this.config.self_ordering_mode === "mobile" && order.state === "paid";

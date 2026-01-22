@@ -334,7 +334,7 @@ class CRMRevealRule(models.Model):
                 views.flush_recordset()
 
         if result.get('credit_error'):
-            self.env['crm.iap.lead.helpers'].notify_no_more_credit('reveal', self._name, 'reveal.already_notified')
+            self.env['crm.iap.lead.helpers']._notify_no_more_credit('reveal', self._name, 'reveal.already_notified')
             return False
         else:
             # avoid loops if IAP return result is broken: otherwise some IP may create loops
@@ -362,7 +362,7 @@ class CRMRevealRule(models.Model):
             return False
         if not result['clearbit_id']:
             return False
-        already_created_lead = self.env['crm.lead'].search([('reveal_id', '=', result['clearbit_id'])])
+        already_created_lead = self.env['crm.lead'].search_count([('reveal_id', '=', result['clearbit_id'])], limit=1)
         if already_created_lead:
             _logger.info('Existing lead for this clearbit_id [%s]', result['clearbit_id'])
             # Does not create a lead if the reveal_id is already known

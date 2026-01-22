@@ -7,33 +7,46 @@ import { setupEditor, testEditor } from "./_helpers/editor";
 import { cleanLinkArtifacts, unformat } from "./_helpers/format";
 import { getContent, setSelection } from "./_helpers/selection";
 import { pasteHtml, pasteOdooEditorHtml, pasteText, undo } from "./_helpers/user_actions";
+import { createBaseContainer } from "@html_editor/utils/base_container";
+import { expectElementCount } from "./_helpers/ui_expectations";
 
 function isInline(node) {
     return ["I", "B", "U", "S", "EM", "STRONG", "IMG", "BR", "A", "FONT"].includes(node);
 }
 
 function toIgnore(node) {
-    return ["TABLE", "THEAD", "TH", "TBODY", "TR", "TD", "IMG", "BR", "LI", ".fa"].includes(node);
+    return ["TABLE", "THEAD", "TH", "TBODY", "TR", "TD", "IMG", "BR", "LI", ".FA"].includes(node);
 }
 
 describe("Html Paste cleaning - whitelist", () => {
-    test("should keep whitelisted Tags tag", async () => {
-        for (const node of CLIPBOARD_WHITELISTS.nodes) {
-            if (!toIgnore(node)) {
-                const html = isInline(node)
-                    ? `a<${node.toLowerCase()}>b</${node.toLowerCase()}>c`
-                    : `a</p><${node.toLowerCase()}>b</${node.toLowerCase()}><p>c`;
+    const baseContainer = createBaseContainer("DIV");
+    const baseContainerString = `${baseContainer.nodeName}`;
+    const agg = [baseContainerString];
+    const baseContainerClass = baseContainer.className;
+    if (baseContainerClass) {
+        agg.push(`class="${baseContainerClass}"`);
+    }
+    const baseContainerNode = agg.join(" ");
+    for (const node of [...CLIPBOARD_WHITELISTS.nodes, baseContainerNode]) {
+        const tagDescription = node.toLowerCase();
+        const tagName = node.split(" ")[0].toLowerCase();
+        if (!toIgnore(tagName.toUpperCase())) {
+            test(`should keep whitelisted ${node} tag`, async () => {
+                const html = isInline(tagName.toUpperCase())
+                    ? `a<${tagName}>b</${tagName}>c`
+                    : `a</p><${tagName}>b</${tagName}><p>c`;
 
                 await testEditor({
                     contentBefore: "<p>123[]4</p>",
                     stepFunction: async (editor) => {
-                        pasteHtml(editor, `a<${node.toLowerCase()}>b</${node.toLowerCase()}>c`);
+                        pasteHtml(editor, `a<${tagDescription}>b</${tagName}>c`);
                     },
                     contentAfter: "<p>123" + html + "[]4</p>",
+                    config: { baseContainer: "DIV" },
                 });
-            }
+            });
         }
-    });
+    }
 
     test("should keep whitelisted Tags tag (2)", async () => {
         await testEditor({
@@ -55,7 +68,39 @@ describe("Html Paste cleaning - whitelist", () => {
                 );
             },
             contentAfter:
-                '<p>123a</p><table class="table table-bordered"><thead><tr><th>h</th></tr></thead><tbody><tr><td>b</td></tr></tbody></table><p>d[]</p>',
+                '<p>123a</p><table class="table table-bordered o_table"><tbody><tr><td>h</td></tr><tr><td>b</td></tr></tbody></table><p>d[]</p>',
+        });
+    });
+
+    test("should insert a base container inside empty <td> on paste", async () => {
+        await testEditor({
+            contentBefore: `
+                <p>[]<br></p>
+            `,
+            stepFunction: async (editor) => {
+                pasteHtml(
+                    editor,
+                    unformat(`
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    `)
+                );
+            },
+            contentAfter: unformat(`
+                <table class="table table-bordered o_table">
+                    <tbody>
+                        <tr>
+                            <td><p><br></p></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>[]<br></p>
+            `),
         });
     });
 
@@ -163,7 +208,7 @@ describe("Simple text", () => {
             });
         });
 
-        test("should paste a text in a p", async () => {
+        test("should paste a text in a p (1)", async () => {
             await testEditor({
                 contentBefore: "<p>ab[]cd</p>",
                 stepFunction: async (editor) => {
@@ -171,6 +216,9 @@ describe("Simple text", () => {
                 },
                 contentAfter: "<p>abx[]cd</p>",
             });
+        });
+
+        test("should paste a text in a p (2)", async () => {
             await testEditor({
                 contentBefore: "<p>ab[]cd</p>",
                 stepFunction: async (editor) => {
@@ -178,6 +226,9 @@ describe("Simple text", () => {
                 },
                 contentAfter: "<p>abxyz 123[]cd</p>",
             });
+        });
+
+        test("should paste a text in a p", async () => {
             await testEditor({
                 contentBefore: "<p>ab[]cd</p>",
                 stepFunction: async (editor) => {
@@ -205,11 +256,7 @@ describe("Simple text", () => {
                 stepFunction: async (editor) => {
                     pasteText(editor, "a\nb\nc\nd");
                 },
-                contentAfter:
-                    '<p style="margin-bottom: 0px;">a</p>' +
-                    '<p style="margin-bottom: 0px;">b</p>' +
-                    '<p style="margin-bottom: 0px;">c</p>' +
-                    "<p>d[]</p>",
+                contentAfter: "<div>a</div>" + "<div>b</div>" + "<div>c</div>" + "<p>d[]</p>",
             });
         });
 
@@ -220,31 +267,27 @@ describe("Simple text", () => {
                 stepFunction: async (editor) => {
                     pasteText(editor, "a\r\nb\r\nc\r\nd");
                 },
-                contentAfter:
-                    '<p style="margin-bottom: 0px;">a</p>' +
-                    '<p style="margin-bottom: 0px;">b</p>' +
-                    '<p style="margin-bottom: 0px;">c</p>' +
-                    "<p>d[]</p>",
+                contentAfter: "<div>a</div>" + "<div>b</div>" + "<div>c</div>" + "<p>d[]</p>",
             });
         });
 
         test("should paste text and understand \\n newlines within UNBREAKABLE node", async () => {
             await testEditor({
-                contentBefore: "<div>[]<br></div>",
+                contentBefore: `<div class="oe_unbreakable">[]<br></div>`,
                 stepFunction: async (editor) => {
                     pasteText(editor, "a\nb\nc\nd");
                 },
-                contentAfter: "<div>a<br>b<br>c<br>d[]</div>",
+                contentAfter: `<div class="oe_unbreakable">a<br>b<br>c<br>d[]</div>`,
             });
         });
 
         test("should paste text and understand \\n newlines within UNBREAKABLE node(2)", async () => {
             await testEditor({
-                contentBefore: '<div><span style="font-size: 9px;">a[]</span></div>',
+                contentBefore: `<div class="oe_unbreakable"><span style="font-size: 9px;">a[]</span></div>`,
                 stepFunction: async (editor) => {
                     pasteText(editor, "b\nc\nd");
                 },
-                contentAfter: '<div><span style="font-size: 9px;">ab<br>c<br>d[]</span></div>',
+                contentAfter: `<div class="oe_unbreakable"><span style="font-size: 9px;">ab<br>c<br>d[]</span></div>`,
             });
         });
 
@@ -257,10 +300,24 @@ describe("Simple text", () => {
                 contentAfter: "<pre>a<br>b<br>c[]</pre>",
             });
         });
+
+        test("should preserve spaces and not add nbsp when pasting plain text inside <pre>", async () => {
+            await testEditor({
+                contentBefore: "<pre>[]<br></pre>",
+                stepFunction: async (editor) => {
+                    pasteText(
+                        editor,
+                        "function example() {\n    console.log('Hello,    world!');\n    // Indented    comment\n}"
+                    );
+                },
+                contentAfter:
+                    "<pre>function example() {<br>    console.log('Hello,    world!');<br>    // Indented    comment<br>}[]</pre>",
+            });
+        });
     });
 
     describe("range not collapsed", () => {
-        test("should paste a text in a p", async () => {
+        test("should paste a text in a p (1)", async () => {
             await testEditor({
                 contentBefore: "<p>a[bc]d</p>",
                 stepFunction: async (editor) => {
@@ -268,6 +325,9 @@ describe("Simple text", () => {
                 },
                 contentAfter: "<p>ax[]d</p>",
             });
+        });
+
+        test("should paste a text in a p (2)", async () => {
             await testEditor({
                 contentBefore: "<p>a[bc]d</p>",
                 stepFunction: async (editor) => {
@@ -275,6 +335,9 @@ describe("Simple text", () => {
                 },
                 contentAfter: "<p>axyz 123[]d</p>",
             });
+        });
+
+        test("should paste a text in a p (3)", async () => {
             await testEditor({
                 contentBefore: "<p>a[bc]d</p>",
                 stepFunction: async (editor) => {
@@ -294,7 +357,7 @@ describe("Simple text", () => {
             });
         });
 
-        test("should paste a text when selection across two span", async () => {
+        test("should paste a text when selection across two span (1)", async () => {
             await testEditor({
                 contentBefore: '<p>a<span class="a">b[c</span><span class="a">d]e</span>f</p>',
                 stepFunction: async (editor) => {
@@ -302,6 +365,9 @@ describe("Simple text", () => {
                 },
                 contentAfter: '<p>a<span class="a">bx[]e</span>f</p>',
             });
+        });
+
+        test("should paste a text when selection across two span (2)", async () => {
             await testEditor({
                 contentBefore: '<p>a<span class="a">b[c</span>- -<span class="a">d]e</span>f</p>',
                 stepFunction: async (editor) => {
@@ -319,6 +385,9 @@ describe("Simple text", () => {
                 },
                 contentAfter: "<div>a<p>bx[]e</p>f</div>",
             });
+        });
+
+        test("should paste a text when selection across two p (2)", async () => {
             await testEditor({
                 contentBefore: "<div>a<p>b[c</p>- -<p>d]e</p>f</div>",
                 stepFunction: async (editor) => {
@@ -336,6 +405,9 @@ describe("Simple text", () => {
                 },
                 contentAfter: '<div>ab<span class="a">cx[]</span>f</div>',
             });
+        });
+
+        test("should paste a text when selection leave a span (2)", async () => {
             await testEditor({
                 contentBefore: '<div>a[b<span class="a">c]d</span>ef</div>',
                 stepFunction: async (editor) => {
@@ -353,12 +425,25 @@ describe("Simple text", () => {
                 },
                 contentAfter: '<div>1a<p>bx[]<span class="a">e</span>f</p></div>',
             });
+        });
+
+        test("should paste a text when selection across two element (2)", async () => {
             await testEditor({
                 contentBefore: '<div>2a<span class="a">b[c</span><p>d]e</p>f</div>',
                 stepFunction: async (editor) => {
                     pasteText(editor, "x");
                 },
                 contentAfter: '<div>2a<span class="a">bx[]</span>e<br>f</div>',
+            });
+        });
+
+        test("should paste a text when content contains line breaks", async () => {
+            await testEditor({
+                contentBefore: "<div>[abc]</div>",
+                stepFunction: async (editor) => {
+                    pasteText(editor, "ab\ncd");
+                },
+                contentAfter: "<div>ab</div><div>cd[]</div>",
             });
         });
     });
@@ -421,7 +506,7 @@ describe("Simple html span", () => {
             });
         });
 
-        test("should paste a text when selection across two span", async () => {
+        test("should paste a text when selection across two span (1)", async () => {
             await testEditor({
                 contentBefore: '<p>a<span class="a">b[c</span><span class="a">d]e</span>f</p>',
                 stepFunction: async (editor) => {
@@ -429,6 +514,9 @@ describe("Simple html span", () => {
                 },
                 contentAfter: '<p>a<span class="a">bx[]e</span>f</p>',
             });
+        });
+
+        test("should paste a text when selection across two span (2)", async () => {
             await testEditor({
                 contentBefore: '<p>a<span class="a">b[c</span>- -<span class="a">d]e</span>f</p>',
                 stepFunction: async (editor) => {
@@ -438,7 +526,7 @@ describe("Simple html span", () => {
             });
         });
 
-        test("should paste a text when selection across two p (2)", async () => {
+        test("should paste a text when selection across two p (1)", async () => {
             await testEditor({
                 contentBefore: "<div>1a<p>b[c</p><p>d]e</p>f</div>",
                 stepFunction: async (editor) => {
@@ -446,6 +534,9 @@ describe("Simple html span", () => {
                 },
                 contentAfter: "<div>1a<p>bx[]e</p>f</div>",
             });
+        });
+
+        test("should paste a text when selection across two p (2)", async () => {
             await testEditor({
                 contentBefore: "<div>2a<p>b[c</p>- -<p>d]e</p>f</div>",
                 stepFunction: async (editor) => {
@@ -455,7 +546,7 @@ describe("Simple html span", () => {
             });
         });
 
-        test("should paste a text when selection leave a span (2)", async () => {
+        test("should paste a text when selection leave a span (1)", async () => {
             await testEditor({
                 contentBefore: '<div>ab<span class="a">c[d</span>e]f</div>',
                 stepFunction: async (editor) => {
@@ -463,6 +554,9 @@ describe("Simple html span", () => {
                 },
                 contentAfter: '<div>ab<span class="a">cx[]</span>f</div>',
             });
+        });
+
+        test("should paste a text when selection leave a span (2)", async () => {
             await testEditor({
                 contentBefore: '<div>a[b<span class="a">c]d</span>ef</div>',
                 stepFunction: async (editor) => {
@@ -472,7 +566,7 @@ describe("Simple html span", () => {
             });
         });
 
-        test("should paste a text when selection across two element (2)", async () => {
+        test("should paste a text when selection across two element (1)", async () => {
             await testEditor({
                 contentBefore: '<div>1a<p>b[c</p><span class="a">d]e</span>f</div>',
                 stepFunction: async (editor) => {
@@ -480,6 +574,9 @@ describe("Simple html span", () => {
                 },
                 contentAfter: '<div>1a<p>bx[]<span class="a">e</span>f</p></div>',
             });
+        });
+
+        test("should paste a text when selection across two element (2)", async () => {
             await testEditor({
                 contentBefore: '<div>2a<span class="a">b[c</span><p>d]e</p>f</div>',
                 stepFunction: async (editor) => {
@@ -487,6 +584,9 @@ describe("Simple html span", () => {
                 },
                 contentAfter: '<div>2a<span class="a">bx[]</span>e<br>f</div>',
             });
+        });
+
+        test("should paste a text when selection across two element (3)", async () => {
             await testEditor({
                 contentBefore: "<div>3a<p>b[c</p><p>d]e</p>f</div>",
                 stepFunction: async (editor) => {
@@ -554,7 +654,7 @@ describe("Simple html p", () => {
             });
         });
 
-        test("should paste a text when selection across two span", async () => {
+        test("should paste a text when selection across two span (1)", async () => {
             await testEditor({
                 contentBefore: '<p>a<span class="a">b[c</span><span class="a">d]e</span>f</p>',
                 stepFunction: async (editor) => {
@@ -562,6 +662,9 @@ describe("Simple html p", () => {
                 },
                 contentAfter: '<p>a<span class="a">bx[]e</span>f</p>',
             });
+        });
+
+        test("should paste a text when selection across two span (2)", async () => {
             await testEditor({
                 contentBefore: '<p>a<span class="a">b[c</span>- -<span class="a">d]e</span>f</p>',
                 stepFunction: async (editor) => {
@@ -571,7 +674,7 @@ describe("Simple html p", () => {
             });
         });
 
-        test("should paste a text when selection across two p (3)", async () => {
+        test("should paste a text when selection across two p (1)", async () => {
             await testEditor({
                 contentBefore: "<div>1a<p>b[c</p><p>d]e</p>f</div>",
                 stepFunction: async (editor) => {
@@ -579,6 +682,9 @@ describe("Simple html p", () => {
                 },
                 contentAfter: "<div>1a<p>bx[]e</p>f</div>",
             });
+        });
+
+        test("should paste a text when selection across two p (2)", async () => {
             await testEditor({
                 contentBefore: "<div>2a<p>b[c</p>- -<p>d]e</p>f</div>",
                 stepFunction: async (editor) => {
@@ -588,7 +694,7 @@ describe("Simple html p", () => {
             });
         });
 
-        test("should paste a text when selection leave a span (3)", async () => {
+        test("should paste a text when selection leave a span (1)", async () => {
             await testEditor({
                 contentBefore: '<div>ab<span class="a">c[d</span>e]f</div>',
                 stepFunction: async (editor) => {
@@ -596,6 +702,9 @@ describe("Simple html p", () => {
                 },
                 contentAfter: '<div>ab<span class="a">cx[]</span>f</div>',
             });
+        });
+
+        test("should paste a text when selection leave a span (2)", async () => {
             await testEditor({
                 contentBefore: '<div>a[b<span class="a">c]d</span>ef</div>',
                 stepFunction: async (editor) => {
@@ -605,7 +714,7 @@ describe("Simple html p", () => {
             });
         });
 
-        test("should paste a text when selection across two element (3)", async () => {
+        test("should paste a text when selection across two element (1)", async () => {
             await testEditor({
                 contentBefore: '<div>1a<p>b[c</p><span class="a">d]e</span>f</div>',
                 stepFunction: async (editor) => {
@@ -613,6 +722,9 @@ describe("Simple html p", () => {
                 },
                 contentAfter: '<div>1a<p>bx[]<span class="a">e</span>f</p></div>',
             });
+        });
+
+        test("should paste a text when selection across two element (2)", async () => {
             await testEditor({
                 contentBefore: '<div>2a<span class="a">b[c</span><p>d]e</p>f</div>',
                 stepFunction: async (editor) => {
@@ -620,6 +732,9 @@ describe("Simple html p", () => {
                 },
                 contentAfter: '<div>2a<span class="a">bx[]</span>e<br>f</div>',
             });
+        });
+
+        test("should paste a text when selection across two element (3)", async () => {
             await testEditor({
                 contentBefore: "<div>3a<p>b[c</p><p>d]e</p>f</div>",
                 stepFunction: async (editor) => {
@@ -693,7 +808,7 @@ describe("Simple html elements containing <br>", () => {
             });
         });
 
-        test("should split p with <br> into seperate p elements", async () => {
+        test("should split p with <br> into seperate p elements (1)", async () => {
             await testEditor({
                 contentBefore: "<p>[]<br></p>",
                 stepFunction: async (editor) => {
@@ -701,6 +816,9 @@ describe("Simple html elements containing <br>", () => {
                 },
                 contentAfter: "<p>abc</p><p>def</p><p>ghi</p><p>jkl[]</p>",
             });
+        });
+
+        test("should split p with <br> into seperate p elements (2)", async () => {
             await testEditor({
                 contentBefore: "<p>[]<br></p>",
                 stepFunction: async (editor) => {
@@ -708,6 +826,9 @@ describe("Simple html elements containing <br>", () => {
                 },
                 contentAfter: "<p>abc</p><p>def</p><p>ghi</p><p>jkl</p><p>mno[]</p>",
             });
+        });
+
+        test("should split p with <br> into seperate p elements (3)", async () => {
             await testEditor({
                 contentBefore: "<p>[]<br></p>",
                 stepFunction: async (editor) => {
@@ -715,6 +836,9 @@ describe("Simple html elements containing <br>", () => {
                 },
                 contentAfter: "<p>abc</p><p>def</p><p>ghi</p><p>jkl</p><p><br></p><p>mno[]</p>",
             });
+        });
+
+        test("should split p with <br> into seperate p elements (4)", async () => {
             await testEditor({
                 contentBefore: "<p>[]<br></p>",
                 stepFunction: async (editor) => {
@@ -744,7 +868,18 @@ describe("Simple html elements containing <br>", () => {
                 stepFunction: async (editor) => {
                     pasteHtml(editor, "<div>abc<br>def</div>");
                 },
-                contentAfter: "<p>abc</p><p>def[]</p>",
+                contentAfter: `<div>abc</div><div>def[]</div>`,
+                config: { baseContainer: "DIV" },
+            });
+        });
+
+        test("should split div with <br> (2)", async () => {
+            await testEditor({
+                contentBefore: "<p>[]<br></p>",
+                stepFunction: async (editor) => {
+                    pasteHtml(editor, "<div>abc<br>def</div>");
+                },
+                contentAfter: `<p>abc</p><p>def[]</p>`,
             });
         });
     });
@@ -783,7 +918,7 @@ describe("Simple html elements containing <br>", () => {
 });
 
 describe("Unwrapping html element", () => {
-    test("should not unwrap a node when pasting on empty node", async () => {
+    test("should not unwrap a node when pasting on empty node (1)", async () => {
         await testEditor({
             contentBefore: "<p>[]<br></p>",
             stepFunction: async (editor) => {
@@ -791,6 +926,9 @@ describe("Unwrapping html element", () => {
             },
             contentAfter: "<h1>abc[]</h1>",
         });
+    });
+
+    test("should not unwrap a node when pasting on empty node (2)", async () => {
         await testEditor({
             contentBefore: "<p>[]<br></p>",
             stepFunction: async (editor) => {
@@ -798,6 +936,9 @@ describe("Unwrapping html element", () => {
             },
             contentAfter: "<h2>abc[]</h2>",
         });
+    });
+
+    test("should not unwrap a node when pasting on empty node (3)", async () => {
         await testEditor({
             contentBefore: "<p>[]<br></p>",
             stepFunction: async (editor) => {
@@ -805,6 +946,9 @@ describe("Unwrapping html element", () => {
             },
             contentAfter: "<h3>abc[]</h3>",
         });
+    });
+
+    test("should not unwrap a node when pasting on empty node (4)", async () => {
         await testEditor({
             contentBefore: "<p>[]<br></p>",
             stepFunction: async (editor) => {
@@ -812,6 +956,9 @@ describe("Unwrapping html element", () => {
             },
             contentAfter: "<h1>abc</h1><h2>def[]</h2>",
         });
+    });
+
+    test("should not unwrap a node when pasting on empty node (5)", async () => {
         await testEditor({
             contentBefore: "<p>[]<br></p>",
             stepFunction: async (editor) => {
@@ -819,6 +966,9 @@ describe("Unwrapping html element", () => {
             },
             contentAfter: "<h1>abc</h1><h2>def</h2><h3>ghi[]</h3>",
         });
+    });
+
+    test("should not unwrap a node when pasting on empty node (6)", async () => {
         await testEditor({
             contentBefore: "<p>[]<br></p><p><br></p>",
             stepFunction: async (editor) => {
@@ -826,6 +976,9 @@ describe("Unwrapping html element", () => {
             },
             contentAfter: "<h3>abc[]</h3><p><br></p>",
         });
+    });
+
+    test("should not unwrap a node when pasting on empty node (7)", async () => {
         await testEditor({
             contentBefore: "<p>[]<br></p>",
             stepFunction: async (editor) => {
@@ -834,7 +987,7 @@ describe("Unwrapping html element", () => {
             contentAfter: "<p>abc</p><p><br></p><p>[]<br></p>",
         });
     });
-    test("should not unwrap a node when pasting in between different node", async () => {
+    test("should not unwrap a node when pasting in between different node (1)", async () => {
         await testEditor({
             contentBefore: "<p>mn[]op</p>",
             stepFunction: async (editor) => {
@@ -842,6 +995,9 @@ describe("Unwrapping html element", () => {
             },
             contentAfter: "<p>mn</p><h1>abc[]</h1><p>op</p>",
         });
+    });
+
+    test("should not unwrap a node when pasting in between different node (2)", async () => {
         await testEditor({
             contentBefore: "<p>mn[]op</p>",
             stepFunction: async (editor) => {
@@ -849,6 +1005,9 @@ describe("Unwrapping html element", () => {
             },
             contentAfter: "<p>mn</p><h1>abc</h1><h2>def[]</h2><p>op</p>",
         });
+    });
+
+    test("should not unwrap a node when pasting in between different node (3)", async () => {
         await testEditor({
             contentBefore: "<p>mn[]op</p>",
             stepFunction: async (editor) => {
@@ -857,7 +1016,7 @@ describe("Unwrapping html element", () => {
             contentAfter: "<p>mn</p><h1>abc</h1><h2>def</h2><h3>ghi[]</h3><p>op</p>",
         });
     });
-    test("should unwrap a node when pasting in between same node", async () => {
+    test("should unwrap a node when pasting in between same node (1)", async () => {
         await testEditor({
             contentBefore: "<h1>mn[]op</h1>",
             stepFunction: async (editor) => {
@@ -865,6 +1024,9 @@ describe("Unwrapping html element", () => {
             },
             contentAfter: "<h1>mnabc[]op</h1>",
         });
+    });
+
+    test("should unwrap a node when pasting in between same node (2)", async () => {
         await testEditor({
             contentBefore: "<h1>mn[]op</h1>",
             stepFunction: async (editor) => {
@@ -872,6 +1034,9 @@ describe("Unwrapping html element", () => {
             },
             contentAfter: "<h1>mnabc</h1><h2>def[]</h2><h1>op</h1>",
         });
+    });
+
+    test("should unwrap a node when pasting in between same node (3)", async () => {
         await testEditor({
             contentBefore: "<h2>mn[]op</h2>",
             stepFunction: async (editor) => {
@@ -879,6 +1044,9 @@ describe("Unwrapping html element", () => {
             },
             contentAfter: "<h2>mn</h2><h1>abc</h1><h2>def[]op</h2>",
         });
+    });
+
+    test("should unwrap a node when pasting in between same node (4)", async () => {
         await testEditor({
             contentBefore: "<h1>mn[]op</h1>",
             stepFunction: async (editor) => {
@@ -887,7 +1055,28 @@ describe("Unwrapping html element", () => {
             contentAfter: "<h1>mnabc</h1><h1>def</h1><h1>ghi[]op</h1>",
         });
     });
-    test("should not unwrap a node when pasting at start of different node", async () => {
+
+    test("should unwrap a node when pasting in between same node (5)", async () => {
+        await testEditor({
+            contentBefore: "<p><strong>test []</strong></p>",
+            stepFunction: async (editor) => {
+                pasteHtml(editor, "<strong>paste</strong>");
+            },
+            contentAfter: "<p><strong>test paste[]</strong></p>",
+        });
+    });
+
+    test("should unwrap a node when pasting in between same node (6)", async () => {
+        await testEditor({
+            contentBefore: '<p><font style="background-color: rgb(255, 0, 0);">[]test</font></p>',
+            stepFunction: async (editor) => {
+                pasteHtml(editor, '<font style="background-color: rgb(255, 0, 0);">nested </font>');
+            },
+            contentAfter:
+                '<p><font style="background-color: rgb(255, 0, 0);">nested []test</font></p>',
+        });
+    });
+    test("should not unwrap a node when pasting at start of different node (1)", async () => {
         await testEditor({
             contentBefore: "<p>[]mn</p>",
             stepFunction: async (editor) => {
@@ -895,6 +1084,9 @@ describe("Unwrapping html element", () => {
             },
             contentAfter: "<h1>abc[]</h1><p>mn</p>",
         });
+    });
+
+    test("should not unwrap a node when pasting at start of different node (2)", async () => {
         await testEditor({
             contentBefore: "<p>[]mn</p>",
             stepFunction: async (editor) => {
@@ -902,6 +1094,9 @@ describe("Unwrapping html element", () => {
             },
             contentAfter: "<h1>abc</h1><h2>def[]</h2><p>mn</p>",
         });
+    });
+
+    test("should not unwrap a node when pasting at start of different node (3)", async () => {
         await testEditor({
             contentBefore: "<p>[]mn</p>",
             stepFunction: async (editor) => {
@@ -910,7 +1105,7 @@ describe("Unwrapping html element", () => {
             contentAfter: "<h1>abc</h1><h2>def</h2><h3>ghi[]</h3><p>mn</p>",
         });
     });
-    test("should unwrap a node when pasting at start of same node", async () => {
+    test("should unwrap a node when pasting at start of same node (1)", async () => {
         await testEditor({
             contentBefore: "<h1>[]mn</h1>",
             stepFunction: async (editor) => {
@@ -918,6 +1113,9 @@ describe("Unwrapping html element", () => {
             },
             contentAfter: "<h1>abc[]mn</h1>",
         });
+    });
+
+    test("should unwrap a node when pasting at start of same node (2)", async () => {
         await testEditor({
             contentBefore: "<h1>[]mn</h1>",
             stepFunction: async (editor) => {
@@ -925,6 +1123,9 @@ describe("Unwrapping html element", () => {
             },
             contentAfter: "<h2>abc</h2><h1>def[]mn</h1>",
         });
+    });
+
+    test("should unwrap a node when pasting at start of same node (3)", async () => {
         await testEditor({
             contentBefore: '<h1><font style="background-color: rgb(255, 0, 0);">[]mn</font></h1>',
             stepFunction: async (editor) => {
@@ -934,7 +1135,7 @@ describe("Unwrapping html element", () => {
                 '<h1>abc</h1><h1>def</h1><h1><font style="background-color: rgb(255, 0, 0);">ghi[]mn</font></h1>',
         });
     });
-    test("should not unwrap a node when pasting at end of different node", async () => {
+    test("should not unwrap a node when pasting at end of different node (1)", async () => {
         await testEditor({
             contentBefore: "<p>mn[]</p>",
             stepFunction: async (editor) => {
@@ -942,6 +1143,9 @@ describe("Unwrapping html element", () => {
             },
             contentAfter: "<p>mn</p><h1>abc[]</h1>",
         });
+    });
+
+    test("should not unwrap a node when pasting at end of different node (2)", async () => {
         await testEditor({
             contentBefore: "<p>mn[]</p>",
             stepFunction: async (editor) => {
@@ -949,6 +1153,9 @@ describe("Unwrapping html element", () => {
             },
             contentAfter: "<p>mn</p><h1>abc</h1><h2>def[]</h2>",
         });
+    });
+
+    test("should not unwrap a node when pasting at end of different node (3)", async () => {
         await testEditor({
             contentBefore: "<p>mn[]</p>",
             stepFunction: async (editor) => {
@@ -957,7 +1164,7 @@ describe("Unwrapping html element", () => {
             contentAfter: "<p>mn</p><h1>abc</h1><h2>def</h2><h3>ghi[]</h3>",
         });
     });
-    test("should unwrap a node when pasting at end of same node", async () => {
+    test("should unwrap a node when pasting at end of same node (1)", async () => {
         await testEditor({
             contentBefore: "<h1>mn[]</h1>",
             stepFunction: async (editor) => {
@@ -965,6 +1172,9 @@ describe("Unwrapping html element", () => {
             },
             contentAfter: "<h1>mnabc[]</h1>",
         });
+    });
+
+    test("should unwrap a node when pasting at end of same node (2)", async () => {
         await testEditor({
             contentBefore: "<h1>mn[]</h1>",
             stepFunction: async (editor) => {
@@ -972,6 +1182,9 @@ describe("Unwrapping html element", () => {
             },
             contentAfter: "<h1>mnabc</h1><h2>def[]</h2>",
         });
+    });
+
+    test("should unwrap a node when pasting at end of same node (3)", async () => {
         await testEditor({
             contentBefore: '<h1><font style="background-color: rgb(255, 0, 0);">mn[]</font></h1>',
             stepFunction: async (editor) => {
@@ -988,6 +1201,166 @@ describe("Unwrapping html element", () => {
                 pasteHtml(editor, "<p><br></p><p><br></p><p><br></p>");
             },
             contentAfter: "<p>a</p><p><br></p><p><br></p><p>[]<br></p>",
+        });
+    });
+    test("should unwrap base container node when pasting on different empty node (1)", async () => {
+        await testEditor({
+            contentBefore: "<h1>[]<br></h1>",
+            stepFunction: async (editor) => {
+                pasteHtml(editor, "<p>abc</p>");
+            },
+            contentAfter: "<h1>abc[]</h1>",
+        });
+    });
+
+    test("should unwrap base container node when pasting on different empty node (2)", async () => {
+        await testEditor({
+            contentBefore: "<h1>[]<br></h1>",
+            stepFunction: async (editor) => {
+                pasteHtml(editor, '<div class="o-paragraph">abc</div>');
+            },
+            contentAfter: "<h1>abc[]</h1>",
+        });
+    });
+
+    test("should unwrap base container node when pasting on different empty node (3)", async () => {
+        await testEditor({
+            contentBefore: "<h1>[]<br></h1>",
+            stepFunction: async (editor) => {
+                pasteOdooEditorHtml(
+                    editor,
+                    '<p><font style="background-color: rgb(255, 0, 0);">abc</font></p>'
+                );
+            },
+            contentAfter: '<h1><font style="background-color: rgb(255, 0, 0);">abc</font>[]</h1>',
+        });
+    });
+
+    test("should unwrap base container node when pasting on different empty node (4)", async () => {
+        await testEditor({
+            contentBefore: "<h1>[]<br></h1>",
+            stepFunction: async (editor) => {
+                pasteOdooEditorHtml(
+                    editor,
+                    '<div class="o-paragraph"><font style="background-color: rgb(255, 0, 0);">abc</font></div>'
+                );
+            },
+            contentAfter: '<h1><font style="background-color: rgb(255, 0, 0);">abc</font>[]</h1>',
+        });
+    });
+
+    test("should unwrap li elements having no ul/ol (1)", async () => {
+        await testEditor({
+            contentBefore: "<p>[]<br></p>",
+            stepFunction: async (editor) => {
+                pasteOdooEditorHtml(editor, "<li><p>abc</p></li><li><p>def</p></li>");
+            },
+            contentAfter: "<p>abc</p><p>def[]</p>",
+        });
+    });
+
+    test("should unwrap li elements having no ul/ol (2)", async () => {
+        await testEditor({
+            contentBefore: "<p>[]<br></p>",
+            stepFunction: async (editor) => {
+                pasteOdooEditorHtml(editor, "<li><h1>abc</h1></li><li><h1>def</h1></li");
+            },
+            contentAfter: "<h1>abc</h1><h1>def[]</h1>",
+        });
+    });
+
+    test("should unwrap li elements having no ul/ol (3)", async () => {
+        await testEditor({
+            contentBefore: "<p>[]<br></p>",
+            stepFunction: async (editor) => {
+                pasteOdooEditorHtml(
+                    editor,
+                    "<li><blockquote>abc</blockquote></li><li><blockquote>def</blockquote></li>"
+                );
+            },
+            contentAfter: "<blockquote>abc</blockquote><blockquote>def[]</blockquote>",
+        });
+    });
+    test("should unwrap li elements with multiple blocks having no ul/ol (1)", async () => {
+        await testEditor({
+            contentBefore: "<p>[]<br></p>",
+            stepFunction: async (editor) => {
+                pasteOdooEditorHtml(
+                    editor,
+                    "<li><p>abc</p><p>def</p></li><li><p>abc</p><p>def</p></li>"
+                );
+            },
+            contentAfter: "<p>abc</p><p>def</p><p>abc</p><p>def[]</p>",
+        });
+    });
+
+    test("should unwrap li elements with multiple blocks having no ul/ol (2)", async () => {
+        await testEditor({
+            contentBefore: "<p>[]<br></p>",
+            stepFunction: async (editor) => {
+                pasteOdooEditorHtml(
+                    editor,
+                    "<li><h1>abc</h1><h1>def</h1></li><li><h1>abc</h1><h1>def</h1></li"
+                );
+            },
+            contentAfter: "<h1>abc</h1><h1>def</h1><h1>abc</h1><h1>def[]</h1>",
+        });
+    });
+
+    test("should unwrap li elements with multiple blocks having no ul/ol (3)", async () => {
+        await testEditor({
+            contentBefore: "<p>[]<br></p>",
+            stepFunction: async (editor) => {
+                pasteOdooEditorHtml(
+                    editor,
+                    "<li><blockquote>abc</blockquote><blockquote>def</blockquote></li><li><blockquote>abc</blockquote><blockquote>def</blockquote></li>"
+                );
+            },
+            contentAfter:
+                "<blockquote>abc</blockquote><blockquote>def</blockquote><blockquote>abc</blockquote><blockquote>def[]</blockquote>",
+        });
+    });
+
+    test("should unwrap li elements with multiple blocks having no ul/ol (4)", async () => {
+        await testEditor({
+            contentBefore: "<p>[]<br></p>",
+            stepFunction: async (editor) => {
+                pasteOdooEditorHtml(
+                    editor,
+                    unformat(`
+                    <li>
+                        <p>abc</p>
+                        <ul>
+                            <li>abc</li>
+                            <li>def</li>
+                            <li>ghi</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p>abc</p>
+                        <ul>
+                            <li>abc</li>
+                            <li>def</li>
+                            <li>ghi</li>
+                        </ul>
+                    </li>
+                `)
+                );
+            },
+            contentAfter: unformat(`
+                <p>abc</p>
+                <ul>
+                    <li>abc</li>
+                    <li>def</li>
+                    <li>ghi</li>
+                </ul>
+                <p>abc</p>
+                <ul>
+                    <li>abc</li>
+                    <li>def</li>
+                    <li>ghi[]</li>
+                </ul>
+            `),
         });
     });
 });
@@ -1049,7 +1422,7 @@ describe("Complex html span", () => {
             });
         });
 
-        test("should paste a text when selection across two span", async () => {
+        test("should paste a text when selection across two span (1)", async () => {
             await testEditor({
                 contentBefore: '<p>a<span class="a">b[c</span><span class="a">d]e</span>f</p>',
                 stepFunction: async (editor) => {
@@ -1057,6 +1430,9 @@ describe("Complex html span", () => {
                 },
                 contentAfter: '<p>a<span class="a">b1<b>23</b>&nbsp;4[]e</span>f</p>',
             });
+        });
+
+        test("should paste a text when selection across two span (2)", async () => {
             await testEditor({
                 contentBefore: '<p>a<span class="a">b[c</span>- -<span class="a">d]e</span>f</p>',
                 stepFunction: async (editor) => {
@@ -1066,7 +1442,7 @@ describe("Complex html span", () => {
             });
         });
 
-        test("should paste a text when selection across two p (4)", async () => {
+        test("should paste a text when selection across two p (1)", async () => {
             await testEditor({
                 contentBefore: "<div>a<p>b[c</p><p>d]e</p>f</div>",
                 stepFunction: async (editor) => {
@@ -1074,6 +1450,9 @@ describe("Complex html span", () => {
                 },
                 contentAfter: "<div>a<p>b1<b>23</b>&nbsp;4[]e</p>f</div>",
             });
+        });
+
+        test("should paste a text when selection across two p (2)", async () => {
             await testEditor({
                 contentBefore: "<div>a<p>b[c</p>- -<p>d]e</p>f</div>",
                 stepFunction: async (editor) => {
@@ -1083,7 +1462,7 @@ describe("Complex html span", () => {
             });
         });
 
-        test("should paste a text when selection leave a span (4)", async () => {
+        test("should paste a text when selection leave a span (1)", async () => {
             await testEditor({
                 contentBefore: '<div>ab<span class="a">c[d</span>e]f</div>',
                 stepFunction: async (editor) => {
@@ -1091,6 +1470,9 @@ describe("Complex html span", () => {
                 },
                 contentAfter: '<div>ab<span class="a">c1<b>23</b>&nbsp;4[]</span>f</div>',
             });
+        });
+
+        test("should paste a text when selection leave a span (2)", async () => {
             await testEditor({
                 contentBefore: '<div>a[b<span class="a">c]d</span>ef</div>',
                 stepFunction: async (editor) => {
@@ -1100,7 +1482,7 @@ describe("Complex html span", () => {
             });
         });
 
-        test("should paste a text when selection across two element (4)", async () => {
+        test("should paste a text when selection across two element (1)", async () => {
             await testEditor({
                 contentBefore: '<div>1a<p>b[c</p><span class="a">d]e</span>f</div>',
                 stepFunction: async (editor) => {
@@ -1108,6 +1490,9 @@ describe("Complex html span", () => {
                 },
                 contentAfter: '<div>1a<p>b1<b>23</b>&nbsp;4[]<span class="a">e</span>f</p></div>',
             });
+        });
+
+        test("should paste a text when selection across two element (2)", async () => {
             await testEditor({
                 contentBefore: '<div>2a<span class="a">b[c</span><p>d]e</p>f</div>',
                 stepFunction: async (editor) => {
@@ -1115,6 +1500,9 @@ describe("Complex html span", () => {
                 },
                 contentAfter: '<div>2a<span class="a">b1<b>23</b>&nbsp;4[]</span>e<br>f</div>',
             });
+        });
+
+        test("should paste a text when selection across two element (3)", async () => {
             await testEditor({
                 contentBefore: "<div>3a<p>b[c</p><p>d]e</p>f</div>",
                 stepFunction: async (editor) => {
@@ -1207,7 +1595,7 @@ describe("Complex html p", () => {
             });
         });
 
-        test("should paste a text when selection across two p (5)", async () => {
+        test("should paste a text when selection across two p (1)", async () => {
             await testEditor({
                 contentBefore: "<div>a<p>b[c</p><p>d]e</p>f</div>",
                 stepFunction: async (editor) => {
@@ -1215,6 +1603,9 @@ describe("Complex html p", () => {
                 },
                 contentAfter: "<div>a<p>b12</p><p>34[]e</p>f</div>",
             });
+        });
+
+        test("should paste a text when selection across two p (2)", async () => {
             await testEditor({
                 contentBefore: "<div>a<p>b[c</p>- -<p>d]e</p>f</div>",
                 stepFunction: async (editor) => {
@@ -1224,24 +1615,47 @@ describe("Complex html p", () => {
             });
         });
 
-        test("should paste a text when selection leave a span (5)", async () => {
+        test("should paste a text when selection leave a span baseContainer (1)", async () => {
             await testEditor({
                 contentBefore: '<div>1ab<span class="a">c[d</span>e]f</div>',
                 stepFunction: async (editor) => {
                     pasteHtml(editor, complexHtmlData);
                 },
-                contentAfter: '<div>1ab<span class="a">c12<br>34[]</span>f</div>',
+                contentAfter: `<div>1ab<span class="a">c12</span></div><div><span class="a">34[]</span>f</div>`,
             });
+        });
+
+        test("should paste a text when selection leave a span baseContainer (2)", async () => {
             await testEditor({
                 contentBefore: '<div>2a[b<span class="a">c]d</span>ef</div>',
                 stepFunction: async (editor) => {
                     pasteHtml(editor, complexHtmlData);
                 },
-                contentAfter: '<div>2a12<br>34[]<span class="a">d</span>ef</div>',
+                contentAfter: `<div>2a12</div><div>34[]<span class="a">d</span>ef</div>`,
             });
         });
 
-        test("should paste a text when selection leave a span (6)", async () => {
+        test("should paste a text when selection leave a span unbreakable (1)", async () => {
+            await testEditor({
+                contentBefore: `<div class="oe_unbreakable">1ab<span class="a">c[d</span>e]f</div>`,
+                stepFunction: async (editor) => {
+                    pasteHtml(editor, complexHtmlData);
+                },
+                contentAfter: `<div class="oe_unbreakable">1ab<span class="a">c12<br>34[]</span>f</div>`,
+            });
+        });
+
+        test("should paste a text when selection leave a span unbreakable (2)", async () => {
+            await testEditor({
+                contentBefore: `<div class="oe_unbreakable">2a[b<span class="a">c]d</span>ef</div>`,
+                stepFunction: async (editor) => {
+                    pasteHtml(editor, complexHtmlData);
+                },
+                contentAfter: `<div class="oe_unbreakable">2a12<br>34[]<span class="a">d</span>ef</div>`,
+            });
+        });
+
+        test("should paste a text when selection leave a span (1)", async () => {
             await testEditor({
                 contentBefore: '<p>1ab<span class="a">c[d</span>e]f</p>',
                 stepFunction: async (editor) => {
@@ -1250,6 +1664,9 @@ describe("Complex html p", () => {
                 contentAfter:
                     '<p>1ab<span class="a">c12</span></p><p><span class="a">34[]</span>f</p>',
             });
+        });
+
+        test("should paste a text when selection leave a span (2)", async () => {
             await testEditor({
                 contentBefore: '<p>2a[b<span class="a">c]d</span>ef</p>',
                 stepFunction: async (editor) => {
@@ -1272,13 +1689,23 @@ describe("Complex html p", () => {
             });
         });
 
-        test("should paste a text when selection across two element (6)", async () => {
+        test("should paste a text when selection across two element (6) baseContainer", async () => {
             await testEditor({
                 contentBefore: '<div>2a<span class="a">b[c</span><p>d]e</p>f</div>',
                 stepFunction: async (editor) => {
                     pasteHtml(editor, complexHtmlData);
                 },
-                contentAfter: '<div>2a<span class="a">b12<br>34[]</span>e<br>f</div>',
+                contentAfter: `<div>2a<span class="a">b12</span></div><div><span class="a">34[]</span>e<br>f</div>`,
+            });
+        });
+
+        test("should paste a text when selection across two element (6) unbreakable", async () => {
+            await testEditor({
+                contentBefore: `<div class="oe_unbreakable">2a<span class="a">b[c</span><p>d]e</p>f</div>`,
+                stepFunction: async (editor) => {
+                    pasteHtml(editor, complexHtmlData);
+                },
+                contentAfter: `<div class="oe_unbreakable">2a<span class="a">b12<br>34[]</span>e<br>f</div>`,
             });
         });
     });
@@ -1364,7 +1791,7 @@ describe("Complex html 3 p", () => {
             });
         });
 
-        test("should paste a text when selection across two p (6)", async () => {
+        test("should paste a text when selection across two p (1)", async () => {
             await testEditor({
                 contentBefore: "<div>a<p>b[c</p><p>d]e</p>f</div>",
                 stepFunction: async (editor) => {
@@ -1373,6 +1800,9 @@ describe("Complex html 3 p", () => {
                 contentAfter:
                     "<div>a<p>b1<i>X</i>2</p><p>3<i>X</i>4</p><p>5<i>X</i>6[]e</p>f</div>",
             });
+        });
+
+        test("should paste a text when selection across two p (2)", async () => {
             await testEditor({
                 contentBefore: "<div>a<p>b[c</p>- -<p>d]e</p>f</div>",
                 stepFunction: async (editor) => {
@@ -1383,26 +1813,51 @@ describe("Complex html 3 p", () => {
             });
         });
 
-        test("should paste a text when selection leave a span (7)", async () => {
+        test("should paste a text when selection leave a span baseContainer (1)", async () => {
             await testEditor({
                 contentBefore: '<div>1ab<span class="a">c[d</span>e]f</div>',
                 stepFunction: async (editor) => {
                     pasteHtml(editor, complexHtmlData);
                 },
                 contentAfter:
-                    '<div>1ab<span class="a">c1<i>X</i>2</span><p>3<i>X</i>4</p><span class="a">5<i>X</i>6[]</span>f</div>',
+                    '<div>1ab<span class="a">c1<i>X</i>2</span></div><p>3<i>X</i>4</p><div><span class="a">5<i>X</i>6[]</span>f</div>',
             });
+        });
+
+        test("should paste a text when selection leave a span baseContainer (2)", async () => {
             await testEditor({
                 contentBefore: '<div>2a[b<span class="a">c]d</span>ef</div>',
                 stepFunction: async (editor) => {
                     pasteHtml(editor, complexHtmlData);
                 },
                 contentAfter:
-                    '<div>2a1<i>X</i>2<p>3<i>X</i>4</p>5<i>X</i>6[]<span class="a">d</span>ef</div>',
+                    '<div>2a1<i>X</i>2</div><p>3<i>X</i>4</p><div>5<i>X</i>6[]<span class="a">d</span>ef</div>',
             });
         });
 
-        test("should paste a text when selection leave a span (8)", async () => {
+        test("should paste a text when selection leave a span unbreakable (1)", async () => {
+            await testEditor({
+                contentBefore: '<div class="oe_unbreakable">1ab<span class="a">c[d</span>e]f</div>',
+                stepFunction: async (editor) => {
+                    pasteHtml(editor, complexHtmlData);
+                },
+                contentAfter:
+                    '<div class="oe_unbreakable">1ab<span class="a">c1<i>X</i>2</span><p>3<i>X</i>4</p><span class="a">5<i>X</i>6[]</span>f</div>',
+            });
+        });
+
+        test("should paste a text when selection leave a span unbreakable (2)", async () => {
+            await testEditor({
+                contentBefore: '<div class="oe_unbreakable">2a[b<span class="a">c]d</span>ef</div>',
+                stepFunction: async (editor) => {
+                    pasteHtml(editor, complexHtmlData);
+                },
+                contentAfter:
+                    '<div class="oe_unbreakable">2a1<i>X</i>2<p>3<i>X</i>4</p>5<i>X</i>6[]<span class="a">d</span>ef</div>',
+            });
+        });
+
+        test("should paste a text when selection leave a span (1)", async () => {
             await testEditor({
                 contentBefore: '<p>1ab<span class="a">c[d</span>e]f</p>',
                 stepFunction: async (editor) => {
@@ -1411,6 +1866,9 @@ describe("Complex html 3 p", () => {
                 contentAfter:
                     '<p>1ab<span class="a">c1<i>X</i>2</span></p><p>3<i>X</i>4</p><p><span class="a">5<i>X</i>6[]</span>f</p>',
             });
+        });
+
+        test("should paste a text when selection leave a span (2)", async () => {
             await testEditor({
                 contentBefore: '<p>2a[b<span class="a">c]d</span>ef</p>',
                 stepFunction: async (editor) => {
@@ -1504,7 +1962,7 @@ describe("Complex html p+i", () => {
             });
         });
 
-        test("should paste a text when selection across two span", async () => {
+        test("should paste a text when selection across two span (1)", async () => {
             await testEditor({
                 contentBefore: '<p>a<span class="a">b[c</span><span class="a">d]e</span>f</p>',
                 stepFunction: async (editor) => {
@@ -1513,6 +1971,9 @@ describe("Complex html p+i", () => {
                 contentAfter:
                     '<p>a<span class="a">b12</span></p><p><span class="a"><i>ii</i>[]e</span>f</p>',
             });
+        });
+
+        test("should paste a text when selection across two span (2)", async () => {
             await testEditor({
                 contentBefore: '<p>a<span class="a">b[c</span>x<span class="a">d]e</span>f</p>',
                 stepFunction: async (editor) => {
@@ -1523,7 +1984,7 @@ describe("Complex html p+i", () => {
             });
         });
 
-        test("should paste a text when selection across two p (7)", async () => {
+        test("should paste a text when selection across two p (1)", async () => {
             await testEditor({
                 contentBefore: "<div>a<p>b[c</p><p>d]e</p>f</div>",
                 stepFunction: async (editor) => {
@@ -1531,6 +1992,9 @@ describe("Complex html p+i", () => {
                 },
                 contentAfter: "<div>a<p>b12</p><p><i>ii</i>[]e</p>f</div>",
             });
+        });
+
+        test("should paste a text when selection across two p (2)", async () => {
             await testEditor({
                 contentBefore: "<div>a<p>b[c</p>- -<p>d]e</p>f</div>",
                 stepFunction: async (editor) => {
@@ -1540,24 +2004,49 @@ describe("Complex html p+i", () => {
             });
         });
 
-        test("should paste a text when selection leave a span (9)", async () => {
+        test("should paste a text when selection leave a span baseContainer (1)", async () => {
             await testEditor({
                 contentBefore: '<div>1ab<span class="a">c[d</span>e]f</div>',
                 stepFunction: async (editor) => {
                     pasteHtml(editor, complexHtmlData);
                 },
-                contentAfter: '<div>1ab<span class="a">c12<i><br>ii</i>[]</span>f</div>',
+                contentAfter: `<div>1ab<span class="a">c12</span></div><div><span class="a"><i>ii</i>[]</span>f</div>`,
             });
+        });
+
+        test("should paste a text when selection leave a span baseContainer (2)", async () => {
             await testEditor({
                 contentBefore: '<div>2a[b<span class="a">c]d</span>ef</div>',
                 stepFunction: async (editor) => {
                     pasteHtml(editor, complexHtmlData);
                 },
-                contentAfter: '<div>2a12<i><br>ii</i>[]<span class="a">d</span>ef</div>',
+                contentAfter: `<div>2a12</div><div><i>ii</i>[]<span class="a">d</span>ef</div>`,
             });
         });
 
-        test("should paste a text when selection leave a span (10)", async () => {
+        test("should paste a text when selection leave a span unbreakable (1)", async () => {
+            await testEditor({
+                contentBefore: '<div class="oe_unbreakable">1ab<span class="a">c[d</span>e]f</div>',
+                stepFunction: async (editor) => {
+                    pasteHtml(editor, complexHtmlData);
+                },
+                contentAfter:
+                    '<div class="oe_unbreakable">1ab<span class="a">c12<i><br>ii</i>[]</span>f</div>',
+            });
+        });
+
+        test("should paste a text when selection leave a span unbreakable (2)", async () => {
+            await testEditor({
+                contentBefore: '<div class="oe_unbreakable">2a[b<span class="a">c]d</span>ef</div>',
+                stepFunction: async (editor) => {
+                    pasteHtml(editor, complexHtmlData);
+                },
+                contentAfter:
+                    '<div class="oe_unbreakable">2a12<i><br>ii</i>[]<span class="a">d</span>ef</div>',
+            });
+        });
+
+        test("should paste a text when selection leave a span (1)", async () => {
             await testEditor({
                 contentBefore: '<p>1ab<span class="a">c[d</span>e]f</p>',
                 stepFunction: async (editor) => {
@@ -1566,6 +2055,9 @@ describe("Complex html p+i", () => {
                 contentAfter:
                     '<p>1ab<span class="a">c12</span></p><p><span class="a"><i>ii</i>[]</span>f</p>',
             });
+        });
+
+        test("should paste a text when selection leave a span (2)", async () => {
             await testEditor({
                 contentBefore: '<p>2a[b<span class="a">c]d</span>ef</p>',
                 stepFunction: async (editor) => {
@@ -1585,13 +2077,23 @@ describe("Complex html p+i", () => {
             });
         });
 
-        test("should paste a text when selection across two element (10)", async () => {
+        test("should paste a text when selection across two element (10) baseContainer", async () => {
             await testEditor({
                 contentBefore: '<div>2a<span class="a">b[c</span><p>d]e</p>f</div>',
                 stepFunction: async (editor) => {
                     pasteHtml(editor, complexHtmlData);
                 },
-                contentAfter: '<div>2a<span class="a">b12<i><br>ii</i>[]</span>e<br>f</div>',
+                contentAfter: `<div>2a<span class="a">b12</span></div><div><span class="a"><i>ii</i>[]</span>e<br>f</div>`,
+            });
+        });
+
+        test("should paste a text when selection across two element (10) unbreakable", async () => {
+            await testEditor({
+                contentBefore: `<div class="oe_unbreakable">2a<span class="a">b[c</span><p>d]e</p>f</div>`,
+                stepFunction: async (editor) => {
+                    pasteHtml(editor, complexHtmlData);
+                },
+                contentAfter: `<div class="oe_unbreakable">2a<span class="a">b12<i><br>ii</i>[]</span>e<br>f</div>`,
             });
         });
     });
@@ -1655,7 +2157,7 @@ describe("Complex html 3p+b", () => {
             });
         });
 
-        test("should paste a text when selection across two span", async () => {
+        test("should paste a text when selection across two span (1)", async () => {
             await testEditor({
                 contentBefore: '<p>a<span class="a">b[c</span><span class="a">d]e</span>f</p>',
                 stepFunction: async (editor) => {
@@ -1664,6 +2166,9 @@ describe("Complex html 3p+b", () => {
                 contentAfter:
                     '<p>a<span class="a">b1<b>23</b></span></p><p>zzz</p><p><span class="a">45<b>6</b>7[]e</span>f</p>',
             });
+        });
+
+        test("should paste a text when selection across two span (2)", async () => {
             await testEditor({
                 contentBefore: '<p>a<span class="a">b[c</span>- -<span class="a">d]e</span>f</p>',
                 stepFunction: async (editor) => {
@@ -1674,7 +2179,7 @@ describe("Complex html 3p+b", () => {
             });
         });
 
-        test("should paste a text when selection across two p (8)", async () => {
+        test("should paste a text when selection across two p (1)", async () => {
             await testEditor({
                 contentBefore: "<div>a<p>b[c</p><p>d]e</p>f</div>",
                 stepFunction: async (editor) => {
@@ -1682,6 +2187,9 @@ describe("Complex html 3p+b", () => {
                 },
                 contentAfter: "<div>a<p>b1<b>23</b></p><p>zzz</p><p>45<b>6</b>7[]e</p>f</div>",
             });
+        });
+
+        test("should paste a text when selection across two p (2)", async () => {
             await testEditor({
                 contentBefore: "<div>a<p>b[c</p>- -<p>d]e</p>f</div>",
                 stepFunction: async (editor) => {
@@ -1691,22 +2199,45 @@ describe("Complex html 3p+b", () => {
             });
         });
 
-        test("should paste a text when selection leave a span (11)", async () => {
+        test("should paste a text when selection leave a span baseContainer (1)", async () => {
             await testEditor({
                 contentBefore: '<div>1ab<span class="a">c[d</span>e]f</div>',
                 stepFunction: async (editor) => {
                     pasteHtml(editor, complexHtmlData);
                 },
-                contentAfter:
-                    '<div>1ab<span class="a">c1<b>23</b></span><p>zzz</p><span class="a">45<b>6</b>7[]</span>f</div>',
+                contentAfter: `<div>1ab<span class="a">c1<b>23</b></span></div><p>zzz</p><div><span class="a">45<b>6</b>7[]</span>f</div>`,
             });
+        });
+
+        test("should paste a text when selection leave a span baseContainer (2)", async () => {
             await testEditor({
                 contentBefore: '<div>2a[b<span class="a">c]d</span>ef</div>',
                 stepFunction: async (editor) => {
                     pasteHtml(editor, complexHtmlData);
                 },
+                contentAfter: `<div>2a1<b>23</b></div><p>zzz</p><div>45<b>6</b>7[]<span class="a">d</span>ef</div>`,
+            });
+        });
+
+        test("should paste a text when selection leave a span unbreakable (1)", async () => {
+            await testEditor({
+                contentBefore: '<div class="oe_unbreakable">1ab<span class="a">c[d</span>e]f</div>',
+                stepFunction: async (editor) => {
+                    pasteHtml(editor, complexHtmlData);
+                },
                 contentAfter:
-                    '<div>2a1<b>23</b><p>zzz</p>45<b>6</b>7[]<span class="a">d</span>ef</div>',
+                    '<div class="oe_unbreakable">1ab<span class="a">c1<b>23</b></span><p>zzz</p><span class="a">45<b>6</b>7[]</span>f</div>',
+            });
+        });
+
+        test("should paste a text when selection leave a span unbreakable (2)", async () => {
+            await testEditor({
+                contentBefore: '<div class="oe_unbreakable">2a[b<span class="a">c]d</span>ef</div>',
+                stepFunction: async (editor) => {
+                    pasteHtml(editor, complexHtmlData);
+                },
+                contentAfter:
+                    '<div class="oe_unbreakable">2a1<b>23</b><p>zzz</p>45<b>6</b>7[]<span class="a">d</span>ef</div>',
             });
         });
 
@@ -1736,13 +2267,46 @@ describe("Complex html 3p+b", () => {
 
 describe("Complex html div", () => {
     const complexHtmlData = `<div><div><span style="color: #fb4934;">abc</span><span style="color: #ebdbb2;">def</span></div><div dir="rtl"><span style="color: #fb4934;">ghi</span><span style="color: #fe8019;">jkl</span></div><div><span style="color: #fb4934;">jkl</span><span style="color: #ebdbb2;">mno</span></div></div>`;
-    test("should convert div to p", async () => {
+    test("should convert div to a baseContainer", async () => {
         await testEditor({
             contentBefore: "<p>[]<br></p>",
             stepFunction: async (editor) => {
                 pasteHtml(editor, complexHtmlData);
             },
-            contentAfter: '<p>abcdef</p><p dir="rtl">ghijkl</p><p>jklmno[]</p>',
+            contentAfter: `<div>abcdef</div><div dir="rtl">ghijkl</div><div>jklmno[]</div>`,
+            config: { baseContainer: "DIV" },
+        });
+    });
+
+    test("should convert div to a baseContainer (2)", async () => {
+        await testEditor({
+            contentBefore: "<p>[]<br></p>",
+            stepFunction: async (editor) => {
+                pasteHtml(editor, complexHtmlData);
+            },
+            contentAfter: `<p>abcdef</p><p dir="rtl">ghijkl</p><p>jklmno[]</p>`,
+        });
+    });
+
+    const copiedHtmlData = `<ol><li><div>abc</div><div></div></li><li><div></div><div style="white-space: break-spaces;"><span>def\nghi</span><br><span>jkl</span></div></li></ol>`;
+    test("should remove empty <div> elements from pasted content", async () => {
+        await testEditor({
+            contentBefore: "<p>12[]3</p>",
+            stepFunction: async (editor) => {
+                pasteHtml(editor, copiedHtmlData);
+            },
+            contentAfter: `<p>12</p><ol><li><div>abc</div></li><li><div>def</div><div>ghi</div><div>jkl[]</div></li></ol><p>3</p>`,
+            config: { baseContainer: "DIV" },
+        });
+    });
+
+    test("should remove empty <div> elements from pasted content (2)", async () => {
+        await testEditor({
+            contentBefore: "<p>12[]3</p>",
+            stepFunction: async (editor) => {
+                pasteHtml(editor, copiedHtmlData);
+            },
+            contentAfter: `<p>12</p><ol><li><p>abc</p></li><li><p>def</p><p>ghi</p><p>jkl[]</p></li></ol><p>3</p>`,
         });
     });
 });
@@ -2221,7 +2785,7 @@ describe("Special cases", () => {
 });
 
 describe("pasting within blockquote", () => {
-    test("should paste paragraph related elements within blockquote", async () => {
+    test("should paste paragraph related elements within blockquote (1)", async () => {
         await testEditor({
             contentBefore: "<blockquote>[]<br></blockquote>",
             stepFunction: async (editor) => {
@@ -2229,6 +2793,9 @@ describe("pasting within blockquote", () => {
             },
             contentAfter: "<blockquote><h1>abc</h1><h2>def</h2><h3>ghi[]</h3></blockquote>",
         });
+    });
+
+    test("should paste paragraph related elements within blockquote (2)", async () => {
         await testEditor({
             contentBefore: "<blockquote>x[]</blockquote>",
             stepFunction: async (editor) => {
@@ -2236,6 +2803,9 @@ describe("pasting within blockquote", () => {
             },
             contentAfter: "<blockquote>x<h1>abc</h1><h2>def</h2><h3>ghi[]</h3></blockquote>",
         });
+    });
+
+    test("should paste paragraph related elements within blockquote (3)", async () => {
         await testEditor({
             contentBefore: "<blockquote>[]x</blockquote>",
             stepFunction: async (editor) => {
@@ -2243,6 +2813,9 @@ describe("pasting within blockquote", () => {
             },
             contentAfter: "<blockquote><h1>abc</h1><h2>def</h2><h3>ghi[]</h3>x</blockquote>",
         });
+    });
+
+    test("should paste paragraph related elements within blockquote (4)", async () => {
         await testEditor({
             contentBefore: "<blockquote>x[]y</blockquote>",
             stepFunction: async (editor) => {
@@ -2254,34 +2827,108 @@ describe("pasting within blockquote", () => {
 });
 
 describe("pasting within pre", () => {
-    test("should paste paragraph releted elements within pre", async () => {
+    test("should paste paragraph related elements within pre as plain text (1)", async () => {
         await testEditor({
             contentBefore: "<pre>[]<br></pre>",
             stepFunction: async (editor) => {
                 pasteHtml(editor, "<h1>abc</h1><h2>def</h2><h3>ghi</h3>");
             },
-            contentAfter: "<pre><h1>abc</h1><h2>def</h2><h3>ghi[]</h3></pre>",
+            contentAfter: "<pre>abc\ndef\nghi[]</pre>",
         });
+    });
+
+    test("should paste paragraph related elements within pre as plain text (2)", async () => {
         await testEditor({
             contentBefore: "<pre>x[]</pre>",
             stepFunction: async (editor) => {
                 pasteHtml(editor, "<h1>abc</h1><h2>def</h2><h3>ghi</h3>");
             },
-            contentAfter: "<pre>x<h1>abc</h1><h2>def</h2><h3>ghi[]</h3></pre>",
+            contentAfter: "<pre>xabc\ndef\nghi[]</pre>",
         });
+    });
+
+    test("should paste paragraph related elements within pre as plain text (3)", async () => {
         await testEditor({
             contentBefore: "<pre>[]x</pre>",
             stepFunction: async (editor) => {
                 pasteHtml(editor, "<h1>abc</h1><h2>def</h2><h3>ghi</h3>");
             },
-            contentAfter: "<pre><h1>abc</h1><h2>def</h2><h3>ghi[]</h3>x</pre>",
+            contentAfter: "<pre>abc\ndef\nghi[]x</pre>",
         });
+    });
+
+    test("should paste paragraph related elements within pre as plain text (4)", async () => {
         await testEditor({
             contentBefore: "<pre>x[]y</pre>",
             stepFunction: async (editor) => {
                 pasteHtml(editor, "<h1>abc</h1><h2>def</h2><h3>ghi</h3>");
             },
-            contentAfter: "<pre>x<h1>abc</h1><h2>def</h2><h3>ghi[]</h3>y</pre>",
+            contentAfter: "<pre>xabc\ndef\nghi[]y</pre>",
+        });
+    });
+    test("should paste as plain text within pre", async () => {
+        await testEditor({
+            contentBefore: "<pre>[]<br></pre>",
+            stepFunction: async (editor) => {
+                pasteHtml(
+                    editor,
+                    '<div class="o-paragraph">a<strong>bcd</strong><font style="color: rgb(255, 0, 0);">efg</font><font style="background-color: rgba(255, 156, 0, 0.6);">hij</font><span class="display-3-fs">klm</span>no</div>'
+                );
+            },
+            contentAfter: "<pre>abcdefghijklmno[]</pre>",
+        });
+    });
+    test("should paste lists within pre as plain text and keep the list style and indentation (1)", async () => {
+        await testEditor({
+            contentBefore: "<pre>[]<br></pre>",
+            stepFunction: async (editor) => {
+                pasteHtml(
+                    editor,
+                    '<ol><li>abc</li><li>def</li><li class="oe-nested"><ol><li>ghi</li><li class="oe-nested"><ol><li>jkl</li></ol></li><li>mno</li></ol></li><li>pqr</li></ol>'
+                );
+            },
+            contentAfter:
+                "<pre>1. abc\n2. def\n    1. ghi\n        1. jkl\n    2. mno\n3. pqr[]</pre>",
+        });
+    });
+
+    test("should paste lists within pre as plain text and keep the list style and indentation (2)", async () => {
+        await testEditor({
+            contentBefore: "<pre>[]<br></pre>",
+            stepFunction: async (editor) => {
+                pasteHtml(
+                    editor,
+                    '<ul><li>abc</li><li>def</li><li class="oe-nested"><ul><li>ghi</li><li class="oe-nested"><ul><li>jkl</li></ul></li><li>mno</li></ul></li><li>pqr</li></ul>'
+                );
+            },
+            contentAfter: "<pre>* abc\n* def\n    * ghi\n        * jkl\n    * mno\n* pqr[]</pre>",
+        });
+    });
+
+    test("should paste lists within pre as plain text and keep the list style and indentation (3)", async () => {
+        await testEditor({
+            contentBefore: "<pre>[]<br></pre>",
+            stepFunction: async (editor) => {
+                pasteHtml(
+                    editor,
+                    '<ul class="o_checklist"><li>abc</li><li>def</li><li class="oe-nested"><ul class="o_checklist"><li>ghi</li><li class="oe-nested"><ul class="o_checklist"><li>jkl</li></ul class="o_checklist"></li><li>mno</li></ul class="o_checklist"></li><li>pqr</li></ul class="o_checklist">'
+                );
+            },
+            contentAfter:
+                "<pre>[] abc\n[] def\n    [] ghi\n        [] jkl\n    [] mno\n[] pqr[]</pre>",
+        });
+    });
+    test("should paste nested lists of different types within pre as plain text and keep the list style and indentation", async () => {
+        await testEditor({
+            contentBefore: "<pre>[]<br></pre>",
+            stepFunction: async (editor) => {
+                pasteHtml(
+                    editor,
+                    '<ol><li>ab</li><li class="oe-nested"><ul><li>cd</li><li class="oe-nested"><ul class="o_checklist"><li>ef</li><li class="oe-nested"><ol><li>gh</li></ol></li><li>ij</li></ul></li><li>kl</li></ul></li><li>mn</li></ol>'
+                );
+            },
+            contentAfter:
+                "<pre>1. ab\n    * cd\n        [] ef\n            1. gh\n        [] ij\n    * kl\n2. mn[]</pre>",
         });
     });
 });
@@ -2313,7 +2960,7 @@ describe("link", () => {
             });
         });
 
-        test("should paste and not transform an URL in a existing link (collapsed)", async () => {
+        test("should paste and not transform an URL in a existing link (collapsed) (1)", async () => {
             await testEditor({
                 contentBefore: '<p>a<a href="http://existing.com">b[]c</a>d</p>',
                 stepFunction: async (editor) => {
@@ -2321,6 +2968,9 @@ describe("link", () => {
                 },
                 contentAfter: '<p>a<a href="http://existing.com">bhttp://www.xyz.com[]c</a>d</p>',
             });
+        });
+
+        test("should paste and not transform an URL in a existing link (collapsed) (2)", async () => {
             await testEditor({
                 contentBefore: '<p>a<a href="http://existing.com">b[]c</a>d</p>',
                 stepFunction: async (editor) => {
@@ -2330,18 +2980,21 @@ describe("link", () => {
             });
         });
 
-        test("should paste and transform an URL in a existing link if pasting valid url (collapsed)", async () => {
+        test("should paste and update an URL in a existing link if label and url are aligned (1)", async () => {
             await testEditor({
                 contentBefore: '<p>a<a href="http://existing.com">[]c</a>d</p>',
                 stepFunction: async (editor) => {
                     pasteText(editor, "https://www.xyz.xdc");
                 },
-                contentAfter: '<p>a<a href="https://www.xyz.xdcc">https://www.xyz.xdc[]c</a>d</p>',
+                contentAfter: '<p>a<a href="http://existing.com">https://www.xyz.xdc[]c</a>d</p>',
             });
+        });
+
+        test("should paste and update an URL in a existing link if label and url are aligned (2)", async () => {
             await testEditor({
-                contentBefore: '<p>a<a href="http://existing.com">b[].com</a>d</p>',
+                contentBefore: '<p>a<a href="http://bo.com">bo[].com</a>d</p>',
                 stepFunction: async (editor) => {
-                    pasteText(editor, "oom");
+                    pasteText(editor, "om");
                 },
                 contentAfter: '<p>a<a href="http://boom.com">boom[].com</a>d</p>',
             });
@@ -2372,7 +3025,7 @@ describe("link", () => {
             );
             pasteText(editor, "http://odoo.com");
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(0);
+            await expectElementCount(".o-we-powerbox", 0);
             expect(cleanLinkArtifacts(getContent(el))).toBe(
                 `<p>xy<a href="http://odoo.com">http://odoo.com</a>[]z</p>`
             );
@@ -2385,7 +3038,7 @@ describe("link", () => {
             );
             pasteText(editor, imgUrl);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(1);
+            await expectElementCount(".o-we-powerbox", 1);
             expect(getContent(el)).toBe(`<p>xy${imgUrl}[]z</p>`);
 
             await press("Enter");
@@ -2398,7 +3051,7 @@ describe("link", () => {
             );
             pasteText(editor, imgUrl);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(1);
+            await expectElementCount(".o-we-powerbox", 1);
             expect(getContent(el)).toBe(`<p>xy${imgUrl}[]z</p>`);
 
             await press("ArrowDown");
@@ -2410,7 +3063,7 @@ describe("link", () => {
             );
         });
 
-        test("should paste and transform plain text content over an empty link (collapsed)", async () => {
+        test("should paste and transform plain text content over an empty link (collapsed) (1)", async () => {
             await testEditor({
                 contentBefore: '<p><a href="#">[]\u200B</a></p>',
                 stepFunction: async (editor) => {
@@ -2418,13 +3071,16 @@ describe("link", () => {
                 },
                 contentAfter: '<p>abc <a href="http://www.odoo.com">www.odoo.com</a> xyz[]</p>',
             });
+        });
+
+        test("should paste and transform plain text content over an empty link (collapsed) (2)", async () => {
             await testEditor({
                 contentBefore: '<p><a href="#">[]\u200B</a></p>',
                 stepFunction: async (editor) => {
                     pasteText(editor, "odoo.com\ngoogle.com");
                 },
                 contentAfter:
-                    '<p style="margin-bottom: 0px;"><a href="http://odoo.com">odoo.com</a></p>' +
+                    '<div><a href="http://odoo.com">odoo.com</a></div>' +
                     '<p><a href="http://google.com">google.com</a>[]</p>',
             });
         });
@@ -2435,11 +3091,24 @@ describe("link", () => {
                 stepFunction: async (editor) => {
                     pasteHtml(
                         editor,
+                        '<a href="www.odoo.com">odoo.com</a><br><a href="google.com">google.com</a>'
+                    );
+                },
+                contentAfter:
+                    '<p><a href="www.odoo.com">odoo.com</a></p><p><a href="https://google.com">google.com[]</a></p>',
+            });
+        });
+        test("should paste html content over an empty link (collapsed) (2)", async () => {
+            await testEditor({
+                contentBefore: '<p><a href="#">[]\u200B</a></p>',
+                stepFunction: async (editor) => {
+                    pasteHtml(
+                        editor,
                         '<a href="www.odoo.com">odoo.com</a><br><a href="www.google.com">google.com</a>'
                     );
                 },
                 contentAfter:
-                    '<p><a href="www.odoo.com">odoo.com</a></p><p><a href="www.google.com">google.com</a>[]</p>',
+                    '<p><a href="www.odoo.com">odoo.com</a></p><p><a href="www.google.com">google.com[]</a></p>',
             });
         });
 
@@ -2447,7 +3116,7 @@ describe("link", () => {
             const { el, editor } = await setupEditor("<p>[]</p>");
             pasteText(editor, `abc ${url} def`);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(0);
+            await expectElementCount(".o-we-powerbox", 0);
             expect(cleanLinkArtifacts(getContent(el))).toBe(
                 `<p>abc <a href="${url}">${url}</a> def[]</p>`
             );
@@ -2457,7 +3126,7 @@ describe("link", () => {
             const { el, editor } = await setupEditor("<p>[]</p>");
             pasteText(editor, `abc ${imgUrl} def`);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(0);
+            await expectElementCount(".o-we-powerbox", 0);
             expect(cleanLinkArtifacts(getContent(el))).toBe(
                 `<p>abc <a href="${imgUrl}">${imgUrl}</a> def[]</p>`
             );
@@ -2467,7 +3136,7 @@ describe("link", () => {
             const { el, editor } = await setupEditor("<p>[]</p>");
             pasteText(editor, `abc ${videoUrl} def`);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(0);
+            await expectElementCount(".o-we-powerbox", 0);
             expect(cleanLinkArtifacts(getContent(el))).toBe(
                 `<p>abc <a href="${videoUrl}">${videoUrl}</a> def[]</p>`
             );
@@ -2477,7 +3146,7 @@ describe("link", () => {
             const { el, editor } = await setupEditor("<p>[]</p>");
             pasteText(editor, `${url} ${videoUrl} ${imgUrl}`);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(0);
+            await expectElementCount(".o-we-powerbox", 0);
             expect(cleanLinkArtifacts(getContent(el))).toBe(
                 `<p><a href="${url}">${url}</a> <a href="${videoUrl}">${videoUrl}</a> <a href="${imgUrl}">${imgUrl}</a>[]</p>`
             );
@@ -2487,7 +3156,7 @@ describe("link", () => {
             const { el, editor } = await setupEditor("<p>[]</p>");
             pasteText(editor, `${url} abc ${videoUrl} def ${imgUrl}`);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(0);
+            await expectElementCount(".o-we-powerbox", 0);
             expect(cleanLinkArtifacts(getContent(el))).toBe(
                 `<p><a href="${url}">${url}</a> abc <a href="${videoUrl}">${videoUrl}</a> def <a href="${imgUrl}">${imgUrl}</a>[]</p>`
             );
@@ -2598,7 +3267,7 @@ describe("link", () => {
             const { el, editor } = await setupEditor("<p>[xyz]</p>");
             pasteText(editor, `abc ${url} def`);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(0);
+            await expectElementCount(".o-we-powerbox", 0);
             expect(cleanLinkArtifacts(getContent(el))).toBe(
                 `<p>abc <a href="${url}">${url}</a> def[]</p>`
             );
@@ -2608,7 +3277,7 @@ describe("link", () => {
             const { el, editor } = await setupEditor("<p>[xyz]</p>");
             pasteText(editor, `abc ${imgUrl} def`);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(0);
+            await expectElementCount(".o-we-powerbox", 0);
             expect(cleanLinkArtifacts(getContent(el))).toBe(
                 `<p>abc <a href="${imgUrl}">${imgUrl}</a> def[]</p>`
             );
@@ -2618,7 +3287,7 @@ describe("link", () => {
             const { el, editor } = await setupEditor("<p>[xyz]</p>");
             pasteText(editor, `abc ${videoUrl} def`);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(0);
+            await expectElementCount(".o-we-powerbox", 0);
             expect(cleanLinkArtifacts(getContent(el))).toBe(
                 `<p>abc <a href="${videoUrl}">${videoUrl}</a> def[]</p>`
             );
@@ -2628,7 +3297,7 @@ describe("link", () => {
             const { el, editor } = await setupEditor("<p>[xyz]</p>");
             pasteText(editor, `${url} ${videoUrl} ${imgUrl}`);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(0);
+            await expectElementCount(".o-we-powerbox", 0);
             expect(cleanLinkArtifacts(getContent(el))).toBe(
                 `<p><a href="${url}">${url}</a> <a href="${videoUrl}">${videoUrl}</a> <a href="${imgUrl}">${imgUrl}</a>[]</p>`
             );
@@ -2664,7 +3333,29 @@ describe("link", () => {
             });
         });
 
-        test("should paste and transform plain text content over a link if all of its contents is selected (not collapsed)", async () => {
+        test("should paste plain text content inside a link if all of its contents is selected but link is inside non-editable (not collapsed)", async () => {
+            await testEditor({
+                contentBefore:
+                    '<p contenteditable="false">a<a href="#" contenteditable="true">[xyz]</a>d</p>',
+                stepFunction: async (editor) => {
+                    pasteText(editor, "bc");
+                },
+                contentAfter:
+                    '<p contenteditable="false">a<a href="#" contenteditable="true">bc[]</a>d</p>',
+            });
+        });
+
+        test("should paste plain text content inside a link if all of its contents is selected but link is unremovable (not collapsed)", async () => {
+            await testEditor({
+                contentBefore: '<p>a<a href="#" class="oe_unremovable">[xyz]</a>d</p>',
+                stepFunction: async (editor) => {
+                    pasteText(editor, "bc");
+                },
+                contentAfter: '<p>a<a href="#" class="oe_unremovable">bc[]</a>d</p>',
+            });
+        });
+
+        test("should paste and transform plain text content over a link if all of its contents is selected (not collapsed) (1)", async () => {
             await testEditor({
                 contentBefore: '<p><a href="#">[xyz]</a></p>',
                 stepFunction: async (editor) => {
@@ -2672,6 +3363,9 @@ describe("link", () => {
                 },
                 contentAfter: '<p><a href="http://www.odoo.com">www.odoo.com</a>[]</p>',
             });
+        });
+
+        test("should paste and transform plain text content over a link if all of its contents is selected (not collapsed) (2)", async () => {
             await testEditor({
                 contentBefore: '<p><a href="#">[xyz]</a></p>',
                 stepFunction: async (editor) => {
@@ -2687,7 +3381,7 @@ describe("link", () => {
             );
             pasteText(editor, imgUrl);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(1);
+            await expectElementCount(".o-we-powerbox", 1);
             expect(getContent(el)).toBe(
                 `<p>abhttps://download.odoocdn.com/icons/website/static/description/icon.png[]cd</p>`
             );
@@ -2701,7 +3395,7 @@ describe("link", () => {
             );
             pasteText(editor, imgUrl);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(1);
+            await expectElementCount(".o-we-powerbox", 1);
             expect(getContent(el)).toBe(
                 `<p>abhttps://download.odoocdn.com/icons/website/static/description/icon.png[]cd</p>`
             );
@@ -2718,11 +3412,24 @@ describe("link", () => {
                 stepFunction: async (editor) => {
                     pasteHtml(
                         editor,
+                        '<a href="www.odoo.com">odoo.com</a><br><a href="google.com">google.com</a>'
+                    );
+                },
+                contentAfter:
+                    '<p><a href="www.odoo.com">odoo.com</a></p><p><a href="https://google.com">google.com[]</a></p>',
+            });
+        });
+        test("should paste html content over a link if all of its contents is selected (not collapsed) (2)", async () => {
+            await testEditor({
+                contentBefore: '<p><a href="#">[xyz]</a></p>',
+                stepFunction: async (editor) => {
+                    pasteHtml(
+                        editor,
                         '<a href="www.odoo.com">odoo.com</a><br><a href="www.google.com">google.com</a>'
                     );
                 },
                 contentAfter:
-                    '<p><a href="www.odoo.com">odoo.com</a></p><p><a href="www.google.com">google.com</a>[]</p>',
+                    '<p><a href="www.odoo.com">odoo.com</a></p><p><a href="www.google.com">google.com[]</a></p>',
             });
         });
     });
@@ -2734,7 +3441,7 @@ describe("images", () => {
             const { el, editor } = await setupEditor("<p>ab[]cd</p>");
             pasteText(editor, imgUrl);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(1);
+            await expectElementCount(".o-we-powerbox", 1);
             await press("Enter");
             expect(getContent(el)).toBe(`<p>ab<img src="${imgUrl}">[]cd</p>`);
         });
@@ -2743,7 +3450,7 @@ describe("images", () => {
             const { el, editor } = await setupEditor('<p>a<span class="a">b[]c</span>d</p>');
             pasteText(editor, imgUrl);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(1);
+            await expectElementCount(".o-we-powerbox", 1);
             await press("Enter");
             expect(getContent(el)).toBe(
                 `<p>a<span class="a">b<img src="${imgUrl}">[]c</span>d</p>`
@@ -2757,7 +3464,7 @@ describe("images", () => {
 
             pasteText(editor, imgUrl);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(0);
+            await expectElementCount(".o-we-powerbox", 0);
             expect(cleanLinkArtifacts(getContent(el))).toBe(
                 `<p>a<a href="http://existing.com">b<img src="${imgUrl}">[]c</a>d</p>`
             );
@@ -2768,7 +3475,7 @@ describe("images", () => {
 
             pasteText(editor, imgUrl);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(1);
+            await expectElementCount(".o-we-powerbox", 1);
             // Pick the second command (Paste as URL)
             await press("ArrowDown");
             await press("Enter");
@@ -2784,7 +3491,7 @@ describe("images", () => {
             pasteText(editor, "*should not disappear*");
             pasteText(editor, imgUrl);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(1);
+            await expectElementCount(".o-we-powerbox", 1);
             // Pick the second command (Paste as URL)
             await press("ArrowDown");
             await press("Enter");
@@ -2800,7 +3507,7 @@ describe("images", () => {
 
             pasteText(editor, imgUrl);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(1);
+            await expectElementCount(".o-we-powerbox", 1);
             await press("Enter");
             expect(cleanLinkArtifacts(getContent(el))).toBe(`<p>ab<img src="${imgUrl}">[]cd</p>`);
         });
@@ -2812,7 +3519,7 @@ describe("images", () => {
 
             pasteText(editor, imgUrl);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(1);
+            await expectElementCount(".o-we-powerbox", 1);
             await press("Enter");
             expect(getContent(el)).toBe(
                 `<p>a<span class="a">b<img src="${imgUrl}">[]c</span>d</p>`
@@ -2826,7 +3533,7 @@ describe("images", () => {
 
             pasteText(editor, imgUrl);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(0);
+            await expectElementCount(".o-we-powerbox", 0);
             expect(cleanLinkArtifacts(getContent(el))).toBe(
                 `<p>a<a href="http://existing.com">b<img src="${imgUrl}">[]c</a>d</p>`
             );
@@ -2837,7 +3544,7 @@ describe("images", () => {
 
             pasteText(editor, imgUrl);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(1);
+            await expectElementCount(".o-we-powerbox", 1);
             // Pick the second command (Paste as URL)
             await press("ArrowDown");
             await press("Enter");
@@ -2863,7 +3570,7 @@ describe("images", () => {
             // paste url
             pasteText(editor, imgUrl);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(1);
+            await expectElementCount(".o-we-powerbox", 1);
             // Pick the second command (Paste as URL)
             await press("ArrowDown");
             await press("Enter");
@@ -2876,7 +3583,7 @@ describe("images", () => {
             const { el, editor } = await setupEditor("<p>[abc]</p>");
             pasteText(editor, imgUrl);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(1);
+            await expectElementCount(".o-we-powerbox", 1);
             // Pick first command (Embed image)
             await press("Enter");
             // Undo
@@ -2889,7 +3596,7 @@ describe("images", () => {
 
             pasteText(editor, imgUrl);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(1);
+            await expectElementCount(".o-we-powerbox", 1);
             // Pick second command (Paste as URL)
             await press("ArrowDown");
             await press("Enter");
@@ -2913,7 +3620,7 @@ describe("youtube video", () => {
             const { el, editor } = await setupEditor("<p>ab[]cd</p>");
             pasteText(editor, videoUrl);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(1);
+            await expectElementCount(".o-we-powerbox", 1);
             // Force powerbox validation on the default first choice
             await press("Enter");
             // Wait for the getYoutubeVideoElement promise to resolve.
@@ -2927,7 +3634,7 @@ describe("youtube video", () => {
             const { el, editor } = await setupEditor('<p>a<span class="a">b[]c</span>d</p>');
             pasteText(editor, "https://youtu.be/dQw4w9WgXcQ");
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(1);
+            await expectElementCount(".o-we-powerbox", 1);
             // Force powerbox validation on the default first choice
             await press("Enter");
             // Wait for the getYoutubeVideoElement promise to resolve.
@@ -2955,7 +3662,7 @@ describe("youtube video", () => {
             const { el, editor } = await setupEditor("<p>[]</p>");
             pasteText(editor, url);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(1);
+            await expectElementCount(".o-we-powerbox", 1);
             // Pick the second command (Paste as URL)
             await press("ArrowDown");
             await press("Enter");
@@ -2969,7 +3676,7 @@ describe("youtube video", () => {
             pasteText(editor, "*should not disappear*");
             pasteText(editor, url);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(1);
+            await expectElementCount(".o-we-powerbox", 1);
             // Pick the second command (Paste as URL)
             await press("ArrowDown");
             await press("Enter");
@@ -2991,7 +3698,7 @@ describe("youtube video", () => {
             const { el, editor } = await setupEditor("<p>ab[xxx]cd</p>");
             pasteText(editor, "https://youtu.be/dQw4w9WgXcQ");
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(1);
+            await expectElementCount(".o-we-powerbox", 1);
             // Force powerbox validation on the default first choice
             await press("Enter");
             // Wait for the getYoutubeVideoElement promise to resolve.
@@ -3007,7 +3714,7 @@ describe("youtube video", () => {
             );
             pasteText(editor, videoUrl);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(1);
+            await expectElementCount(".o-we-powerbox", 1);
             // Force powerbox validation on the default first choice
             await press("Enter");
             // Wait for the getYoutubeVideoElement promise to resolve.
@@ -3034,7 +3741,7 @@ describe("youtube video", () => {
             const { el, editor } = await setupEditor("<p>ab[xxx]cd</p>");
             pasteText(editor, videoUrl);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(1);
+            await expectElementCount(".o-we-powerbox", 1);
             // Pick the second command (Paste as URL)
             await press("ArrowDown");
             await press("Enter");
@@ -3061,7 +3768,7 @@ describe("youtube video", () => {
             // paste url
             pasteText(editor, videoUrl);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(1);
+            await expectElementCount(".o-we-powerbox", 1);
             // Pick the second command (Paste as URL)
             await press("ArrowDown");
             await press("Enter");
@@ -3074,7 +3781,7 @@ describe("youtube video", () => {
             const { el, editor } = await setupEditor("<p>[abc]</p>");
             pasteText(editor, videoUrl);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(1);
+            await expectElementCount(".o-we-powerbox", 1);
             // Force powerbox validation on the default first choice
             await press("Enter");
             // Undo
@@ -3086,7 +3793,7 @@ describe("youtube video", () => {
             const { el, editor } = await setupEditor("<p>[abc]</p>");
             pasteText(editor, videoUrl);
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(1);
+            await expectElementCount(".o-we-powerbox", 1);
             // Pick the second command (Paste as URL)
             await press("ArrowDown");
             await press("Enter");
@@ -3102,9 +3809,9 @@ describe("Odoo editor own html", () => {
         await testEditor({
             contentBefore: "<p>a[]b</p>",
             stepFunction: async (editor) => {
-                pasteOdooEditorHtml(editor, '<div class="custom-paste">b</div>');
+                pasteOdooEditorHtml(editor, '<div class="custom-paste oe_unbreakable">b</div>');
             },
-            contentAfter: '<p>a</p><div class="custom-paste">b</div><p>[]b</p>',
+            contentAfter: '<p>a</p><div class="custom-paste oe_unbreakable">b</div><p>[]b</p>',
         });
     });
 
@@ -3338,7 +4045,7 @@ describe("Paste HTML tables", () => {
 </div>`
                 );
             },
-            contentAfter: `<table class="table table-bordered">
+            contentAfter: `<table class="table table-bordered o_table">
 ${"            "}
 ${"            "}
             <tbody><tr>
@@ -3362,11 +4069,7 @@ ${"            "}
                 <td>14pt MONO TEXT
                 </td>
             </tr>
-        </tbody></table><p>
-${"    "}
-
-${"    "}
-[]</p>`,
+        </tbody></table><p>[]<br></p>`,
         });
     });
 
@@ -3441,7 +4144,7 @@ ${"    "}
 </google-sheets-html-origin>`
                 );
             },
-            contentAfter: `<table class="table table-bordered">
+            contentAfter: `<table class="table table-bordered o_table">
 ${"        "}
 ${"            "}
 ${"            "}
@@ -3477,8 +4180,7 @@ ${"        "}
                 <td>14pt MONO TEXT</td>
             </tr>
         </tbody>
-    </table><p>
-[]</p>`,
+    </table><p>[]<br></p>`,
         });
     });
 
@@ -3577,7 +4279,7 @@ ${"        "}
 </html>`
                 );
             },
-            contentAfter: `<table class="table table-bordered">
+            contentAfter: `<table class="table table-bordered o_table">
 ${"        "}
 ${"        "}
         <tbody><tr>
@@ -3607,22 +4309,132 @@ ${"        "}
                 14pt MONO TEXT
             </td>
         </tr>
-    </tbody></table><p>
+    </tbody></table><p>[]<br></p>`,
+        });
+    });
 
+    test("should apply default table classes (table, table-bordered, o_table) on paste", async () => {
+        await testEditor({
+            contentBefore: `
+                <p>[]<br></p>
+            `,
+            stepFunction: async (editor) => {
+                pasteHtml(
+                    editor,
+                    unformat(`
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    `)
+                );
+            },
+            contentAfter: unformat(`
+                <table class="table table-bordered o_table">
+                    <tbody>
+                        <tr>
+                            <td><p><br></p></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>[]<br></p>
+            `),
+        });
+    });
 
-[]</p>`,
+    test("should move all rows from thead to tbody", async () => {
+        await testEditor({
+            contentBefore: "<p>[]<br></p>",
+            stepFunction: async (editor) => {
+                pasteHtml(
+                    editor,
+                    unformat(`
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>1</th>
+                                    <th>2</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>2</td>
+                                </tr>
+                                <tr>
+                                    <td>1</td>
+                                    <td>2</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    `)
+                );
+            },
+            contentAfter: unformat(`
+                        <table class="table table-bordered o_table">
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>2</td>
+                                </tr>
+                                <tr>
+                                    <td>1</td>
+                                    <td>2</td>
+                                </tr>
+                                <tr>
+                                    <td>1</td>
+                                    <td>2</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p>[]<br></p>
+                    `),
+        });
+    });
+    test("should replace thead element with tbody", async () => {
+        await testEditor({
+            contentBefore: "<p>[]<br></p>",
+            stepFunction: async (editor) => {
+                pasteHtml(
+                    editor,
+                    unformat(`
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>1</th>
+                                    <th>2</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    `)
+                );
+            },
+            contentAfter: unformat(`
+                        <table class="table table-bordered o_table">
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>2</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p>[]<br></p>
+                    `),
         });
     });
 });
 
 describe("onDrop", () => {
-    test("should add text from htmlTransferItem", async () => {
+    test("should drop text from htmlTransferItem", async () => {
         const { el } = await setupEditor("<p>a[b]cd</p>");
         const pElement = el.firstChild;
         const textNode = pElement.firstChild;
 
         patchWithCleanup(document, {
-            caretPositionFromPoint: () => ({ offsetNode: textNode, offset: 3 }),
+            caretPositionFromPoint: () => ({ offsetNode: textNode, offset: 0 }),
         });
 
         const dropData = new DataTransfer();
@@ -3630,7 +4442,7 @@ describe("onDrop", () => {
         await dispatch(pElement, "drop", { dataTransfer: dropData });
         await tick();
 
-        expect(getContent(el)).toBe("<p>abcb[]d</p>");
+        expect(getContent(el)).toBe("<p>b[]acd</p>");
     });
     test("should not be able to paste inside some branded node", async () => {
         const { el } = await setupEditor(`<p data-oe-model="foo" data-oe-type="text">a[b]cd</p>`);
@@ -3650,7 +4462,7 @@ describe("onDrop", () => {
         expect(getContent(el)).toBe(`<p data-oe-model="foo" data-oe-type="text">a[b]cd</p>`);
     });
     test("should add new images form fileTransferItems", async () => {
-        const { el } = await setupEditor(`<p>a[b]cd</p>`);
+        const { el } = await setupEditor(`<p>ab[]cd</p>`);
         const pElement = el.firstChild;
         const textNode = pElement.firstChild;
 
@@ -3705,6 +4517,64 @@ describe("onDrop", () => {
 
         expect(getContent(el)).toBe(
             `<p>ab<img class="img-fluid" data-file-name="image.png" src="${base64Image}">[]c</p>`
+        );
+    });
+    test("should be able to drag and drop icon", async () => {
+        const { el } = await setupEditor(`<p>a<span class="fa fa-heart">[]</span>bc</p><p>def</p>`);
+        const pElement = el.lastElementChild;
+        const iconElement = el.querySelector(".fa");
+        const defTextNode = pElement.firstChild;
+
+        patchWithCleanup(document, {
+            caretPositionFromPoint: () => ({
+                offsetNode: defTextNode,
+                offset: defTextNode.textContent.length,
+            }),
+        });
+
+        const dragdata = new DataTransfer();
+        await dispatch(iconElement, "dragstart", { dataTransfer: dragdata });
+
+        const dropData = new DataTransfer();
+        // Simulate the text/html data with unwanted styles that the browser would do.
+        dropData.setData(
+            "text/html",
+            `<span class="fa fa-heart" contenteditable="false" style="font-weight: normal">\u200b</span>`
+        );
+        await dispatch(pElement, "drop", { dataTransfer: dropData });
+        await animationFrame();
+
+        expect(getContent(el)).toBe(
+            '<p>abc</p><p>def\ufeff<span class="fa fa-heart" contenteditable="false">\u200b</span>\ufeff[]</p>'
+        );
+    });
+    test("should be able to drag and drop icon along with text", async () => {
+        const { el } = await setupEditor(`<p>a[b<span class="fa fa-heart"></span>cd]</p><p>ef</p>`);
+        const pElement = el.lastElementChild;
+        const iconElement = el.querySelector(".fa");
+        const efTextNode = pElement.firstChild;
+
+        patchWithCleanup(document, {
+            caretPositionFromPoint: () => ({
+                offsetNode: efTextNode,
+                offset: efTextNode.textContent.length,
+            }),
+        });
+
+        const dragdata = new DataTransfer();
+        await dispatch(iconElement, "dragstart", { dataTransfer: dragdata });
+
+        const dropData = new DataTransfer();
+        // Simulate the text/html data with unwanted styles that the browser would do.
+        dropData.setData(
+            "text/html",
+            `<span style="font-weight: normal">b<span class="fa fa-heart" contenteditable="false" style="font-weight: normal">\u200b</span>cd</span>`
+        );
+        await dispatch(pElement, "drop", { dataTransfer: dropData });
+        await animationFrame();
+
+        expect(getContent(el)).toBe(
+            '<p>a</p><p>efb\ufeff<span class="fa fa-heart" contenteditable="false">\u200b</span>\ufeffcd[]</p>'
         );
     });
 });

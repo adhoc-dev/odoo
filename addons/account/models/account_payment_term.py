@@ -66,7 +66,16 @@ class AccountPaymentTerm(models.Model):
                 discount_amount_currency = (total_amount - untaxed_amount) * percentage
             else:
                 discount_amount_currency = total_amount * percentage
-            return self.currency_id.round(total_amount - discount_amount_currency)
+            amount_due = self.currency_id.round(total_amount - discount_amount_currency)
+            if self.env.context.get('active_model') == 'account.move' and (active_id := self.env.context.get('active_id')):
+                move = self.env['account.move'].browse(active_id)
+                cash_rounding = move.invoice_cash_rounding_id
+                currency = move.currency_id
+                if cash_rounding:
+                    cash_rounding_difference = cash_rounding.compute_difference(currency, amount_due)
+                    if not currency.is_zero(cash_rounding_difference):
+                        amount_due = self.currency_id.round(amount_due + cash_rounding_difference)
+            return amount_due
         return total_amount
 
     @api.depends('company_id')
@@ -255,6 +264,8 @@ class AccountPaymentTerm(models.Model):
 
     def _get_last_discount_date(self, date_ref):
         self.ensure_one()
+        if not date_ref:
+            return None
         return date_ref + relativedelta(days=self.discount_days or 0) if self.early_discount else False
 
     def _get_last_discount_date_formatted(self, date_ref):
@@ -262,6 +273,12 @@ class AccountPaymentTerm(models.Model):
         if not date_ref:
             return None
         return format_date(self.env, self._get_last_discount_date(date_ref))
+
+    def copy_data(self, default=None):
+        default = dict(default or {})
+        vals_list = super().copy_data(default=default)
+        return [dict(vals, name=_("%s (copy)", line.name)) for line, vals in zip(self, vals_list)]
+
 
 class AccountPaymentTermLine(models.Model):
     _name = "account.payment.term.line"

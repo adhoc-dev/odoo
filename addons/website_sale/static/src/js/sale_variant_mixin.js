@@ -486,7 +486,9 @@ var VariantMixin = {
         if ($pricePerUom) {
             if (combination.is_combination_possible !== false && combination.base_unit_price != 0) {
                 $pricePerUom.parents(".o_base_unit_price_wrapper").removeClass("d-none");
-                $pricePerUom.text(this._priceToStr(combination.base_unit_price));
+                $pricePerUom.text(
+                    this._priceToStr(combination.base_unit_price, combination.currency_precision)
+                );
                 $parent.find(".oe_custom_base_unit:first").text(combination.base_unit_name);
             } else {
                 $pricePerUom.parents(".o_base_unit_price_wrapper").addClass("d-none");
@@ -503,7 +505,7 @@ var VariantMixin = {
             $product.trigger('view_item_event', combination['product_tracking_info']);
         }
         const addToCart = $parent.find('#add_to_cart_wrap');
-        const contactUsButton = $parent.find('#contact_us_wrapper');
+        const contactUsButton = $parent.parents('#product_details').find('#contact_us_wrapper');
         const productPrice = $parent.find('.product_price');
         const quantity = $parent.find('.css_quantity');
         const product_unavailable = $parent.find('#product_unavailable');
@@ -525,8 +527,10 @@ var VariantMixin = {
         var $price = $parent.find(".oe_price:first .oe_currency_value");
         var $default_price = $parent.find(".oe_default_price:first .oe_currency_value");
         var $compare_price = $parent.find(".oe_compare_list_price")
-        $price.text(self._priceToStr(combination.price));
-        $default_price.text(self._priceToStr(combination.list_price));
+        const precision = combination.currency_precision;
+        $price.parent().addClass('decimal_precision').attr('data-precision', precision);
+        $price.text(self._priceToStr(combination.price, precision));
+        $default_price.text(self._priceToStr(combination.list_price, precision));
 
         var isCombinationPossible = true;
         if (typeof combination.is_combination_possible !== "undefined") {
@@ -578,9 +582,8 @@ var VariantMixin = {
             .trigger('change');
 
         $parent
-            .find('.o_product_tags')
-            .first()
-            .html(combination.product_tags);
+            .find('.o_product_tags:first')
+            .replaceWith(combination.product_tags);
 
         this.handleCustomValues($(ev.target));
     },
@@ -590,12 +593,12 @@ var VariantMixin = {
      *
      * @private
      * @param {float} price
+     * @param {integer} precision
+     * @returns {string}
      */
-    _priceToStr: function (price) {
-        var precision = 2;
-
-        if ($('.decimal_precision').length) {
-            precision = parseInt($('.decimal_precision').last().data('precision'));
+    _priceToStr: function (price, precision) {
+        if (!Number.isInteger(precision)) {
+            precision = parseInt($('.decimal_precision:last').data('precision') ?? 2);
         }
         var formatted = price.toFixed(precision).split(".");
         const { thousandsSep, decimalPoint, grouping } = localization;

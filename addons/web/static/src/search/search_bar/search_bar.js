@@ -73,7 +73,7 @@ export class SearchBar extends Component {
         this.inputRef =
             this.env.config.disableSearchBarAutofocus || !this.props.autofocus
                 ? useRef("autofocus")
-                : useAutofocus({ mobile: this.props.toggler !== undefined }); // only force the focus on touch devices when the toggler is present on small devices
+                : useAutofocus({ mobile: this.ui.isSmall }); // only force the focus on touch devices on small screens
 
         useBus(this.env.searchModel, "focus-search", () => {
             this.inputRef.el.focus();
@@ -592,7 +592,7 @@ export class SearchBar extends Component {
                         ev.preventDefault();
                         if (focusedItem.isExpanded) {
                             focusedIndex = this.state.focusedIndex + 1;
-                        } else {
+                        } else if (!ev.repeat) {
                             this.toggleItem(focusedItem, true);
                         }
                     } else if (ev.target.selectionStart === this.state.query.length) {

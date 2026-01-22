@@ -36,7 +36,7 @@
             <t t-call="website.record_cover">
                 <t t-set="_record" t-value="record"/>
                 <t t-set="use_filters" t-value="True"/>
-                <t t-set="additionnal_classes" t-value="'h-100 w-100 bg-600 position-absolute'"/>
+                <t t-set="additionnal_classes" t-value="'h-100 w-100 bg-600 position-absolute o_snippet_not_selectable'"/>
 
                 <div class="s_blog_post_big_picture_infos position-absolute top-0 start-0 w-100 h-100 text-white">
                     <div class="s_blog_posts_post_cover_header d-flex flex-column justify-content-end w-100">
@@ -56,14 +56,14 @@
 <template id="dynamic_filter_template_blog_post_horizontal" name="Horizontal">
     <div t-foreach="records" t-as="data" class="s_blog_posts_post w-100" data-number-of-elements="1">
         <t t-set="record" t-value="data['_record']"/>
-        <div t-attf-class="pb-4 {{record_last and 'border-0' or 'border-bottom'}}">
+        <div t-attf-class="pb-4 {{not data_last and 'border-bottom'}}">
             <div class="row flex-md-nowrap">
                 <div class="s_blog_posts_post_cover_col col mb-2 mb-md-0">
                     <a class="d-block h-100 text-decoration-none" t-att-href="data['call_to_action_url']" t-att-title="'Read ' + data['name']">
                         <div class="s_blog_posts_post_cover h-100">
                             <t t-call="website.record_cover">
                                 <t t-set="_record" t-value="record"/>
-                                <t t-set="additionnal_classes" t-value="'h-100 rounded-3 overflow-hidden'"/>
+                                <t t-set="additionnal_classes" t-value="'h-100 rounded-3 overflow-hidden o_snippet_not_selectable'"/>
                             </t>
                         </div>
                     </a>
@@ -95,7 +95,7 @@
                 <div class="s_blog_posts_post_cover o_not_editable card-img-top ratio ratio-16x9">
                     <t t-call="website.record_cover">
                         <t t-set="_record" t-value="record"/>
-                        <t t-set="additionnal_classes" t-value="'position-absolute w-100 h-100 bg-600'"/>
+                        <t t-set="additionnal_classes" t-value="'position-absolute w-100 h-100 bg-600 o_snippet_not_selectable'"/>
                     </t>
                 </div>
                 <div class="card-body">
@@ -205,16 +205,14 @@
 </template>
 
 <!-- Assets -->
-<record id="website_blog.s_blog_posts_000_scss" model="ir.asset">
-    <field name="name">Blog posts 000 SCSS</field>
-    <field name="bundle">web.assets_frontend</field>
-    <field name="path">website_blog/static/src/snippets/s_blog_posts/000.scss</field>
-</record>
+<asset id="website_blog.s_blog_posts_000_scss" name="Blog posts 000 SCSS">
+    <bundle>web.assets_frontend</bundle>
+    <path>website_blog/static/src/snippets/s_blog_posts/000.scss</path>
+</asset>
 
-<record id="website_blog.s_blog_posts_000_js" model="ir.asset">
-    <field name="name">Blog posts 000 JS</field>
-    <field name="bundle">web.assets_frontend</field>
-    <field name="path">website_blog/static/src/snippets/s_blog_posts/000.js</field>
-</record>
+<asset id="website_blog.s_blog_posts_000_js" name="Blog posts 000 JS">
+    <bundle>web.assets_frontend</bundle>
+    <path>website_blog/static/src/snippets/s_blog_posts/000.js</path>
+</asset>
 
 </odoo>

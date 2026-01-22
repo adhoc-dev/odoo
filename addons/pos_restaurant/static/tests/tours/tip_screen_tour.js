@@ -12,7 +12,6 @@ import * as Chrome from "@point_of_sale/../tests/tours/utils/chrome_util";
 import { registry } from "@web/core/registry";
 
 registry.category("web_tour.tours").add("PosResTipScreenTour", {
-    checkDelay: 50,
     steps: () =>
         [
             // Create order that is synced when draft.
@@ -27,6 +26,7 @@ registry.category("web_tour.tours").add("PosResTipScreenTour", {
             FloorScreen.clickTable("2"),
             ProductScreen.totalAmountIs("2.0"),
             ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Bank"),
             PaymentScreen.clickPaymentMethod("Bank"),
             PaymentScreen.clickValidate(),
             TipScreen.isShown(),
@@ -138,11 +138,6 @@ registry.category("web_tour.tours").add("PosResTipScreenTour", {
             PaymentScreen.emptyPaymentlines("5.0"),
             PaymentScreen.clickPaymentMethod("Cash"),
             PaymentScreen.clickValidate(),
-            {
-                ...Dialog.confirm(),
-                content:
-                    "acknowledge printing error ( because we don't have printer in the test. )",
-            },
             ReceiptScreen.isShown(),
 
             // order 5
@@ -156,11 +151,6 @@ registry.category("web_tour.tours").add("PosResTipScreenTour", {
             PaymentScreen.clickValidate(),
             TipScreen.isShown(),
             TipScreen.clickSettle(),
-            {
-                ...Dialog.confirm(),
-                content:
-                    "acknowledge printing error ( because we don't have printer in the test. )",
-            },
             ReceiptScreen.isShown(),
             ReceiptScreen.clickNextOrder(),
             FloorScreen.isShown(),

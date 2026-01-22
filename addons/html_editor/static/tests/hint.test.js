@@ -64,8 +64,50 @@ test("should not display hint in paragraph with media content", async () => {
     expect(getContent(el)).toBe(content);
 });
 
+test("should not display hint in paragraph with tab", async () => {
+    const content =
+        '<p><span class="oe-tabs" contenteditable="false" style="width: 40px;">\t</span>\u200b[]</p>';
+    const { el } = await setupEditor(content);
+    // Unchanged, no empty paragraph hint.
+    expect(getContent(el)).toBe(content);
+});
+
+test("should display hint in paragraph with strong (bold)", async () => {
+    const { el } = await setupEditor(
+        `<p><strong data-oe-zws-empty-inline="">[]\u200B</strong></p>`
+    );
+    // hint should be visible
+    expect(getContent(el)).toBe(
+        `<p placeholder='Type "/" for commands' class="o-we-hint"><strong data-oe-zws-empty-inline="">[]\u200B</strong></p>`
+    );
+});
+
+test("should display hint in paragraph with em (italic)", async () => {
+    const { el } = await setupEditor(`<p><em data-oe-zws-empty-inline="">[]\u200B</em></p>`);
+    // hint should be visible
+    expect(getContent(el)).toBe(
+        `<p placeholder='Type "/" for commands' class="o-we-hint"><em data-oe-zws-empty-inline="">[]\u200B</em></p>`
+    );
+});
+
+test("should display hint in paragraph with u (underline)", async () => {
+    const { el } = await setupEditor(`<p><u data-oe-zws-empty-inline="">[]\u200B</u></p>`);
+    // hint should be visible
+    expect(getContent(el)).toBe(
+        `<p placeholder='Type "/" for commands' class="o-we-hint"><u data-oe-zws-empty-inline="">[]\u200B</u></p>`
+    );
+});
+
+test("should display hint in paragraph with s (strikethrough)", async () => {
+    const { el } = await setupEditor(`<p><s data-oe-zws-empty-inline="">[]\u200B</s></p>`);
+    // hint should be visible
+    expect(getContent(el)).toBe(
+        `<p placeholder='Type "/" for commands' class="o-we-hint"><s data-oe-zws-empty-inline="">[]\u200B</s></p>`
+    );
+});
+
 test("should not lose track of temporary hints on split block", async () => {
-    const { el, editor } = await setupEditor("<p>[]</p>", {});
+    const { el, editor, plugins } = await setupEditor("<p>[]</p>", {});
     expect(getContent(el)).toBe(`<p placeholder='Type "/" for commands' class="o-we-hint">[]</p>`);
     editor.shared.split.splitBlock();
     editor.shared.history.addStep();
@@ -93,6 +135,8 @@ test("should not lose track of temporary hints on split block", async () => {
             <p placeholder='Type "/" for commands' class="o-we-hint">[]<br></p>
         `)
     );
+    // Changing the selection should not generate mutations for the next step
+    expect(plugins.get("history").currentStep.mutations.length).toBe(0);
 });
 
 test("hint should only Be display for focused empty block element", async () => {

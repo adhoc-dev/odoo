@@ -3,6 +3,7 @@
 import json
 
 from babel.dates import format_date
+from collections import defaultdict
 from dateutil import relativedelta
 from datetime import timedelta, datetime
 from functools import partial
@@ -80,6 +81,7 @@ class MrpWorkcenter(models.Model):
     capacity_ids = fields.One2many('mrp.workcenter.capacity', 'workcenter_id', string='Product Capacities',
         help="Specific number of pieces that can be produced in parallel per product.", copy=True)
     kanban_dashboard_graph = fields.Text(compute='_compute_kanban_dashboard_graph')
+    resource_calendar_id = fields.Many2one(check_company=True)
 
     @api.constrains('alternative_workcenter_ids')
     def _check_alternative_workcenter(self):
@@ -229,11 +231,28 @@ class MrpWorkcenter(models.Model):
 
     @api.depends('blocked_time', 'productive_time')
     def _compute_oee(self):
-        for order in self:
-            if order.productive_time:
-                order.oee = round(order.productive_time * 100.0 / (order.productive_time + order.blocked_time), 2)
+        time_data = self.env['mrp.workcenter.productivity']._read_group(
+            domain=[
+                ('date_start', '>=', fields.Datetime.to_string(datetime.now() - relativedelta.relativedelta(months=1))),
+                ('workcenter_id', 'in', self.ids),
+                ('date_end', '!=', False),
+            ],
+            groupby=['workcenter_id', 'loss_type'],
+            aggregates=['duration:sum'],
+        )
+        time_by_workcenter = defaultdict(lambda: {'productive_time': 0.0, 'blocked_time': 0.0})
+        for data in time_data:
+            workcenter, loss_type, duration = data
+            time_to_update = 'productive_time' if loss_type == 'productive' else 'blocked_time'
+            time_by_workcenter[workcenter.id][time_to_update] += duration
+        for workcenter in self:
+            workcenter_time = time_by_workcenter[workcenter.id]
+            productive_time = workcenter_time['productive_time']
+            if productive_time:
+                blocked_time = workcenter_time['blocked_time']
+                workcenter.oee = float_round(productive_time * 100.0 / (productive_time + blocked_time), precision_digits=2)
             else:
-                order.oee = 0.0
+                workcenter.oee = 0.0
 
     def _compute_performance(self):
         wo_data = self.env['mrp.workorder']._read_group([
@@ -326,6 +345,8 @@ class MrpWorkcenter(models.Model):
         :rtype: tuple
         """
         self.ensure_one()
+        ICP = self.env['ir.config_parameter'].sudo()
+        max_planning_iterations = max(int(ICP.get_param('mrp.workcenter_max_planning_iterations', '50')), 1)
         resource = self.resource_id
         start_datetime, revert = make_aware(start_datetime)
         get_available_intervals = partial(self.resource_calendar_id._work_intervals_batch, resources=resource, tz=timezone(self.resource_calendar_id.tz))
@@ -335,11 +356,11 @@ class MrpWorkcenter(models.Model):
         get_workorder_intervals = partial(self.resource_calendar_id._leave_intervals_batch, domain=workorder_intervals_leaves_domain, resources=resource, tz=timezone(self.resource_calendar_id.tz))
         extra_leaves_slots_intervals = Intervals([(make_aware(start)[0], make_aware(stop)[0], self.env['resource.calendar.attendance']) for start, stop in extra_leaves_slots])
 
-        remaining = duration
+        remaining = duration = max(duration, 1 / 60)
         now = make_aware(datetime.now())[0]
         delta = timedelta(days=14)
         start_interval, stop_interval = None, None
-        for n in range(50):  # 50 * 14 = 700 days in advance (hardcoded)
+        for n in range(max_planning_iterations):  # 50 * 14 = 700 days in advance
             if forward:
                 date_start = start_datetime + delta * n
                 date_stop = date_start + delta
@@ -520,6 +541,8 @@ class MrpWorkcenterProductivity(models.Model):
 
     @api.onchange('duration')
     def _duration_changed(self):
+        if not self.date_end:
+            return
         self.date_start = self.date_end - timedelta(minutes=self.duration)
         self._loss_type_change()
 

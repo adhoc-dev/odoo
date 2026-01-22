@@ -83,10 +83,11 @@ export function getBasicServerData() {
  *
  * @param {string} model
  * @param {Array<string>} columns
+ * @param {{name: string, asc: boolean}[]} orderBy
  *
  * @returns { {definition: Object, columns: Array<Object>}}
  */
-export function generateListDefinition(model, columns) {
+export function generateListDefinition(model, columns, orderBy = []) {
     const cols = [];
     for (const name of columns) {
         const PyModel = Object.values(SpreadsheetModels).find((m) => m._name === model);
@@ -104,7 +105,7 @@ export function generateListDefinition(model, columns) {
             searchParams: {
                 domain: [],
                 context: {},
-                orderBy: [],
+                orderBy,
             },
             name: "List",
         },
@@ -115,8 +116,6 @@ export function generateListDefinition(model, columns) {
 export function getBasicListArchs() {
     return {
         "partner,false,list": getBasicListArch(),
-        "partner,false,search": /* xml */ `<search/>`,
-        "partner,false,form": /* xml */ `<form/>`,
     };
 }
 
@@ -130,7 +129,6 @@ export function defineSpreadsheetActions() {
             id: 1,
             name: "partner Action",
             res_model: "partner",
-            type: "ir.actions.act_window",
             xml_id: "spreadsheet.partner_action",
             views: [
                 [false, "list"],
@@ -145,11 +143,20 @@ export function defineSpreadsheetActions() {
 
 export class IrModel extends webModels.IrModel {
     display_name_for(models) {
-        const records = this.env["ir.model"].search_read([["model", "in", models]]);
-        return records.map((record) => ({
-            model: record.model,
-            display_name: record.name,
-        }));
+        const records = this.env["ir.model"].search_read(
+            [["model", "in", models]],
+            ["name", "model"]
+        );
+        const result = [];
+        for (const model of models) {
+            const record = records.find((record) => record.model === model);
+            if (record) {
+                result.push({ model: model, display_name: record.name });
+            } else {
+                result.push({ model: model, display_name: model });
+            }
+        }
+        return result;
     }
 
     _records = [
@@ -199,7 +206,7 @@ export class SpreadsheetMixin extends models.Model {
 
     spreadsheet_binary_data = fields.Binary({ string: "Spreadsheet file" });
     spreadsheet_data = fields.Text();
-    thumbnail = fields.Binary();
+    display_thumbnail = fields.Binary();
 
     get_display_names_for_spreadsheet(args) {
         const result = [];
@@ -428,8 +435,6 @@ export class Partner extends models.Model {
         list: getBasicListArch(),
         pivot: getBasicPivotArch(),
         graph: getBasicGraphArch(),
-        form: /* xml */ `<Form/>`,
-        search: /* xml */ `<search/>`,
     };
 }
 

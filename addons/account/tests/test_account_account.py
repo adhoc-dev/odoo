@@ -1,6 +1,6 @@
 from odoo import Command
 from odoo.addons.account.tests.common import TestAccountMergeCommon
-from odoo.tests import Form, tagged
+from odoo.tests import Form, tagged, new_test_user
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import mute_logger
 import psycopg2
@@ -97,6 +97,25 @@ class TestAccountAccount(TestAccountMergeCommon):
         # Test that you can modify the code of an account in another company by passing a CREATE value to `code_mapping_ids` (needed for import).
         account_copy_3.write({'code_mapping_ids': [Command.create({'company_id': company_3.id, 'code': '180026'})]})
         self.assertRecordValues(account_copy_3.with_company(company_3), [{'code': '180026'}])
+
+    def test_write_on_code_from_branch(self):
+        """ Ensure that when writing on account.code from a company, the old code isn't erroneously kept
+        on other companies that share the same root_id """
+        branch = self.env['res.company'].create([{
+            'name': "My Test Branch",
+            'parent_id': self.company_data['company'].id,
+        }])
+
+        account = self.env['account.account'].create([{
+            'name': 'My Test Account',
+            'code': '180001',
+        }])
+
+        # Change the code from the branch
+        account.with_company(branch).code = '180002'
+
+        # Ensure it's changed from the perspective of the root company
+        self.assertRecordValues(account, [{'code': '180002'}])
 
     def test_ensure_code_unique(self):
         ''' Test the `_ensure_code_unique` check method.
@@ -312,7 +331,6 @@ class TestAccountAccount(TestAccountMergeCommon):
 
         # Set the account as reconcile and partially reconcile something.
         account.reconcile = True
-        self.env.invalidate_all()
 
         move.line_ids.filtered(lambda line: line.account_id == account).reconcile()
 
@@ -604,6 +622,68 @@ class TestAccountAccount(TestAccountMergeCommon):
         )
         self.assertFalse(account.id in results_2, "Deprecated account should NOT appear in account suggestions")
 
+    def test_placeholder_code(self):
+        """ Test that the placeholder code is '{code_in_company} ({company})'
+            where `company` is the first of the user's companies that is
+            in `account.company_ids`.
+
+            Check that `_field_to_sql` gives the same value.
+        """
+        def get_placeholder_code_via_sql(account):
+            account_query = account._as_query()
+            placeholder_code_sql = account_query.select(account._field_to_sql('account_account', 'placeholder_code', account_query))
+            placeholder_code = self.env.execute_query(placeholder_code_sql)[0][0]
+            return placeholder_code
+
+        # This user cannot access company 2, so it can't access the created account.
+        user_2 = new_test_user(
+            self.env,
+            name="User that can't access company 2",
+            login='user_that_cannot_access_company_2',
+            password='user_that_cannot_access_company_2',
+            email='user_that_cannot_access_company_2@test.com',
+            groups_id=self.get_default_groups().ids,
+            company_id=self.env.company.id,
+        )
+
+        account = self.env['account.account'].create([{
+            'name': 'My account',
+            'company_ids': [Command.set(self.company_data_2['company'].ids)],
+            'code': '180001',
+        }])
+
+        self.assertEqual(account.placeholder_code, '180001 (company_2)')
+        self.assertEqual(get_placeholder_code_via_sql(account), '180001 (company_2)')
+
+        self.assertEqual(account.with_company(self.company_data_2['company']).placeholder_code, '180001')
+        self.assertEqual(get_placeholder_code_via_sql(account.with_company(self.company_data_2['company'])), '180001')
+
+        # Invalidate in order to recompute `placeholder_code` with `user_2`
+        account.invalidate_recordset(fnames=['placeholder_code'])
+        self.assertEqual(account.with_user(user_2).sudo().placeholder_code, False)
+        self.assertEqual(get_placeholder_code_via_sql(account.with_user(user_2).sudo()), None)
+
+    def test_account_accessible_by_search_in_sudo_mode(self):
+        """ Test that even if an account isn't accessible by the current user, it is returned by a search in sudo mode. """
+        account = self.env['account.account'].with_company(self.company_data_2['company']).create([{
+            'name': 'Account in Company 2',
+            'code': '180002',
+        }])
+
+        # This user can't access company 2, so it can't access the created account.
+        user_that_cannot_access_company_2 = new_test_user(
+            self.env,
+            name="User that can't access company 2",
+            login='user_that_cannot_access_company_2',
+            password='user_that_cannot_access_company_2',
+            email='user_that_cannot_access_company_2@test.com',
+            groups_id=self.get_default_groups().ids,
+            company_id=self.env.company.id,
+        )
+
+        searched_account = self.env['account.account'].with_user(user_that_cannot_access_company_2).sudo().search([('id', '=', account.id)])
+        self.assertEqual(searched_account, account)
+
     @freeze_time('2017-01-01')
     def test_account_opening_balance(self):
         company = self.env.company
@@ -835,6 +915,7 @@ class TestAccountAccount(TestAccountMergeCommon):
 
             account_form.name = "My Test Account"
             account_form.code = 'test1'
+            account_form.account_type = 'asset_current'
             with account_form.code_mapping_ids.edit(1) as code_mapping_form:
                 code_mapping_form.code = 'test2'
             with account_form.code_mapping_ids.edit(2) as code_mapping_form:
@@ -937,3 +1018,58 @@ class TestAccountAccount(TestAccountMergeCommon):
             child_group,
             "group_id computation should work if company_id is not in self.env.companies"
         )
+
+    def test_compute_account(self):
+        account_sale = self.company_data['default_account_revenue'].copy()
+
+        invoice = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'partner_id': self.partner_a.id,
+            'invoice_line_ids': [
+                Command.create({
+                    'account_id': account_sale.id,
+                    'product_id': self.product_a.id,
+                    'quantity': 1,
+                    'price_unit': 100,
+                })
+            ]
+        })
+
+        self.assertEqual(invoice.invoice_line_ids.account_id, account_sale)
+
+        invoice.line_ids._compute_account_id()
+
+        self.assertEqual(invoice.invoice_line_ids.account_id, self.company_data['default_account_revenue'])
+
+    def test_access_to_parent_accounts_from_branch(self):
+        """ Ensure that a user with access to a branch can access to the accounts of the parent company """
+        parent_company = self.env['res.company'].create([{
+            'name': "Parent Company",
+        }])
+        branch = self.env['res.company'].create([{
+            'name': "Branch Company",
+            'parent_id': parent_company.id,
+        }])
+        self.env['account.account'].create([{
+            'name': 'Parent Account',
+            'code': '444719',
+            'company_ids': [Command.link(parent_company.id)]
+        }])
+        # create a user with account rights and access to the branch company only
+        branch_user = self.env['res.users'].create({
+            'login': 'branch',
+            'name': 'XYZ',
+            'email': 'xyz@example.com',
+            'groups_id': [Command.link(self.env.ref('account.group_account_user').id)],
+            'company_ids': [Command.link(branch.id)],
+            'company_id': branch.id,
+        })
+
+        parent_accounts = self.env['account.account'].search([('company_ids', '=', parent_company.id)])
+        self.assertEqual(len(parent_accounts), 1, "There should be 1 account in the parent company")
+
+        branch_accounts = self.env['account.account'].search([('company_ids', '=', branch.id)])
+        self.assertEqual(len(branch_accounts), 0, "There should be no account in the branch company")
+        # get the accounts from the parent company with the branch user
+        accounts = self.env['account.account'].with_user(branch_user.id).search([('company_ids', 'parent_of', [branch.id])])
+        self.assertEqual(len(accounts), 1, "Branch user should have access to the accounts of the parent company")

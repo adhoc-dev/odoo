@@ -2,7 +2,7 @@
 
 import logging
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 from odoo.osv import expression
 from odoo.tools import float_is_zero, is_html_empty
 from odoo.tools.translate import html_translate
@@ -180,7 +180,11 @@ class ProductTemplate(models.Model):
     def write(self, vals):
         # Clear empty ecommerce description content to avoid side-effects on product pages
         # when there is no content to display anyway.
-        if vals.get('description_ecommerce') and is_html_empty(vals['description_ecommerce']):
+        if (
+            (description_ecommerce := vals.get('description_ecommerce'))
+            and is_html_empty(description_ecommerce)
+            and 'media_iframe_video' not in description_ecommerce  # don't remove "empty" video div
+        ):
             vals['description_ecommerce'] = ''
         return super().write(vals)
 
@@ -440,6 +444,19 @@ class ProductTemplate(models.Model):
                 combination_info,
             )
 
+        if (
+            product_or_template.type == 'combo'
+            and website.show_line_subtotals_tax_selection == 'tax_included'
+            and not all(
+                tax.price_include
+                for tax
+                in product_or_template.combo_ids.sudo().combo_item_ids.product_id.taxes_id
+            )
+        ):
+            combination_info['tax_disclaimer'] = _(
+                "Final price may vary based on selection. Tax will be calculated at checkout."
+            )
+
         return combination_info
 
     def _get_additionnal_combination_info(self, product_or_template, quantity, date, website):
@@ -539,6 +556,9 @@ class ProductTemplate(models.Model):
             'product_taxes': product_taxes,  # taxes before fpos mapping
             'taxes': taxes,  # taxes after fpos mapping
         })
+
+        if combination_info['prevent_zero_price_sale']:
+            combination_info['compare_list_price'] = 0
 
         return combination_info
 
@@ -741,7 +761,11 @@ class ProductTemplate(models.Model):
         if tags:
             if isinstance(tags, str):
                 tags = tags.split(',')
-            domains.append([('product_variant_ids.all_product_tag_ids', 'in', tags)])
+            domains.append([
+                '|',
+                ('product_tag_ids', 'in', tags),
+                ('product_variant_ids.additional_product_tag_ids', 'in', tags),
+            ])
         if min_price:
             domains.append([('list_price', '>=', min_price)])
         if max_price:
@@ -805,14 +829,14 @@ class ProductTemplate(models.Model):
         return results_data
 
     def _search_render_results_prices(self, mapping, combination_info):
-        monetary_options = {'display_currency': mapping['detail']['display_currency']}
         if combination_info.get('prevent_zero_price_sale'):
             website = self.env['website'].get_current_website()
-            price = website.prevent_zero_price_sale_text
-        else:
-            price = self.env['ir.qweb.field.monetary'].value_to_html(
-                combination_info['price'], monetary_options
-            )
+            return website.prevent_zero_price_sale_text, None
+
+        monetary_options = {'display_currency': mapping['detail']['display_currency']}
+        price = self.env['ir.qweb.field.monetary'].value_to_html(
+            combination_info['price'], monetary_options
+        )
         list_price = None
         if combination_info['has_discounted_price']:
             list_price = self.env['ir.qweb.field.monetary'].value_to_html(
@@ -908,3 +932,19 @@ class ProductTemplate(models.Model):
                 'currency_name': currency.name,
             })
         return data
+
+    @api.model
+    def _allow_publish_rating_stats(self):
+        return True
+
+    def _get_access_action(self, access_uid=None, force_website=False):
+        """ Instead of the classic form view, redirect to website if it is published. """
+        self.ensure_one()
+        if force_website or (self.website_published and self.env.user.share):
+            return {
+                "type": "ir.actions.act_url",
+                "url": self.website_url,
+                "target": "self",
+                "target_type": "public",
+            }
+        return super()._get_access_action(access_uid=access_uid, force_website=force_website)

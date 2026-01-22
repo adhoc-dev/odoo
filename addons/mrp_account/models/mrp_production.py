@@ -79,7 +79,7 @@ class MrpProduction(models.Model):
             workorders = defaultdict(self.env['mrp.workorder'].browse)
             for wo in mo.workorder_ids:
                 account = wo.workcenter_id.expense_account_id or product_accounts['expense']
-                labour_amounts[account] += wo._cal_cost()
+                labour_amounts[account] += wo.company_id.currency_id.round(wo._cal_cost())
                 workorders[account] |= wo
             workcenter_cost = sum(labour_amounts.values())
 
@@ -107,5 +107,5 @@ class MrpProduction(models.Model):
 
     def button_mark_done(self):
         res = super().button_mark_done()
-        self._post_labour()
+        self.filtered(lambda mo: mo.state == 'done' and not mo.reservation_state)._post_labour()
         return res

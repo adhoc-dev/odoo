@@ -1,6 +1,7 @@
 import { parseFloat as oParseFloat } from "@web/views/fields/parsers";
 import { barcodeService } from "@barcodes/barcode_service";
 import { registry } from "@web/core/registry";
+import { session } from "@web/session";
 import { EventBus, onWillDestroy, useComponent } from "@odoo/owl";
 
 const INPUT_KEYS = new Set(
@@ -54,7 +55,7 @@ const getDefaultConfig = () => ({
  * - Write more integration tests. NumberPopup can be used as test component.
  */
 class NumberBuffer extends EventBus {
-    static serviceDependencies = ["mail.sound_effects", "localization"];
+    static serviceDependencies = ["mail.sound_effects", "localization", "overlay"];
     constructor() {
         super();
         this.setup(...arguments);
@@ -64,6 +65,7 @@ class NumberBuffer extends EventBus {
         this.bufferHolderStack = [];
         this.sound = services["mail.sound_effects"];
         this.defaultDecimalPoint = services.localization.decimalPoint;
+        this.overlay = services.overlay;
         window.addEventListener("keyup", this._onKeyboardInput.bind(this));
     }
     /**
@@ -159,6 +161,13 @@ class NumberBuffer extends EventBus {
             : 0;
     }
     _onKeyboardInput(event) {
+        const overlays = Object.values(this.overlay.overlays);
+        if (
+            overlays.length &&
+            !overlays.some((overlay) => overlay.props.subComponent?.name === "NumberPopup")
+        ) {
+            return;
+        }
         return (
             this._currentBufferHolder &&
             this._bufferEvents(this._onInput((event) => event.key))(event)
@@ -179,6 +188,10 @@ class NumberBuffer extends EventBus {
             if (["INPUT", "TEXTAREA"].includes(event.target.tagName) || !this.eventsBuffer) {
                 return;
             }
+            // Ignore any input if combined with Ctrl, Cmd, or Alt
+            if (event.ctrlKey || event.metaKey || event.altKey) {
+                return;
+            }
             clearTimeout(this._timeout);
             this.eventsBuffer.push(event);
             this._timeout = setTimeout(handler, this.maxTimeBetweenKeys);
@@ -189,7 +202,11 @@ class NumberBuffer extends EventBus {
         return (manualCapture = false) => {
             // Manual call to NumberBuffer.capture() should allow handling more than 2 items in the buffer.
             // This is useful in tour test that make very fast screen numpad presses (clicks).
-            if (manualCapture || (!manualCapture && this.eventsBuffer.length <= 2)) {
+            if (
+                manualCapture ||
+                session.test_mode ||
+                (!manualCapture && this.eventsBuffer.length <= 2)
+            ) {
                 // Check first the buffer if its contents are all valid
                 // number input.
                 for (const event of this.eventsBuffer) {
@@ -287,11 +304,7 @@ class NumberBuffer extends EventBus {
             // when input is like '+10', '+50', etc
             const inputValue = oParseFloat(input.slice(1));
             const currentBufferValue = this.state.buffer ? oParseFloat(this.state.buffer) : 0;
-            // FIXME POSREF: the `buffer` shouldn't be dependent on the currency.
-            this.state.buffer = this.component.env.utils.formatCurrency(
-                inputValue + currentBufferValue,
-                false
-            );
+            this.state.buffer = (inputValue + currentBufferValue).toString();
         } else if (!isNaN(parseInt(input, 10))) {
             if (this.state.toStartOver) {
                 // when we want to erase the current buffer for a new value

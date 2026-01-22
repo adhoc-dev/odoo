@@ -1,34 +1,42 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* bus
-# 
+# * bus
+#
+# Translators:
+# Wil Odoo, 2024
+# Manav Shah, 2025
+# Ujjawal Pathak, 2025
+#
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:55+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Language-Team: Hindi (https://app.transifex.com/odoo/teams/41243/hi/)\n"
+"POT-Creation-Date: 2025-12-29 18:37+0000\n"
+"PO-Revision-Date: 2025-11-21 02:25+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Hindi <https://translate.odoo.com/projects/odoo-18/bus/hi/>\n"
+"Language: hi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: hi\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Weblate 5.12.2\n"
 
 #. module: bus
 #: model:ir.model,name:bus.model_res_groups
 msgid "Access Groups"
-msgstr ""
+msgstr "ऐक्सेस ग्रुप्स"
 
 #. module: bus
 #: model:ir.model,name:bus.model_ir_attachment
 msgid "Attachment"
-msgstr ""
+msgstr "अटैचमेंट"
 
 #. module: bus
 #: model:ir.model.fields.selection,name:bus.selection__bus_presence__status__away
 msgid "Away"
-msgstr ""
+msgstr "दूर"
 
 #. module: bus
 #: model:ir.model,name:bus.model_bus_listener_mixin
@@ -38,7 +46,7 @@ msgstr ""
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_bus__channel
 msgid "Channel"
-msgstr ""
+msgstr "चैनल"
 
 #. module: bus
 #: model:ir.model,name:bus.model_bus_bus
@@ -48,41 +56,41 @@ msgstr ""
 #. module: bus
 #: model:ir.model,name:bus.model_res_partner
 msgid "Contact"
-msgstr ""
+msgstr "संपर्क"
 
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_bus__create_uid
 msgid "Created by"
-msgstr ""
+msgstr "द्वारा निर्मित"
 
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_bus__create_date
 msgid "Created on"
-msgstr ""
+msgstr "इस तारीख को बनाया गया"
 
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_bus__display_name
 #: model:ir.model.fields,field_description:bus.field_bus_presence__display_name
 msgid "Display Name"
-msgstr ""
+msgstr "डिस्प्ले नाम"
 
 #. module: bus
 #: model:ir.model,name:bus.model_ir_http
 msgid "HTTP Routing"
-msgstr ""
+msgstr "एचटीपीपी राउटिंग"
 
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_bus__id
 #: model:ir.model.fields,field_description:bus.field_bus_presence__id
 msgid "ID"
-msgstr ""
+msgstr "आईडी"
 
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_presence__status
 #: model:ir.model.fields,field_description:bus.field_res_partner__im_status
 #: model:ir.model.fields,field_description:bus.field_res_users__im_status
 msgid "IM Status"
-msgstr ""
+msgstr "आईएम स्टेटस"
 
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_presence__last_poll
@@ -97,22 +105,22 @@ msgstr ""
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_bus__write_uid
 msgid "Last Updated by"
-msgstr ""
+msgstr "इन्होंने आखिरी बार अपडेट किया"
 
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_bus__write_date
 msgid "Last Updated on"
-msgstr ""
+msgstr "आखिरी बार अपडेट हुआ"
 
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_bus__message
 msgid "Message"
-msgstr ""
+msgstr "मैसेज"
 
 #. module: bus
 #: model:ir.model,name:bus.model_ir_model
 msgid "Models"
-msgstr ""
+msgstr "मॉडल"
 
 #. module: bus
 #: model:ir.model.fields.selection,name:bus.selection__bus_presence__status__offline
@@ -122,17 +130,19 @@ msgstr ""
 #. module: bus
 #: model:ir.model.fields.selection,name:bus.selection__bus_presence__status__online
 msgid "Online"
-msgstr ""
+msgstr "ऑनलािन"
 
 #. module: bus
 #. odoo-javascript
+#: code:addons/bus/static/src/outdated_page_watcher_service.js:0
 #: code:addons/bus/static/src/services/assets_watchdog_service.js:0
 #: code:addons/bus/static/src/services/bus_service.js:0
 msgid "Refresh"
-msgstr ""
+msgstr "रीफ्रेश करें"
 
 #. module: bus
 #. odoo-javascript
+#: code:addons/bus/static/src/outdated_page_watcher_service.js:0
 #: code:addons/bus/static/src/services/bus_service.js:0
 msgid ""
 "Save your work and refresh to get the latest updates and avoid potential "
@@ -147,6 +157,7 @@ msgstr ""
 
 #. module: bus
 #. odoo-javascript
+#: code:addons/bus/static/src/outdated_page_watcher_service.js:0
 #: code:addons/bus/static/src/services/bus_service.js:0
 msgid "The page is out of date"
 msgstr ""
@@ -154,7 +165,7 @@ msgstr ""
 #. module: bus
 #: model:ir.model,name:bus.model_res_users
 msgid "User"
-msgstr ""
+msgstr "उपयोगकर्ता"
 
 #. module: bus
 #: model:ir.model,name:bus.model_bus_presence
@@ -164,20 +175,20 @@ msgstr ""
 #. module: bus
 #: model:ir.model,name:bus.model_res_users_settings
 msgid "User Settings"
-msgstr ""
+msgstr "यूज़र सेटिंग"
 
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_presence__user_id
 msgid "Users"
-msgstr ""
+msgstr "उपयोगकर्ता"
 
 #. module: bus
 #. odoo-python
 #: code:addons/bus/controllers/home.py:0
 msgid ""
-"Your password is the default (admin)! If this system is exposed to untrusted"
-" users it is important to change it immediately for security reasons. I will"
-" keep nagging you about it!"
+"Your password is the default (admin)! If this system is exposed to untrusted "
+"users it is important to change it immediately for security reasons. I will "
+"keep nagging you about it!"
 msgstr ""
 
 #. module: bus

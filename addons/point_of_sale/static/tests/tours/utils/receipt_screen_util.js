@@ -166,6 +166,16 @@ export function trackingMethodIsLot() {
         },
     ];
 }
+
+export function noDiscountAmount() {
+    return [
+        {
+            trigger: `.pos-receipt:not(:contains("Discounts"))`,
+            run: () => {},
+        },
+    ];
+}
+
 export function shippingDateExists() {
     return [
         {
@@ -188,6 +198,15 @@ export function shippingDateIsToday() {
         {
             content: "Shipping date must be today",
             trigger: `.pos-receipt-order-data:contains('Expected delivery:') > div:contains('${expectedDelivery}')`,
+        },
+    ];
+}
+
+export function cashierNameExists(name) {
+    return [
+        {
+            content: `Cashier ${name} exists on the receipt`,
+            trigger: `.pos-receipt-contact .cashier:contains(Served by):contains(${name})`,
         },
     ];
 }

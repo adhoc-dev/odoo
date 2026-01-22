@@ -154,7 +154,7 @@ class Users(models.Model):
         return write_res
 
     def action_archive(self):
-        activities_to_delete = self.env['mail.activity'].search([('user_id', 'in', self.ids)])
+        activities_to_delete = self.env['mail.activity'].sudo().search([('user_id', 'in', self.ids)])
         activities_to_delete.unlink()
         return super(Users, self).action_archive()
 
@@ -281,11 +281,12 @@ class Users(models.Model):
                         self.env.user.partner_id,
                         fields=[
                             "active",
+                            "avatar_128",
                             "isAdmin",
                             "name",
                             "notification_type",
+                            "signature",
                             "user",
-                            "write_date",
                         ],
                         main_user_by_partner={self.env.user.partner_id: self.env.user},
                     ),
@@ -293,7 +294,7 @@ class Users(models.Model):
                 }
             )
         elif guest := self.env["mail.guest"]._get_guest_from_context():
-            store.add({"self": Store.one(guest, fields=["name", "write_date"])})
+            store.add({"self": Store.one(guest, fields=["avatar_128", "name"])})
 
     def _init_messaging(self, store):
         self.ensure_one()
@@ -335,14 +336,16 @@ class Users(models.Model):
             res_ids = [r.id for r in activities_by_record]
             Model = self.env[model_name].with_context(**self.env.context)
             has_model_access_right = self.env[model_name].has_access('read')
+            # also filters out non existing records (db cascade)
+            existing = Model.browse(res_ids).exists()
             if has_model_access_right:
-                allowed_records = Model.browse(res_ids)._filtered_access('read')
+                allowed_records = existing._filtered_access('read')
             else:
                 allowed_records = self.env[model_name]
             unallowed_records = Model.browse(res_ids) - allowed_records
             # We remove from not allowed records, records that the user has access to through others of his companies
             if has_model_access_right and unallowed_records and not is_all_user_companies_allowed:
-                unallowed_records -= unallowed_records.with_context(
+                unallowed_records -= (unallowed_records & existing).with_context(
                     allowed_company_ids=user_company_ids)._filtered_access('read')
             for record, activities in activities_by_record.items():
                 if record in unallowed_records:

@@ -1,19 +1,19 @@
 /** @odoo-module alias=@bus/../tests/websocket_worker_tests default=false */
 
-import { WEBSOCKET_CLOSE_CODES } from "@bus/workers/websocket_worker";
 import { patchWebsocketWorkerWithCleanup } from "@bus/../tests/helpers/mock_websocket";
+import { WEBSOCKET_CLOSE_CODES } from "@bus/workers/websocket_worker";
 
 import { nextTick, patchWithCleanup } from "@web/../tests/helpers/utils";
+import { Deferred } from "@web/core/utils/concurrency";
 
 QUnit.module("Websocket Worker");
 
 QUnit.test("connect event is broadcasted after calling start", async function (assert) {
     const worker = patchWebsocketWorkerWithCleanup({
         broadcast(type) {
-            if (type === "update_state") {
-                return;
+            if (type !== "worker_state_updated") {
+                assert.step(`broadcast ${type}`);
             }
-            assert.step(`broadcast ${type}`);
         },
     });
     worker._start();
@@ -25,10 +25,9 @@ QUnit.test("connect event is broadcasted after calling start", async function (a
 QUnit.test("disconnect event is broadcasted", async function (assert) {
     const worker = patchWebsocketWorkerWithCleanup({
         broadcast(type) {
-            if (type === "update_state") {
-                return;
+            if (type !== "worker_state_updated") {
+                assert.step(`broadcast ${type}`);
             }
-            assert.step(`broadcast ${type}`);
         },
     });
     worker._start();
@@ -48,10 +47,9 @@ QUnit.test("reconnecting/reconnect event is broadcasted", async function (assert
     });
     const worker = patchWebsocketWorkerWithCleanup({
         broadcast(type) {
-            if (type === "update_state") {
-                return;
+            if (type !== "worker_state_updated") {
+                assert.step(`broadcast ${type}`);
             }
-            assert.step(`broadcast ${type}`);
         },
     });
     worker._start();
@@ -100,4 +98,33 @@ QUnit.test("notification event is broadcasted", async function (assert) {
     );
 
     assert.verifySteps(["broadcast notification"]);
+});
+
+QUnit.test("check connection health during inactivity", async (assert) => {
+    let restartIntervalDef = null;
+    const worker = patchWebsocketWorkerWithCleanup({
+        _restartConnectionCheckInterval() {
+            if (restartIntervalDef) {
+                assert.step("_restartConnectionCheckInterval");
+                restartIntervalDef.resolve();
+                restartIntervalDef = null;
+            }
+        },
+    });
+    restartIntervalDef = new Deferred();
+    worker._start();
+    await restartIntervalDef;
+    assert.verifySteps(["_restartConnectionCheckInterval"]);
+    restartIntervalDef = new Deferred();
+    worker.websocket.dispatchEvent(
+        new MessageEvent("message", {
+            data: JSON.stringify([{ id: 70, message: { type: "foo" } }]),
+        })
+    );
+    await restartIntervalDef;
+    assert.verifySteps(["_restartConnectionCheckInterval"]);
+    restartIntervalDef = new Deferred();
+    worker._sendToServer({ event_name: "foo" });
+    await restartIntervalDef;
+    assert.verifySteps(["_restartConnectionCheckInterval"]);
 });

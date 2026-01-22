@@ -1,23 +1,25 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* iap_mail
-# 
+#
 # Translators:
 # Martin Trigaux, 2024
 # Kostas Goutoudis <goutoudis@gmail.com>, 2024
-# 
+# Maria Chalepiadou, 2025
+# Gerasimos Kanelatos, 2025
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:55+0000\n"
+"POT-Creation-Date: 2025-12-29 18:37+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Kostas Goutoudis <goutoudis@gmail.com>, 2024\n"
+"Last-Translator: Gerasimos Kanelatos, 2025\n"
 "Language-Team: Greek (https://app.transifex.com/odoo/teams/41243/el/)\n"
+"Language: el\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: el\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: iap_mail
@@ -103,7 +105,7 @@ msgstr "Απαιτείται ενέργεια"
 #. module: iap_mail
 #: model:ir.model.fields,field_description:iap_mail.field_iap_account__message_attachment_count
 msgid "Attachment Count"
-msgstr ""
+msgstr "Αριθμός Συνημμένων"
 
 #. module: iap_mail
 #. odoo-javascript
@@ -139,7 +141,7 @@ msgstr "Ακόλουθοι (Συνεργάτες)"
 #. module: iap_mail
 #: model:ir.model.fields,field_description:iap_mail.field_iap_account__has_message
 msgid "Has Message"
-msgstr ""
+msgstr "Έχει Μήνυμα"
 
 #. module: iap_mail
 #: model:ir.model,name:iap_mail.model_iap_account
@@ -154,7 +156,7 @@ msgstr "Εάν επιλεγεί τα νέα μηνύματα χρειάζοντ�
 #. module: iap_mail
 #: model:ir.model.fields,help:iap_mail.field_iap_account__message_has_error
 msgid "If checked, some messages have a delivery error."
-msgstr ""
+msgstr "Αν επιλεγεί, κάποια μηνύματα έχουν σφάλμα παράδοσης."
 
 #. module: iap_mail
 #: model:ir.model.fields,field_description:iap_mail.field_iap_account__message_is_follower
@@ -164,7 +166,7 @@ msgstr "Είναι Ακόλουθος"
 #. module: iap_mail
 #: model:ir.model.fields,field_description:iap_mail.field_iap_account__message_has_error
 msgid "Message Delivery error"
-msgstr ""
+msgstr "Σφάλμα παράδοσης μηνύματος"
 
 #. module: iap_mail
 #: model:ir.model.fields,field_description:iap_mail.field_iap_account__message_ids
@@ -179,17 +181,17 @@ msgstr "Πλήθος ενεργειών"
 #. module: iap_mail
 #: model:ir.model.fields,field_description:iap_mail.field_iap_account__message_has_error_counter
 msgid "Number of errors"
-msgstr ""
+msgstr "Αριθμός σφαλμάτων"
 
 #. module: iap_mail
 #: model:ir.model.fields,help:iap_mail.field_iap_account__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr ""
+msgstr "Αριθμός μηνυμάτων που απαιτούν ενέργεια"
 
 #. module: iap_mail
 #: model:ir.model.fields,help:iap_mail.field_iap_account__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr ""
+msgstr "Αριθμός μηνυμάτων με σφάλμα παράδοσης"
 
 #. module: iap_mail
 #: model_terms:ir.ui.view,arch_db:iap_mail.enrich_company

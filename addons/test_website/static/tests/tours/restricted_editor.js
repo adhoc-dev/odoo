@@ -9,7 +9,7 @@ import {
 
 const checkNoTranslate = {
     content: "Check there is no translate button",
-    trigger: ".o_menu_systray:not(:contains(.o_translate_website_container))",
+    trigger: ".o_menu_systray:not(:has(.o_translate_website_container)):contains(edit)",
 };
 const translate = [{
     content: "Open Edit menu",
@@ -65,6 +65,9 @@ registerWebsitePreviewTour('test_restricted_editor_only', {
     ...closeErrorDialog,
     ...switchTo('en'),
     // Model item
+    {
+        trigger: ":iframe body:contains(welcome to your)"
+    },
     ...goToMenuItem,
     checkNoTranslate,
     ...clickOnEditAndWaitEditMode(),
@@ -72,6 +75,7 @@ registerWebsitePreviewTour('test_restricted_editor_only', {
         content: "Check icons cannot be dragged",
         trigger: "#oe_snippets .oe_snippet[name='Intro'].o_disabled",
     },
+    ...clickOnSave(),
     ...switchTo('fr'),
     ...translate,
     ...closeErrorDialog,
@@ -128,6 +132,10 @@ registerWebsitePreviewTour('test_restricted_editor_test_admin', {
         trigger: "body:not(:has(.modal))",
     },
     {
+        content: "Check that html fields are not content editable when translating",
+        trigger: ":iframe [data-oe-expression='record.website_description']:not([contenteditable='true'])",
+    },
+    {
         content: "Translate name",
         trigger: ":iframe [data-oe-expression='record.name']",
         run: "editor Nouvelle valeur",
@@ -136,6 +144,17 @@ registerWebsitePreviewTour('test_restricted_editor_test_admin', {
         content: "Translate some banner text",
         trigger: ":iframe [data-oe-expression='record.website_description'] strong.o_default_snippet_text",
         run: "editor potentiel.",
+    },
+    ...clickOnSave(),
+]);
+
+registerWebsitePreviewTour('test_restricted_editor_tester', {
+    url: '/test_model/1',
+}, () => [
+    ...clickOnEditAndWaitEditMode(),
+    {
+        content: "Footer should not be be editable for restricted user",
+        trigger: ":iframe :has(.o_editable) footer:not(.o_editable):not(:has(.o_editable))",
     },
     ...clickOnSave(),
 ]);

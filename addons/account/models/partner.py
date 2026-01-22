@@ -12,11 +12,20 @@ from odoo import api, fields, models, _
 from odoo.osv import expression
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, mute_logger
 from odoo.exceptions import ValidationError, UserError
-from odoo.addons.base.models.res_partner import WARNING_MESSAGE, WARNING_HELP
 from odoo.tools import SQL, unique
+
+from odoo.addons.account.models.account_move import BYPASS_LOCK_CHECK
+from odoo.addons.base.models.res_partner import WARNING_MESSAGE, WARNING_HELP
 from odoo.addons.base_vat.models.res_partner import _ref_vat
 
 _logger = logging.getLogger(__name__)
+
+
+_ref_company_registry = {
+    'jp': '7000012050002',
+    'fi': '8763054-9',
+}
+
 
 class AccountFiscalPosition(models.Model):
     _name = 'account.fiscal.position'
@@ -87,7 +96,7 @@ class AccountFiscalPosition(models.Model):
         for position in self:
             tax_map = defaultdict(list)
             for tl in position.tax_ids:
-                if tl.tax_dest_id:
+                if tl.tax_dest_active:
                     tax_map[tl.tax_src_id.id].append(tl.tax_dest_id.id)
                 else:
                     tax_map[tl.tax_src_id.id]  # map to an empty list
@@ -339,13 +348,18 @@ class ResPartner(models.Model):
 
     fiscal_country_codes = fields.Char(compute='_compute_fiscal_country_codes')
     partner_vat_placeholder = fields.Char(compute='_compute_partner_vat_placeholder')
+    partner_company_registry_placeholder = fields.Char(compute='_compute_partner_company_registry_placeholder')
+    duplicate_bank_partner_ids = fields.Many2many(related="bank_ids.duplicate_bank_partner_ids")
 
     @api.depends('company_id')
     @api.depends_context('allowed_company_ids')
     def _compute_fiscal_country_codes(self):
         for record in self:
             allowed_companies = record.company_id or self.env.companies
-            record.fiscal_country_codes = ",".join(allowed_companies.mapped('account_fiscal_country_id.code'))
+            country_codes = allowed_companies.mapped('account_fiscal_country_id.code')
+            if record.country_code:
+                country_codes.append(record.country_code)
+            record.fiscal_country_codes = ",".join(set(country_codes))
 
     @property
     def _order(self):
@@ -513,7 +527,8 @@ class ResPartner(models.Model):
         company_dependent=True, copy=False, readonly=False)
     use_partner_credit_limit = fields.Boolean(
         string='Partner Limit', groups='account.group_account_invoice,account.group_account_readonly',
-        compute='_compute_use_partner_credit_limit', inverse='_inverse_use_partner_credit_limit')
+        compute='_compute_use_partner_credit_limit', inverse='_inverse_use_partner_credit_limit',
+        help='Set a value greater than 0.0 to activate a credit limit check')
     show_credit_limit = fields.Boolean(
         default=lambda self: self.env.company.account_use_credit_limit,
         compute='_compute_show_credit_limit', groups='account.group_account_invoice,account.group_account_readonly')
@@ -553,6 +568,7 @@ class ResPartner(models.Model):
         help="This payment term will be used instead of the default one for purchase orders and vendor bills")
     ref_company_ids = fields.One2many('res.company', 'partner_id',
         string='Companies that refers to partner')
+    supplier_invoice_count = fields.Integer(compute='_compute_supplier_invoice_count', string='# Vendor Bills')
     invoice_ids = fields.One2many('account.move', 'partner_id', string='Invoices', readonly=True, copy=False)
     contract_ids = fields.One2many('account.analytic.account', 'partner_id', string='Partner Contracts', readonly=True)
     bank_account_count = fields.Integer(compute='_compute_bank_count', string="Bank")
@@ -574,11 +590,13 @@ class ResPartner(models.Model):
         selection=[],  # to extend
         compute='_compute_invoice_edi_format',
         inverse='_inverse_invoice_edi_format',
+        compute_sudo=True,
     )
     invoice_edi_format_store = fields.Char(company_dependent=True)
     display_invoice_edi_format = fields.Boolean(default=lambda self: len(self._fields['invoice_edi_format'].selection), store=False)
     invoice_template_pdf_report_id = fields.Many2one(
         comodel_name='ir.actions.report',
+        string='Invoice template',
         domain="[('is_invoice_report', '=', True)]",
         readonly=False,
         store=True,
@@ -597,15 +615,17 @@ class ResPartner(models.Model):
     )
 
     # Technical field holding the amount partners that share the same account number as any set on this partner.
+    # TODO remove in master
     duplicated_bank_account_partners_count = fields.Integer(
         compute='_compute_duplicated_bank_account_partners_count',
     )
+    # DEPRECATED, DO NOT USE, TO BE REMOVED IN MASTER
     is_coa_installed = fields.Boolean(store=False, default=lambda partner: bool(partner.env.company.chart_template))
 
     property_outbound_payment_method_line_id = fields.Many2one(
         comodel_name='account.payment.method.line',
         company_dependent=True,
-        domain=lambda self: [('payment_type', '=', 'outbound'), ('company_id', '=', self.env.company.id)],
+        domain=lambda self: [('payment_type', '=', 'outbound'), ('company_id', 'parent_of', self.env.company.id)],
         help="Preferred payment method when buying from this vendor. This will be set by default on all"
              " outgoing payments created for this vendor",
     )
@@ -613,7 +633,7 @@ class ResPartner(models.Model):
     property_inbound_payment_method_line_id = fields.Many2one(
         comodel_name='account.payment.method.line',
         company_dependent=True,
-        domain=lambda self: [('payment_type', '=', 'inbound'), ('company_id', '=', self.env.company.id)],
+        domain=lambda self: [('payment_type', '=', 'inbound'), ('company_id', 'parent_of', self.env.company.id)],
         help="Preferred payment method when selling to this customer. This will be set by default on all"
              " incoming payments created for this customer",
     )
@@ -624,6 +644,28 @@ class ResPartner(models.Model):
         for partner in self:
             partner.bank_account_count = mapped_data.get(partner.id, 0)
 
+    def _compute_supplier_invoice_count(self):
+        # retrieve all children partners and prefetch 'parent_id' on them
+        all_partners = self.with_context(active_test=False).search_fetch(
+            [('id', 'child_of', self.ids)],
+            ['parent_id'],
+        )
+        supplier_invoice_groups = self.env['account.move']._read_group(
+            domain=[('partner_id', 'in', all_partners.ids),
+                    *self.env['account.move']._check_company_domain(self.env.company),
+                    ('move_type', 'in', ('in_invoice', 'in_refund'))],
+            groupby=['partner_id'], aggregates=['__count']
+        )
+        self_ids = set(self._ids)
+
+        self.supplier_invoice_count = 0
+        for partner, count in supplier_invoice_groups:
+            while partner:
+                if partner.id in self_ids:
+                    partner.supplier_invoice_count += count
+                partner = partner.parent_id
+
+    # TODO remove in master
     def _get_duplicated_bank_accounts(self):
         self.ensure_one()
         if not self.bank_ids:
@@ -638,12 +680,13 @@ class ResPartner(models.Model):
         return self.env['res.partner.bank'].search(domain)
 
     @api.depends_context('company')
+    @api.depends('country_code')
     def _compute_invoice_edi_format(self):
         for partner in self:
-            if partner.invoice_edi_format_store == 'none':
+            if not partner.commercial_partner_id or partner.commercial_partner_id.invoice_edi_format_store == 'none':
                 partner.invoice_edi_format = False
             else:
-                partner.invoice_edi_format = partner.invoice_edi_format_store or partner._get_suggested_invoice_edi_format()
+                partner.invoice_edi_format = partner.commercial_partner_id.invoice_edi_format_store or partner.commercial_partner_id._get_suggested_invoice_edi_format()
 
     def _inverse_invoice_edi_format(self):
         for partner in self:
@@ -702,6 +745,7 @@ class ResPartner(models.Model):
         action['context'] = {'default_move_type': 'out_invoice', 'move_type': 'out_invoice', 'journal_type': 'sale', 'search_default_unpaid': 1}
         return action
 
+    # TODO remove in master
     def action_view_partner_with_same_bank(self):
         self.ensure_one()
         bank_partners = self._get_duplicated_bank_accounts()
@@ -752,6 +796,24 @@ class ResPartner(models.Model):
             [('partner_id', 'child_of', self.commercial_partner_id.id)]
         )
 
+    def write(self, vals):
+        if 'parent_id' in vals:
+            partner2moves = self.sudo().env['account.move'].search([('partner_id', 'in', self.ids)]).grouped('partner_id')
+            parent_vat = self.env['res.partner'].browse(vals['parent_id']).vat
+            if partner2moves and vals['parent_id'] and any((partner.vat or '') != (parent_vat or '') for partner in self):
+                raise UserError(_("You cannot set a partner as an invoicing address of another if they have a different %(vat_label)s.", vat_label=self.vat_label))
+
+        res = super().write(vals)
+
+        if 'parent_id' in vals:
+            for partner, moves in partner2moves.items():
+                partner._compute_commercial_partner()
+                # Make sure to write on all the lines at the same time to avoid breaking the reconciliation check
+                moves.line_ids.with_context(bypass_lock_check=BYPASS_LOCK_CHECK).partner_id = partner.commercial_partner_id
+                moves.with_context(bypass_lock_check=BYPASS_LOCK_CHECK).commercial_partner_id = partner.commercial_partner_id
+                partner._message_log(body=_("The commercial partner has been updated for all related accounting entries."))
+        return res
+
     @api.model_create_multi
     def create(self, vals_list):
         search_partner_mode = self.env.context.get('res_partner_search_mode')
@@ -793,6 +855,7 @@ class ResPartner(models.Model):
                         n=n,
                     ))
                     self.invalidate_recordset([field])
+                    self.modified([field])
             except (pgerrors.LockNotAvailable, pgerrors.SerializationFailure):
                 _logger.debug('Another transaction already locked partner rows. Cannot update partner ranks.')
 
@@ -846,8 +909,8 @@ class ResPartner(models.Model):
         if not vat:
             return None
 
-        # Sometimes, the vat is specified with some whitespaces.
-        normalized_vat = vat.replace(' ', '')
+        # Sometimes, the vat is specified with some whitespaces or dots.
+        normalized_vat = vat.replace(' ', '').replace('.', '')
         country_prefix = re.match('^[a-zA-Z]{2}|^', vat).group()
 
         partner = self.env['res.partner'].search(extra_domain + [('vat', 'in', (normalized_vat, vat))], limit=2)
@@ -986,3 +1049,32 @@ class ResPartner(models.Model):
                     placeholder = _("%s, or / if not applicable", expected_vat)
 
             partner.partner_vat_placeholder = placeholder
+
+    @api.depends('country_id')
+    def _compute_partner_company_registry_placeholder(self):
+        """ Provides a dynamic placeholder on the company registry field for countries that may need it.
+        Add your country and the value you want in the _ref_company_registry map.
+        """
+        for partner in self:
+            country_code = partner.country_id.code or ''
+            partner.partner_company_registry_placeholder = _ref_company_registry.get(country_code.lower(), '')
+
+    def action_open_business_doc(self):
+        return self._get_records_action()
+
+    @api.model
+    def _clear_removed_edi_formats(self, *formats):
+        """Helper to clear outdated EDI formats.
+
+        Usually called as an uninstall hook of modules that add these formats.
+        It avoids the form view to become unusable after module uninstallation.
+        """
+        self.env.cr.execute(
+            """
+            UPDATE res_partner
+            SET invoice_edi_format_store = invoice_edi_format_store - res_company.id::char
+            FROM res_company
+            WHERE res_partner.invoice_edi_format_store ->> res_company.id::char IN %s
+            """,
+            (formats,),
+        )

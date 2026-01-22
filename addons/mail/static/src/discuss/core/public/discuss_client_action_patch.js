@@ -2,16 +2,14 @@ import { DiscussClientAction } from "@mail/core/public_web/discuss_client_action
 import { WelcomePage } from "@mail/discuss/core/public/welcome_page";
 import { useState } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
-import { useService } from "@web/core/utils/hooks";
 import { patch } from "@web/core/utils/patch";
 
 DiscussClientAction.components = { ...DiscussClientAction.components, WelcomePage };
 patch(DiscussClientAction.prototype, {
     setup() {
         super.setup(...arguments);
-        this.store = useService("mail.store");
         this.publicState = useState({
-            welcome: this.store.shouldDisplayWelcomeViewInitially,
+            welcome: this.store.shouldDisplayWelcomeView,
         });
         if (this.store.isChannelTokenSecret) {
             // Change the URL to avoid leaking the invitation link.
@@ -33,9 +31,12 @@ patch(DiscussClientAction.prototype, {
     async restoreDiscussThread() {
         await super.restoreDiscussThread(...arguments);
         this.publicState.welcome ||=
+            this.store.shouldDisplayWelcomeView ??
             this.store.discuss.thread?.defaultDisplayMode === "video_full_screen";
+        this.store.shouldDisplayWelcomeView = this.publicState.welcome;
     },
     closeWelcomePage() {
         this.publicState.welcome = false;
+        this.store.shouldDisplayWelcomeView = false;
     },
 });

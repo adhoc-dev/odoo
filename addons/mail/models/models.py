@@ -191,6 +191,8 @@ class BaseModel(models.AbstractModel):
         """ Find tracking sequence of a given field, given their name. Current
         parameter 'tracking' should be an integer, but attributes with True
         are still supported; old naming 'track_sequence' also. """
+        if fname not in self._fields:
+            return 100
         sequence = getattr(
             self._fields[fname], 'tracking',
             getattr(self._fields[fname], 'track_sequence', 100)
@@ -487,13 +489,20 @@ class BaseModel(models.AbstractModel):
         return ' '.join(str(value if value is not False and value is not None else '') for value in field_value)
 
     def _mail_get_timezone(self):
-        """To be override to get desired timezone of the model
+        """deprecated, override `_mail_get_timezone_with_default` instead."""
+        return self._mail_get_timezone_with_default()
 
+    def _mail_get_timezone_with_default(self, default_tz=True):
+        """To be overridden to get desired timezone of the model.
+
+        :param default_tz: the default timezone if none is found, or True to use the user's.
         :returns: selected timezone (e.g. 'UTC' or 'Asia/Kolkata')
         """
         if self:
             self.ensure_one()
-        tz = self.env.user.tz or 'UTC'
+        if default_tz is True:
+            default_tz = self.env.user.tz or 'UTC'
+        tz = default_tz
         for tz_field in ('date_tz', 'tz', 'timezone'):
             if tz_field in self:
                 tz = self[tz_field] or tz

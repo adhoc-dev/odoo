@@ -5,6 +5,7 @@ import {
     defineMailModels,
     insertText,
     onRpcBefore,
+    onRpcAfter,
     openDiscuss,
     scroll,
     start,
@@ -39,8 +40,10 @@ test("reply: discard on reply button toggle", async () => {
     await start();
     await openDiscuss();
     await contains(".o-mail-Message");
+    await click("[title='Expand']");
     await click("[title='Reply']");
     await contains(".o-mail-Composer");
+    await click("[title='Expand']");
     await click("[title='Reply']");
     await contains(".o-mail-Composer", { count: 0 });
 });
@@ -67,6 +70,7 @@ test("reply: discard on pressing escape", async () => {
     await start();
     await openDiscuss();
     await contains(".o-mail-Message");
+    await click("[title='Expand']");
     await click("[title='Reply']");
     await contains(".o-mail-Composer");
     // Escape on emoji picker does not stop replying
@@ -82,6 +86,7 @@ test("reply: discard on pressing escape", async () => {
     await contains(".o-mail-Composer-suggestionList .o-open", { count: 0 });
     await contains(".o-mail-Composer");
     await click(".o-mail-Composer-input").catch(() => {});
+    await contains(".o-mail-Composer.o-focused");
     triggerHotkey("Escape");
     await contains(".o-mail-Composer", { count: 0 });
 });
@@ -110,6 +115,7 @@ test('"reply to" composer should log note if message replied to is a note', asyn
     await start();
     await openDiscuss();
     await contains(".o-mail-Message");
+    await click("[title='Expand']");
     await click("[title='Reply']");
     await contains(".o-mail-Composer [placeholder='Log an internal note…']");
     await insertText(".o-mail-Composer-input", "Test");
@@ -142,6 +148,7 @@ test('"reply to" composer should send message if message replied to is not a not
     await start();
     await openDiscuss();
     await contains(".o-mail-Message");
+    await click("[title='Expand']");
     await click("[title='Reply']");
     await contains(".o-mail-Composer [placeholder='Send a message to followers…']");
     await insertText(".o-mail-Composer-input", "Test");
@@ -447,6 +454,41 @@ test("inbox: mark as read should not display jump to present", async () => {
     await contains("[title='Jump to Present']", { count: 0 });
 });
 
+test("inbox: can mark as read when received a message from the record without access to", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["res.partner"].create({ name: "General" });
+    const messageId = pyEnv["mail.message"].create({
+        body: "not empty",
+        model: "res.partner",
+        needaction: true,
+        res_id: channelId,
+    });
+    pyEnv["mail.notification"].create({
+        mail_message_id: messageId,
+        notification_type: "inbox",
+        res_partner_id: serverState.partnerId,
+    });
+    onRpcAfter("/mail/inbox/messages", async (promise) => {
+        const res = await promise;
+        // simulate data with no access rights to thread of message.
+        return {
+            data: {
+                "mail.notification": res.data["mail.notification"],
+            },
+            messages: res["messages"],
+        };
+    });
+    await start();
+    await openDiscuss();
+    await contains("button", { text: "Inbox", contains: [".badge", { text: "1" }] });
+    await contains("h4:contains(Your inbox is empty)");
+    await click(".o-mail-Discuss-header button:enabled", { text: "Mark all read" });
+    await contains("button", {
+        text: "Inbox",
+        contains: [[".badge", { count: 0 }]],
+    });
+});
+
 test("click on (non-channel/non-partner) origin thread link should redirect to form view", async () => {
     const pyEnv = await startServer();
     const fakeId = pyEnv["res.fake"].create({ name: "Some record" });
@@ -552,6 +594,7 @@ test("reply: stop replying button click", async () => {
     await start();
     await openDiscuss();
     await contains(".o-mail-Message");
+    await click("[title='Expand']");
     await click("[title='Reply']");
     await contains(".o-mail-Composer");
     await contains("i[title='Stop replying']");
@@ -739,6 +782,7 @@ test("can reply to email message", async () => {
     await start();
     await openDiscuss();
     await contains(".o-mail-Message");
+    await click("[title='Expand']");
     await click("[title='Reply']");
     await contains(".o-mail-Composer", { text: "Replying to md@oilcompany.fr" });
 });

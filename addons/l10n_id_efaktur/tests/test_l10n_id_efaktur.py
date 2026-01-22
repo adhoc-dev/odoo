@@ -4,8 +4,10 @@ from odoo import Command
 from odoo.exceptions import UserError, ValidationError, RedirectWarning
 from odoo.tests import tagged
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
+from odoo.addons.l10n_id_efaktur.models.account_move import AccountMove
 from odoo.addons.l10n_id_efaktur.models.efaktur_document import FK_HEAD_LIST, LT_HEAD_LIST, OF_HEAD_LIST, _csv_row
-
+from odoo.exceptions import RedirectWarning
+from unittest.mock import patch
 
 @tagged('post_install', '-at_install', 'post_install_l10n')
 class TestIndonesianEfaktur(AccountTestInvoicingCommon):
@@ -19,7 +21,8 @@ class TestIndonesianEfaktur(AccountTestInvoicingCommon):
             'street': 'test',
             'phone': '12345',
         })
-        cls.partner_id = cls.env['res.partner'].create({"name": "l10ntest", "l10n_id_pkp": True, "l10n_id_kode_transaksi": "01", "l10n_id_nik": "12345", "vat": "000000000000000"})
+        indonesia = cls.env.ref('base.id')
+        cls.partner_id = cls.env['res.partner'].create({"name": "l10ntest", "l10n_id_pkp": True, "l10n_id_kode_transaksi": "01", "l10n_id_nik": "12345", "vat": "000000000000000", "country_id": indonesia.id})
         cls.partner_id_vat = cls.env['res.partner'].create({"name": "l10ntest3", "l10n_id_pkp": True, "l10n_id_kode_transaksi": "01", "l10n_id_nik": "67890", "vat": "010000000000000"})
         cls.tax_id = cls.env['account.tax'].create({"name": "test tax", "type_tax_use": "sale", "amount": 10.0, "price_include_override": "tax_included"})
 
@@ -28,6 +31,16 @@ class TestIndonesianEfaktur(AccountTestInvoicingCommon):
 
         # multi-company setup
         cls.company_data_2 = cls.setup_other_company()
+
+        # For the sake of unit test of this module, we want to retain the the compute method for field
+        # l10n_id_need_kode_transaksi of this module. In the coretax module, l10n_id_need_kode_transaksi
+        # is always set to False to prevent the flows of old module to be triggered
+        patch_kode_transaksi = patch('odoo.addons.l10n_id_efaktur_coretax.models.account_move.AccountMove._compute_need_kode_transaksi',
+                                AccountMove._compute_need_kode_transaksi)
+        cls.startClassPatcher(patch_kode_transaksi)
+        patch_download_efaktur = patch("odoo.addons.l10n_id_efaktur_coretax.models.account_move.AccountMove.download_efaktur",
+                                AccountMove.download_efaktur)
+        cls.startClassPatcher(patch_download_efaktur)
 
     def test_posting_without_code(self):
         """ Make sure that if an invoice has no code computed but the partner has one, we still allow posting but also set the code. """
@@ -77,7 +90,7 @@ class TestIndonesianEfaktur(AccountTestInvoicingCommon):
             _csv_row(OF_HEAD_LIST, ','),
         )
         # remaining lines
-        line_4 = '"FK","01","0","0000000000001","5","2019","1/5/2019","000000000000000","12345#NIK#NAMA#l10ntest","","100","10","0","","0","0","0","0","INV/2019/00001","0"\n'
+        line_4 = '"FK","01","0","0000000000001","5","2019","1/5/2019","000000000000000","12345#NIK#NAMA#l10ntest","Indonesia","100","10","0","","0","0","0","0","INV/2019/00001","0"\n'
         line_5 = '"OF","","","100.00","1.0","100.00","0","100.00","10.00","0","0"\n'
 
         efaktur_csv_expected = output_head + line_4 + line_5
@@ -151,7 +164,7 @@ class TestIndonesianEfaktur(AccountTestInvoicingCommon):
             _csv_row(LT_HEAD_LIST, ','),
             _csv_row(OF_HEAD_LIST, ','),
         )
-        line_4 = '"FK","01","0","0000000000001","5","2019","1/5/2019","000000000000000","12345#NIK#NAMA#l10ntest","","40040","4004","0","","0","0","0","0","INV/2019/00001","0"\n'
+        line_4 = '"FK","01","0","0000000000001","5","2019","1/5/2019","000000000000000","12345#NIK#NAMA#l10ntest","Indonesia","40040","4004","0","","0","0","0","0","INV/2019/00001","0"\n'
         line_5 = '"OF","","","100.10","400.0","40040.00","0","40040.00","4004.00","0","0"\n'
 
         efaktur_csv_expected = output_head + line_4 + line_5

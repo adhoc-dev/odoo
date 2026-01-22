@@ -1,8 +1,27 @@
+import { PropertiesField } from "@web/views/fields/properties/properties_field";
 import { Many2XAutocomplete } from "@web/views/fields/relational_utils";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
-import { PropertiesField } from "@web/views/fields/properties/properties_field";
 import { WebClient } from "@web/webclient/webclient";
 
+import { expect, getFixture, test } from "@odoo/hoot";
+import {
+    click,
+    edit,
+    press,
+    queryAll,
+    queryAllTexts,
+    queryAllValues,
+    queryAttribute,
+    queryFirst,
+    select,
+    waitFor,
+} from "@odoo/hoot-dom";
+import { animationFrame, mockDate, runAllTimers } from "@odoo/hoot-mock";
+import {
+    getPickerApplyButton,
+    getPickerCell,
+    getTimePickers,
+} from "@web/../tests/core/datetime/datetime_test_helpers";
 import {
     clickCancel,
     clickSave,
@@ -18,25 +37,6 @@ import {
     toggleActionMenu,
     toggleMenuItem,
 } from "@web/../tests/web_test_helpers";
-import {
-    getTimePickers,
-    getPickerApplyButton,
-    getPickerCell,
-} from "@web/../tests/core/datetime/datetime_test_helpers";
-import {
-    click,
-    edit,
-    press,
-    queryAll,
-    queryAllTexts,
-    queryAllValues,
-    queryAttribute,
-    queryFirst,
-    select,
-    waitFor,
-} from "@odoo/hoot-dom";
-import { getFixture, expect, test } from "@odoo/hoot";
-import { animationFrame, mockDate, runAllTimers } from "@odoo/hoot-mock";
 
 async function closePopover() {
     // Close the popover by clicking outside
@@ -1051,7 +1051,7 @@ test("properties: many2many", async () => {
  * modal should correspond to the selected model and should be updated dynamically.
  */
 test.tags("desktop");
-test("properties: many2one 'Search more...'", async () => {
+test("properties: many2one 'Search more...' +  internal link save keeps data", async () => {
     onRpc(({ method, model }) => {
         if (["has_access", "has_group"].includes(method)) {
             return true;
@@ -1065,6 +1065,8 @@ test("properties: many2one 'Search more...'", async () => {
                 { model: "partner", display_name: "Partner" },
                 { model: "res.users", display_name: "User" },
             ];
+        } else if (method === "get_formview_id") {
+            return false;
         }
     });
 
@@ -1092,12 +1094,19 @@ test("properties: many2one 'Search more...'", async () => {
             <field name="id"/>
             <field name="display_name"/>
         </list>`;
+    User._views[["form", false]] = /* xml */ `
+        <form>
+            <sheet>
+                <group>
+                    <field name="display_name"/>
+                </group>
+            </sheet>
+        </form>`;
     User._views[["list", false]] = /* xml */ `
         <list>
             <field name="id"/>
             <field name="display_name"/>
         </list>`;
-    User._views[["search", false]] = /* xml */ `<search/>`;
 
     // Patch the Many2XAutocomplete default search limit options
     patchWithCleanup(Many2XAutocomplete.defaultProps, {
@@ -1162,6 +1171,21 @@ test("properties: many2one 'Search more...'", async () => {
     await animationFrame();
     // Checking the model loaded
     expect.verifySteps(["res.users"]);
+
+    // Select the first value
+    await click(".o_list_table tbody tr:first-child td[name='display_name']");
+    await animationFrame();
+
+    // Click on external button
+    await click(".o_properties_external_button");
+    await animationFrame();
+
+    // Click on Save & close button
+    await click(".modal .o_form_button_save");
+    await animationFrame();
+
+    // Check that value does not disappear
+    expect(".o_field_property_definition_value input").toHaveValue("Alice");
 });
 
 test("properties: date(time) property manipulations", async () => {
@@ -1597,7 +1621,6 @@ test("properties: kanban view without properties", async () => {
  */
 test.tags("desktop");
 test("properties: switch view on desktop", async () => {
-    Partner._views[["search", false]] = /* xml */ `<search/>`;
     Partner._views[["kanban", 99]] = /* xml */ `<kanban>
                 <templates>
                     <t t-name="card">
@@ -1631,7 +1654,6 @@ test("properties: switch view on desktop", async () => {
 
 test.tags("mobile");
 test("properties: switch view on mobile", async () => {
-    Partner._views[["search", false]] = /* xml */ `<search/>`;
     Partner._views[["kanban", 99]] = /* xml */ `<kanban>
                 <templates>
                     <t t-name="card">
@@ -1907,6 +1929,25 @@ test("properties: form view and falsy domain, properties are empty", async () =>
     await click(".o-dropdown--menu span .fa-cogs");
     await animationFrame();
     expect(".o_test_properties_not_empty").toHaveCount(1);
+});
+
+test("properties: discard changes", async () => {
+    onRpc("has_access", () => true);
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 1,
+        arch: /* xml */ `
+            <form>
+                <field name="company_id"/>
+                <field name="properties" widget="properties"/>
+            </form>`,
+    });
+    expect(".o_property_field:first-child input").toHaveValue("char value");
+    await contains(".o_property_field:first-child input").edit("char updated");
+    expect(".o_property_field:first-child input").toHaveValue("char updated");
+    await clickCancel();
+    expect(".o_property_field:first-child input").toHaveValue("char value");
 });
 
 // ---------------------------------------------------
@@ -2506,7 +2547,8 @@ test("new property, change record, change property type", async () => {
     expect(".o_property_field .o_property_field_value input").toHaveValue("0");
 });
 
-test.tags("desktop")("properties: moving single property to 2nd group in auto split mode", async () => {
+test.tags("desktop");
+test("properties: moving single property to 2nd group in auto split mode", async () => {
     await makePropertiesGroupView([false]);
     const { moveTo, drop } = await contains(getPropertyHandleElement("property_1"), {
         visible: false,
@@ -2523,7 +2565,8 @@ test.tags("desktop")("properties: moving single property to 2nd group in auto sp
     ]);
 });
 
-test.tags("desktop")("properties: moving single property to 1st group", async () => {
+test.tags("desktop");
+test("properties: moving single property to 1st group", async () => {
     await makePropertiesGroupView([true, true, false]);
 
     await contains(getPropertyHandleElement("property_3"), {
@@ -2538,7 +2581,8 @@ test.tags("desktop")("properties: moving single property to 1st group", async ()
     ]);
 });
 
-test.tags("desktop")("properties: split, moving property from 2nd group to 1st", async () => {
+test.tags("desktop");
+test("properties: split, moving property from 2nd group to 1st", async () => {
     await makePropertiesGroupView([true, false, false]);
 
     await contains(getPropertyHandleElement("property_3"), {
@@ -2554,7 +2598,8 @@ test.tags("desktop")("properties: split, moving property from 2nd group to 1st",
     ]);
 });
 
-test.tags("desktop")("properties: split, moving property from 1st group to 2nd", async () => {
+test.tags("desktop");
+test("properties: split, moving property from 1st group to 2nd", async () => {
     await makePropertiesGroupView([true, false, false, false, false, false]);
 
     await contains(getPropertyHandleElement("property_3"), {

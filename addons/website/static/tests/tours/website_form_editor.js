@@ -32,6 +32,9 @@ for (const data of ESSENTIAL_FIELDS_VALID_DATA_FOR_DEFAULT_FORM) {
         trigger: `:iframe .s_website_form_model_required .s_website_form_input[name="${data.name}"]`,
         run: `edit ${data.value} && press Tab`,
     });
+    essentialFieldsForDefaultFormFillInSteps.push({
+        trigger: `:iframe .s_website_form_model_required .s_website_form_input[name="${data.name}"]:value(${data.value})`,
+    });
 }
 
 // Replace all `"` character by `&quot;`.
@@ -140,7 +143,6 @@ const addExistingField = function (name, type, label, required, display) {
 registerWebsitePreviewTour("website_form_editor_tour", {
     url: '/',
     edition: true,
-    checkDelay: 100,
 }, () => [
     // Drop a form builder snippet and configure it
     {
@@ -150,6 +152,39 @@ registerWebsitePreviewTour("website_form_editor_tour", {
     },
     {
         trigger: ":iframe .s_website_form_field",
+    },
+    // Check if fields in two form snippet have unique IDs
+    {
+        content: "Drop another form snippet",
+        trigger: "#oe_snippets .oe_snippet .oe_snippet_thumbnail[data-snippet='s_website_form']:not(.o_we_ongoing_insertion)",
+        run: "drag_and_drop :iframe #wrap",
+    },
+    {
+        content: "Check if there are two form snippets on the page",
+        trigger: ":iframe .s_website_form:nth-of-type(2) .s_website_form_field",
+    },
+    {
+        content: "Check that the first field of both the form snippets have different IDs",
+        trigger: ":iframe .s_website_form:nth-of-type(1) input[name='name']",
+        run: function() {
+            const firstFieldForm1El = this.anchor;
+            const firstFieldForm2El = firstFieldForm1El.ownerDocument.querySelector(
+                ".s_website_form:nth-of-type(2) input[name='name']"
+            );
+            if (firstFieldForm1El.id === firstFieldForm2El.id) {
+                console.error("The first fields of two different form snippet have the same ID");
+            }
+        },
+    },
+    {
+        content: "Click on the second form",
+        trigger: ":iframe .s_website_form:nth-of-type(2)",
+        run: "click",
+    },
+    {
+        content: "Remove the second snippet",
+        trigger: ":iframe .oe_overlay.oe_active .oe_snippet_remove",
+        run: "click",
     },
     {
         content: "Select form by clicking on an input field",
@@ -191,6 +226,14 @@ registerWebsitePreviewTour("website_form_editor_tour", {
         content: "Form has a model name",
         trigger: ':iframe section.s_website_form form[data-model_name="mail.mail"]',
         run: "click",
+    }, {
+        content: "Set the offset and width of the Phone Number field",
+        trigger: ':iframe input[name="phone"]',
+        run: function () {
+            const fieldEl = this.anchor.closest('.s_website_form_field');
+            fieldEl.classList.add('offset-lg-3');
+            fieldEl.classList.add('col-lg-9');
+        },
     }, {
         content: 'Edit the Phone Number field',
         trigger: ':iframe input[name="phone"]',
@@ -387,13 +430,28 @@ registerWebsitePreviewTour("website_form_editor_tour", {
         trigger: 'we-list table input:eq(0)',
         run: "edit Germany",
     }, {
+        content: "Check that the label has been changed on the snippet",
+        trigger: ":iframe .s_website_form_field.s_website_form_custom.s_website_form_required" +
+            ":has(option:contains('Germany'))",
+        run: function () {},
+    }, {
         content: "Change Option 2 Label",
         trigger: 'we-list table input:eq(1)',
         run: "edit Belgium",
     }, {
+        content: "Check that the label has been changed on the snippet",
+        trigger: ":iframe .s_website_form_field.s_website_form_custom.s_website_form_required" +
+            ":has(option:contains('Belgium'))",
+        run: function () {},
+    }, {
         content: "Change first Option 3 label",
         trigger: 'we-list table input:eq(2)',
         run: "edit France",
+    }, {
+        content: "Check that the label has been changed on the snippet",
+        trigger: ":iframe .s_website_form_field.s_website_form_custom.s_website_form_required" +
+            ":has(option:contains('France'))",
+        run: function () {},
     },
     {
         // TODO: Fix code to avoid this behavior
@@ -414,13 +472,26 @@ registerWebsitePreviewTour("website_form_editor_tour", {
     },
     {
         content: "Change last Option label",
-        trigger: 'we-list table input:eq(3)',
+        trigger: "we-list table input:eq(3)[name='Item']",
         // TODO: Fix code to avoid blur event
         run: "edit Canada",
+    },
+    {
+        content: "Check that the label has been changed on the snippet",
+        trigger: ":iframe .s_website_form_field.s_website_form_custom.s_website_form_required" +
+            ":has(option:contains('Canada'))",
+        run: function () {},
     }, {
         content: "Remove Germany Option",
         trigger: '.o_we_select_remove_option:eq(0)',
         run: "click",
+    },
+    {
+        content: "Check that the Germany option was removed",
+        trigger: ":iframe .s_website_form_field.s_website_form_custom.s_website_form_required" +
+            ":has(label:contains('State'))" +
+            ":not(:has(option:contains('Germany')))",
+        run: function () {},
     },
     {
         // TODO: Fix code to avoid this behavior
@@ -434,7 +505,7 @@ registerWebsitePreviewTour("website_form_editor_tour", {
         run: "click",
     }, {
         content: "Change last option label with a number",
-        trigger: 'we-list table input:eq(3)',
+        trigger: "we-list table input:eq(3)[name='Item']",
         run: "edit 44 - UK",
     }, {
         content: "Check that the input value is the full option value",
@@ -489,7 +560,7 @@ registerWebsitePreviewTour("website_form_editor_tour", {
         trigger: '.dropdown:has([name="link_style_color"]) > button',
         run: "click",
     }, {
-        trigger: "[data-value=secondary]",
+        trigger: "[data-value=custom]",
         run: "click",
     }, {
         trigger: ".dropdown:has([name=link_style_shape]) > button",
@@ -505,7 +576,7 @@ registerWebsitePreviewTour("website_form_editor_tour", {
         run: "click",
     }, {
         content: "Check the resulting button",
-        trigger: ':iframe .s_website_form_send.btn.btn-sm.btn-secondary.rounded-circle',
+        trigger: ':iframe .s_website_form_send.btn.btn-sm.btn-custom.rounded-circle',
     },
     // Add a default value to a auto-fillable field.
     {
@@ -542,6 +613,19 @@ registerWebsitePreviewTour("website_form_editor_tour", {
         content: 'Verify that phone field is still auto-fillable',
         trigger: ':iframe .s_website_form_field input[data-fill-with="phone"]:value("+1 555-555-5555")',
         run: "click",
+    },
+    {
+        content: "Check that the offset and width of the Phone Number field are still correct",
+        trigger: ':iframe .s_website_form_field input[data-fill-with="phone"]',
+        run: function () {
+            const fieldEl = this.anchor.closest('.s_website_form_field');
+            if (!fieldEl.classList.contains('offset-lg-3')) {
+                throw new Error("The offset of the Phone Number field should have been kept");
+            }
+            if (!fieldEl.classList.contains('col-lg-9')) {
+                throw new Error("The width of the Phone Number field should have been kept");
+            }
+        },
     },
     // Check that the resulting form behavior is correct.
     {
@@ -620,7 +704,7 @@ registerWebsitePreviewTour("website_form_editor_tour", {
      {
         content: "Write anything in C",
         trigger: `:iframe ${triggerFieldByLabel("field C")} input`,
-        run: "edit Mellon",
+        run: "edit Mellon && press Tab",
     }, {
         content: "Check that field B is visible, but field A is not",
         trigger: `:iframe .s_website_form:has(${triggerFieldByLabel("field B")}:visible)` +
@@ -634,6 +718,63 @@ registerWebsitePreviewTour("website_form_editor_tour", {
         trigger: `:iframe .s_website_form:has(${triggerFieldByLabel("field A")}:visible)`,
     },
     ...clickOnEditAndWaitEditMode(),
+    ...addCustomField("char", "text", "Philippe of Belgium", false),
+    {
+        content: "Select the 'Subject' field",
+        trigger: ':iframe .s_website_form_field.s_website_form_model_required:has(label:contains("Subject"))',
+        run: "click",
+    },
+    ...selectButtonByText(CONDITIONALVISIBILITY),
+    ...selectButtonByData('data-set-visibility-dependency="Philippe of Belgium"'),
+    ...selectButtonByData('data-select-data-attribute="set"'),
+    {
+        content: "Set a default value to the 'Subject' field",
+        trigger: 'we-input[data-attribute-name="value"] input',
+        run: "edit Default Subject",
+    },
+    {
+        content: "Select the 'Your Message' field",
+        trigger: ':iframe .s_website_form_field.s_website_form_required:has(label:contains("Your Message"))',
+        run: "click",
+    },
+    ...selectButtonByText(CONDITIONALVISIBILITY),
+    ...selectButtonByData('data-set-visibility-dependency="Philippe of Belgium"'),
+    ...selectButtonByData('data-select-data-attribute="set"'),
+
+    ...clickOnSave(),
+    // Ensure that a field required for a model is not disabled when
+    // conditionally hidden.
+    {
+        content: "Check that the 'Subject' field is not disabled",
+        trigger: `:iframe .s_website_form:has(.s_website_form_model_required ` +
+            `.s_website_form_input[value="Default Subject"]:not([disabled]):not(:visible))`,
+    },
+    // Ensure that a required field (but not for a model) is disabled when
+    // conditionally hidden.
+    {
+        content: "Check that the 'Your Message' field is disabled",
+        trigger: `:iframe .s_website_form:has(.s_website_form_required ` +
+            `.s_website_form_input[name="body_html"][required][disabled]:not(:visible))`,
+    },
+
+    ...clickOnEditAndWaitEditMode(),
+    {
+        content: "Select the 'Subject' field",
+        trigger: ':iframe .s_website_form_field.s_website_form_model_required:has(label:contains("Subject"))',
+        run: "click",
+    },
+    ...selectButtonByData("data-set-visibility='visible'"),
+    {
+        content: "Empty the default value of the 'Subject' field",
+        trigger: 'we-input[data-attribute-name="value"] input',
+        run: "clear",
+    },
+    {
+        content: "Select the 'Your Message' field",
+        trigger: ':iframe .s_website_form_field.s_website_form_required:has(label:contains("Your Message"))',
+        run: "click",
+    },
+    ...selectButtonByData("data-set-visibility='visible'"),
     // This step is to ensure select fields are properly cleaned before
     // exiting edit mode
     {
@@ -824,40 +965,26 @@ registerWebsitePreviewTour('website_form_conditional_required_checkboxes', {
     {
         content: "Open condition item select",
         trigger: 'we-select[data-name="hidden_condition_opt"] we-toggler',
-        run(helpers) {
-            // TODO: use run: "click",
-            this.anchor.click();
-        }
+        run: "click",
     }, {
         content: "Choose first checkbox as condition item",
         trigger: 'we-button[data-set-visibility-dependency="Checkbox 1"]',
-        async run(helpers) {
-            await helpers.click();
-            // TODO:to be removed
-            await new Promise((r) => setTimeout(r, 300));
-        }
+        run: "click",
     }, {
         content: "Open condition comparator select",
         trigger: 'we-select[data-attribute-name="visibilityComparator"] we-toggler',
-        run(helpers) {
-            // TODO: use run: "click",
-            this.anchor.click();
-        }
+        run: "click",
     }, {
         content: "Choose 'not equal to' comparator",
         trigger: 'we-button[data-select-data-attribute="!selected"]',
-        async run(helpers) {
-            await helpers.click();
-            // TODO: to be removed
-            await new Promise((r) => setTimeout(r, 300));
-        }
+        run: "click",
     },
     ...clickOnSave(),
 
     // Check that the resulting form behavior is correct
     {
         content: "Wait for page reload",
-        trigger: ':iframe body:not(.editor_enable) [data-snippet="s_website_form"]',
+        trigger: 'body:not(.editor_enable) :iframe [data-snippet="s_website_form"]',
         run: function (actions) {
             // The next steps will be about removing non essential required
             // fields. For the robustness of the test, check that amount
@@ -867,6 +994,10 @@ registerWebsitePreviewTour('website_form_conditional_required_checkboxes', {
                 console.error('The amount of model-required fields seems to have changed');
             }
         },
+    },
+    {
+        content: "Wait the form is loaded before fill it",
+        trigger: ":iframe form:contains(checkbox 2)",
     },
     ...essentialFieldsForDefaultFormFillInSteps,
     {
@@ -894,6 +1025,10 @@ registerWebsitePreviewTour('website_form_conditional_required_checkboxes', {
         content: "Go back to the form",
         trigger: ':iframe a.navbar-brand.logo',
         run: "click",
+    },
+    {
+        content: "Wait the form is loaded before fill it",
+        trigger: ":iframe form:contains(checkbox 2)",
     },
     ...essentialFieldsForDefaultFormFillInSteps,
     {
@@ -1000,7 +1135,7 @@ registerWebsitePreviewTour("website_form_editable_content", {
     },
     {
         content: "Check that the new text value was correctly set",
-        trigger: ":iframe section.s_website_form h5:contains(/^ABC$/)",
+        trigger: ":iframe section.s_website_form h5:text(ABC)",
     },
     {
         content: "Remove the dropped column",
@@ -1030,7 +1165,6 @@ registerWebsitePreviewTour("website_form_special_characters", {
         run: "click",
     },
     ...addCustomField("char", "text", `Test1"'`, false),
-    ...addCustomField("char", "text", 'Test2`\\', false),
     ...clickOnSave(),
     ...essentialFieldsForDefaultFormFillInSteps,
     {
@@ -1041,10 +1175,6 @@ registerWebsitePreviewTour("website_form_special_characters", {
         content: "Complete the first added field",
         trigger: `:iframe input[name="${CSS.escape("Test1&quot;'")}"]`,
         run: "edit test1",
-    }, {
-        content: "Complete the second added field",
-        trigger: `:iframe input[name="${CSS.escape("Test2`\\")}"]`,
-        run: "edit test2",
     }, {
         content: "Click on 'Submit'",
         trigger: ":iframe a.s_website_form_send",

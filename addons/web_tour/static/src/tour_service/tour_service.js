@@ -16,6 +16,7 @@ import {
     TourRecorder,
 } from "@web_tour/tour_service/tour_recorder/tour_recorder";
 import { redirect } from "@web/core/utils/urls";
+import { tourRecorderState } from "@web_tour/tour_service/tour_recorder/tour_recorder_state";
 
 const StepSchema = {
     id: { type: [String], optional: true },
@@ -36,15 +37,14 @@ const StepSchema = {
         },
     },
     trigger: { type: String },
+    expectUnloadPage: { type: Boolean, optional: true },
     //ONLY IN DEBUG MODE
     pause: { type: Boolean, optional: true },
     break: { type: Boolean, optional: true },
 };
 
 const TourSchema = {
-    checkDelay: { type: Number, optional: true },
     name: { type: String, optional: true },
-    saveAs: { type: String, optional: true },
     steps: Function,
     url: { type: String, optional: true },
     wait_for: { type: [Function, Object], optional: true },
@@ -56,7 +56,7 @@ const userMenuRegistry = registry.category("user_menuitems");
 export const tourService = {
     // localization dependency to make sure translations used by tours are loaded
     dependencies: ["orm", "effect", "overlay", "localization"],
-    start: async (_env, { orm, effect, overlay }) => {
+    start: async (env, { orm, effect, overlay }) => {
         await whenReady();
         let toursEnabled = session?.tour_enabled;
         const tourRegistry = registry.category("web_tour.tours");
@@ -77,22 +77,10 @@ export const tourService = {
         }));
 
         function getTourFromRegistry(tourName) {
-            let tour = null;
-            if (tourRegistry.contains(tourName)) {
-                tour = tourRegistry.get(tourName);
-            }
-            const tourFromSaveAs = tourRegistry
-                .getEntries()
-                .findLast(([n, t]) => t.saveAs == tourName);
-            if (tourFromSaveAs) {
-                tourName = tourFromSaveAs[0];
-                tour = tourFromSaveAs[1];
-            }
-
-            if (!tour) {
+            if (!tourRegistry.contains(tourName)) {
                 return;
             }
-
+            const tour = tourRegistry.get(tourName);
             return {
                 ...tour,
                 steps: tour.steps(),
@@ -170,13 +158,10 @@ export const tourService = {
             const tourName = tourState.getCurrentTour();
             const tourConfig = tourState.getCurrentConfig();
 
-            let tour;
+            let tour = getTourFromRegistry(tourName);
             if (tourConfig.fromDB) {
                 tour = await getTourFromDB(tourName);
-            } else if (tourRegistry.contains(tourName)) {
-                tour = getTourFromRegistry(tourName);
             }
-
             if (!tour) {
                 return;
             }
@@ -194,9 +179,9 @@ export const tourService = {
             );
 
             if (tourConfig.mode === "auto") {
-                new TourAutomatic(tour).start(pointer);
+                new TourAutomatic(tour).start();
             } else {
-                new TourInteractive(tour).start(pointer, async () => {
+                new TourInteractive(tour).start(env, pointer, async () => {
                     pointer.stop();
                     tourState.clear();
                     browser.console.log("tour succeeded");
@@ -229,6 +214,7 @@ export const tourService = {
                         onClose: () => {
                             remove();
                             browser.localStorage.removeItem(TOUR_RECORDER_ACTIVE_LOCAL_STORAGE_KEY);
+                            tourRecorderState.clear();
                         },
                     },
                     { sequence: 99999 }
@@ -267,6 +253,7 @@ export const tourService = {
                         onClose: () => {
                             remove();
                             browser.localStorage.removeItem(TOUR_RECORDER_ACTIVE_LOCAL_STORAGE_KEY);
+                            tourRecorderState.clear();
                         },
                     },
                     { sequence: 99999 }

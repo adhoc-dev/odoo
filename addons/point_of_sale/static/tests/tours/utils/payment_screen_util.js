@@ -89,15 +89,8 @@ export function clickInvoiceButton() {
 export function clickValidate() {
     return [
         {
-            isActive: ["desktop"],
             content: "validate payment",
-            trigger: `.payment-screen .button.next.highlight`,
-            run: "click",
-        },
-        {
-            isActive: ["mobile"],
-            content: "validate payment",
-            trigger: `.payment-screen .btn-switchpane:contains('Validate')`,
+            trigger: `.payment-screen button.validation-button.next`,
             run: "click",
         },
     ];
@@ -127,6 +120,15 @@ export function clickBack() {
         {
             content: "click back button",
             trigger: ".back-button",
+            run: "click",
+        },
+    ];
+}
+export function clickBackToProductScreen() {
+    return [
+        {
+            content: "click back to product screen",
+            trigger: ".payment-screen .back-button",
             run: "click",
         },
     ];
@@ -250,17 +252,10 @@ export function validateButtonIsHighlighted(isHighlighted = true) {
     return [
         {
             isActive: ["desktop"],
-            content: `validate button is ${isHighlighted ? "highlighted" : "not highligted"}`,
+            content: `validate button is ${isHighlighted ? "highlighted" : "not highlighted"}`,
             trigger: isHighlighted
-                ? `.payment-screen .button.next.highlight`
-                : `.payment-screen .button.next:not(:has(.highlight))`,
-        },
-        {
-            isActive: ["mobile"],
-            content: `validate button is ${isHighlighted ? "highlighted" : "not highligted"}`,
-            trigger: isHighlighted
-                ? `.payment-screen .btn-switchpane:not(.secondary):contains('Validate')`
-                : `.payment-screen .btn-switchpane.secondary:contains('Validate')`,
+                ? `.payment-screen button.validation-button.next.highlight`
+                : `.payment-screen button.validation-button.next:not(:has(.highlight))`,
         },
     ];
 }
@@ -349,7 +344,7 @@ export function clickPartnerButton() {
         },
         {
             content: "partner screen is shown",
-            trigger: `.modal ${PartnerList.clickPartner().trigger}`,
+            trigger: `${PartnerList.clickPartner().trigger}`,
         },
     ];
 }
@@ -363,4 +358,13 @@ export function shippingLaterHighlighted() {
         content: "Shipping later button is highlighted",
         trigger: ".button:contains('Ship Later').highlight",
     };
+}
+
+export function isInvoiceButtonUnchecked() {
+    return [
+        {
+            content: "check invoice button is not highlighted",
+            trigger: ".js_invoice:not(.highlight)",
+        },
+    ];
 }

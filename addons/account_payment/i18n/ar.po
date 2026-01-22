@@ -1,24 +1,25 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* account_payment
-# 
+#
 # Translators:
 # Wil Odoo, 2024
-# Malaz Abuidris <msea@odoo.com>, 2024
-# 
+# Malaz Abuidris <msea@odoo.com>, 2025
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-25 07:48+0000\n"
+"POT-Creation-Date: 2025-12-29 18:37+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Malaz Abuidris <msea@odoo.com>, 2024\n"
+"Last-Translator: Malaz Abuidris <msea@odoo.com>, 2025\n"
 "Language-Team: Arabic (https://app.transifex.com/odoo/teams/41243/ar/)\n"
+"Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: ar\n"
-"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
+"&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
 
 #. module: account_payment
 #. odoo-python
@@ -111,12 +112,16 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_payment.payment_refund_wizard_view_form
 msgid ""
 "<strong>Warning!</strong> There is a refund pending for this payment.\n"
-"                        Wait a moment for it to be processed. If the refund is still pending in a\n"
-"                        few minutes, please check your payment provider configuration."
+"                        Wait a moment for it to be processed. If the refund "
+"is still pending in a\n"
+"                        few minutes, please check your payment provider "
+"configuration."
 msgstr ""
 "<strong>تحذير!</strong> توجد عملية استرداد أموال معلقة لهذا الدفع.\n"
-"                        انتظر قليلاً ريثما يتم معالجتها. إذا ما زالت عملية استرداد الأموال\n"
-"                        معلقة بعد عدة دقائق، يرجى التحقق من تهيئة مزود الدفع. "
+"                        انتظر قليلاً ريثما يتم معالجتها. إذا ما زالت عملية "
+"استرداد الأموال\n"
+"                        معلقة بعد عدة دقائق، يرجى التحقق من تهيئة مزود "
+"الدفع. "
 
 #. module: account_payment
 #. odoo-python
@@ -127,10 +132,9 @@ msgstr "سيتم تطبيق خصم إذا قام العميل بالدفع قب�
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment
 msgid ""
-"A payment has already been made on this invoice, please make sure to not pay"
-" twice."
-msgstr ""
-"لقد تم سداد قيمة هذه الفاتورة بالفعل، يُرجى التأكد من عدم الدفع مرتين. "
+"A payment has already been made on this invoice, please make sure to not pay "
+"twice."
+msgstr "لقد تم سداد قيمة هذه الفاتورة بالفعل، يُرجى التأكد من عدم الدفع مرتين. "
 
 #. module: account_payment
 #. odoo-python
@@ -199,11 +203,6 @@ msgid "Close"
 msgstr "إغلاق"
 
 #. module: account_payment
-#: model:ir.model.fields,field_description:account_payment.field_account_payment_register__payment_method_code
-msgid "Code"
-msgstr "رمز "
-
-#. module: account_payment
 #: model:ir.model,name:account_payment.model_res_config_settings
 msgid "Config Settings"
 msgstr "تهيئة الإعدادات "
@@ -259,8 +258,7 @@ msgstr "خصم الدفع المبكر بقيمة "
 #: model:onboarding.onboarding.step,description:account_payment.onboarding_onboarding_step_payment_provider
 msgid "Enable credit & debit card payments supported by Stripe."
 msgstr ""
-"تمكين الدفع عن طريق البطاقات الائتمانية وبطاقات الخصم المدعومة من قِبَل "
-"Stripe "
+"تمكين الدفع عن طريق البطاقات الائتمانية وبطاقات الخصم المدعومة من قِبَل Stripe "
 
 #. module: account_payment
 #: model:ir.model.fields.selection,name:account_payment.selection__payment_refund_wizard__support_refund__full_only
@@ -403,6 +401,12 @@ msgstr "خطة تمهيدية "
 #: model:onboarding.onboarding.step,title:account_payment.onboarding_onboarding_step_payment_provider
 msgid "Online Payments"
 msgstr "المدفوعات عبر الإنترنت "
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/wizards/payment_link_wizard.py:0
+msgid "Online payment option is not enabled in Configuration."
+msgstr "لم يتم تمكين خيار الدفع عبر الإنترنت في التهيئة. "
 
 #. module: account_payment
 #. odoo-python
@@ -642,6 +646,18 @@ msgid "The source payment of related refund payments"
 msgstr "الدفع المصدري للمدفوعات المستردة ذات الصلة "
 
 #. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "There are pending transactions for this invoice."
+msgstr "توجد معاملات معلقة لهذه الفاتورة. "
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "There is no amount to be paid."
+msgstr "لا يوجد مبلغ يجب دفعه. "
+
+#. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_error
 msgid "There was an error processing your payment: invalid invoice."
 msgstr "حدث خطأ أثناء معالجة عملية الدفع: الفاتورة غير صالحة. "
@@ -666,9 +682,28 @@ msgid "There was en error processing your payment: invalid credit card ID."
 msgstr "حدث خطأ أثناء معالجة عملية الدفع: معرف البطاقة الائتمانية غير صالح. "
 
 #. module: account_payment
-#: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment_paid
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "This invoice cannot be paid online."
+msgstr "لا يمكن سداد هذه الفاتورة عبر الإنترنت. "
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
 msgid "This invoice has already been paid."
 msgstr "لقد تم دفع قيمة هذه الفاتورة بالفعل. "
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "This invoice isn't posted."
+msgstr "لم يتم ترحيل هذه الفاتورة. "
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "This is not an outgoing invoice."
+msgstr "هذه ليست فاتورة جارية. "
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_account_bank_statement_line__transaction_count
@@ -702,7 +737,8 @@ msgstr "إبطال المعاملة"
 #. odoo-python
 #: code:addons/account_payment/models/account_payment_method_line.py:0
 msgid ""
-"You can't delete a payment method that is linked to a provider in the enabled or test state.\n"
+"You can't delete a payment method that is linked to a provider in the "
+"enabled or test state.\n"
 "Linked providers(s): %s"
 msgstr ""
 "لا يمكنك حذف طريقة دفع مرتبطة بمزود دفع في وضع التمكين أو الاختبار. \n"
@@ -715,8 +751,8 @@ msgid ""
 "You cannot uninstall this module as payments using this payment method "
 "already exist."
 msgstr ""
-"لا يمكنك إلغاء تثبيت هذا التطبيق لأنه هناك عمليات دفع تستخدم طريقة الدفع هذه"
-" بالفعل. "
+"لا يمكنك إلغاء تثبيت هذا التطبيق لأنه هناك عمليات دفع تستخدم طريقة الدفع هذه "
+"بالفعل. "
 
 #. module: account_payment
 #. odoo-python
@@ -749,3 +785,6 @@ msgstr "تم تطبيقها. "
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
 msgid "overdue"
 msgstr "متأخر"
+
+#~ msgid "Code"
+#~ msgstr "رمز "

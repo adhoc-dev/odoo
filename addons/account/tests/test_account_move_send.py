@@ -162,7 +162,7 @@ class TestAccountComposerPerformance(AccountTestInvoicingCommon, MailCommon):
         with self.mock_mail_gateway(mail_unlink_sent=False):
             self.env['account.move.send']._generate_and_send_invoices(
                 test_moves,
-                sending_methods=['email'],
+                sending_methods={'email'},
                 mail_template=move_template,
             )
 
@@ -512,10 +512,10 @@ class TestAccountMoveSendCommon(AccountTestInvoicingCommon):
             )
 
     def create_send_and_print(self, invoices, **kwargs):
-        wizard_model = 'account.move.send.wizard' if len(invoices) == 1 else 'account.move.send.batch.wizard'
-        return self.env[wizard_model]\
-            .with_context(active_model='account.move', active_ids=invoices.ids)\
-            .create(kwargs)
+        if len(invoices) == 1:
+            return self._create_account_move_send_wizard_single(invoices, **kwargs)
+        else:
+            return self._create_account_move_send_wizard_multi(invoices, **kwargs)
 
     def _get_mail_message(self, move):
         return self.env['mail.message'].search([('model', '=', move._name), ('res_id', '=', move.id)], limit=1)
@@ -574,7 +574,9 @@ class TestAccountMoveSend(TestAccountMoveSendCommon):
 
         # Send it again. The PDF must not be created again.
         wizard = self.create_send_and_print(invoice, sending_methods=['email', 'manual'])
-        results = wizard.action_send_and_print()
+        with patch('odoo.addons.account.models.account_move_send.AccountMoveSend._hook_invoice_document_after_pdf_report_render') as mocked_method:
+            results = wizard.action_send_and_print()
+            mocked_method.assert_not_called()
         self.assertEqual(results['type'], 'ir.actions.act_url')
         self.assertFalse(invoice.sending_data)
         self.assertRecordValues(invoice, [{'invoice_pdf_report_id': pdf_report.id}])
@@ -595,25 +597,6 @@ class TestAccountMoveSend(TestAccountMoveSendCommon):
         ])
         self.assertFalse(invoice_attachments)
 
-    def test_invoice_single_email_missing(self):
-        invoice = self.init_invoice("out_invoice", amounts=[1000], post=True)
-
-        self.partner_a.invoice_sending_method = 'email'
-        self.partner_a.email = None
-        wizard = self.create_send_and_print(invoice)
-        self.assertFalse('email' in wizard.sending_methods)  # preferred method is overriden since it makes no sense
-        wizard.sending_methods = ['email']  # user selects email anyway
-        self.assertTrue('account_missing_email' in wizard.alerts and wizard.alerts['account_missing_email']['level'] == 'danger')
-        with self.assertRaisesRegex(UserError, "email"):
-            wizard.action_send_and_print()
-
-        self.partner_a.email = "turlututu@tsointsoin"
-        wizard = self.create_send_and_print(invoice)
-        self.assertFalse(wizard.alerts)
-        self.assertTrue('email' in wizard.sending_methods)
-        wizard.action_send_and_print()
-        self.assertTrue(self._get_mail_message(invoice))
-
     def test_invoice_multi(self):
         invoice1 = self.init_invoice("out_invoice", partner=self.partner_a, amounts=[1000], post=True)
         invoice2 = self.init_invoice("out_invoice", partner=self.partner_b, amounts=[1000], post=True)
@@ -625,7 +608,7 @@ class TestAccountMoveSend(TestAccountMoveSendCommon):
         self.assertEqual(wizard.move_ids, invoice1 + invoice2)
         self.assertFalse(wizard.alerts)
         self.assertEqual(wizard.summary_data, {
-            'manual': {'count': 1, 'label': 'Download'},
+            'manual': {'count': 1, 'label': 'Manually'},
             'email': {'count': 1, 'label': 'by Email'},
         })
 
@@ -664,9 +647,8 @@ class TestAccountMoveSend(TestAccountMoveSendCommon):
         invoice3 = self.init_invoice("out_invoice", partner=self.partner_b, amounts=[1000], post=True)
         wizard = self.create_send_and_print(invoice1 + invoice2 + invoice3)
         self.assertEqual(wizard.move_ids, invoice1 + invoice2 + invoice3)
-        self.assertTrue(wizard.alerts and 'account_pdf_exist' in wizard.alerts)
         self.assertEqual(wizard.summary_data, {
-            'manual': {'count': 2, 'label': 'Download'},
+            'manual': {'count': 2, 'label': 'Manually'},
             'email': {'count': 1, 'label': 'by Email'},
         })
         wizard.action_send_and_print()
@@ -698,6 +680,9 @@ class TestAccountMoveSend(TestAccountMoveSendCommon):
         self.partner_a.email = None
         self.assertTrue(bool(self.partner_b.email))
         wizard = self.create_send_and_print(invoice1 + invoice2)
+        self.assertEqual(wizard.summary_data, {
+            'email': {'count': 1, 'label': 'by Email'},  # Only one will be actually sent by email
+        })
         self.assertTrue('account_missing_email' in wizard.alerts)
         self.assertEqual(wizard.alerts['account_missing_email']['level'], 'warning')
         wizard.action_send_and_print()
@@ -707,6 +692,51 @@ class TestAccountMoveSend(TestAccountMoveSendCommon):
         self.assertFalse(self._get_mail_message(invoice1))
         self.assertTrue(invoice2.invoice_pdf_report_id)
         self.assertTrue(self._get_mail_message(invoice2))
+
+    def test_invoice_multi_with_edi(self):
+        invoice1 = self.init_invoice("out_invoice", partner=self.partner_a, amounts=[1000], post=True)
+        invoice2 = self.init_invoice("out_invoice", partner=self.partner_b, amounts=[1000], post=True)
+
+        self.partner_a.invoice_sending_method = 'email'
+        self.partner_b.invoice_sending_method = 'manual'
+
+        def get_default_extra_edis(self, move):
+            if move == invoice1:
+                return {'edi1'}
+            return {'edi1', 'edi2'}
+
+        def get_all_extra_edis(self):
+            return {
+                'edi1': {'label': 'EDI 1'},
+                'edi2': {'label': 'EDI 2'},
+            }
+
+        with (
+            patch('odoo.addons.account.models.account_move_send.AccountMoveSend._get_default_extra_edis', get_default_extra_edis),
+            patch('odoo.addons.account.models.account_move_send.AccountMoveSend._get_all_extra_edis', get_all_extra_edis)
+        ):
+            wizard = self.create_send_and_print(invoice1 + invoice2)
+            self.assertEqual(wizard.summary_data, {
+                'edi1': {'count': 2, 'label': 'by EDI 1'},
+                'edi2': {'count': 1, 'label': 'by EDI 2'},
+                'manual': {'count': 1, 'label': 'Manually'},
+                'email': {'count': 1, 'label': 'by Email'},
+            })
+
+    def test_invoice_multi_child_contact(self):
+        """ Test bulk invoice sending will retrieve info from the main partner. """
+        self.partner_a.write({'invoice_sending_method': 'manual'})
+        partner = self.env['res.partner'].create({
+            'type': 'invoice',
+            'email': 'child@example.com',
+            'parent_id': self.partner_a.id
+        })
+        invoice1 = self.init_invoice("out_invoice", amounts=[1000], partner=partner, post=True)
+        invoice2 = self.init_invoice("out_invoice", amounts=[1000], partner=partner, post=True)
+        wizard = self.create_send_and_print(invoice1 + invoice2)
+        self.assertEqual(wizard.summary_data, {
+            'manual': {'count': 2, 'label': 'Manually'}
+        })
 
     def test_invoice_mail_attachments_widget(self):
         invoice = self.init_invoice("out_invoice", amounts=[1000], post=True)
@@ -898,7 +928,9 @@ class TestAccountMoveSend(TestAccountMoveSendCommon):
         invoice = self.init_invoice("out_invoice", amounts=[1000], post=True)
 
         custom_subject = "turlututu"
-        wizard = self.create_send_and_print(invoice, mail_template_id=None, mail_subject=custom_subject)
+        wizard = self.create_send_and_print(invoice)
+        wizard.mail_template_id = None
+        wizard.mail_subject = custom_subject
 
         wizard.action_send_and_print(allow_fallback_pdf=True)
         message = self._get_mail_message(invoice)
@@ -1065,6 +1097,58 @@ class TestAccountMoveSend(TestAccountMoveSendCommon):
         invoice = self.init_invoice("out_invoice", amounts=[1000], post=True)
         self.assertFalse(invoice.invoice_pdf_report_id)
         wizard = self.create_send_and_print(invoice, sending_methods=[])
+        self.assertFalse(wizard.sending_methods)
         wizard.action_send_and_print()
         self.assertTrue(invoice.is_move_sent)
         self.assertTrue(invoice.invoice_pdf_report_id)
+
+    def test_get_sending_settings(self):
+        invoice = self.init_invoice("out_invoice", amounts=[1000], post=True)
+        wizard = self.create_send_and_print(invoice)
+        
+        expected_results = {
+            'sending_methods': {'email'},
+            'invoice_edi_format': False,
+            'extra_edis': set(),
+            'pdf_report': self.env.ref('account.account_invoices'),
+            'author_user_id': self.env.user.id,
+            'author_partner_id': self.env.user.partner_id.id,
+            'mail_template': self.env.ref('account.email_template_edi_invoice'),
+            'mail_lang': 'en_US',
+            'mail_body': wizard.mail_body,
+            'mail_subject': 'company_1_data Invoice (Ref INV/2019/00001)',
+            'mail_partner_ids': invoice.partner_id.ids,
+            'mail_attachments_widget': [{'id': 'placeholder_INV_2019_00001.pdf', 'name': 'INV_2019_00001.pdf', 'mimetype': 'application/pdf', 'placeholder': True}],
+        }
+        results = wizard._get_sending_settings()
+        self.assertDictEqual(results, expected_results)
+
+    def test_invoice_email_subtitle(self):
+        """ Test email notification subtitle for Invoice with and without partner name. """
+        partner = self.env['res.partner'].create({'type': 'invoice', 'parent_id': self.partner_a.id})
+        invoice = self.init_invoice("out_invoice", amounts=[1000], partner=partner, post=True)
+        context = invoice._notify_by_email_prepare_rendering_context(message=self.env['mail.message'])
+        self.assertEqual(context.get('subtitles')[0], invoice.name)
+
+        invoice.partner_id.name = "Test Partner"
+        context = invoice._notify_by_email_prepare_rendering_context(message=self.env['mail.message'])
+        self.assertEqual(context.get('subtitles')[0], f"{invoice.name} - Test Partner")
+
+    def test_get_invoice_report_filename(self):
+        mock_template = self.env.ref('account.account_invoices_without_payment')
+        mock_template.write({
+            'is_invoice_report': True,
+            'print_report_name': "('CustomName_%s' % (object._get_report_base_filename()))",
+        })
+        # Test: filename when no template is set.
+        move = self.init_invoice("out_invoice", amounts=[1000], partner=self.partner_a, post=True)
+        wizard_1 = self.create_send_and_print(move)
+        wizard_1.action_send_and_print()
+        self.assertEqual(move.message_main_attachment_id.name, f"{move._get_report_base_filename().replace('/', '_')}.pdf")
+
+        # Test: filename when template is set.
+        self.partner_a.invoice_template_pdf_report_id = mock_template.id
+        move2 = self.init_invoice("out_invoice", amounts=[1000], partner=self.partner_a, post=True)
+        wizard_2 = self.create_send_and_print(move2)
+        wizard_2.action_send_and_print()
+        self.assertEqual(move2.message_main_attachment_id.name, f"CustomName_{move2._get_report_base_filename().replace('/', '_')}.pdf")

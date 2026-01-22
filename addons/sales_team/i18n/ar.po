@@ -1,28 +1,32 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* sales_team
-# 
+#
 # Translators:
 # Wil Odoo, 2024
-# 
+# Malaz Abuidris <msea@odoo.com>, 2025
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
+"POT-Creation-Date: 2025-12-29 18:38+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
+"Last-Translator: Malaz Abuidris <msea@odoo.com>, 2025\n"
 "Language-Team: Arabic (https://app.transifex.com/odoo/teams/41243/ar/)\n"
+"Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: ar\n"
-"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
+"&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_kanban
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_view_form
-msgid "<i class=\"fa fa-envelope me-1\" role=\"img\" aria-label=\"Email\" title=\"Email\"/>"
+msgid ""
+"<i class=\"fa fa-envelope me-1\" role=\"img\" aria-label=\"Email\" "
+"title=\"Email\"/>"
 msgstr ""
 "<i class=\"fa fa-envelope me-1\" role=\"img\" aria-label=\"Email\" "
 "title=\"البريد الإلكتروني \"/>"
@@ -66,39 +70,8 @@ msgstr "أضف عضو فريق"
 
 #. module: sales_team
 #: model:ir.model.fields,help:sales_team.field_crm_team__crm_team_member_ids
-msgid ""
-"Add members to automatically assign their documents to this sales team."
+msgid "Add members to automatically assign their documents to this sales team."
 msgstr "قم بإضافة أعضاء لإسناد مستنداتهم إلى فريق المبيعات هذا تلقائياً. "
-
-#. module: sales_team
-#. odoo-python
-#: code:addons/sales_team/models/crm_team.py:0
-msgid ""
-"Adding %(user_name)s in this team would remove him/her from its current team"
-" %(team_name)s."
-msgstr ""
-"سينتج عن إضافة %(user_name)s إلى هذه الفريق إزالته/إزالتها من فريقه/فريقها "
-"الحالي %(team_name)s. "
-
-#. module: sales_team
-#. odoo-python
-#: code:addons/sales_team/models/crm_team_member.py:0
-msgid ""
-"Adding %(user_name)s in this team would remove him/her from its current "
-"teams %(team_names)s."
-msgstr ""
-"سينتج عن إضافة %(user_name)s إلى هذه الفريق إزالته/إزالتها من فريقه/فريقها "
-"الحالي %(team_names)s. "
-
-#. module: sales_team
-#. odoo-python
-#: code:addons/sales_team/models/crm_team.py:0
-msgid ""
-"Adding %(user_names)s in this team would remove them from their current "
-"teams (%(team_names)s)."
-msgstr ""
-"سينتج عن إضافة %(user_names)s إلى هذه الفريق إزالتهم من فريقهم الحالي "
-"(%(team_names)s). "
 
 #. module: sales_team
 #. odoo-python
@@ -107,6 +80,8 @@ msgid ""
 "Adding %(user_name)s in this team will remove them from %(team_names)s. "
 "Working in multiple teams? Activate the option under Configuration>Settings."
 msgstr ""
+"ستؤدي إضافة %(user_name)s إلى هذا الفريق إلى إزالته من %(team_names)s. هل "
+"تعمل في أكثر من فريق؟ قم بتنشيط الخيار ضمن التهيئة> الإعدادات. "
 
 #. module: sales_team
 #. odoo-python
@@ -114,6 +89,7 @@ msgstr ""
 msgid ""
 "Adding %(user_names)s in this team will remove them from %(team_names)s."
 msgstr ""
+"ستؤدي إضافة %(user_names)s إلى هذا الفريق إلى إزالتهم من %(team_names)s. "
 
 #. module: sales_team
 #: model:res.groups,name:sales_team.group_sale_manager
@@ -259,8 +235,7 @@ msgstr "الأعضاء المفضلين"
 
 #. module: sales_team
 #: model:ir.model.fields,help:sales_team.field_crm_team__is_favorite
-msgid ""
-"Favorite teams to display them in the dashboard and access them easily."
+msgid "Favorite teams to display them in the dashboard and access them easily."
 msgstr "الفرق المفضلة لعرضها في لوحة البيانات للوصول إليها بسهولة. "
 
 #. module: sales_team
@@ -305,8 +280,8 @@ msgid ""
 "If True, users may belong to several sales teams. Otherwise membership is "
 "limited to a single sales team."
 msgstr ""
-"إذا كانت القيمة صحيحة، سيكون بإمكان المستخدمين أن ينتموا إلى عدة فرق مبيعات،"
-" وإلا فستكون العضوية مقتصرة على فريق مبيعات واحد. "
+"إذا كانت القيمة صحيحة، سيكون بإمكان المستخدمين أن ينتموا إلى عدة فرق مبيعات، "
+"وإلا فستكون العضوية مقتصرة على فريق مبيعات واحد. "
 
 #. module: sales_team
 #: model:ir.model.fields,help:sales_team.field_crm_team__message_needaction
@@ -619,6 +594,14 @@ msgid "The default company for this user."
 msgstr "الشركة الافتراضية لهذا المستخدم. "
 
 #. module: sales_team
+#. odoo-python
+#: code:addons/sales_team/models/crm_team.py:0
+msgid ""
+"The following team members are not allowed in company '%(company)s' of the "
+"Sales Team '%(team)s': %(users)s"
+msgstr ""
+
+#. module: sales_team
 #: model_terms:ir.actions.act_window,help:sales_team.mail_activity_type_action_config_sales
 msgid ""
 "Those represent the different categories of things you have to do (e.g. "
@@ -626,16 +609,6 @@ msgid ""
 msgstr ""
 "يمثلون الفئات المختلفة للأشياء التي عليك القيام بها (مثال: \"اتصال\" أو "
 "\"التحضير لاجتماع\"). "
-
-#. module: sales_team
-#. odoo-python
-#: code:addons/sales_team/models/crm_team.py:0
-msgid ""
-"To add a Salesperson into multiple Teams, activate the Multi-Team option in "
-"settings."
-msgstr ""
-"لإضافة مندوب مبيعات إلى عدة فرق، قم بتفعيل خيار الفرق المتعددة من الإعدادات."
-" "
 
 #. module: sales_team
 #: model:crm.tag,name:sales_team.categ_oppor6
@@ -664,8 +637,7 @@ msgstr "نموذج رسم بياني غير محدد لفريق المبيعات
 
 #. module: sales_team
 #: model_terms:ir.actions.act_window,help:sales_team.crm_team_action_config
-msgid ""
-"Use Sales Teams to organize your sales departments and draw up reports."
+msgid "Use Sales Teams to organize your sales departments and draw up reports."
 msgstr "استخدم فرق المبيعات لتنظيم أقسام المبيعات لديك وسحب التقارير. "
 
 #. module: sales_team
@@ -691,6 +663,14 @@ msgstr ""
 #: model:ir.model,name:sales_team.model_res_users
 msgid "User"
 msgstr "المستخدم"
+
+#. module: sales_team
+#. odoo-python
+#: code:addons/sales_team/models/crm_team_member.py:0
+msgid ""
+"User '%(user)s' is not allowed in the company '%(company)s' of the Sales "
+"Team '%(team)s'."
+msgstr ""
 
 #. module: sales_team
 #: model:ir.model.fields,field_description:sales_team.field_crm_team_member__user_company_ids
@@ -733,13 +713,14 @@ msgstr "الموقع الإلكتروني"
 msgid ""
 "Working in multiple teams? Activate the option under Configuration>Settings."
 msgstr ""
+"أتعمل في فِرَق متعددة؟ قم بتنشيط الخيار الموجود تحت التهيئة > الإعدادات. "
 
 #. module: sales_team
 #. odoo-python
 #: code:addons/sales_team/models/crm_team_member.py:0
 msgid ""
-"You are trying to create duplicate membership(s). We found that "
-"%(duplicates)s already exist(s)."
+"You are trying to create duplicate membership(s). We found that %"
+"(duplicates)s already exist(s)."
 msgstr ""
 "أنت تحاول إنشاء عضوية (عضويات) متكررة. لقد وجدنا أن %(duplicates)s موجودة "
 "بالفعل. "
@@ -769,8 +750,8 @@ msgstr "سيملك المستخدم صلاحية الوصول لبياناته �
 #. module: sales_team
 #: model:res.groups,comment:sales_team.group_sale_manager
 msgid ""
-"the user will have an access to the sales configuration as well as statistic"
-" reports."
+"the user will have an access to the sales configuration as well as statistic "
+"reports."
 msgstr ""
 "سيملك المستخدم صلاحية الوصول لتهيئة المبيعات، بالإضافة إلى تقارير "
 "الإحصائيات. "

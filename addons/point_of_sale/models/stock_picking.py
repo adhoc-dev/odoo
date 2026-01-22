@@ -89,9 +89,13 @@ class StockPicking(models.Model):
 
     def _create_move_from_pos_order_lines(self, lines):
         self.ensure_one()
-        lines_by_product = groupby(sorted(lines, key=lambda l: l.product_id.id), key=lambda l: l.product_id.id)
+
+        def get_grouping_key(line):
+            return (line.product_id.id, tuple(sorted(line.attribute_value_ids.ids)))
+
+        lines_by_product_and_attrs = groupby(sorted(lines, key=get_grouping_key), key=get_grouping_key)
         move_vals = []
-        for dummy, olines in lines_by_product:
+        for dummy, olines in lines_by_product_and_attrs:
             order_lines = self.env['pos.order.line'].concat(*olines)
             move_vals.append(self._prepare_stock_move_vals(order_lines[0], order_lines))
         moves = self.env['stock.move'].create(move_vals)
@@ -102,7 +106,7 @@ class StockPicking(models.Model):
 
     def _link_owner_on_return_picking(self, lines):
         """This method tries to retrieve the owner of the returned product"""
-        if lines[0].order_id.refunded_order_id.picking_ids:
+        if lines and lines[0].order_id.refunded_order_id.picking_ids:
             returned_lines_picking = lines[0].order_id.refunded_order_id.picking_ids
             returnable_qty_by_product = {}
             for move_line in returned_lines_picking.move_line_ids:
@@ -126,18 +130,21 @@ class StockPicking(models.Model):
                 continue
             if rec.pos_order_id.shipping_date and not rec.pos_order_id.to_invoice:
                 cost_per_account = defaultdict(lambda: 0.0)
-                for line in rec.pos_order_id.lines:
+                for line in rec.move_line_ids:
                     if not line.product_id.is_storable or line.product_id.valuation != 'real_time':
                         continue
                     out = line.product_id.categ_id.property_stock_account_output_categ_id
                     exp = line.product_id._get_product_accounts()['expense']
-                    cost_per_account[(out, exp)] += line.total_cost
+                    line_cost = next(iter(line.move_id._get_price_unit().values())) * line.quantity_product_uom
+                    if line_cost != 0:
+                        cost_per_account[out, exp] += line_cost
                 move_vals = []
                 for (out_acc, exp_acc), cost in cost_per_account.items():
                     move_vals.append({
                         'journal_id': rec.pos_order_id.sale_journal.id,
                         'date': rec.pos_order_id.date_order,
                         'ref': 'pos_order_'+str(rec.pos_order_id.id),
+                        'partner_id': rec.pos_order_id.partner_id.id,
                         'line_ids': [
                             (0, 0, {
                                 'name': rec.pos_order_id.name,
@@ -287,7 +294,7 @@ class StockMove(models.Model):
         mls_qties = []
         if are_qties_done:
             for move in moves_remaining:
-                move.move_line_ids.quantity = 0
+                move.move_line_ids.unlink()
                 for line in lines_data[move.product_id.id]['order_lines']:
                     sum_of_lots = 0
                     for lot in line.pack_lot_ids.filtered(lambda l: l.lot_name):
@@ -309,6 +316,7 @@ class StockMove(models.Model):
                                 else:
                                     ml_vals.update({
                                         'lot_name': existing_lot.name,
+                                        'lot_id': existing_lot.id,
                                     })
                         else:
                             ml_vals.update({'lot_name': lot.lot_name})

@@ -1,7 +1,7 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* stock_account
-# 
+# * stock_account
+#
 # Translators:
 # Tiffany Chang, 2024
 # Tommi Rintala <tommi.rintala@gmail.com>, 2024
@@ -17,21 +17,24 @@
 # Tuomas Lyyra <tuomas.lyyra@legenda.fi>, 2024
 # Martin Trigaux, 2024
 # Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2024
-# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2024
-# 
+# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2025
+# Jessica Jakara, 2025
+# "Jessica Tuulia Sade Jäkärä (jtsj)" <jtsj@odoo.com>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2024\n"
-"Language-Team: Finnish (https://app.transifex.com/odoo/teams/41243/fi/)\n"
+"POT-Creation-Date: 2025-12-29 18:37+0000\n"
+"PO-Revision-Date: 2025-11-21 07:48+0000\n"
+"Last-Translator: Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>\n"
+"Language-Team: Finnish <https://translate.odoo.com/projects/odoo-18/"
+"stock_account/fi/>\n"
+"Language: fi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: fi\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 5.12.2\n"
 
 #. module: stock_account
 #. odoo-python
@@ -40,6 +43,8 @@ msgid ""
 "\n"
 "Affected valuation layers: %s"
 msgstr ""
+"\n"
+"Vaikuttavat arviointikerrokset: %s"
 
 #. module: stock_account
 #. odoo-python
@@ -58,29 +63,39 @@ msgstr " [Kirjattu %s]"
 #: code:addons/stock_account/wizard/stock_valuation_layer_revaluation.py:0
 msgid " lot/serial number cost updated from %(previous)s to %(new_cost)s."
 msgstr ""
+" erän/sarjanumeron kustannukset päivitetty vanhasta arvosta %(previous)s "
+"uuteen arvoon %(new_cost)s."
 
 #. module: stock_account
 #. odoo-python
 #: code:addons/stock_account/models/stock_valuation_layer.py:0
 msgid "%(user)s changed cost from %(previous)s to %(new_price)s - %(record)s"
 msgstr ""
+"%(user)s muutti kustannukset vanhasta arvosta %(previous)s uuteen arvoon %"
+"(new_price)s - %(record)s"
 
 #. module: stock_account
 #. odoo-python
 #: code:addons/stock_account/wizard/stock_valuation_layer_revaluation.py:0
 msgid ""
-"%(user)s changed stock valuation from  %(previous)s to %(new_value)s - %(product)s\n"
+"%(user)s changed stock valuation from  %(previous)s to %(new_value)s - %"
+"(product)s\n"
 "%(reason)s"
 msgstr ""
+"%(user)s muutti osakkeiden arvostusta. Vanha arvo: %(previous)s ja uusi "
+"arvo: %(new_value)s:een - %(product)s\n"
+"%(reason)s"
 
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.stock_valuation_layer_revaluation_form_view
 msgid ""
 ")\n"
-"                            <small class=\"mx-2 fst-italic\">Use a negative added value to record a decrease in the product value</small>"
+"                            <small class=\"mx-2 fst-italic\">Use a negative "
+"added value to record a decrease in the product value</small>"
 msgstr ""
 ")\n"
-"                           <small class=\"mx-2 fst-italic\">Käytä negatiivista lisäarvoa kirjataksesi tuotteen arvon alenemisen</small>"
+"                           <small class=\"mx-2 fst-italic\">Käytä "
+"negatiivista lisäarvoa kirjataksesi tuotteen arvon alenemisen</small>"
 
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.stock_account_report_invoice_document
@@ -169,14 +184,14 @@ msgstr "Lisäarvo"
 #. module: stock_account
 #: model:ir.actions.act_window,name:stock_account.action_revalue_layers
 msgid "Adjust Valuation"
-msgstr ""
+msgstr "Säädä arvostusta"
 
 #. module: stock_account
 #: model:ir.model.fields,help:stock_account.field_res_config_settings__module_stock_landed_costs
 #: model_terms:ir.ui.view,arch_db:stock_account.res_config_settings_view_form
 msgid ""
-"Affect landed costs on reception operations and split them among products to"
-" update their cost price."
+"Affect landed costs on reception operations and split them among products to "
+"update their cost price."
 msgstr ""
 "Vaikuta vastaanottotoiminnan maihintuontikustannuksiin ja jaa ne tuotteiden "
 "kesken niiden omakustannushinnan päivittämiseksi."
@@ -236,8 +251,8 @@ msgstr "Peruuta"
 #. odoo-python
 #: code:addons/stock_account/models/stock_move.py:0
 msgid ""
-"Cannot find a stock input account for the product %s. You must define one on"
-" the product category, or on the location, before processing this operation."
+"Cannot find a stock input account for the product %s. You must define one on "
+"the product category, or on the location, before processing this operation."
 msgstr ""
 "Tuotteelle %s ei löydy varastotiliä. Sinun on määriteltävä sellainen "
 "tuoteryhmälle tai sijainnille ennen tämän toiminnon käsittelyä."
@@ -304,7 +319,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/stock_account/models/stock_move.py:0
 msgid "Correction of %s (modification of past move)"
-msgstr ""
+msgstr "Korjaus %s (aikaisemman siirron muuttaminen)"
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_lot__standard_price
@@ -323,9 +338,11 @@ msgstr "Arvotuskäytäntö"
 #. odoo-python
 #: code:addons/stock_account/models/product.py:0
 msgid ""
-"Costing method change for product category %(category)s: from %(old_method)s"
-" to %(new_method)s."
+"Costing method change for product category %(category)s: from %(old_method)s "
+"to %(new_method)s."
 msgstr ""
+"Kustannuslaskentamenetelmän muutos tuoteryhmässä %(category)s: %"
+"(old_method)s-stä %(new_method)s-een."
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_valuation_layer_revaluation__account_id
@@ -335,11 +352,15 @@ msgstr "Vastatili"
 #. module: stock_account
 #: model:ir.model.fields,help:stock_account.field_product_category__property_stock_account_input_categ_id
 msgid ""
-"Counterpart journal items for all incoming stock moves will be posted in this account, unless there is a specific valuation account\n"
-"                set on the source location. This is the default value for all products in this category. It can also directly be set on each product."
+"Counterpart journal items for all incoming stock moves will be posted in "
+"this account, unless there is a specific valuation account\n"
+"                set on the source location. This is the default value for "
+"all products in this category. It can also directly be set on each product."
 msgstr ""
-"Kaikkien saapuvien varastosiirtojen vastapuolen päiväkirjamerkinnät kirjataan tälle tilille, ellei ole olemassa erityistä arvostustiliä\n"
-"                määritetty lähtöpaikassa. Tämä on oletusarvo kaikille tämän luokan tuotteille. Se voidaan määrittää myös suoraan kullekin tuotteelle."
+"Kaikkien saapuvien varastosiirtojen vastapuolen päiväkirjamerkinnät "
+"kirjataan tälle tilille, ellei ole olemassa erityistä arvostustiliä\n"
+"                määritetty lähtöpaikassa. Tämä on oletusarvo kaikille tämän "
+"luokan tuotteille. Se voidaan määrittää myös suoraan kullekin tuotteelle."
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_picking__country_code
@@ -423,10 +444,13 @@ msgstr "Sarja- ja eränumeron näyttäminen laskuissa"
 #. odoo-python
 #: code:addons/stock_account/models/product.py:0
 msgid ""
-"Due to a change of product category (from %(old_category)s to "
-"%(new_category)s), the costing method has changed for product %(product)s: "
+"Due to a change of product category (from %(old_category)s to %"
+"(new_category)s), the costing method has changed for product %(product)s: "
 "from %(old_method)s to %(new_method)s."
 msgstr ""
+"Koska tuoteryhmä on muuttunut (%(old_category)s:sta %(new_category)s:ksi), "
+"kustannuslaskentamenetelmä on muuttunut tuotteen %(product)s osalta: %"
+"(old_method)s:sta %(new_method)s:ksi."
 
 #. module: stock_account
 #: model:ir.model.fields.selection,name:stock_account.selection__product_category__property_cost_method__fifo
@@ -454,6 +478,8 @@ msgstr "ID"
 #: model:ir.model.fields,help:stock_account.field_product_template__lot_valuated
 msgid "If checked, the valuation will be specific by Lot/Serial number."
 msgstr ""
+"Jos valintaruutu on valittuna, arvonmääritys tapahtuu erän tai sarjanumeron "
+"mukaan."
 
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.view_inventory_valuation_search
@@ -502,7 +528,7 @@ msgstr "Päiväkirjan kirjaus"
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_account_move_line
 msgid "Journal Item"
-msgstr "Päiväkirjatapahtuma"
+msgstr "Päiväkirjamerkintä"
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_res_config_settings__module_stock_landed_costs
@@ -530,15 +556,17 @@ msgstr "Yhdistetty"
 #. odoo-python
 #: code:addons/stock_account/models/product.py:0
 msgid ""
-"Lot %(lot)s has a negative quantity in stock. Correct this"
-"                         quantity before enabling lot valuation"
+"Lot %(lot)s has a negative quantity in stock.\n"
+"Correct this quantity before enabling/disabling lot valuation."
 msgstr ""
+"Erällä %(lot)s on negatiivinen määrä varastossa.\n"
+"Korjaa tämä määrä ennen eräarvon määrittämisen sallimista/estämistä."
 
 #. module: stock_account
 #. odoo-python
 #: code:addons/stock_account/models/stock_lot.py:0
 msgid "Lot value manually modified (from %(old)s to %(new)s)"
-msgstr ""
+msgstr "Erän arvoa muutettu manuaalisesti (arvosta %(old)s arvoon %(new)s)"
 
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_stock_lot
@@ -555,13 +583,14 @@ msgstr "Erä/sarjanumero"
 #. odoo-python
 #: code:addons/stock_account/models/stock_lot.py:0
 msgid "Lot/Serial number Revaluation"
-msgstr ""
+msgstr "Erä- tai sarjanumero uudelleenarvostus"
 
 #. module: stock_account
 #. odoo-python
 #: code:addons/stock_account/models/stock_move_line.py:0
 msgid "Lot/Serial number is mandatory for product valuated by lot"
 msgstr ""
+"Erä- tai sarjanumero on pakollinen tuotteille, jotka arvostetaan erän mukaan"
 
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.res_config_settings_view_form
@@ -585,12 +614,16 @@ msgstr "Manuaalinen varaston arvonmääritys: %s."
 #: model:ir.model.fields,help:stock_account.field_product_template__valuation
 #: model:ir.model.fields,help:stock_account.field_stock_valuation_layer_revaluation__property_valuation
 msgid ""
-"Manual: The accounting entries to value the inventory are not posted automatically.\n"
-"        Automated: An accounting entry is automatically created to value the inventory when a product enters or leaves the company.\n"
+"Manual: The accounting entries to value the inventory are not posted "
+"automatically.\n"
+"        Automated: An accounting entry is automatically created to value the "
+"inventory when a product enters or leaves the company.\n"
 "        "
 msgstr ""
-"Käsikirja: Kirjanpitokirjauksia, joilla inventaario arvostetaan, ei kirjata automaattisesti.\n"
-"        Automaattinen: Kirjanpitokirjaus luodaan automaattisesti varaston arvon määrittämiseksi, kun tuote saapuu tai poistuu yrityksestä.\n"
+"Käsikirja: Kirjanpitokirjauksia, joilla inventaario arvostetaan, ei kirjata "
+"automaattisesti.\n"
+"        Automaattinen: Kirjanpitokirjaus luodaan automaattisesti varaston "
+"arvon määrittämiseksi, kun tuote saapuu tai poistuu yrityksestä.\n"
 "        "
 
 #. module: stock_account
@@ -607,7 +640,7 @@ msgstr "Uusi arvo määrällisesti"
 #. odoo-python
 #: code:addons/stock_account/wizard/stock_valuation_layer_revaluation.py:0
 msgid "No Reason Given"
-msgstr ""
+msgstr "Syytä ei ole annettu"
 
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.stock_valuation_layer_form
@@ -625,6 +658,18 @@ msgstr "Lähtevä"
 #: model_terms:ir.ui.view,arch_db:stock_account.view_inventory_valuation_search
 msgid "Product"
 msgstr "Tuote"
+
+#. module: stock_account
+#. odoo-python
+#: code:addons/stock_account/models/product.py:0
+msgid ""
+"Product %(product)s has quantity in valued location %(location)s without any "
+"lot.\n"
+"Please assign lots to all your quantities before enabling lot valuation."
+msgstr ""
+"Tuotetta %(product)s on jonkin verran arvotetussa sijainnissa  %(location)s "
+"ilman sille määritettyä sarjaa.\n"
+"Määritä erät kaikille määrillesi ennen eräarvon määrittämisen sallimista."
 
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_product_category
@@ -661,16 +706,18 @@ msgstr "Tuotevariaatio"
 msgid ""
 "Product value manually modified (from %(original_price)s to %(new_price)s)"
 msgstr ""
+"Tuotteen arvoa muutettu manuaalisesti (arvosta %(original_price)s arvoon %"
+"(new_price)s)"
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_res_company__account_production_wip_account_id
 msgid "Production WIP Account"
-msgstr ""
+msgstr "Tuotannon WIP-tili"
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_res_company__account_production_wip_overhead_account_id
 msgid "Production WIP Overhead Account"
-msgstr ""
+msgstr "Tuotannon WIP-yleiskustannustili"
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_valuation_layer__quantity
@@ -712,7 +759,7 @@ msgstr "Viite"
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_valuation_layer_revaluation__lot_id
 msgid "Related lot/serial number"
-msgstr ""
+msgstr "Asiaan liittyvä erä- tai sarjanumero"
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_valuation_layer_revaluation__product_id
@@ -736,6 +783,12 @@ msgstr "Palauta poimintalinja"
 
 #. module: stock_account
 #. odoo-python
+#: code:addons/stock_account/models/product.py:0
+msgid "Revaluation of %(name)s (negative inventory)"
+msgstr ""
+
+#. module: stock_account
+#. odoo-python
 #: code:addons/stock_account/wizard/stock_valuation_layer_revaluation.py:0
 msgid "Revaluation of %s"
 msgstr "Uudelleenarvotus kohteelle %s"
@@ -750,6 +803,7 @@ msgstr "Uudelleenarvota"
 #: code:addons/stock_account/models/stock_lot.py:0
 msgid "Select an existing lot/serial number to be reevaluated"
 msgstr ""
+"Valitse olemassa oleva erä/sarjanumero, joka halutaan arvioida uudelleen"
 
 #. module: stock_account
 #: model:ir.model.fields.selection,name:stock_account.selection__product_category__property_cost_method__standard
@@ -762,14 +816,21 @@ msgstr "Normaalihinta"
 #: model:ir.model.fields,help:stock_account.field_product_template__cost_method
 #: model:ir.model.fields,help:stock_account.field_stock_quant__cost_method
 msgid ""
-"Standard Price: The products are valued at their standard cost defined on the product.\n"
-"        Average Cost (AVCO): The products are valued at weighted average cost.\n"
-"        First In First Out (FIFO): The products are valued supposing those that enter the company first will also leave it first.\n"
+"Standard Price: The products are valued at their standard cost defined on "
+"the product.\n"
+"        Average Cost (AVCO): The products are valued at weighted average "
+"cost.\n"
+"        First In First Out (FIFO): The products are valued supposing those "
+"that enter the company first will also leave it first.\n"
 "        "
 msgstr ""
-"Vakiohinta: Tuotteet arvostetaan tuotteelle määriteltyyn vakiokustannukseen.\n"
-"        Keskimääräiset kustannukset (AVCO): Tuotteet arvostetaan painotettuun keskihintaan.\n"
-"        First In First Out (FIFO): Tuotteet arvostetaan olettaen, että tuotteet, jotka tulevat yritykseen ensimmäisenä, myös poistuvat sieltä ensimmäisenä.\n"
+"Vakiohinta: Tuotteet arvostetaan tuotteelle määriteltyyn "
+"vakiokustannukseen.\n"
+"        Keskimääräiset kustannukset (AVCO): Tuotteet arvostetaan "
+"painotettuun keskihintaan.\n"
+"        First In First Out (FIFO): Tuotteet arvostetaan olettaen, että "
+"tuotteet, jotka tulevat yritykseen ensimmäisenä, myös poistuvat sieltä "
+"ensimmäisenä.\n"
 "        "
 
 #. module: stock_account
@@ -866,8 +927,8 @@ msgid ""
 "The ISO country code in two chars. \n"
 "You can use this field for quick search."
 msgstr ""
-"Kaksikirjaiminen ISO-maaatunnus. \n"
-"Voit hakea tämän kentän avulla nopeasti."
+"Kaksikirjaiminen ISO-maatunnus. \n"
+"Voit käyttää tätä kenttää pikahakuun."
 
 #. module: stock_account
 #. odoo-python
@@ -912,8 +973,8 @@ msgid ""
 "intercompany in a single step while they should go through the intercompany "
 "transit location."
 msgstr ""
-"Siirtorivit eivät ole johdonmukaisessa tilassa: ne tekevät yritysten välisen"
-" siirron yhdessä vaiheessa, vaikka niiden pitäisi kulkea yritysten välisen "
+"Siirtorivit eivät ole johdonmukaisessa tilassa: ne tekevät yritysten välisen "
+"siirron yhdessä vaiheessa, vaikka niiden pitäisi kulkea yritysten välisen "
 "kauttakulkupaikan kautta."
 
 #. module: stock_account
@@ -932,6 +993,21 @@ msgstr ""
 msgid ""
 "The stock accounts should be set in order to use the automatic valuation."
 msgstr ""
+"Varastotilit on asetettava, jotta automaattista arvonmääritystä voidaan "
+"käyttää."
+
+#. module: stock_account
+#. odoo-python
+#: code:addons/stock_account/models/stock_move_line.py:0
+msgid ""
+"The stock valuation of a move is based on the type of the source and "
+"destination locations. As the move is already processed, you cannot modify "
+"the locations in a way that changes the valuation logic defined during the "
+"initial processing."
+msgstr ""
+"Muuton varastoarvostus perustuu lähtö- ja määräpaikan tyyppiin. Koska siirto "
+"on jo käsitelty, et voi muuttaa sijainteja siten, että alkuperäisen "
+"käsittelyn aikana määritetty arvostuslogiikka muuttuu."
 
 #. module: stock_account
 #. odoo-python
@@ -941,8 +1017,7 @@ msgid ""
 "be use to correct a specific transfer."
 msgstr ""
 "Varaston arvostuskerroksen arvo ei voi olla negatiivinen. "
-"Maahantuontikustannusten arvoa voidaan käyttää määrätyn siirron "
-"korjaamiseen."
+"Maahantuontikustannusten arvoa voidaan käyttää määrätyn siirron korjaamiseen."
 
 #. module: stock_account
 #: model_terms:ir.actions.act_window,help:stock_account.stock_valuation_layer_action
@@ -958,17 +1033,31 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/stock_account/static/src/fields/boolean_confirm.js:0
 msgid ""
-"This operation might lead in a loss of data. Valuation will be identical for"
-" all lots/SN. Do you want to proceed ? "
+"This operation might lead in a loss of data. Valuation will be identical for "
+"all lots/SN. Do you want to proceed ? "
 msgstr ""
+"Tämä toimenpide saattaa johtaa tietojen menetykseen. Arvonmääritys on sama "
+"kaikille erille/SN:lle. Haluatko jatkaa? "
 
 #. module: stock_account
 #. odoo-python
 #: code:addons/stock_account/models/product.py:0
 msgid ""
-"This product is valuated by lot/serial number. Changing the cost will update"
-" the cost of every lot/serial number in stock."
+"This product is valuated by lot/serial number. Changing the cost will update "
+"the cost of every lot/serial number in stock."
 msgstr ""
+"Tämä tuote arvostetaan erän/sarjanumeron mukaan. Kustannuksen muuttaminen "
+"päivittää jokaisen varastossa olevan erän/sarjanumeron kustannukset."
+
+#. module: stock_account
+#. odoo-python
+#: code:addons/stock_account/models/stock_move_line.py:0
+msgid ""
+"This product is valuated by lot: an explicit Lot/Serial number is required "
+"when adding quantity"
+msgstr ""
+"Tämä tuote arvotetaan erän perusteella: sarja- tai eränumero tarvitaan, kun "
+"tuotteen määrää lisätään"
 
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.stock_valuation_layer_tree
@@ -1006,8 +1095,8 @@ msgstr "Siirto"
 #: model:ir.model.fields,help:stock_account.field_stock_move__to_refund
 #: model:ir.model.fields,help:stock_account.field_stock_return_picking_line__to_refund
 msgid ""
-"Trigger a decrease of the delivered/received quantity in the associated Sale"
-" Order/Purchase Order"
+"Trigger a decrease of the delivered/received quantity in the associated Sale "
+"Order/Purchase Order"
 msgstr ""
 "Käynnistää toimitetun/vastaanotetun määrän vähentämisen siihen liittyvässä "
 "myyntitilauksessa/ostotilauksessa"
@@ -1043,7 +1132,7 @@ msgstr "Päivitä määrät myynti- tai ostotilauksessa"
 #. odoo-python
 #: code:addons/stock_account/models/product.py:0
 msgid "Updating lot valuation for product %s."
-msgstr ""
+msgstr "Tuotteen %s erän arvostuksen päivittäminen."
 
 #. module: stock_account
 #: model:ir.model.fields,help:stock_account.field_stock_location__valuation_in_account_id
@@ -1092,7 +1181,7 @@ msgstr "Arvostusvaluutta"
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_valuation_layer_revaluation__adjusted_layer_ids
 msgid "Valuation Layers"
-msgstr ""
+msgstr "Arvostuskerrokset"
 
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.product_product_stock_tree_inherit_stock_account
@@ -1109,20 +1198,22 @@ msgstr "Arvonmäärityksen päivä"
 #: model:ir.model.fields,field_description:stock_account.field_product_product__lot_valuated
 #: model:ir.model.fields,field_description:stock_account.field_product_template__lot_valuated
 msgid "Valuation by Lot/Serial number"
-msgstr ""
+msgstr "Arvonmääritys erän/sarjanumeron mukaan"
 
 #. module: stock_account
 #. odoo-python
 #: code:addons/stock_account/models/product.py:0
 msgid ""
-"Valuation method change for product category %(category)s: from "
-"%(old_method)s to %(new_method)s."
+"Valuation method change for product category %(category)s: from %"
+"(old_method)s to %(new_method)s."
 msgstr ""
+"Arviointimenetelmän muutos tuoteryhmässä %(category)s: %(old_method)s-stä %"
+"(new_method)s-een."
 
 #. module: stock_account
 #: model:ir.model.fields,help:stock_account.field_stock_valuation_layer_revaluation__adjusted_layer_ids
 msgid "Valuations layers being adjusted"
-msgstr ""
+msgstr "Arvonmäärityskerrokset mukautetaan"
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_quant__value
@@ -1145,9 +1236,14 @@ msgstr "Arvo Svl"
 #: model:ir.model.fields,help:stock_account.field_stock_lot__standard_price
 msgid ""
 "Value of the lot (automatically computed in AVCO).\n"
-"        Used to value the product when the purchase cost is not known (e.g. inventory adjustment).\n"
+"        Used to value the product when the purchase cost is not known (e.g. "
+"inventory adjustment).\n"
 "        Used to compute margins on sale orders."
 msgstr ""
+"Erän arvo (lasketaan automaattisesti AVCO:ssa).\n"
+"        Käytetään tuotteen arvon määrittämiseen, kun ostohintaa ei tiedetä "
+"(esim. varaston oikaisu).\n"
+"        Käytetään myyntitilausten katteiden laskemiseen."
 
 #. module: stock_account
 #. odoo-python
@@ -1167,12 +1263,17 @@ msgstr ""
 #. module: stock_account
 #: model:ir.model.fields,help:stock_account.field_product_category__property_stock_account_output_categ_id
 msgid ""
-"When doing automated inventory valuation, counterpart journal items for all outgoing stock moves will be posted in this account,\n"
-"                unless there is a specific valuation account set on the destination location. This is the default value for all products in this category.\n"
+"When doing automated inventory valuation, counterpart journal items for all "
+"outgoing stock moves will be posted in this account,\n"
+"                unless there is a specific valuation account set on the "
+"destination location. This is the default value for all products in this "
+"category.\n"
 "                It can also directly be set on each product."
 msgstr ""
-"Automaattista varaston arvonmääritystä tehtäessä kaikkien lähtevien varastosiirtojen vastinpäiväkirjaerät kirjataan tälle tilille,\n"
-"                ellei määränpään sijaintipaikalle ole määritetty erityistä arvonmääritystiliä. Tämä on oletusarvo kaikille tämän luokan tuotteille.\n"
+"Automaattista varaston arvonmääritystä tehtäessä kaikkien lähtevien "
+"varastosiirtojen vastinpäiväkirjaerät kirjataan tälle tilille,\n"
+"                ellei määränpään sijaintipaikalle ole määritetty erityistä "
+"arvonmääritystiliä. Tämä on oletusarvo kaikille tämän luokan tuotteille.\n"
 "                Se voidaan määrittää myös suoraan kullekin tuotteelle."
 
 #. module: stock_account
@@ -1192,15 +1293,16 @@ msgstr "Ohjattu malli tuotteen varastovaraston uudelleenarviointiin"
 
 #. module: stock_account
 #. odoo-python
+#: code:addons/stock_account/models/stock_lot.py:0
 #: code:addons/stock_account/wizard/stock_valuation_layer_revaluation.py:0
 msgid "You cannot adjust the valuation of a layer with zero quantity"
-msgstr ""
+msgstr "Et voi säätää sellaisen kerroksen arvoa, jonka määrä on nolla"
 
 #. module: stock_account
 #. odoo-python
 #: code:addons/stock_account/wizard/stock_valuation_layer_revaluation.py:0
 msgid "You cannot adjust valuation without a product"
-msgstr ""
+msgstr "Arvostusta ei voi mukauttaa ilman tuotetta"
 
 #. module: stock_account
 #. odoo-python
@@ -1209,6 +1311,8 @@ msgid ""
 "You cannot change the costing method of product valuated by lot/serial "
 "number."
 msgstr ""
+"Erän/sarjanumeron mukaan arvostetun tuotteen kustannuslaskentamenetelmää ei "
+"voi muuttaa."
 
 #. module: stock_account
 #. odoo-python
@@ -1217,6 +1321,7 @@ msgid ""
 "You cannot change the product category of a product valuated by lot/serial "
 "number."
 msgstr ""
+"Erän/sarjanumeron perusteella arvostetun tuotteen tuoteryhmää ei voi muuttaa."
 
 #. module: stock_account
 #. odoo-python
@@ -1229,14 +1334,13 @@ msgstr "Tuotetta ei voi arvostaa uudelleen standardikustannusmenetelmällä."
 #: code:addons/stock_account/wizard/stock_valuation_layer_revaluation.py:0
 msgid "You cannot revalue a product with an empty or negative stock."
 msgstr ""
-"Tuotetta, jonka varasto on tyhjä tai negatiivinen, ei voi arvostaa "
-"uudelleen."
+"Tuotetta, jonka varasto on tyhjä tai negatiivinen, ei voi arvostaa uudelleen."
 
 #. module: stock_account
 #. odoo-python
 #: code:addons/stock_account/wizard/stock_valuation_layer_revaluation.py:0
 msgid "You cannot revalue multiple products at once"
-msgstr ""
+msgstr "Et voi arvostaa useita tuotteita kerralla"
 
 #. module: stock_account
 #. odoo-python
@@ -1255,8 +1359,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/stock_account/models/product.py:0
 msgid ""
-"You don't have any input valuation account defined on your product category."
-" You must define one before processing this operation."
+"You don't have any input valuation account defined on your product category. "
+"You must define one before processing this operation."
 msgstr ""
 "Tuoteryhmällesi ei ole määritetty tuloarviotiliä. Sinun on määritettävä "
 "sellainen ennen tämän toiminnon käsittelyä."
@@ -1275,8 +1379,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/stock_account/models/product.py:0
 msgid ""
-"You don't have any stock input account defined on your product category. You"
-" must define one before processing this operation."
+"You don't have any stock input account defined on your product category. You "
+"must define one before processing this operation."
 msgstr ""
 "Tuoteryhmällesi ei ole määritelty varastotiliä. Sinun on määritettävä "
 "sellainen ennen tämän toiminnon käsittelyä."
@@ -1297,8 +1401,8 @@ msgstr ""
 #: code:addons/stock_account/models/stock_move.py:0
 #: code:addons/stock_account/models/stock_valuation_layer.py:0
 msgid ""
-"You don't have any stock valuation account defined on your product category."
-" You must define one before processing this operation."
+"You don't have any stock valuation account defined on your product category. "
+"You must define one before processing this operation."
 msgstr ""
 "Tuoteryhmällesi ei ole määritetty varastojen arvostustiliä. Sinun on "
 "määritettävä sellainen ennen tämän toiminnon käsittelyä."
@@ -1332,4 +1436,4 @@ msgstr "yksiköt"
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.stock_valuation_layer_graph
 msgid "valuation graph"
-msgstr ""
+msgstr "arviointikaavio"

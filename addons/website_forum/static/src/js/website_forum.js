@@ -9,7 +9,7 @@ import { session } from "@web/session";
 import { rpc } from "@web/core/network/rpc";
 import { get } from "@web/core/network/http_service";
 import { _t } from "@web/core/l10n/translation";
-import { renderToElement } from "@web/core/utils/render";
+import { renderToFragment } from "@web/core/utils/render";
 import { scrollTo, closestScrollable } from "@web_editor/js/common/scrolling";
 import { attachComponent } from "@web_editor/js/core/owl_utils";
 import { SelectMenu } from "@web/core/select_menu/select_menu";
@@ -52,12 +52,9 @@ class WebsiteForumTagsWrapper extends Component {
     }
 
     onCreateOption(string) {
-        const choice = {
-            label: string.trim(),
-            value: `_${string.trim()}`,
-        };
-        this.state.choices.push(choice);
-        this.onSelect([...this.state.value, choice.value]);
+        const choices = string.split(",").map((c) => ({ label: c.trim(), value: `_${c.trim()}` }));
+        this.state.choices.push(...choices);
+        this.onSelect([...this.state.value, ...choices.map((c) => c.value)]);
     }
 
     onSelect(values) {
@@ -158,6 +155,7 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
                     showHeading3: false,
                     showLink: hasFullEdit,
                     showImageEdit: hasFullEdit,
+                    showImageWidth: false,
                 },
                 recordInfo: {
                     context: self._getContext(),
@@ -171,6 +169,7 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
                 value: $textarea.get(0).getAttribute("content"),
                 resizable: true,
                 userGeneratedContent: true,
+                disableTransform: true,
                 height: 350,
             };
             options.allowCommandLink = hasFullEdit;
@@ -692,7 +691,7 @@ publicWidget.registry.websiteForumSpam = publicWidget.Widget.extend({
             Object.values(o).forEach((r) => {
                 r.content = $('<p>' + $(r.content).html() + '</p>').text().substring(0, 250);
             });
-            self.$('div.post_spam').empty().append(renderToElement('website_forum.spam_search_name', {
+            self.$('div.post_spam').empty().append(renderToFragment('website_forum.spam_search_name', {
                 posts: o,
             }));
         });

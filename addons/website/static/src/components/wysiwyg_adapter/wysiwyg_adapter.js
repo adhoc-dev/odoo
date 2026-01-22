@@ -17,7 +17,7 @@ import { WebsiteDialog } from '../dialog/dialog';
 import { PageOption } from "./page_options";
 import { Component, onWillStart, useEffect, onWillUnmount } from "@odoo/owl";
 import { EditHeadBodyDialog } from "../edit_head_body_dialog/edit_head_body_dialog";
-import { router } from "@web/core/browser/router";
+import { router, routerBus } from "@web/core/browser/router";
 import { OptimizeSEODialog } from "@website/components/dialog/seo";
 
 /**
@@ -158,12 +158,17 @@ export class WysiwygAdapterComponent extends Wysiwyg {
                         history.pushState({ skipRouteChange: true }, '');
                         hasFakeState = true;
                     },
-                    onLeave: () => history.back(),
-                    reloadIframe: false
+                    onLeave: () => {},
+                    reloadIframe: true,
                 });
             };
+            const skipLoadOnBeforeRouteChange = () => {
+                router.skipLoad = true;
+            };
+            routerBus.addEventListener("BEFORE_ROUTE_CHANGE", skipLoadOnBeforeRouteChange);
             window.addEventListener('popstate', leaveOnBackNavigation);
             return () => {
+                routerBus.removeEventListener("BEFORE_ROUTE_CHANGE", skipLoadOnBeforeRouteChange);
                 window.removeEventListener('popstate', leaveOnBackNavigation);
                 if (hasFakeState) {
                     // prevent router from reloading state from scratch
@@ -229,6 +234,8 @@ export class WysiwygAdapterComponent extends Wysiwyg {
                 $(el).empty();
             }
         }
+        // The jquery instance inside the iframe needs to be aware of the wysiwyg.
+        this.websiteService.contentWindow.$('#wrapwrap').data('wysiwyg', this);
         await super.startEdition();
 
         // Overriding the `filterMutationRecords` function so it can be used to
@@ -314,8 +321,6 @@ export class WysiwygAdapterComponent extends Wysiwyg {
         if (this.props.beforeEditorActive) {
             await this.props.beforeEditorActive(this.$editable);
         }
-        // The jquery instance inside the iframe needs to be aware of the wysiwyg.
-        this.websiteService.contentWindow.$('#wrapwrap').data('wysiwyg', this);
         // grep: RESTART_WIDGETS_EDIT_MODE
         await new Promise((resolve, reject) => this._websiteRootEvent('widgets_start_request', {
             editableMode: true,
@@ -340,6 +345,12 @@ export class WysiwygAdapterComponent extends Wysiwyg {
         // observer) as the widgets might trigger DOM mutations.
         this._setObserver();
         this.odooEditor.observerActive();
+    }
+    _getBannerCommands() {
+        return [];
+    }
+    _getBannerCategory() {
+        return [];
     }
     /**
      * Stop the widgets and save the content.
@@ -368,6 +379,11 @@ export class WysiwygAdapterComponent extends Wysiwyg {
         if (this.props.editableElements) {
             return this.props.editableElements();
         }
+        for (const coverPartEl of $wrapwrap[0].querySelectorAll(".o_record_cover_component")) {
+            // Exclude cover properties from the o_dirty system, they are
+            // handled by _saveCoverProperties.
+            coverPartEl.dataset.oeReadonly = 1;
+        }
         return $wrapwrap.find('[data-oe-model]')
             .not('.o_not_editable')
             .filter(function () {
@@ -378,7 +394,7 @@ export class WysiwygAdapterComponent extends Wysiwyg {
             .not('[data-oe-readonly]')
             .not('img[data-oe-field="arch"], br[data-oe-field="arch"], input[data-oe-field="arch"]')
             .not('.oe_snippet_editor')
-            .not('hr, br, input, textarea')
+            .not('hr, br, input, textarea, owl-component')
             .not('[data-oe-sanitize-prevent-edition]')
             .add('.o_editable');
     }
@@ -528,15 +544,34 @@ export class WysiwygAdapterComponent extends Wysiwyg {
             // generated a new stack and break the "redo" of the editor.
             this.odooEditor.automaticStepSkipStack();
             for (const record of records) {
-                if (record.attributeName === 'contenteditable') {
-                    continue;
-                }
-
+                // If the mutation occurred in a non-savable zone, skip it
                 const $savable = $(record.target).closest(this.savableSelector);
                 if (!$savable.length) {
                     continue;
                 }
 
+                if (record.attributeName === 'contenteditable') {
+                    continue;
+                }
+                // Whitespace changes in the "class" attribute should be ignored
+                // FIXME ? I suspect that the "attributeCache" system in
+                // `filterMutationRecords` is buggy in the first place: even
+                // though "o_we_force_no_transition" was not listed in
+                // "renderingClasses", it was acting like one because the
+                // "attributeCache" system ignored it... unless the classes
+                // contained an extra whitespace. The combination of this +
+                // adding it as a rendering class makes it so the "o_dirty"
+                // class is not added by merely clicking on a section which has
+                // useless whitespaces in its class attribute.
+                if (record.attributeName === 'class') {
+                    const oldValue = record.oldValue?.trim() || "";
+                    const oldClasses = oldValue ? oldValue.split(/\s+/) : [];
+                    const newClasses = [...record.target.classList];
+                    if (oldClasses.length === newClasses.length
+                            && oldClasses.every(c => newClasses.includes(c))) {
+                        continue;
+                    }
+                }
                 // Do not mark the editable dirty when simply adding/removing
                 // link zwnbsp since these are just technical nodes that aren't
                 // part of the user's editing of the document.
@@ -550,7 +585,7 @@ export class WysiwygAdapterComponent extends Wysiwyg {
                 // Mark any savable element dirty if any tracked mutation occurs
                 // inside of it.
                 $savable.not('.o_dirty').each(function () {
-                    if (!this.hasAttribute('data-oe-readonly')) {
+                    if (this.tagName !== 'OWL-COMPONENT' && !this.hasAttribute('data-oe-readonly')) {
                         this.classList.add('o_dirty');
                     }
                 });
@@ -617,7 +652,7 @@ export class WysiwygAdapterComponent extends Wysiwyg {
     _getContentEditableAreas() {
         const $savableZones = $(this.websiteService.pageDocument).find(this.savableSelector);
         const $editableSavableZones = $savableZones
-            .not('input, [data-oe-readonly], ' +
+            .not('input, [data-oe-readonly], owl-component, ' +
                  '[data-oe-type="monetary"], [data-oe-many2one-id], [data-oe-field="arch"]:empty')
             .filter((_, el) => {
                 // The whole record cover is considered editable by the editor,
@@ -723,7 +758,7 @@ export class WysiwygAdapterComponent extends Wysiwyg {
         // TODO we should investigate if this is normal the websiteRootInstance
         // is being accessed while being dead following a wysiwyg adapter event.
         if (!websiteRootInstance) {
-            if (eventData.onFailure) {
+            if (eventData.onFailure && !eventData.onSuccess) {
                 return eventData.onFailure();
             }
             return false;
@@ -792,6 +827,7 @@ export class WysiwygAdapterComponent extends Wysiwyg {
                 priority: 100,
                 description: _t('Insert an alert snippet'),
                 fontawesome: 'fa-info',
+                keywords: ["banner", "info", "success", "warning", "danger"],
                 isDisabled: () => !this.odooEditor.isSelectionInBlockRoot(),
                 callback: () => {
                     snippetCommandCallback('.oe_snippet_body[data-snippet="s_alert"]');
@@ -1184,25 +1220,24 @@ export class WysiwygAdapterComponent extends Wysiwyg {
         const isDirty = this._isDirty();
         let callback = () => {
             this.leaveEditMode({ forceLeave: true });
-            const canPublish = this.websiteService.currentWebsite.metadata.canPublish;
-            if (
-                isDirty &&
-                (!canPublish ||
-                    (canPublish && this.websiteService.currentWebsite.metadata.isPublished)) &&
-                this.websiteService.currentWebsite.metadata.canOptimizeSeo
-            ) {
+            if (isDirty) {
                 const {
                     mainObject: { id, model },
+                    canPublish,
                 } = this.websiteService.currentWebsite.metadata;
                 rpc("/website/get_seo_data", {
                     res_id: id,
                     res_model: model,
                 }).then(
-                    (seo_data) =>
+                    (seo_data) => {
+                        if (!(seo_data.website_is_published && canPublish)) {
+                            return;
+                        }
                         checkAndNotifySEO(seo_data, OptimizeSEODialog, {
                             notification: this.notificationService,
                             dialog: this.dialogs,
-                        }),
+                        });
+                    },
                     (error) => {
                         throw error;
                     }
@@ -1392,5 +1427,20 @@ export class WysiwygAdapterComponent extends Wysiwyg {
             return;
         }
         this._hideDropdowns();
+    }
+    /**
+     * @override
+     */
+    async _onMediaDialogSave(params, element) {
+        await super._onMediaDialogSave(...arguments);
+        // This wasn't needed before activating the "iframe video" public widget
+        // in the edit mode. It should allow destroying newly added iframes and
+        // prevent saving them in the DOM.
+        if (element.classList.contains("media_iframe_video")) {
+            this._websiteRootEvent("widgets_start_request", {
+                editableMode: true,
+                $target: $(element),
+            });
+        }
     }
 }

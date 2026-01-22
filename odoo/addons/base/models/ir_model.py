@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import inspect
 import itertools
 import logging
 import random
@@ -357,6 +358,11 @@ class IrModel(models.Model):
         if crons:
             crons.unlink()
 
+        # delete related ir_model_data
+        model_data = self.env['ir.model.data'].search([('model', 'in', self.mapped('model'))])
+        if model_data:
+            model_data.unlink()
+
         self._drop_table()
         res = super(IrModel, self).unlink()
 
@@ -650,7 +656,12 @@ class IrModelFields(models.Model):
     @api.constrains('domain')
     def _check_domain(self):
         for field in self:
-            safe_eval(field.domain or '[]')
+            try:
+                safe_eval(field.domain or '[]')
+            except ValueError as e:
+                raise ValidationError(
+                    _("An error occurred while evaluating the domain:\n%(error)s", error=e)
+                ) from e
 
     @api.constrains('name')
     def _check_name(self):
@@ -1036,11 +1047,16 @@ class IrModelFields(models.Model):
                 if relation and not IrModel._get_id(relation):
                     raise UserError(_("Model %s does not exist!", vals['relation']))
 
-                if vals.get('ttype') == 'one2many' and not self.search_count([
-                    ('ttype', '=', 'many2one'),
-                    ('model', '=', vals['relation']),
-                    ('name', '=', vals['relation_field']),
-                ]):
+                if (
+                    vals.get('ttype') == 'one2many' and
+                    vals.get("store", True) and
+                    not vals.get("related") and
+                    not self.search_count([
+                        ('ttype', '=', 'many2one'),
+                        ('model', '=', vals['relation']),
+                        ('name', '=', vals['relation_field']),
+                    ])
+                ):
                     raise UserError(_("Many2one %(field)s on model %(model)s does not exist!", field=vals['relation_field'], model=vals['relation']))
 
         if any(model in self.pool for model in models):
@@ -1276,6 +1292,7 @@ class IrModelFields(models.Model):
             'required': bool(field_data['required']),
             'readonly': bool(field_data['readonly']),
             'store': bool(field_data['store']),
+            'company_dependent': bool(field_data['company_dependent']),
         }
         if field_data['ttype'] in ('char', 'text', 'html'):
             attrs['translate'] = bool(field_data['translate'])
@@ -1409,7 +1426,7 @@ class ModelInherit(models.Model):
         IrModel = self.env["ir.model"]
         get_model_id = IrModel._get_id
 
-        module_mapping = defaultdict(list)
+        module_mapping = defaultdict(OrderedSet)
         for model_name in model_names:
             get_field_id = self.env["ir.model.fields"]._get_ids(model_name).get
             model_id = get_model_id(model_name)
@@ -1426,10 +1443,16 @@ class ModelInherit(models.Model):
                 ] + [
                     (model_id, get_model_id(parent_name), get_field_id(field))
                     for parent_name, field in cls._inherits.items()
+                ] + [
+                    (model_id, get_model_id(field.comodel_name), get_field_id(field_name))
+                    for (field_name, field) in inspect.getmembers(cls)
+                    if isinstance(field, fields.Many2one)
+                    if field.type == 'many2one' and not field.related and field.delegate
+                    if field_name not in cls._inherits.values()
                 ]
 
                 for item in items:
-                    module_mapping[item].append(cls._module)
+                    module_mapping[item].add(cls._module)
 
         if not module_mapping:
             return
@@ -2228,7 +2251,7 @@ class IrModelData(models.Model):
     @tools.ormcache('xmlid')
     def _xmlid_lookup(self, xmlid: str) -> tuple:
         """Low level xmlid lookup
-        Return (id, res_model, res_id) or raise ValueError if not found
+        Return (res_model, res_id) or raise ValueError if not found
         """
         module, name = xmlid.split('.', 1)
         query = "SELECT model, res_id FROM ir_model_data WHERE module=%s AND name=%s"
@@ -2462,7 +2485,7 @@ class IrModelData(models.Model):
                     else:
                         # the field is shared across registries; don't modify it
                         Field = type(field)
-                        field_ = Field(_base_fields=[field, Field(prefetch=False)])
+                        field_ = Field(_base_fields=(field, Field(prefetch=False)))
                         self.env[ir_field.model]._add_field(ir_field.name, field_)
                         field_.setup(model)
                         has_shared_field = True
@@ -2479,6 +2502,8 @@ class IrModelData(models.Model):
                 ('model', '=', records._name),
                 ('res_id', 'in', records.ids),
             ])
+            cloc_exclude_data = ref_data.filtered(lambda imd: imd.module == '__cloc_exclude__')
+            ref_data -= cloc_exclude_data
             records -= records.browse((ref_data - module_data).mapped('res_id'))
             if not records:
                 return
@@ -2507,6 +2532,7 @@ class IrModelData(models.Model):
             _logger.info('Deleting %s', records)
             try:
                 with self._cr.savepoint():
+                    cloc_exclude_data.unlink()
                     records.unlink()
             except Exception:
                 if len(records) <= 1:
@@ -2519,7 +2545,12 @@ class IrModelData(models.Model):
 
         # remove non-model records first, grouped by batches of the same model
         for model, items in itertools.groupby(unique(records_items), itemgetter(0)):
-            delete(self.env[model].browse(item[1] for item in items))
+            ids = [item[1] for item in items]
+            # we cannot guarantee that the ir.model.data points to an existing model
+            if model in self.env:
+                delete(self.env[model].browse(ids))
+            else:
+                _logger.info("Orphan ir.model.data records %s refer to unavailable model '%s'", ids, model)
 
         # Remove copied views. This must happen after removing all records from
         # the modules to remove, otherwise ondelete='restrict' may prevent the

@@ -9,7 +9,7 @@ import { ProductCombo } from "@sale/js/models/product_combo";
 import {
     ProductConfiguratorDialog
 } from '@sale/js/product_configurator_dialog/product_configurator_dialog';
-import { serializeComboItem } from '@sale/js/sale_utils';
+import { serializeComboItem, getSelectedCustomPtav } from '@sale/js/sale_utils';
 import { WebsiteSale } from '@website_sale/js/website_sale';
 import wSaleUtils from '@website_sale/js/website_sale_utils';
 
@@ -22,7 +22,7 @@ WebsiteSale.include({
     },
 
     async _openDialog(isOnProductPage) {
-        const { combos, ...remainingData } = await rpc(
+        const { combos, show_quantity, ...remainingData } = await rpc(
             '/website_sale/combo_configurator/get_data',
             {
                 product_tmpl_id: this.rootProduct.product_template_id,
@@ -32,15 +32,15 @@ WebsiteSale.include({
             }
         );
         if (combos.length) {
-            const preselectedComboItems = combos
+            const selectedComboItems = combos
                 .map(combo => new ProductCombo(combo))
-                .map(combo => combo.preselectedComboItem)
+                .map(combo => combo.selectedComboItem)
                 .filter(Boolean);
-            // If each combo choice has only one combo item, and that combo item can't be configured
-            // (i.e. it has no `no_variant` attributes), then the combo product is already fully
-            // configured and the user doesn't need to do anything else.
-            if (preselectedComboItems.length === combos.length) {
-                const extraPrice = preselectedComboItems.reduce(
+            // If the combo product is already fully configured (i.e. a combo item has been selected
+            // for each combo choice), then it can be added to the cart without opening the combo
+            // configurator.
+            if (selectedComboItems.length === combos.length) {
+                const extraPrice = selectedComboItems.reduce(
                     (price, item) => price + item.totalExtraPrice, 0
                 );
                 const comboProductData = {
@@ -48,11 +48,11 @@ WebsiteSale.include({
                     price: remainingData.price + extraPrice,
                 };
                 return this.addComboProductToCart(
-                    comboProductData, preselectedComboItems, remainingData, {}
+                    comboProductData, selectedComboItems, remainingData, {}
                 );
             }
             // If some combo choices need to be configured, open the combo configurator.
-            return this._openComboConfigurator(combos, remainingData);
+            return this._openComboConfigurator(combos, remainingData, show_quantity);
         }
         if (this.isBuyNow) {
             return this._submitForm();
@@ -66,7 +66,7 @@ WebsiteSale.include({
             }
         );
         if (shouldShowProductConfigurator) {
-            return this._openProductConfigurator(isOnProductPage);
+            return this._openProductConfigurator(isOnProductPage, show_quantity);
         }
         return this._submitForm();
     },
@@ -75,8 +75,9 @@ WebsiteSale.include({
      * Opens the product configurator dialog.
      *
      * @param isOnProductPage Whether the user is currently on the product page.
+     * @param showQuantity Whether the quantity selector is shown.
      */
-    _openProductConfigurator(isOnProductPage) {
+    _openProductConfigurator(isOnProductPage, showQuantity) {
         this.call('dialog', 'add', ProductConfiguratorDialog, {
             productTemplateId: this.rootProduct.product_template_id,
             ptavIds: this.rootProduct.variant_values,
@@ -90,7 +91,10 @@ WebsiteSale.include({
             soDate: serializeDateTime(DateTime.now()),
             edit: false,
             isFrontend: true,
-            options: { isMainProductConfigurable: !isOnProductPage },
+            options: {
+                isMainProductConfigurable: !isOnProductPage,
+                showQuantity: showQuantity,
+            },
             save: async (mainProduct, optionalProducts, options) => {
                 this._trackProducts([mainProduct, ...optionalProducts]);
 
@@ -111,14 +115,18 @@ WebsiteSale.include({
      *
      * @param combos The combos of the product.
      * @param remainingData Other data needed to open the combo configurator.
+     * @param showQuantity Whether the quantity selector is shown.
      */
-    _openComboConfigurator(combos, remainingData) {
+    _openComboConfigurator(combos, remainingData, showQuantity) {
         this.call('dialog', 'add', ComboConfiguratorDialog, {
             combos: combos.map(combo => new ProductCombo(combo)),
             ...remainingData,
             date: serializeDateTime(DateTime.now()),
             edit: false,
             isFrontend: true,
+            options: {
+                showQuantity: showQuantity,
+            },
             save: (comboProductData, selectedComboItems, options) =>
                 this.addComboProductToCart(
                     comboProductData, selectedComboItems, remainingData, options
@@ -198,10 +206,7 @@ WebsiteSale.include({
         // Custom attributes.
         serializedProduct.product_custom_attribute_values = [];
         for (const ptal of product.attribute_lines) {
-            const selectedPtavIds = new Set(ptal.selected_attribute_value_ids);
-            const selectedCustomPtav = ptal.attribute_values.find(
-                ptav => ptav.is_custom && selectedPtavIds.has(ptav.id)
-            );
+            const selectedCustomPtav = ptal.customValue && getSelectedCustomPtav(ptal);
             if (selectedCustomPtav) {
                 serializedProduct.product_custom_attribute_values.push({
                     custom_product_template_attribute_value_id: selectedCustomPtav.id,

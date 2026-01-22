@@ -7,6 +7,7 @@ import logging
 from ast import literal_eval
 
 from odoo import _, api, fields, models, tools, Command
+from odoo.osv import expression
 from odoo.exceptions import ValidationError, UserError
 from odoo.tools import is_html_empty
 from odoo.tools.safe_eval import safe_eval, time
@@ -41,7 +42,7 @@ class MailTemplate(models.Model):
          ('hidden_template', 'Hidden Template'),
          ('custom_template', 'Custom Template')],
          compute="_compute_template_category", search="_search_template_category")
-    model_id = fields.Many2one('ir.model', 'Applies to')
+    model_id = fields.Many2one('ir.model', 'Applies to', ondelete='cascade')
     model = fields.Char('Related Document Model', related='model_id.model', index=True, store=True, readonly=True)
     subject = fields.Char('Subject', translate=True, prefetch=True, help="Subject (placeholders may be used here)")
     email_from = fields.Char('From',
@@ -131,19 +132,37 @@ class MailTemplate(models.Model):
 
     @api.model
     def _search_template_category(self, operator, value):
-        if operator in ['in', 'not in'] and isinstance(value, list):
-            value_templates = self.env['mail.template'].search([]).filtered(
-                lambda t: t.template_category in value
-            )
-            return [('id', operator, value_templates.ids)]
+        if operator not in ['in', 'not in', '=', '!=']:
+            raise NotImplementedError(_('Operation not supported'))
 
-        if operator in ['=', '!='] and isinstance(value, str):
-            value_templates = self.env['mail.template'].search([]).filtered(
-                lambda t: t.template_category == value
-            )
-            return [('id', 'in' if operator == "=" else 'not in', value_templates.ids)]
+        value = [value] if isinstance(value, str) else value
+        operator = 'in' if operator in ("in", "=") else 'not in'
 
-        raise NotImplementedError(_('Operation not supported'))
+        templates_with_xmlid = self.env['ir.model.data'].sudo()._search([
+            ('model', '=', 'mail.template'),
+            ('module', '!=', '__export__')
+        ]).subselect('res_id')
+
+        domain = []
+        if 'hidden_template' in value:
+            domain.append(['|', ('active', '=', False), '&', ('description', '=', False), ('id', 'in', templates_with_xmlid)])
+
+        if 'base_template' in value:
+            domain.append(['&', ('description', '!=', False), ('id', 'in', templates_with_xmlid)])
+
+        if 'custom_template' in value:
+            domain.append([('template_category', 'not in', ['base_template', 'hidden_template'])])
+
+        if operator == 'not in':
+            for dom in domain:
+                dom.insert(0, "!")
+
+        if len(domain) > 1:
+            domain = (expression.OR if operator == 'in' else expression.AND)(domain)
+        else:
+            domain = domain[0]
+
+        return domain
 
     # ------------------------------------------------------------
     # CRUD
@@ -202,7 +221,31 @@ class MailTemplate(models.Model):
 
     def copy_data(self, default=None):
         vals_list = super().copy_data(default=default)
-        return [dict(vals, name=self.env._("%s (copy)", template.name)) for template, vals in zip(self, vals_list)]
+        for vals, template in zip(vals_list, self):
+            if 'name' not in (default or {}) and vals.get('name') == template.name:
+                vals['name'] = self.env._("%s (copy)", template.name)
+        return vals_list
+
+    def copy(self, default=None):
+        default = default or {}
+        copy_attachments = 'attachment_ids' not in default
+        if copy_attachments:
+            default['attachment_ids'] = False
+        copies = super().copy(default=default)
+
+        if copy_attachments:
+            for copy, original in zip(copies, self):
+                # copy attachments, to avoid ownership / ACLs issue
+                # anyway filestore should keep a single reference to content
+                if original.attachment_ids:
+                    copy.write({
+                        'attachment_ids': [
+                            (4, att_copy.id) for att_copy in (
+                                attachment.copy(default={'res_id': copy.id, 'res_model': original._name}) for attachment in original.attachment_ids
+                            )
+                        ]
+                    })
+        return copies
 
     def unlink_action(self):
         for template in self:

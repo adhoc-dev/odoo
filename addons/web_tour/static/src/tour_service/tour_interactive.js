@@ -27,13 +27,17 @@ export class TourInteractive {
         Object.assign(this, data);
         this.steps = this.steps.map((step) => new TourStep(step, this));
         this.actions = this.steps.flatMap((s) => this.getSubActions(s));
+        this.isBusy = false;
     }
 
     /**
      * @param {import("@web_tour/tour_pointer/tour_pointer").TourPointer} pointer
      * @param {Function} onTourEnd
      */
-    start(pointer, onTourEnd) {
+    start(env, pointer, onTourEnd) {
+        env.bus.addEventListener("ACTION_MANAGER:UPDATE", () => (this.isBusy = true));
+        env.bus.addEventListener("ACTION_MANAGER:UI-UPDATED", () => (this.isBusy = false));
+
         this.pointer = pointer;
         this.debouncedToggleOpen = debounce(this.pointer.showContent, 50, true);
         this.onTourEnd = onTourEnd;
@@ -50,7 +54,7 @@ export class TourInteractive {
         while (!tempAnchors.length && tempIndex >= 0) {
             tempIndex--;
             tempAction = this.actions.at(tempIndex);
-            if (!tempAction.step.active) {
+            if (!tempAction.step.active || tempAction.event === "warn") {
                 continue;
             }
             tempAnchors = tempAction && this.findTriggers(tempAction.anchor);
@@ -340,6 +344,49 @@ export class TourInteractive {
                     name: "input",
                     target: element,
                 });
+                if (element.classList.contains("o-autocomplete--input")) {
+                    consumeEvents.push({
+                        name: "keydown",
+                        target: element,
+                        conditional: (ev) => {
+                            if (
+                                ["Tab", "Enter"].includes(ev.key) &&
+                                ev.target.parentElement.querySelector(
+                                    ".o-autocomplete--dropdown-item .ui-state-active"
+                                )
+                            ) {
+                                const nextStep = this.actions.at(this.currentActionIndex + 1);
+                                if (
+                                    this.findTriggers(nextStep.anchor)
+                                        .at(0)
+                                        ?.closest(".o-autocomplete--dropdown-item")
+                                ) {
+                                    // Skip the next step if the next one is a click on a dropdown item
+                                    this.currentActionIndex++;
+                                }
+                                return true;
+                            }
+                        },
+                    });
+                    consumeEvents.push({
+                        name: "click",
+                        target: element.ownerDocument,
+                        conditional: (ev) => {
+                            if (ev.target.closest(".o-autocomplete--dropdown-item")) {
+                                const nextStep = this.actions.at(this.currentActionIndex + 1);
+                                if (
+                                    this.findTriggers(nextStep.anchor)
+                                        .at(0)
+                                        ?.closest(".o-autocomplete--dropdown-item")
+                                ) {
+                                    // Skip the next step if the next one is a click on a dropdown item
+                                    this.currentActionIndex++;
+                                }
+                                return true;
+                            }
+                        },
+                    });
+                }
             }
         }
 
@@ -354,7 +401,15 @@ export class TourInteractive {
         if (runCommand === "drop") {
             consumeEvents.push({
                 name: "pointerup",
-                target: document,
+                target: element.ownerDocument,
+                conditional: (ev) =>
+                    element.ownerDocument
+                        .elementsFromPoint(ev.clientX, ev.clientY)
+                        .includes(element),
+            });
+            consumeEvents.push({
+                name: "drop",
+                target: element.ownerDocument,
                 conditional: (ev) =>
                     element.ownerDocument
                         .elementsFromPoint(ev.clientX, ev.clientY)
@@ -374,8 +429,10 @@ export class TourInteractive {
         if (consumeEvent === "drag") {
             // jQuery-ui draggable triggers 'drag' events on the .ui-draggable element,
             // but the tip is attached to the .ui-draggable-handle element which may
-            // be one of its children (or the element itself)
-            return el.closest(".ui-draggable, .o_draggable, .o_we_draggable, .o-draggable");
+            // be one of its children (or the element itself
+            return el.closest(
+                ".ui-draggable, .o_draggable, .o_we_draggable, .o-draggable, [draggable='true']"
+            );
         }
 
         if (consumeEvent === "input" && !["textarea", "input"].includes(el.tagName.toLowerCase())) {
@@ -402,7 +459,11 @@ export class TourInteractive {
                 this.setActionListeners();
             } else if (!tempAnchors.length && this.anchorEls.length) {
                 this.pointer.hide();
-                if (!hoot.queryFirst(".o_home_menu", { visible: true })) {
+                if (
+                    !hoot.queryFirst(".o_home_menu", { visible: true }) &&
+                    !hoot.queryFirst(".dropdown-item.o_loading", { visible: true }) &&
+                    !this.isBusy
+                ) {
                     this.backward();
                 }
                 return;

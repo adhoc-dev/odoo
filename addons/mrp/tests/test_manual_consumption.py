@@ -111,11 +111,14 @@ class TestManualConsumption(TestMrpCommon):
             self.assertTrue(production.move_raw_ids.filtered(lambda m: m.product_id == p1).manual_consumption)
             self.assertFalse(production.move_raw_ids.filtered(lambda m: m.product_id == p2).manual_consumption)
 
+        location = self.env['stock.location'].search([], limit=1)
+        mo.procurement_group_id.mrp_production_ids.location_final_id = location
         # Merge them back
         action = mo.procurement_group_id.mrp_production_ids.action_merge()
         mo = self.env[action['res_model']].browse(action['res_id'])
         self.assertTrue(mo.move_raw_ids.filtered(lambda m: m.product_id == p1).manual_consumption)
         self.assertFalse(mo.move_raw_ids.filtered(lambda m: m.product_id == p2).manual_consumption)
+        self.assertEqual(mo.location_final_id, location)
 
     def test_manual_consumption_with_different_component_price(self):
         """
@@ -276,3 +279,29 @@ class TestManualConsumption(TestMrpCommon):
         self.assertEqual(mo.move_raw_ids.mapped('manual_consumption'), [True, False])
         self.assertEqual(components[0].stock_quant_ids.reserved_quantity, 3.0)
         self.assertRecordValues(mo.move_raw_ids, [{'quantity': 3.0, 'picked': True}, {'quantity': 2.0, 'picked': True}])
+
+    def test_reservation_state_with_manual_consumption(self):
+        """
+        Check that the reservation state of an MO is not influenced by moves without demand.
+        """
+        self.warehouse_1.manufacture_steps = "pbm"
+        bom = self.bom_1
+        components = bom.bom_line_ids.mapped('product_id')
+        components.is_storable = True
+        # make the second component optional
+        bom.bom_line_ids[-1].product_qty = 0.0
+        self.env['stock.quant']._update_available_quantity(components[0], self.warehouse_1.lot_stock_id, 10.0)
+        mo_form = Form(self.env['mrp.production'])
+        mo_form.picking_type_id = self.warehouse_1.manu_type_id
+        mo_form.bom_id = bom
+        mo_form.product_qty = 4
+        mo = mo_form.save()
+        mo.action_confirm()
+        self.assertRecordValues(mo.picking_ids.move_ids, [
+            { "product_id": components[0].id, "product_uom_qty": 2.0}
+        ])
+        self.assertEqual(mo.reservation_state, "waiting")
+        mo.picking_ids.button_validate()
+        self.assertEqual(mo.reservation_state, "assigned")
+        mo.move_raw_ids.filtered(lambda m: m.product_id == components[0]).picked = True
+        self.assertEqual(mo.reservation_state, "assigned")

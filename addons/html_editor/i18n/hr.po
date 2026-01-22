@@ -1,32 +1,38 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* html_editor
-# 
+# * html_editor
+#
 # Translators:
 # Matija Gudlin, 2024
 # Davor Bojkić <davor.bojkic@storm.hr>, 2024
 # Ivica Dimjašević <ivica.dimjasevic@storm.hr>, 2024
 # Marko Carević <marko.carevic@live.com>, 2024
-# Vladimir Olujić <olujic.vladimir@storm.hr>, 2024
 # Tina Milas, 2024
 # Kristina Palaš, 2024
-# Karolina Tonković <karolina.tonkovic@storm.hr>, 2024
 # Martin Trigaux, 2024
-# Bole <bole@dajmi5.com>, 2024
-# 
+# Bole <bole@dajmi5.com>, 2025
+# Karolina Tonković <karolina.tonkovic@storm.hr>, 2025
+# Vladimir Olujić <olujic.vladimir@storm.hr>, 2025
+# Zvonimir Galic, 2025
+# Luka Carević <luka@uvid.hr>, 2025
+# Karlo Mikešić <karlo@uvid.hr>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-25 07:49+0000\n"
-"PO-Revision-Date: 2024-09-29 00:00+0000\n"
-"Last-Translator: Bole <bole@dajmi5.com>, 2024\n"
-"Language-Team: Croatian (https://app.transifex.com/odoo/teams/41243/hr/)\n"
+"POT-Creation-Date: 2025-12-29 18:37+0000\n"
+"PO-Revision-Date: 2025-11-21 06:41+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Croatian <https://translate.odoo.com/projects/odoo-18/"
+"html_editor/hr/>\n"
+"Language: hr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: hr\n"
-"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"X-Generator: Weblate 5.12.2\n"
 
 #. module: html_editor
 #. odoo-javascript
@@ -58,13 +64,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
 msgid "(URL or Embed)"
-msgstr ""
+msgstr "(URL ili ugrađivanje)"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/column_plugin.js:0
 msgid "2 columns"
-msgstr ""
+msgstr "2 stupca"
 
 #. module: html_editor
 #. odoo-javascript
@@ -76,13 +82,13 @@ msgstr "3 zvijezdice"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/column_plugin.js:0
 msgid "3 columns"
-msgstr ""
+msgstr "3 stupca"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/column_plugin.js:0
 msgid "4 columns"
-msgstr ""
+msgstr "4 stupca"
 
 #. module: html_editor
 #. odoo-javascript
@@ -106,13 +112,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_plugin.js:0
 msgid "AI Tools"
-msgstr ""
+msgstr "AI Alati"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
 msgid "Accepts"
-msgstr ""
+msgstr "Prihvaća"
 
 #. module: html_editor
 #. odoo-python
@@ -124,8 +130,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/html_editor/controllers/main.py:0
 msgid ""
-"Action %s not found, link preview is not available, please check your url is"
-" correct"
+"Action %s not found, link preview is not available, please check your url is "
+"correct"
 msgstr ""
 
 #. module: html_editor
@@ -145,31 +151,37 @@ msgstr "Dodaj URL"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Add a blockquote section"
-msgstr ""
+msgstr "Dodaj odlomak s citatom"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_plugin.js:0
 msgid "Add a button"
-msgstr ""
+msgstr "Dodajte gumb"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Add a code section"
-msgstr ""
+msgstr "Dodaj odlomak s kodom"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/file_plugin.js:0
+msgid "Add a download box"
+msgstr "Dodajte okvir za preuzimanje"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_plugin.js:0
 msgid "Add a link"
-msgstr ""
+msgstr "Dodajte link"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/emoji_plugin.js:0
 msgid "Add an emoji"
-msgstr ""
+msgstr "Dodajte emoji"
 
 #. module: html_editor
 #. odoo-javascript
@@ -276,45 +288,49 @@ msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/html_migrations/migration-1.2.js:0
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Banner Danger"
-msgstr ""
+msgstr "Banner upozorenja"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/html_migrations/migration-1.2.js:0
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Banner Info"
-msgstr ""
+msgstr "Informativni banner"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/html_migrations/migration-1.2.js:0
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Banner Success"
-msgstr ""
+msgstr "Banner uspjeha"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/html_migrations/migration-1.2.js:0
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Banner Warning"
-msgstr ""
+msgstr "Banner upozorenja"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/signature_plugin.js:0
 msgid "Basic Bloc"
-msgstr ""
+msgstr "Osnovni blok"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Big section heading"
-msgstr ""
+msgstr "Veliko zaglavlje sekcije"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/list/list_plugin.js:0
 msgid "Bulleted list"
-msgstr ""
+msgstr "Popis po točkama"
 
 #. module: html_editor
 #. odoo-javascript
@@ -358,19 +374,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/list/list_plugin.js:0
 msgid "Checklist"
-msgstr ""
+msgstr "Checklista"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/others/x2many_image_field.xml:0
 msgid "Clear"
 msgstr "Očisti"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/backend/excalidraw/excalidraw.xml:0
-msgid "Click here to update the source"
-msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -389,14 +399,6 @@ msgstr "Šifra"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/fields/html_field.js:0
 msgid "Code view"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
-msgid ""
-"Collaborative Links require joining, while Embed Links directly show the "
-"drawing."
 msgstr ""
 
 #. module: html_editor
@@ -427,19 +429,19 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/column_plugin.js:0
 msgid "Convert into 2 columns"
-msgstr ""
+msgstr "Pretvori u 2 stupca"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/column_plugin.js:0
 msgid "Convert into 3 columns"
-msgstr ""
+msgstr "Pretvori u 3 stupca"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/column_plugin.js:0
 msgid "Convert into 4 columns"
-msgstr ""
+msgstr "Pretvori u 4 stupca"
 
 #. module: html_editor
 #. odoo-javascript
@@ -451,13 +453,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.xml:0
 msgid "Copy Link"
-msgstr ""
+msgstr "Kopiraj link"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
 msgid "Copy-paste your URL or embed code here"
-msgstr ""
+msgstr "Kopiraj i zalijepi URL ili ugradbeni kod ovdje"
 
 #. module: html_editor
 #. odoo-javascript
@@ -475,13 +477,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/list/list_plugin.js:0
 msgid "Create a list with numbering"
-msgstr ""
+msgstr "Izradite popis s numeriranjem"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/list/list_plugin.js:0
 msgid "Create a simple bulleted list"
-msgstr ""
+msgstr "Stvori jednostavnu listu s točkama"
 
 #. module: html_editor
 #. odoo-javascript
@@ -510,16 +512,9 @@ msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.js:0
 #: code:addons/html_editor/static/src/main/media/image_plugin.js:0
 msgid "Default"
 msgstr "Zadano"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.js:0
-msgid "Default + Rounded"
-msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -531,7 +526,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/table/table_menu.js:0
 msgid "Delete"
-msgstr "Briši"
+msgstr "Obriši"
 
 #. module: html_editor
 #. odoo-javascript
@@ -545,7 +540,6 @@ msgstr "Opis"
 #: code:addons/html_editor/static/src/main/media/image_crop.xml:0
 #: code:addons/html_editor/static/src/main/media/image_description.xml:0
 #: code:addons/html_editor/static/src/main/media/media_dialog/media_dialog.xml:0
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
 msgid "Discard"
 msgstr "Odbaci"
 
@@ -556,24 +550,15 @@ msgid ""
 "Discover a world of awesomeness in our copyright-free image haven. No legal "
 "drama, just nice images!"
 msgstr ""
+"Otkrijte svijet veličanstvenosti u našem utočištu slika bez autorskih prava. "
+"Nema pravne drame, samo lijepe slike!"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/media_dialog.js:0
+#: code:addons/html_editor/static/src/main/media/file_plugin.js:0
+#: code:addons/html_editor/static/src/main/media/media_dialog/file_media_dialog.js:0
 msgid "Documents"
 msgstr "Dokumenti"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/core/file/readonly_file.xml:0
-msgid "Download"
-msgstr "Preuzimanje"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_plugin.js:0
-msgid "Drawing Board"
-msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -709,12 +694,6 @@ msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.js:0
-msgid "Flat"
-msgstr "Ravan"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/image_crop.js:0
 msgid "Flexible"
 msgstr "Fleksibilno"
@@ -736,7 +715,7 @@ msgstr ""
 #: code:addons/html_editor/static/src/main/font/color_plugin.js:0
 #: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
 msgid "Font Color"
-msgstr ""
+msgstr "Boja fonta"
 
 #. module: html_editor
 #. odoo-javascript
@@ -766,13 +745,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_prompt_dialog.xml:0
 msgid "Generate Text with AI"
-msgstr ""
+msgstr "Generiraj tekst pomoću AI"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_plugin.js:0
 msgid "Generate or transform content with AI."
-msgstr ""
+msgstr "Automatski generiraj ili prilagodi sadržaj uz AI."
 
 #. module: html_editor
 #. odoo-javascript
@@ -796,61 +775,61 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Header 1"
-msgstr "Header 1"
+msgstr "Zaglavlje 1"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Header 1 Display 1"
-msgstr ""
+msgstr "Zaglavlje 1 Prikaz 1"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Header 2"
-msgstr "Header 2"
+msgstr "Zaglavlje 2"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Header 3"
-msgstr "Header 3"
+msgstr "Zaglavlje 3"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Header 4"
-msgstr "Header 4"
+msgstr "Zaglavlje 4"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Header 5"
-msgstr "Header 5"
+msgstr "Zaglavlje 5"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Header 6"
-msgstr "Header 6"
+msgstr "Zaglavlje 6"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Heading 1"
-msgstr ""
+msgstr "Zaglavlje 1"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Heading 2"
-msgstr ""
+msgstr "Zaglavlje 2"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Heading 3"
-msgstr ""
+msgstr "Zaglavlje 3"
 
 #. module: html_editor
 #. odoo-javascript
@@ -873,12 +852,6 @@ msgstr ""
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.js:0
-msgid "Hide Dailymotion logo"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.js:0
 msgid "Hide fullscreen button"
 msgstr ""
 
@@ -890,15 +863,9 @@ msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.js:0
-msgid "Hide sharing button"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/others/embedded_components/plugins/table_of_content_plugin/table_of_content_plugin.js:0
 msgid "Highlight the structure (headings) of this field"
-msgstr ""
+msgstr "Istakni strukturu (zaglavlja) ovog polja"
 
 #. module: html_editor
 #. odoo-javascript
@@ -952,13 +919,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/media_dialog.js:0
 msgid "Icons"
-msgstr ""
+msgstr "Ikone"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
 msgid "Illustrations"
-msgstr ""
+msgstr "Ilustracije"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1003,12 +970,6 @@ msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
-msgid "Insert Drawing"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/others/embedded_components/plugins/video_plugin/video_selector_dialog/video_selector_dialog.xml:0
 msgid "Insert Video"
 msgstr ""
@@ -1017,19 +978,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/others/embedded_components/plugins/video_plugin/video_plugin.js:0
 msgid "Insert a Video"
-msgstr ""
+msgstr "Umetni video"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Insert a danger banner"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
-msgid "Insert a drawing board"
-msgstr ""
+msgstr "Umetni Banner upozorenja"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1041,7 +996,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/core/dom_plugin.js:0
 msgid "Insert a horizontal rule separator"
-msgstr ""
+msgstr "Umetnite vodoravnu crtu za razdvajanje"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1053,78 +1008,78 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/star_plugin.js:0
 msgid "Insert a rating over 3 stars"
-msgstr ""
+msgstr "Umetnite ocjenu veću od 3 zvjezdice"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/star_plugin.js:0
 msgid "Insert a rating over 5 stars"
-msgstr ""
+msgstr "Umetnite ocjenu veću od 5 zvjezdica"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Insert a success banner"
-msgstr ""
+msgstr "Umetni banner s porukom o uspjehu"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/table/table_ui_plugin.js:0
 msgid "Insert a table"
-msgstr ""
+msgstr "Umetni tablicu"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Insert a warning banner"
-msgstr ""
+msgstr "Umetni banner upozorenja"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/table/table_menu.js:0
 msgid "Insert above"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_plugin.js:0
-msgid "Insert an Excalidraw Board"
-msgstr ""
+msgstr "Umetni iznad"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Insert an info banner"
-msgstr ""
+msgstr "Dodaj informativni banner"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/table/table_menu.js:0
 msgid "Insert below"
-msgstr ""
+msgstr "Umetni ispod"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_plugin.js:0
 msgid "Insert image or icon"
-msgstr ""
+msgstr "Umetnite sliku ili ikonu"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/table/table_menu.js:0
 msgid "Insert left"
-msgstr ""
+msgstr "Umetni lijevo"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/table/table_menu.js:0
 msgid "Insert right"
-msgstr ""
+msgstr "Umetni desno"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/signature_plugin.js:0
 msgid "Insert your signature"
+msgstr "Umetnite svoj potpis"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
+msgid "Instagram"
 msgstr ""
 
 #. module: html_editor
@@ -1168,8 +1123,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/html_editor/controllers/main.py:0
 msgid ""
-"Link preview is not available because %s, please check if your url is "
-"correct"
+"Link preview is not available because %s, please check if your url is correct"
 msgstr ""
 
 #. module: html_editor
@@ -1209,7 +1163,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_plugin.js:0
 msgid "Media"
-msgstr ""
+msgstr "Datoteka"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1221,7 +1175,7 @@ msgstr "Medij"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Medium section heading"
-msgstr ""
+msgstr "Srednje zaglavlje sekcije"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1233,25 +1187,25 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/powerbox/powerbox_plugin.js:0
 msgid "More options"
-msgstr ""
+msgstr "Više mogućnosti"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/table/table_menu.js:0
 msgid "Move down"
-msgstr ""
+msgstr "Pomakni dolje"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/table/table_menu.js:0
 msgid "Move left"
-msgstr ""
+msgstr "Pomakni lijevo"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/table/table_menu.js:0
 msgid "Move right"
-msgstr ""
+msgstr "Pomakni desno"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1263,13 +1217,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
 msgid "My Images"
-msgstr ""
+msgstr "Moje slike"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_plugin.js:0
 msgid "Navigation"
-msgstr ""
+msgstr "Navigacija"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1281,7 +1235,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/document_selector.xml:0
 msgid "No documents found."
-msgstr ""
+msgstr "Nema pronađenih dokumenata."
 
 #. module: html_editor
 #. odoo-javascript
@@ -1293,13 +1247,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/image_selector.xml:0
 msgid "No images found."
-msgstr ""
+msgstr "Nema pronađenih slika."
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/icon_selector.xml:0
 msgid "No pictograms found."
-msgstr ""
+msgstr "Nema pronađenih piktograma."
 
 #. module: html_editor
 #. odoo-javascript
@@ -1311,7 +1265,7 @@ msgstr "Normalan"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/list/list_plugin.js:0
 msgid "Numbered list"
-msgstr ""
+msgstr "Popis po brojevima"
 
 #. module: html_editor
 #. odoo-python
@@ -1331,12 +1285,6 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.xml:0
 msgid "Open in a new tab"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/core/excalidraw/readonly_excalidraw.xml:0
-msgid "Open in new Window"
 msgstr ""
 
 #. module: html_editor
@@ -1365,8 +1313,14 @@ msgstr ""
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
-msgid "Paragraph block"
+msgid "Paragraph"
 msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/font/font_plugin.js:0
+msgid "Paragraph block"
+msgstr "Blok paragrafa"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1439,7 +1393,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/core/format_plugin.js:0
 msgid "Remove Format"
-msgstr ""
+msgstr "Ukloni format"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1482,7 +1436,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/table/table_menu.js:0
 msgid "Reset Size"
-msgstr ""
+msgstr "Poništi veličinu"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1536,19 +1490,19 @@ msgstr "Spremi"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/document_selector.js:0
 msgid "Search a document"
-msgstr ""
+msgstr "Pretraži dokument"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/icon_selector.xml:0
 msgid "Search a pictogram"
-msgstr ""
+msgstr "Pronađite piktogram"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/image_selector.js:0
 msgid "Search an image"
-msgstr ""
+msgstr "Pronađite sliku"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1560,7 +1514,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/media_dialog.js:0
 msgid "Select a media"
-msgstr ""
+msgstr "Odaberi datoteku"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1572,7 +1526,7 @@ msgstr "Pošalji poruku"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/core/dom_plugin.js:0
 msgid "Separator"
-msgstr "Separator"
+msgstr "Razdjelnik"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1608,7 +1562,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
 msgid "Show optimized images"
-msgstr ""
+msgstr "Prikaži optimizirane slike"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1632,25 +1586,12 @@ msgstr "Malo"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Small section heading"
-msgstr ""
+msgstr "Malo zaglavlje sekcije"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/color_selector.xml:0
 msgid "Solid"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/core/excalidraw/readonly_excalidraw.xml:0
-msgid "Something went wrong!"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
-msgid ""
-"Sorry, we could not find your drawing, please verify that the URL is valid."
 msgstr ""
 
 #. module: html_editor
@@ -1687,37 +1628,31 @@ msgstr "Prijedlozi"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/text_direction_plugin.js:0
 msgid "Switch direction"
-msgstr ""
+msgstr "Promjena smjera"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/text_direction_plugin.js:0
 msgid "Switch the text's direction"
-msgstr ""
+msgstr "Promijeni smjer teksta"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/table/table_ui_plugin.js:0
 msgid "Table"
-msgstr "Table"
+msgstr "Tablica"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/others/embedded_components/plugins/table_of_content_plugin/table_of_content_plugin.js:0
 msgid "Table Of Content"
-msgstr ""
+msgstr "Sadržaj"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Text"
 msgstr "Tekst"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/core/excalidraw/readonly_excalidraw.xml:0
-msgid "The Excalidraw URL is not valid."
-msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -1791,7 +1726,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/core/format_plugin.js:0
 msgid "Toggle bold"
-msgstr ""
+msgstr "Uključi podebljano"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1803,19 +1738,19 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/core/format_plugin.js:0
 msgid "Toggle italic"
-msgstr ""
+msgstr "Uključi kurziv"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/core/format_plugin.js:0
 msgid "Toggle strikethrough"
-msgstr ""
+msgstr "Uključi precrtano"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/core/format_plugin.js:0
 msgid "Toggle underline"
-msgstr ""
+msgstr "Uključi podcrtavanje"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1827,7 +1762,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/list/list_plugin.js:0
 msgid "Track tasks with a checklist"
-msgstr ""
+msgstr "Prati zadatke uz pomoć popisa stavki za označavanje"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1839,7 +1774,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/language_selector.xml:0
 msgid "Translate"
-msgstr "Prevoditi"
+msgstr "Prevedi"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1858,7 +1793,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/icon_selector.xml:0
 msgid "Try searching with other keywords."
-msgstr ""
+msgstr "Pokušajte pretraživati s drugom ključnom riječi."
 
 #. module: html_editor
 #. odoo-javascript
@@ -1870,7 +1805,7 @@ msgstr "Vrsta"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/powerbox/powerbox_plugin.js:0
 msgid "Type \"/\" for commands"
-msgstr ""
+msgstr "Unesite \"/\" za naredbe"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1892,15 +1827,22 @@ msgstr "URL"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/document_selector.js:0
-msgid "Upload a document"
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "Upload File"
 msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/media_dialog/document_selector.js:0
+msgid "Upload a document"
+msgstr "Učitaj dokument"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/file_plugin.js:0
 #: code:addons/html_editor/static/src/others/embedded_components/plugins/file_plugin/file_plugin.js:0
 msgid "Upload a file"
-msgstr ""
+msgstr "Umetnite datoteku"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1930,7 +1872,7 @@ msgstr "Video Link"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
 msgid "Video code"
-msgstr ""
+msgstr "Kod videa"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1969,6 +1911,8 @@ msgid ""
 "Wow, it feels a bit empty in here. Upload from the button in the top right "
 "corner!"
 msgstr ""
+"Vau, ovdje izgleda malo prazno. Dodaj datoteke klikom na gumb u gornjem "
+"desnom kutu."
 
 #. module: html_editor
 #. odoo-javascript
@@ -1983,6 +1927,8 @@ msgid ""
 "You can upload documents with the button located in the top left of the "
 "screen."
 msgstr ""
+"Dokumente možete prenijeti pomoću gumba koji se nalazi u gornjem lijevom "
+"kutu zaslona."
 
 #. module: html_editor
 #. odoo-python
@@ -2007,15 +1953,9 @@ msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
-msgid "Youku"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/others/embedded_components/core/video/video.xml:0
 msgid "Your browser does not support iframe."
-msgstr ""
+msgstr "Vaš preglednik ne podržava iframe."
 
 #. module: html_editor
 #. odoo-javascript
@@ -2043,12 +1983,6 @@ msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
-msgid "all"
-msgstr "sve"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.xml:0
 msgid "alternatives..."
 msgstr ""
@@ -2061,48 +1995,30 @@ msgstr "i"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
-msgid "database"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
 msgid "deg"
 msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
-msgid "e.g. https://link.excalidraw.com/..."
+#: code:addons/html_editor/static/src/main/media/file_plugin.js:0
+msgid "document"
+msgstr "dokument"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/file_plugin.js:0
+msgid "file"
 msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
-msgid "media-library"
-msgstr ""
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "or"
+msgstr "ili"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
 msgid "videos"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
-msgid "{{state.urlDescription}}"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
-msgid "{{state.urlTitle}}"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
-msgid "{{state.url}}"
-msgstr ""
+msgstr "videe"

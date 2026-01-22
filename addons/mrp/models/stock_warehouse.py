@@ -22,10 +22,10 @@ class StockWarehouse(models.Model):
         'stock.rule', 'Stock After Manufacturing Rule', copy=False)
     manu_type_id = fields.Many2one(
         'stock.picking.type', 'Manufacturing Operation Type',
-        domain="[('code', '=', 'mrp_operation'), ('company_id', '=', company_id)]", check_company=True)
+        domain="[('code', '=', 'mrp_operation'), ('company_id', '=', company_id)]", check_company=True, copy=False)
 
-    pbm_type_id = fields.Many2one('stock.picking.type', 'Picking Before Manufacturing Operation Type', check_company=True)
-    sam_type_id = fields.Many2one('stock.picking.type', 'Stock After Manufacturing Operation Type', check_company=True)
+    pbm_type_id = fields.Many2one('stock.picking.type', 'Picking Before Manufacturing Operation Type', check_company=True, copy=False)
+    sam_type_id = fields.Many2one('stock.picking.type', 'Stock After Manufacturing Operation Type', check_company=True, copy=False)
 
     manufacture_steps = fields.Selection([
         ('mrp_one_step', 'Manufacture (1 step)'),
@@ -285,10 +285,14 @@ class Orderpoint(models.Model):
     @api.constrains('product_id')
     def check_product_is_not_kit(self):
         domain = [
-            '|', ('product_id', 'in', self.product_id.ids),
-                 '&', ('product_id', '=', False),
-                      ('product_tmpl_id', 'in', self.product_id.product_tmpl_id.ids),
-            ('type', '=', 'phantom'),
+            '&',
+                '|', ('product_id', 'in', self.product_id.ids),
+                    '&', ('product_id', '=', False),
+                        ('product_tmpl_id', 'in', self.product_id.product_tmpl_id.ids),
+                ('type', '=', 'phantom'),
+                '|',
+                    ('company_id', 'in', self.company_id.ids),
+                    ('company_id', '=', False),
         ]
         if self.env['mrp.bom'].search_count(domain, limit=1):
             raise ValidationError(_("A product with a kit-type bill of materials can not have a reordering rule."))

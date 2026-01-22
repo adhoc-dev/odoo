@@ -113,14 +113,24 @@ class MrpBatchProduct(models.TransientModel):
             productions_to_set.add(production.id)
 
         productions = self.env['mrp.production'].browse(productions_to_set)
-        for production in reversed(productions):
-            production.qty_producing = production.product_uom_qty
-            production.set_qty_producing()
-            production.move_raw_ids.picked = True
+        if not productions.product_id.tracking == 'serial':
+            for production in reversed(productions):
+                production.qty_producing = production.product_uom_qty
+                production.set_qty_producing()
 
         if mark_done:
             return productions.with_context(from_wizard=True).button_mark_done()
-        return
+
+        print_actions = productions._autoprint_mass_generated_lots()
+        if print_actions:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'do_multi_print',
+                'context': {},
+                'params': {
+                    'reports': print_actions,
+                }
+            }
 
     def _process_components(self, production, components_line):
         lot_names = []
@@ -159,7 +169,6 @@ class MrpBatchProduct(models.TransientModel):
             })
             lots[(lot_name, move.product_id)] = lot
         ml_vals['lot_id'] = lots[(lot_name, move.product_id)].id
-        ml_vals['picked'] = True
         return ml_vals
 
     def _get_lot_and_qty(self, move, text):

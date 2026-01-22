@@ -2,16 +2,17 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from collections import defaultdict
+from contextlib import contextmanager
 from datetime import datetime
+from freezegun import freeze_time
 from unittest.mock import patch
 
 from odoo.addons.google_calendar.utils.google_calendar import GoogleCalendarService
 from odoo.addons.google_account.models.google_service import GoogleService
 from odoo.addons.google_calendar.models.res_users import User
 from odoo.addons.google_calendar.models.google_sync import google_calendar_token, GoogleSync
-from odoo.tests.common import HttpCase, new_test_user
-from freezegun import freeze_time
-from contextlib import contextmanager
+from odoo.addons.mail.tests.common import mail_new_test_user
+from odoo.tests.common import HttpCase
 
 
 def patch_api(func):
@@ -27,8 +28,8 @@ class TestSyncGoogle(HttpCase):
         super().setUp()
         self.google_service = GoogleCalendarService(self.env['google.service'])
         self.env.user.sudo().unpause_google_synchronization()
-        self.organizer_user = new_test_user(self.env, login="organizer_user")
-        self.attendee_user = new_test_user(self.env, login='attendee_user')
+        self.organizer_user = mail_new_test_user(self.env, login="organizer_user")
+        self.attendee_user = mail_new_test_user(self.env, login='attendee_user')
 
     @contextmanager
     def mock_datetime_and_now(self, mock_dt):
@@ -90,6 +91,16 @@ class TestSyncGoogle(HttpCase):
 
     def assertGoogleEventInserted(self, values, timeout=None):
         self.assertEqual(len(self._gsync_insert_values), 1)
+        matching = []
+        for insert_values, insert_kwargs in self._gsync_insert_values:
+            if all(insert_values.get(key, False) == value for key, value in values.items()):
+                matching.append((insert_values, insert_kwargs))
+        self.assertGreaterEqual(len(matching), 1, 'There must be at least 1 matching insert.')
+        insert_values, insert_kwargs = matching[0]
+        self.assertDictEqual(insert_kwargs, {'timeout': timeout} if timeout else {})
+
+    def assertGoogleEventInsertedMultiTime(self, values, timeout=None):
+        self.assertGreaterEqual(len(self._gsync_insert_values), 1)
         matching = []
         for insert_values, insert_kwargs in self._gsync_insert_values:
             if all(insert_values.get(key, False) == value for key, value in values.items()):

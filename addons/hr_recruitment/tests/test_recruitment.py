@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from odoo.fields import Date
 from odoo.tests import tagged, TransactionCase
 
 @tagged('recruitment')
@@ -147,3 +148,108 @@ class TestRecruitment(TransactionCase):
             self.env['hr.applicant'].search([('email_from', 'ilike', 'mitchell_admin@example.com')]),
             no_dup
         )
+
+    def test_other_applications_count(self):
+        """ Test that the other_applications_count field does not change
+            when archiving or refusing an application.
+        """
+        candidate = self.env['hr.candidate'].create({'partner_name': 'Test'})
+        application1 = self.env['hr.applicant'].create({'candidate_id': candidate.id})
+        application2 = self.env['hr.applicant'].create({'candidate_id': candidate.id})
+        application3 = self.env['hr.applicant'].create({'candidate_id': candidate.id})
+        self.assertEqual(application1.other_applications_count, 2)
+        application2.action_archive()
+        self.env.invalidate_all()
+        self.assertEqual(application1.other_applications_count, 2, 'The other_applications_count should not change when archiving an application')
+        # refuse application3
+        refuse_reason = self.env['hr.applicant.refuse.reason'].create([{'name': 'Fired'}])
+        applicant_get_refuse_reason = self.env['applicant.get.refuse.reason'].create([{
+            'refuse_reason_id': refuse_reason.id,
+            'applicant_ids': [application3.id],
+        }])
+        applicant_get_refuse_reason.action_refuse_reason_apply()
+        self.env.invalidate_all()
+        self.assertEqual(application1.other_applications_count, 2, 'The other_applications_count should not change when refusing an application')
+
+    def test_open_other_applications_count(self):
+        """
+            The smart button labeled 'Other Applications N' (where N represents the number of
+            other job applications for the same candidate) should, when clicked, open a list view
+            displaying all related applications.
+
+            This list should include both the N other applications and the current one,
+            resulting in a total of N + 1 records.
+        """
+
+        candidate = self.env['hr.candidate'].create({'partner_name': 'Test'})
+        application1 = self.env['hr.applicant'].create({'candidate_id': candidate.id})
+        application2 = self.env['hr.applicant'].create({'candidate_id': candidate.id})
+        application3 = self.env['hr.applicant'].create({'candidate_id': candidate.id})
+        res = application1.action_open_other_applications()
+        self.assertEqual(len(res['domain'][0][2]), 3, "The list view should display 3 applications")
+
+    def test_candidate_application_count(self):
+        """
+            The computed field 'application_count' on the hr.candidate model should return the
+            number of all active and inactive applications linked to the candidate.
+        """
+        candidate = self.env['hr.candidate'].create({'partner_name': 'Test'})
+        application1, application2 = self.env['hr.applicant'].create([
+            {'candidate_id': candidate.id},
+            {'candidate_id': candidate.id}
+        ])
+        self.assertEqual(candidate.application_count, 2, "The application_count should return 2 applications")
+        application2.action_archive()
+        self.env.invalidate_all()
+        self.assertEqual(candidate.application_count, 2, 'The applications_count should not change after archiving an application')
+
+    def test_candidate_related_partner_name(self):
+        """
+            Verify that the candidate's related partner's name is correctly set when
+            the email_from is not normalized e.g. it contains uppercase characters.
+        """
+        candidate = self.env['hr.candidate'].create({
+            'partner_name': 'Test Name',
+            'email_from': 'Test@test.com'
+        })
+        self.assertEqual(candidate.partner_id.name, 'Test Name')
+
+    def test_job_overdue_activities(self):
+        job = self.env["hr.job"].create({
+            "name": "Test Job",
+        })
+        stage = self.env['hr.recruitment.stage'].create({
+            'name': 'New',
+            'sequence': 0,
+            'hired_stage': False,
+        })
+        candidate = self.env['hr.candidate'].create({
+            'partner_name': 'Test Candidate',
+            'company_id': self.env.user.company_id.id
+        })
+        applicant = self.env["hr.applicant"].create({
+            'candidate_id': candidate.id,
+            "job_id": job.id,
+            "stage_id": stage.id,
+        })
+        self.assertEqual(job.activities_today, 0)
+        persistent_activity_type = self.env["mail.activity.type"].create({
+            "name": "Persistent Activity",
+            "keep_done": True,
+        })
+        activity = self.env["mail.activity"].create({
+            "activity_type_id": persistent_activity_type.id,
+            "date_deadline": Date.today(),
+            "res_id": applicant.id,
+            "res_model_id": self.env["ir.model"]._get_id("hr.applicant"),
+            "user_id": self.env.user.id,
+        })
+        job._compute_activities()
+        self.assertEqual(job.activities_today, 1)
+
+        activity.action_feedback()
+        self.assertFalse(activity.active)
+        self.env.cr.flush()
+
+        job._compute_activities()
+        self.assertEqual(job.activities_today, 0)

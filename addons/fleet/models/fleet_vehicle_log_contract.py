@@ -140,7 +140,7 @@ class FleetVehicleLogContract(models.Model):
         delay_alert_contract = int(params.get_param('hr_fleet.delay_alert_contract', default=30))
         date_today = fields.Date.from_string(fields.Date.today())
         outdated_days = fields.Date.to_string(date_today + relativedelta(days=+delay_alert_contract))
-        reminder_activity_type = self.env.ref('fleet.mail_act_fleet_contract_to_renew', raise_if_not_found=False) or self.env['mail.activity.type']
+        reminder_activity_type = self.env.ref('fleet.mail_act_fleet_contract_to_renew')
         nearly_expired_contracts = self.search([
             ('state', '=', 'open'),
             ('expiration_date', '<', outdated_days),
@@ -156,13 +156,13 @@ class FleetVehicleLogContract(models.Model):
                 user_id=contract.user_id.id)
 
         expired_contracts = self.search([('state', 'not in', ['expired', 'closed']), ('expiration_date', '<',fields.Date.today() )])
-        expired_contracts.write({'state': 'expired'})
+        expired_contracts.action_expire()
 
         futur_contracts = self.search([('state', 'not in', ['futur', 'closed']), ('start_date', '>', fields.Date.today())])
-        futur_contracts.write({'state': 'futur'})
+        futur_contracts.action_draft()
 
         now_running_contracts = self.search([('state', '=', 'futur'), ('start_date', '<=', fields.Date.today())])
-        now_running_contracts.write({'state': 'open'})
+        now_running_contracts.action_open()
 
     def run_scheduler(self):
         self.scheduler_manage_contract_expiration()

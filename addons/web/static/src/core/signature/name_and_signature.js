@@ -89,7 +89,7 @@ export class NameAndSignature extends Component {
                     }
                     if (this.props.signature.signatureImage) {
                         this.clear();
-                        this.signaturePad.fromDataURL(this.props.signature.signatureImage);
+                        this.fromDataURL(this.props.signature.signatureImage);
                     }
                 }
             },
@@ -124,6 +124,15 @@ export class NameAndSignature extends Component {
     }
 
     /**
+    * Loads a signature image from a base64 dataURL and updates the empty state.
+    */
+    async fromDataURL() {
+        await this.signaturePad.fromDataURL(...arguments);
+        this.props.signature.isSignatureEmpty = this.isSignatureEmpty;
+        this.props.onSignatureChange(this.state.signMode);
+    }
+
+    /**
      * Returns the given name after cleaning it by removing characters that
      * are not supposed to be used in a signature. If @see signatureType is set
      * to 'initial', returns the first letter of each word, separated by dots.
@@ -131,7 +140,8 @@ export class NameAndSignature extends Component {
      * @returns {string} cleaned name
      */
     getCleanedName() {
-        const text = this.props.signature.name;
+        // This replaces non-breaking spaces with breaking spaces
+        const text = this.props.signature.name.replace(/ /g, " ");
         if (this.props.signatureType === "initial" && text) {
             return (
                 text

@@ -1,8 +1,18 @@
 import { Plugin } from "@html_editor/plugin";
-import { closestBlock } from "@html_editor/utils/blocks";
+import { closestBlock, isBlock } from "@html_editor/utils/blocks";
 import { splitTextNode } from "@html_editor/utils/dom";
-import { isEditorTab, isTextNode, isZWS } from "@html_editor/utils/dom_info";
-import { descendants, getAdjacentPreviousSiblings } from "@html_editor/utils/dom_traversal";
+import {
+    isEditorTab,
+    isParagraphRelatedElement,
+    isTextNode,
+    isZWS,
+} from "@html_editor/utils/dom_info";
+import {
+    descendants,
+    getAdjacentPreviousSiblings,
+    closestElement,
+    firstLeaf,
+} from "@html_editor/utils/dom_traversal";
 import { parseHTML } from "@html_editor/utils/html";
 import { DIRECTIONS, childNodeIndex } from "@html_editor/utils/position";
 
@@ -65,8 +75,8 @@ export class TabulationPlugin extends Plugin {
         if (selection.isCollapsed) {
             this.insertTab();
         } else {
-            const traversedBlocks = this.dependencies.selection.getTraversedBlocks();
-            this.indentBlocks(traversedBlocks);
+            const targetedBlocks = this.dependencies.selection.getTargetedBlocks();
+            this.indentBlocks(targetedBlocks);
         }
         this.dependencies.history.addStep();
     }
@@ -75,13 +85,23 @@ export class TabulationPlugin extends Plugin {
         if (this.delegateTo("shift_tab_overrides")) {
             return;
         }
-        const traversedBlocks = this.dependencies.selection.getTraversedBlocks();
-        this.outdentBlocks(traversedBlocks);
+        const targetedBlocks = this.dependencies.selection.getTargetedBlocks();
+        this.outdentBlocks(targetedBlocks);
         this.dependencies.history.addStep();
     }
 
     insertTab() {
-        this.dependencies.dom.insert(parseHTML(this.document, tabHtml));
+        const selection = this.dependencies.selection.getEditableSelection();
+        const element = closestElement(selection.anchorNode);
+        const isSelectionAtStart =
+            firstLeaf(element) === selection.anchorNode &&
+            (selection.anchorOffset === 0 || element.textContent === "\u200B");
+        const tab = parseHTML(this.document, tabHtml);
+        if (isSelectionAtStart && !isBlock(element)) {
+            element.before(tab);
+        } else {
+            this.dependencies.dom.insert(tab);
+        }
     }
 
     /**
@@ -90,7 +110,12 @@ export class TabulationPlugin extends Plugin {
     indentBlocks(blocks) {
         const selectionToRestore = this.dependencies.selection.getEditableSelection();
         const tab = parseHTML(this.document, tabHtml);
-        for (const block of blocks) {
+        const indentableBlocks = [...blocks].filter(
+            (block) =>
+                block.isContentEditable &&
+                (isParagraphRelatedElement(block) || block.tagName === "BLOCKQUOTE")
+        );
+        for (const block of indentableBlocks) {
             block.prepend(tab.cloneNode(true));
         }
         this.dependencies.selection.setSelection(selectionToRestore, { normalize: false });

@@ -4,6 +4,7 @@ import { browser } from "@web/core/browser/browser";
 
 patch(PosStore.prototype, {
     async setup() {
+        this.employeeBuffer = [];
         await super.setup(...arguments);
         if (this.config.module_pos_hr) {
             this.login = Boolean(odoo.from_backend) && !this.config.module_pos_hr;
@@ -11,7 +12,6 @@ patch(PosStore.prototype, {
                 this.showScreen("LoginScreen");
             }
         }
-        this.employeeBuffer = [];
         browser.addEventListener("online", () => {
             this.employeeBuffer.forEach((employee) =>
                 this.data.write("pos.session", [this.config.current_session_id.id], {
@@ -23,7 +23,7 @@ patch(PosStore.prototype, {
     },
     get employeeIsAdmin() {
         const cashier = this.get_cashier();
-        return cashier._role === "manager" || cashier.user_id?.id === this.user.id;
+        return cashier._role === "manager";
     },
     checkPreviousLoggedCashier() {
         if (this.config.module_pos_hr) {
@@ -35,11 +35,6 @@ patch(PosStore.prototype, {
             }
         } else {
             super.checkPreviousLoggedCashier(...arguments);
-        }
-    },
-    async actionAfterIdle() {
-        if (this.mainScreen.component?.name !== "LoginScreen") {
-            return super.actionAfterIdle();
         }
     },
     async afterProcessServerData() {
@@ -144,7 +139,7 @@ patch(PosStore.prototype, {
     },
     async allowProductCreation() {
         if (this.config.module_pos_hr) {
-            return this.employeeIsAdmin;
+            return this.employeeIsAdmin && (await super.allowProductCreation());
         }
         return await super.allowProductCreation();
     },

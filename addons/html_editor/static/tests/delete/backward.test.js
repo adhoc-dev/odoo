@@ -1,10 +1,12 @@
-import { describe, expect, test } from "@odoo/hoot";
+import { beforeEach, describe, expect, test } from "@odoo/hoot";
+import { manuallyDispatchProgrammaticEvent, microTick, press } from "@odoo/hoot-dom";
+import { animationFrame, tick } from "@odoo/hoot-mock";
+import { patchWithCleanup } from "@web/../tests/web_test_helpers";
+import { browser } from "@web/core/browser/browser";
 import { setupEditor, testEditor } from "../_helpers/editor";
 import { unformat } from "../_helpers/format";
-import { microTick, press } from "@odoo/hoot-dom";
-import { animationFrame, tick } from "@odoo/hoot-mock";
-import { deleteBackward, insertText, tripleClick, undo } from "../_helpers/user_actions";
-import { getContent } from "../_helpers/selection";
+import { getContent, setSelection } from "../_helpers/selection";
+import { deleteBackward, insertText, splitTripleClick, undo } from "../_helpers/user_actions";
 
 /**
  * content of the "deleteBackward" sub suite in editor.test.js
@@ -12,7 +14,7 @@ import { getContent } from "../_helpers/selection";
 
 describe("Selection collapsed", () => {
     describe("Basic", () => {
-        test("should do nothing", async () => {
+        test("should do nothing (1)", async () => {
             // TODO the addition of <br/> "correction" part was judged
             // unnecessary to enforce, the rest of the test still makes
             // sense: not removing the unique <p/> and keeping the
@@ -22,6 +24,13 @@ describe("Selection collapsed", () => {
                 stepFunction: deleteBackward,
                 contentAfter: "<p>[]</p>",
             });
+        });
+
+        test("should do nothing (2)", async () => {
+            // TODO the addition of <br/> "correction" part was judged
+            // unnecessary to enforce, the rest of the test still makes
+            // sense: not removing the unique <p/> and keeping the
+            // cursor at the right place.
             // TODO this cannot actually be tested currently as a
             // backspace/delete in that case is not even detected
             // (no input event to rollback)
@@ -56,12 +65,15 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test("should delete the last character in a paragraph", async () => {
+        test("should delete the last character in a paragraph (1)", async () => {
             await testEditor({
                 contentBefore: "<p>abc[]</p>",
                 stepFunction: deleteBackward,
                 contentAfter: "<p>ab[]</p>",
             });
+        });
+
+        test("should delete the last character in a paragraph (2)", async () => {
             await testEditor({
                 contentBefore: "<p>ab c[]</p>",
                 stepFunction: deleteBackward,
@@ -95,7 +107,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test("should keep inline block", async () => {
+        test("should keep inline block (1)", async () => {
             await testEditor({
                 contentBefore: "<div><p>ab</p><br><i>c[]</i></div>",
                 stepFunction: deleteBackward,
@@ -103,6 +115,9 @@ describe("Selection collapsed", () => {
                     '<div><p>ab</p><br><i data-oe-zws-empty-inline="">[]\u200B</i></div>',
                 contentAfter: "<div><p>ab</p><br><br>[]</div>",
             });
+        });
+
+        test("should keep inline block (2)", async () => {
             await testEditor({
                 contentBefore: '<div><p>uv</p><br><span class="style">w[]</span></div>',
                 stepFunction: deleteBackward,
@@ -110,6 +125,9 @@ describe("Selection collapsed", () => {
                     '<div><p>uv</p><br><span class="style" data-oe-zws-empty-inline="">[]\u200B</span></div>',
                 contentAfter: '<div><p>uv</p><br><span class="style">[]\u200B</span></div>',
             });
+        });
+
+        test("should keep inline block (3)", async () => {
             await testEditor({
                 contentBefore: '<div><p>cd</p><br><span class="a">e[]</span></div>',
                 stepFunction: async (editor) => {
@@ -120,29 +138,30 @@ describe("Selection collapsed", () => {
                 contentAfter: '<div><p>cd</p><br><span class="a">x[]</span></div>',
             });
         });
+
         test("should keep inline block and then undo (1)", async () => {
             await testEditor({
-                contentBefore: "<div>ab<b>c[]</b>de</div>",
+                contentBefore: "<p>ab<b>c[]</b>de</p>",
                 stepFunction: async (editor) => {
                     deleteBackward(editor);
                     await insertText(editor, "x");
                     undo(editor);
                 },
-                contentAfterEdit: '<div>ab<b data-oe-zws-empty-inline="">[]\u200B</b>de</div>',
-                contentAfter: "<div>ab[]de</div>",
+                contentAfterEdit: '<p>ab<b data-oe-zws-empty-inline="">[]\u200B</b>de</p>',
+                contentAfter: "<p>ab[]de</p>",
             });
         });
         test("should keep inline block and then undo (2)", async () => {
             await testEditor({
-                contentBefore: "<div>ab<b>c[]</b>de</div>",
+                contentBefore: "<p>ab<b>c[]</b>de</p>",
                 stepFunction: async (editor) => {
                     deleteBackward(editor);
                     await insertText(editor, "x");
                     undo(editor);
                     undo(editor);
                 },
-                contentAfterEdit: "<div>ab<b>c[]</b>de</div>",
-                contentAfter: "<div>ab<b>c[]</b>de</div>",
+                contentAfterEdit: "<p>ab<b>c[]</b>de</p>",
+                contentAfter: "<p>ab<b>c[]</b>de</p>",
             });
         });
 
@@ -158,7 +177,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test("ZWS: should delete element content but keep cursor in", async () => {
+        test("ZWS: should delete element content but keep cursor in (1)", async () => {
             await testEditor({
                 contentBefore: '<p>uv<i style="color:red">w[]</i>xy</p>',
                 stepFunction: async (editor) => {
@@ -168,6 +187,9 @@ describe("Selection collapsed", () => {
                     '<p>uv<i style="color:red" data-oe-zws-empty-inline="">[]\u200B</i>xy</p>',
                 contentAfter: "<p>uv[]xy</p>",
             });
+        });
+
+        test("ZWS: should delete element content but keep cursor in (2)", async () => {
             await testEditor({
                 contentBefore: '<p>uv<i style="color:red">w[]</i>xy</p>',
                 stepFunction: async (editor) => {
@@ -177,6 +199,9 @@ describe("Selection collapsed", () => {
                 contentAfterEdit: '<p>uv<i style="color:red">i[]</i>xy</p>',
                 contentAfter: '<p>uv<i style="color:red">i[]</i>xy</p>',
             });
+        });
+
+        test("ZWS: should delete element content but keep cursor in (3)", async () => {
             await testEditor({
                 contentBefore: '<p>ab<span class="style">cd[]</span>ef</p>',
                 stepFunction: async (editor) => {
@@ -187,6 +212,9 @@ describe("Selection collapsed", () => {
                     '<p>ab<span class="style" data-oe-zws-empty-inline="">[]\u200B</span>ef</p>',
                 contentAfter: '<p>ab<span class="style">[]\u200B</span>ef</p>',
             });
+        });
+
+        test("ZWS: should delete element content but keep cursor in (4)", async () => {
             await testEditor({
                 contentBefore: '<p>ab<span class="style">cd[]</span>ef</p>',
                 stepFunction: async (editor) => {
@@ -209,6 +237,9 @@ describe("Selection collapsed", () => {
                 },
                 contentAfter: "<p><b>ax[]</b></p>",
             });
+        });
+
+        test("should ignore ZWS and merge (2)", async () => {
             await testEditor({
                 contentBefore:
                     '<p><span class="a">cd</span><span class="removeme" data-oe-zws-empty-inline="">[]\u200B</span></p>',
@@ -218,6 +249,9 @@ describe("Selection collapsed", () => {
                 },
                 contentAfter: '<p><span class="a">cx[]</span></p>',
             });
+        });
+
+        test("should ignore ZWS and merge (3)", async () => {
             await testEditor({
                 contentBefore:
                     '<p><b>ef</b><br><span class="removeme" data-oe-zws-empty-inline="">[]\u200B</span></p>',
@@ -229,12 +263,15 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test("should ignore ZWS and merge (2)", async () => {
+        test("should ignore ZWS and merge (4)", async () => {
             await testEditor({
                 contentBefore: '<div><p>ab</p><span class="a">[]\u200B</span></div>',
                 stepFunction: deleteBackward,
                 contentAfter: "<div><p>ab[]</p></div>",
             });
+        });
+
+        test("should ignore ZWS and merge (5)", async () => {
             await testEditor({
                 contentBefore: '<div><p>cd</p><br><span class="a">[]\u200B</span></div>',
                 stepFunction: async (editor) => {
@@ -245,7 +282,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test("should not remove empty Bootstrap column", async () => {
+        test("should not remove empty Bootstrap column (1)", async () => {
             await testEditor({
                 contentBefore: '<div><div><p>ABC</p></div><div class="col">X[]</div></div>',
                 stepFunction: async (editor) => {
@@ -255,6 +292,9 @@ describe("Selection collapsed", () => {
                 },
                 contentAfter: '<div><div><p>ABC</p></div><div class="col">[]<br></div></div>',
             });
+        });
+
+        test("should not remove empty Bootstrap column (2)", async () => {
             await testEditor({
                 contentBefore: '<div><div><p>ABC</p></div><div class="col-12">X[]</div></div>',
                 stepFunction: async (editor) => {
@@ -264,6 +304,9 @@ describe("Selection collapsed", () => {
                 },
                 contentAfter: '<div><div><p>ABC</p></div><div class="col-12">[]<br></div></div>',
             });
+        });
+
+        test("should not remove empty Bootstrap column (3)", async () => {
             await testEditor({
                 contentBefore: '<div><div><p>ABC</p></div><div class="col-lg-3">X[]</div></div>',
                 stepFunction: async (editor) => {
@@ -275,12 +318,15 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test("should merge the following inline text node", async () => {
+        test("should merge the following inline text node (1)", async () => {
             await testEditor({
                 contentBefore: "<div><p>abc</p>[]def</div>",
                 stepFunction: deleteBackward,
                 contentAfter: "<div><p>abc[]def</p></div>",
             });
+        });
+
+        test("should merge the following inline text node (2)", async () => {
             await testEditor({
                 contentBefore: "<div><p>abc</p>[]def<p>ghi</p></div>",
                 stepFunction: deleteBackward,
@@ -288,12 +334,15 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test("should merge paragraphs", async () => {
+        test("should merge paragraphs (1)", async () => {
             await testEditor({
                 contentBefore: '<p>abc</p><p style="margin-bottom: 0px;">[]def</p>',
                 stepFunction: deleteBackward,
                 contentAfter: "<p>abc[]def</p>",
             });
+        });
+
+        test("should merge paragraphs (2)", async () => {
             await testEditor({
                 contentBefore: '<p>abc</p><p style="margin-bottom: 0px;">[]def</p><p>ghi</p>',
                 stepFunction: deleteBackward,
@@ -311,11 +360,11 @@ describe("Selection collapsed", () => {
 
         test('should remove contenteditable="false"', async () => {
             await testEditor({
-                contentBefore: `<div><span contenteditable="false">abc</span>[]def</div>`,
+                contentBefore: `<p><span contenteditable="false">abc</span>[]def</p>`,
                 stepFunction: async (editor) => {
                     deleteBackward(editor);
                 },
-                contentAfter: `<div>[]def</div>`,
+                contentAfter: `<p>[]def</p>`,
             });
         });
 
@@ -485,16 +534,34 @@ describe("Selection collapsed", () => {
                 contentAfter: `<div contenteditable="false"><div contenteditable="true"><p>abc[]def</p></div></div>`,
             });
         });
+
+        test("should not remove preceding character with U+0020 whitespace", async () => {
+            await testEditor({
+                contentBefore: `<p>abcd\u0020[]</p>`,
+                stepFunction: deleteBackward,
+                contentAfter: `<p>abcd[]</p>`,
+            });
+        });
+        test("should delete only the button", async () => {
+            await testEditor({
+                contentBefore: `<p>a<a class="btn" href="#">[]</a></p>`,
+                stepFunction: deleteBackward,
+                contentAfter: `<p>a[]</p>`,
+            });
+        });
     });
 
     describe("Line breaks", () => {
         describe("Single", () => {
-            test("should delete a leading line break", async () => {
+            test("should delete a leading line break (1)", async () => {
                 await testEditor({
                     contentBefore: "<p><br>[]abc</p>",
                     stepFunction: deleteBackward,
                     contentAfter: "<p>[]abc</p>",
                 });
+            });
+
+            test("should delete a leading line break (2)", async () => {
                 await testEditor({
                     contentBefore: "<p><br>[] abc</p>",
                     stepFunction: deleteBackward,
@@ -504,17 +571,23 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test("should delete a line break within a paragraph", async () => {
+            test("should delete a line break within a paragraph (1)", async () => {
                 await testEditor({
                     contentBefore: "<p>ab<br>[]cd</p>",
                     stepFunction: deleteBackward,
                     contentAfter: "<p>ab[]cd</p>",
                 });
+            });
+
+            test("should delete a line break within a paragraph (2)", async () => {
                 await testEditor({
                     contentBefore: "<p>ab <br>[]cd</p>",
                     stepFunction: deleteBackward,
                     contentAfter: "<p>ab []cd</p>",
                 });
+            });
+
+            test("should delete a line break within a paragraph (3)", async () => {
                 await testEditor({
                     contentBefore: "<p>ab<br>[] cd</p>",
                     stepFunction: deleteBackward,
@@ -524,17 +597,23 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test("should delete a trailing line break", async () => {
+            test("should delete a trailing line break (1)", async () => {
                 await testEditor({
                     contentBefore: "<p>abc<br><br>[]</p>",
                     stepFunction: deleteBackward,
                     contentAfter: "<p>abc[]</p>",
                 });
+            });
+
+            test("should delete a trailing line break (2)", async () => {
                 await testEditor({
                     contentBefore: "<p>abc<br>[]<br></p>",
                     stepFunction: deleteBackward,
                     contentAfter: "<p>abc[]</p>",
                 });
+            });
+
+            test("should delete a trailing line break (3)", async () => {
                 await testEditor({
                     contentBefore: "<p>abc <br><br>[]</p>",
                     stepFunction: deleteBackward,
@@ -629,7 +708,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test("should delete a line break when several", async () => {
+            test("should delete a line break when several (1)", async () => {
                 // 4-1
                 await testEditor({
                     contentBefore: "<p>ab</p><p><br><br><br>[]<br></p><p>cd</p>",
@@ -637,6 +716,8 @@ describe("Selection collapsed", () => {
                     // A trailing line break is rendered as two <br>.
                     contentAfter: "<p>ab</p><p><br><br>[]<br></p><p>cd</p>",
                 });
+            });
+            test("should delete a line break when several (2)", async () => {
                 // 5-1
                 await testEditor({
                     contentBefore: "<p>ab</p><p><br><br><br><br>[]</p><p>cd</p>",
@@ -646,7 +727,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test("should delete two line breaks", async () => {
+            test("should delete two line breaks (1)", async () => {
                 // 4-2
                 await testEditor({
                     contentBefore: "<p>ab</p><p><br><br><br>[]<br></p><p>cd</p>",
@@ -657,6 +738,8 @@ describe("Selection collapsed", () => {
                     // A trailing line break is rendered as two <br>.
                     contentAfter: "<p>ab</p><p><br>[]<br></p><p>cd</p>",
                 });
+            });
+            test("should delete two line breaks (2)", async () => {
                 // 5-2
                 await testEditor({
                     contentBefore: "<p>ab</p><p><br><br><br><br>[]</p><p>cd</p>",
@@ -669,7 +752,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test("should delete three line breaks (emptying a paragraph)", async () => {
+            test("should delete three line breaks (emptying a paragraph) (1)", async () => {
                 // 4-3
                 await testEditor({
                     contentBefore: "<p>ab</p><p><br><br><br>[]<br></p><p>cd</p>",
@@ -680,6 +763,8 @@ describe("Selection collapsed", () => {
                     },
                     contentAfter: "<p>ab</p><p>[]<br></p><p>cd</p>",
                 });
+            });
+            test("should delete three line breaks (emptying a paragraph) (2)", async () => {
                 // 5-3
                 await testEditor({
                     contentBefore: "<p>ab</p><p><br><br><br><br>[]</p><p>cd</p>",
@@ -693,7 +778,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test("should delete three line breaks, then merge an empty parargaph into a paragraph with text", async () => {
+            test("should delete three line breaks, then merge an empty parargaph into a paragraph with text (1)", async () => {
                 // 4-4
                 await testEditor({
                     contentBefore: "<p>ab</p><p><br><br><br>[]<br></p><p>cd</p>",
@@ -706,6 +791,8 @@ describe("Selection collapsed", () => {
                     // This should be identical to 4-4
                     contentAfter: "<p>ab[]</p><p>cd</p>",
                 });
+            });
+            test("should delete three line breaks, then merge an empty parargaph into a paragraph with text (2)", async () => {
                 // 5-4
                 await testEditor({
                     contentBefore: "<p>ab</p><p><br><br><br><br>[]</p><p>cd</p>",
@@ -863,7 +950,7 @@ describe("Selection collapsed", () => {
     });
 
     describe("Formats", () => {
-        test("should delete a character before a format node", async () => {
+        test("should delete a character before a format node (1)", async () => {
             await testEditor({
                 contentBefore: "<p>abc<b>[]def</b></p>",
                 stepFunction: deleteBackward,
@@ -871,6 +958,9 @@ describe("Selection collapsed", () => {
                 // to represent a position.
                 contentAfter: "<p>ab[]<b>def</b></p>",
             });
+        });
+
+        test("should delete a character before a format node (2)", async () => {
             await testEditor({
                 contentBefore: "<p>abc[]<b>def</b></p>",
                 stepFunction: deleteBackward,
@@ -938,12 +1028,15 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test("should merge an empty paragraph into a heading1 with text", async () => {
+        test("should merge an empty paragraph into a heading1 with text (1)", async () => {
             await testEditor({
                 contentBefore: "<h1>ab</h1><p>[]<br></p>",
                 stepFunction: deleteBackward,
                 contentAfter: "<h1>ab[]</h1>",
             });
+        });
+
+        test("should merge an empty paragraph into a heading1 with text (2)", async () => {
             await testEditor({
                 contentBefore: "<h1>ab</h1><p><br>[]</p>",
                 stepFunction: deleteBackward,
@@ -959,12 +1052,15 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test("should merge a text preceding a paragraph (removing the paragraph)", async () => {
+        test("should merge a text preceding a paragraph (removing the paragraph) (1)", async () => {
             await testEditor({
                 contentBefore: "<div>ab<p>[]cd</p></div>",
                 stepFunction: deleteBackward,
                 contentAfter: "<div>ab[]cd</div>",
             });
+        });
+
+        test("should merge a text preceding a paragraph (removing the paragraph) (2)", async () => {
             await testEditor({
                 contentBefore: "<div>ab<p>[]cd</p>ef</div>",
                 stepFunction: deleteBackward,
@@ -1145,12 +1241,15 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test("should delete a one letter word followed by visible space (start of block)", async () => {
+        test("should delete a one letter word followed by visible space (start of block) (1)", async () => {
             await testEditor({
                 contentBefore: "<p>a[] b</p>",
                 stepFunction: deleteBackward,
                 contentAfter: "<p>[]&nbsp;b</p>",
             });
+        });
+
+        test("should delete a one letter word followed by visible space (start of block) (2)", async () => {
             await testEditor({
                 contentBefore: "<p>[a] b</p>",
                 stepFunction: deleteBackward,
@@ -1158,12 +1257,15 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test("should delete a one letter word surrounded by visible space", async () => {
+        test("should delete a one letter word surrounded by visible space (1)", async () => {
             await testEditor({
                 contentBefore: "<p>ab c[] de</p>",
                 stepFunction: deleteBackward,
                 contentAfter: "<p>ab []&nbsp;de</p>",
             });
+        });
+
+        test("should delete a one letter word surrounded by visible space (2)", async () => {
             await testEditor({
                 contentBefore: "<p>ab [c] de</p>",
                 stepFunction: deleteBackward,
@@ -1171,12 +1273,15 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test("should delete a one letter word preceded by visible space (end of block)", async () => {
+        test("should delete a one letter word preceded by visible space (end of block) (1)", async () => {
             await testEditor({
                 contentBefore: "<p>a b[]</p>",
                 stepFunction: deleteBackward,
                 contentAfter: "<p>a&nbsp;[]</p>",
             });
+        });
+
+        test("should delete a one letter word preceded by visible space (end of block) (2)", async () => {
             await testEditor({
                 contentBefore: "<p>a [b]</p>",
                 stepFunction: deleteBackward,
@@ -1192,12 +1297,15 @@ describe("Selection collapsed", () => {
                 contentAfter: "<table><tbody><tr><td><p>a[]</p></td></tr></tbody></table>",
             }));
 
-        test("should fill empty block with a <br>", async () => {
+        test("should fill empty block with a <br> (1)", async () => {
             await testEditor({
                 contentBefore: "<p>a[]</p>",
                 stepFunction: deleteBackward,
                 contentAfter: "<p>[]<br></p>",
             });
+        });
+
+        test("should fill empty block with a <br> (2)", async () => {
             await testEditor({
                 contentBefore: "<p><img>[]</p>",
                 stepFunction: deleteBackward,
@@ -1205,7 +1313,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test("should merge a paragraph with text into a paragraph with text removing spaces", async () => {
+        test("should merge a paragraph with text into a paragraph with text removing spaces (1)", async () => {
             await testEditor({
                 contentBefore: "<p>ab   </p>    <p>   []cd</p>",
                 stepFunction: deleteBackward,
@@ -1215,6 +1323,9 @@ describe("Selection collapsed", () => {
                 // maybe not a good idea... see next case ->
                 contentAfter: "<p>ab[]cd</p>",
             });
+        });
+
+        test("should merge a paragraph with text into a paragraph with text removing spaces (2)", async () => {
             await testEditor({
                 contentBefore: "<p>ab   <br></p>    <p>   []cd</p>",
                 stepFunction: deleteBackward,
@@ -1226,12 +1337,14 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test("should remove a br and remove following spaces", async () => {
+        test("should remove a br and remove following spaces (1)", async () => {
             await testEditor({
                 contentBefore: "<p>ab<br><b>[]   </b>cd</p>",
                 stepFunction: deleteBackward,
                 contentAfter: "<p>ab[]cd</p>",
             });
+        });
+        test("should remove a br and remove following spaces (2)", async () => {
             await testEditor({
                 contentBefore: "<p>ab<br><b>[]   x</b>cd</p>",
                 stepFunction: deleteBackward,
@@ -1247,13 +1360,15 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test("should merge in nested paragraphs and remove invisible inline content", async () => {
+        test("should merge in nested paragraphs and remove invisible inline content (1)", async () => {
             await testEditor({
                 contentBefore:
                     '<custom-block style="display: block;"><p>ab</p>    </custom-block><p>[]c</p>',
                 stepFunction: deleteBackward,
                 contentAfter: '<custom-block style="display: block;"><p>ab[]c</p></custom-block>',
             });
+        });
+        test("should merge in nested paragraphs and remove invisible inline content (2)", async () => {
             await testEditor({
                 contentBefore:
                     '<custom-block style="display: block;"><p>ab</p> <i> </i> </custom-block><p>[]c</p>',
@@ -1262,7 +1377,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test("should not merge in nested blocks if inline content afterwards", async () => {
+        test("should not merge in nested blocks if inline content afterwards (1)", async () => {
             await testEditor({
                 contentBefore:
                     '<custom-block style="display: block;"><p>ab</p>de</custom-block><p>[]fg</p>',
@@ -1270,6 +1385,8 @@ describe("Selection collapsed", () => {
                 contentAfter:
                     '<custom-block style="display: block;"><p>ab</p>de[]fg</custom-block>',
             });
+        });
+        test("should not merge in nested blocks if inline content afterwards (2)", async () => {
             await testEditor({
                 contentBefore:
                     '<custom-block style="display: block;"><p>ab</p><img></custom-block><p>[]fg</p>',
@@ -1359,7 +1476,7 @@ describe("Selection collapsed", () => {
 });
 
 describe("Selection not collapsed", () => {
-    test("ZWS : should keep inline block", async () => {
+    test("ZWS : should keep inline block (1)", async () => {
         await testEditor({
             contentBefore: '<div><p>ab <span class="style">[c]</span> d</p></div>',
             stepFunction: async (editor) => {
@@ -1369,6 +1486,9 @@ describe("Selection not collapsed", () => {
                 '<div><p>ab <span class="style" data-oe-zws-empty-inline="">[]\u200B</span> d</p></div>',
             contentAfter: '<div><p>ab <span class="style">[]\u200B</span> d</p></div>',
         });
+    });
+
+    test("ZWS : should keep inline block (2)", async () => {
         await testEditor({
             contentBefore: '<div><p>ab <span class="style">[c]</span> d</p></div>',
             stepFunction: async (editor) => {
@@ -1378,6 +1498,9 @@ describe("Selection not collapsed", () => {
             contentAfterEdit: '<div><p>ab <span class="style">x[]</span> d</p></div>',
             contentAfter: '<div><p>ab <span class="style">x[]</span> d</p></div>',
         });
+    });
+
+    test("ZWS : should keep inline block (3)", async () => {
         await testEditor({
             contentBefore: "<div><p>ab <span>[c]</span> d</p></div>",
             stepFunction: async (editor) => {
@@ -1387,6 +1510,9 @@ describe("Selection not collapsed", () => {
                 '<div><p>ab <span data-oe-zws-empty-inline="">[]\u200B</span> d</p></div>',
             contentAfter: "<div><p>ab []&nbsp;d</p></div>",
         });
+    });
+
+    test("ZWS : should keep inline block (4)", async () => {
         await testEditor({
             contentBefore: '<div><p>ab<span class="style">[c]</span>d</p></div>',
             stepFunction: async (editor) => {
@@ -1396,6 +1522,9 @@ describe("Selection not collapsed", () => {
             contentAfterEdit: '<div><p>ab<span class="style">x[]</span>d</p></div>',
             contentAfter: '<div><p>ab<span class="style">x[]</span>d</p></div>',
         });
+    });
+
+    test("ZWS : should keep inline block (5)", async () => {
         await testEditor({
             contentBefore: '<div><p>ab <span class="style">[cde]</span> f</p></div>',
             stepFunction: async (editor) => {
@@ -1443,13 +1572,16 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test("should delete across two paragraphs", async () => {
+    test("should delete across two paragraphs (1)", async () => {
         // Forward selection
         await testEditor({
             contentBefore: "<p>ab[cd</p><p>ef]gh</p>",
             stepFunction: deleteBackward,
             contentAfter: "<p>ab[]gh</p>",
         });
+    });
+
+    test("should delete across two paragraphs (2)", async () => {
         // Backward selection
         await testEditor({
             contentBefore: "<p>ab]cd</p><p>ef[gh</p>",
@@ -1473,13 +1605,16 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test("should delete all the text in a paragraph", async () => {
+    test("should delete all the text in a paragraph (1)", async () => {
         // Forward selection
         await testEditor({
             contentBefore: "<p>[abc]</p>",
             stepFunction: deleteBackward,
             contentAfter: "<p>[]<br></p>",
         });
+    });
+
+    test("should delete all the text in a paragraph (2)", async () => {
         // Backward selection
         await testEditor({
             contentBefore: "<p>]abc[</p>",
@@ -1488,24 +1623,35 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test("should delete a complex selection accross format nodes and multiple paragraphs", async () => {
+    test("should delete a complex selection accross format nodes and multiple paragraphs (1)", async () => {
         // Forward selection
         await testEditor({
             contentBefore: "<p><b>ab[cd</b></p><p><b>ef<br>gh</b>ij<i>kl]</i>mn</p>",
             stepFunction: deleteBackward,
             contentAfter: "<p><b>ab[]</b>mn</p>",
         });
+    });
+
+    test("should delete a complex selection accross format nodes and multiple paragraphs (2)", async () => {
+        // Forward selection
         await testEditor({
             contentBefore: "<p><b>ab[cd</b></p><p><b>ef<br>gh</b>ij<i>k]l</i>mn</p>",
             stepFunction: deleteBackward,
             contentAfter: "<p><b>ab[]</b><i>l</i>mn</p>",
         });
+    });
+
+    test("should delete a complex selection accross format nodes and multiple paragraphs (3)", async () => {
         // Backward selection
         await testEditor({
             contentBefore: "<p><b>ab]cd</b></p><p><b>ef<br>gh</b>ij<i>kl[</i>mn</p>",
             stepFunction: deleteBackward,
             contentAfter: "<p><b>ab[]</b>mn</p>",
         });
+    });
+
+    test("should delete a complex selection accross format nodes and multiple paragraphs (4)", async () => {
+        // Backward selection
         await testEditor({
             contentBefore: "<p><b>ab]cd</b></p><p><b>ef<br>gh</b>ij<i>k[l</i>mn</p>",
             stepFunction: deleteBackward,
@@ -1513,7 +1659,6 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    //
     test("should delete all contents of a complex DOM with format nodes and multiple paragraphs (backward, forward selection)", async () => {
         await testEditor({
             contentBefore: "<p><b>[abcd</b></p><p><b>ef<br>gh</b>ij<i>kl</i>mn]</p>",
@@ -1530,13 +1675,16 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test("should delete a selection accross a heading1 and a paragraph", async () => {
+    test("should delete a selection accross a heading1 and a paragraph (1)", async () => {
         // Forward selection
         await testEditor({
             contentBefore: "<h1>ab [cd</h1><p>ef]gh</p>",
             stepFunction: deleteBackward,
             contentAfter: "<h1>ab []gh</h1>",
         });
+    });
+
+    test("should delete a selection accross a heading1 and a paragraph (2)", async () => {
         // Backward selection
         await testEditor({
             contentBefore: "<h1>ab ]cd</h1><p>ef[gh</p>",
@@ -1545,24 +1693,35 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test("should delete a selection from the beginning of a heading1 with a format to the middle of a paragraph", async () => {
+    test("should delete a selection from the beginning of a heading1 with a format to the middle of a paragraph (1)", async () => {
         // Forward selection
         await testEditor({
             contentBefore: "<h1><b>[abcd</b></h1><p>ef]gh1</p>",
             stepFunction: deleteBackward,
             contentAfter: "<p>[]gh1</p>",
         });
+    });
+
+    test("should delete a selection from the beginning of a heading1 with a format to the middle of a paragraph (2)", async () => {
+        // Forward selection
         await testEditor({
             contentBefore: "<h1>[<b>abcd</b></h1><p>ef]gh2</p>",
             stepFunction: deleteBackward,
             contentAfter: "<p>[]gh2</p>",
         });
+    });
+
+    test("should delete a selection from the beginning of a heading1 with a format to the middle of a paragraph (3)", async () => {
         // Backward selection
         await testEditor({
             contentBefore: "<h1><b>]abcd</b></h1><p>ef[gh3</p>",
             stepFunction: deleteBackward,
             contentAfter: "<p>[]gh3</p>",
         });
+    });
+
+    test("should delete a selection from the beginning of a heading1 with a format to the middle of a paragraph (4)", async () => {
+        // Backward selection
         await testEditor({
             contentBefore: "<h1>]<b>abcd</b></h1><p>ef[gh4</p>",
             stepFunction: deleteBackward,
@@ -1572,18 +1731,16 @@ describe("Selection not collapsed", () => {
 
     test("should delete a heading (triple click backspace) (1)", async () => {
         const { editor, el } = await setupEditor("<h1>abc</h1><p>def</p>", {});
-        tripleClick(el.querySelector("h1"));
-        await microTick();
+        let release = await splitTripleClick(el.querySelector("h1"));
         // Chrome puts the cursor at the start of next sibling
         expect(getContent(el)).toBe("<h1>[abc</h1><p>]def</p>");
-        await tick();
+        await release();
         // The Editor corrects it on selection change
         expect(getContent(el)).toBe("<h1>[abc]</h1><p>def</p>");
-        tripleClick(el.querySelector("h1"));
-        await microTick();
+        release = await splitTripleClick(el.querySelector("h1"));
         // Chrome puts the cursor at the start of next sibling
         expect(getContent(el)).toBe("<h1>[abc</h1><p>]def</p>");
-        await tick();
+        await release();
         // The Editor corrects it repeatedly on selection change
         expect(getContent(el)).toBe("<h1>[abc]</h1><p>def</p>");
         deleteBackward(editor);
@@ -1594,11 +1751,10 @@ describe("Selection not collapsed", () => {
 
     test("should delete a heading (triple click backspace) (2)", async () => {
         const { editor, el } = await setupEditor("<h1>abc</h1><p><br></p><p>def</p>", {});
-        tripleClick(el.querySelector("h1"));
-        await microTick();
+        const release = await splitTripleClick(el.querySelector("h1"));
         // Chrome puts the cursor at the start of next sibling
         expect(getContent(el)).toBe("<h1>[abc</h1><p>]<br></p><p>def</p>");
-        await tick();
+        await release();
         // The Editor corrects it on selection change
         expect(getContent(el)).toBe("<h1>[abc]</h1><p><br></p><p>def</p>");
         deleteBackward(editor);
@@ -1607,12 +1763,15 @@ describe("Selection not collapsed", () => {
         );
     });
 
-    test("should delete last character of paragraph and merge the two p elements", async () => {
+    test("should delete last character of paragraph and merge the two p elements (1)", async () => {
         await testEditor({
             contentBefore: "<p>ab[c</p><p>]def</p>",
             stepFunction: deleteBackward,
             contentAfter: "<p>ab[]def</p>",
         });
+    });
+
+    test("should delete last character of paragraph and merge the two p elements (2)", async () => {
         await testEditor({
             contentBefore: "<p>ab[c</p><p>]<br></p><p>def</p>",
             stepFunction: deleteBackward,
@@ -1697,8 +1856,8 @@ describe("Selection not collapsed", () => {
             stepFunction: deleteBackward,
             contentAfter: unformat(
                 `<table><tbody>
-                        <tr><td>cd</td><td>[]<br></td><td>gh</td></tr>
-                        <tr><td>ij</td><td><br></td><td>mn</td></tr>
+                        <tr><td>cd</td><td><p>[]<br></p></td><td>gh</td></tr>
+                        <tr><td>ij</td><td><p><br></p></td><td>mn</td></tr>
                         <tr><td>op</td><td>qr</td><td>st</td></tr>
                     </tbody></table>`
             ),
@@ -1870,13 +2029,14 @@ describe("Selection not collapsed", () => {
                     <tr><td><br></td><td>]<br></td></tr>
                 </tbody></table>`
             ),
-            stepFunction: deleteBackward,
-            contentAfter: unformat(
-                `<table><tbody>
-                    <tr><td>[]<br></td><td><br></td></tr>
-                    <tr><td><br></td><td><br></td></tr>
+            contentBeforeEdit: unformat(
+                `[<table class="o_selected_table"><tbody>
+                    <tr><td class="o_selected_td"><br></td><td class="o_selected_td"><br></td></tr>
+                    <tr><td class="o_selected_td"><br></td><td class="o_selected_td">]<br></td></tr>
                 </tbody></table>`
             ),
+            stepFunction: deleteBackward,
+            contentAfter: unformat("<p>[]<br></p>"),
         });
     });
 
@@ -1888,17 +2048,33 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test("should delete if first element and append in paragraph", async () => {
+    test("should convert empty blockquote into base container regardless of its position in editable (1)", async () => {
         await testEditor({
             contentBefore: `<blockquote><br>[]</blockquote>`,
             stepFunction: deleteBackward,
-            contentAfter: `<p>[]<br></p>`,
+            contentAfter: `<div>[]<br></div>`,
+            config: { baseContainer: "DIV" },
         });
+    });
+
+    test("should convert empty blockquote into base container regardless of its position in editable (2)", async () => {
+        await testEditor({
+            contentBefore: `<div><br></div><blockquote><br>[]</blockquote>`,
+            stepFunction: deleteBackward,
+            contentAfter: `<div><br></div><div>[]<br></div>`,
+            config: { baseContainer: "DIV" },
+        });
+    });
+
+    test("should delete if first element and append in paragraph (1)", async () => {
         await testEditor({
             contentBefore: `<h1><br>[]</h1>`,
             stepFunction: deleteBackward,
             contentAfter: `<p>[]<br></p>`,
         });
+    });
+
+    test("should delete if first element and append in paragraph (2)", async () => {
         await testEditor({
             contentBefore: `<h4><br>[]</h4>`,
             stepFunction: deleteBackward,
@@ -1906,17 +2082,23 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test("should not delete the block and appends a paragraph if the element has textContent ", async () => {
+    test("should not delete the block and appends a paragraph if the element has textContent (1)", async () => {
         await testEditor({
             contentBefore: `<h1>[]abc</h1>`,
             stepFunction: deleteBackward,
             contentAfter: `<h1>[]abc</h1>`,
         });
+    });
+
+    test("should not delete the block and appends a paragraph if the element has textContent (2)", async () => {
         await testEditor({
             contentBefore: `<h1><font style="background-color: rgb(255, 0, 0);">[]abc</font></h1>`,
             stepFunction: deleteBackward,
             contentAfter: `<h1><font style="background-color: rgb(255, 0, 0);">[]abc</font></h1>`,
         });
+    });
+
+    test("should not delete the block and appends a paragraph if the element has textContent (3)", async () => {
         await testEditor({
             contentBefore: `<table><tbody><tr><td><h1>[]ab</h1></td><td>cd</td><td>ef</td></tr><tr><td><br></td><td><br></td><td><br></td></tr></tbody></table>`,
             stepFunction: deleteBackward,
@@ -2077,6 +2259,80 @@ describe("Selection not collapsed", () => {
                         <div contenteditable="true"><p>[]<br></p></div>
                     </div>`),
             });
+        });
+    });
+
+    describe("Android Chrome", () => {
+        beforeEach(() => {
+            patchWithCleanup(browser.navigator, {
+                userAgent:
+                    "Mozilla/5.0 (Linux; Android 10; Pixel 3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Mobile Safari/537.36",
+            });
+        });
+
+        // This simulates the sequence of events that happens in Android Chrome
+        // when pressing backspace. Some random stuff might happen, and
+        // `extraAction` can be used to simulate that.
+        const backspaceAndroid = async (editor, { extraAction = null } = {}) => {
+            const dispatch = (type, eventInit) =>
+                manuallyDispatchProgrammaticEvent(editor.editable, type, eventInit);
+            const selection = editor.document.getSelection();
+            if (selection.isCollapsed) {
+                selection.modify("extend", "backward", "character");
+            }
+            await dispatch("keydown", { key: "Unidentified" });
+            await dispatch("beforeinput", { inputType: "deleteContentBackward" });
+            // beforeinput event is not default preventable
+            selection.getRangeAt(0).deleteContents();
+            extraAction?.();
+            await dispatch("input", { inputType: "deleteContentBackward" });
+            await dispatch("keyup", { key: "Unidentified" });
+        };
+
+        test.tags("mobile");
+        test("should merge paragraphs and put cursor between c and d", async () => {
+            const { editor, el } = await setupEditor("<p>abc</p><p>[]def</p>");
+            await backspaceAndroid(editor, {
+                extraAction: async () => {
+                    // Simulate what happens in Android Chrome for this particular
+                    // case: after input, the cursor is moved one character to the
+                    // right: <p>abcd[]ef</p>
+                    await microTick();
+                    const secondTextNode = el.querySelector("p").childNodes[1];
+                    setSelection({ anchorNode: secondTextNode, anchorOffset: 1 });
+                },
+            });
+            await tick(); // Wait for the selection change to be handled
+            expect(getContent(el)).toBe("<p>abc[]def</p>");
+        });
+
+        test.tags("mobile");
+        test("should revert random stuff done by chrome", async () => {
+            const { editor, el } = await setupEditor("<p>abc[]</p>");
+            await backspaceAndroid(editor, {
+                extraAction: () =>
+                    el.append(
+                        editor.document.createTextNode("random changes that should be reverted")
+                    ),
+            });
+            expect(getContent(el)).toBe("<p>ab[]</p>");
+        });
+
+        test.tags("mobile");
+        test("should not break Gboard dictionary input", async () => {
+            const { editor, el } = await setupEditor("<p>woonderf[]</p>");
+            // Roughly as observed on Android Chrome with Gboard:
+            // - selection change
+            // - input deleteContentBackward
+            // - input insertText
+            const selection = editor.document.getSelection();
+            for (let i = 0; i < 6; i++) {
+                selection.modify("extend", "backward", "character");
+            }
+            await backspaceAndroid(editor);
+            await insertText(editor, "nderful ");
+            await tick(); // Wait for the selection change to be handled
+            expect(getContent(el)).toBe("<p>wonderful []</p>");
         });
     });
 });

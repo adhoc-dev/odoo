@@ -10,6 +10,7 @@ from odoo.osv import expression
 from odoo.tools import float_compare, format_list, groupby
 from odoo.tools.image import is_image_size_above
 from odoo.tools.misc import unique
+from odoo.tools.sql import SQL
 
 
 class ProductProduct(models.Model):
@@ -149,8 +150,9 @@ class ProductProduct(models.Model):
         compute method is not subject to this restriction.  It therefore
         works as intended :-)
         """
+        now = self.env.cr.now()
         for record in self:
-            record.write_date = max(record.write_date or self.env.cr.now(), record.product_tmpl_id.write_date)
+            record.write_date = max(record.write_date or now, record.product_tmpl_id.write_date or now)
 
     def _compute_image_1920(self):
         """Get the image from the template if no image is set on the variant."""
@@ -242,6 +244,11 @@ class ProductProduct(models.Model):
             self._check_duplicated_product_barcodes(barcodes_within_company, company_id)
             self._check_duplicated_packaging_barcodes(barcodes_within_company, company_id)
 
+    @api.constrains('company_id')
+    def _check_company_id(self):
+        combo_items = self.env['product.combo.item'].sudo().search([('product_id', 'in', self.ids)])
+        combo_items._check_company(fnames=['product_id'])
+
     def _get_invoice_policy(self):
         return False
 
@@ -284,13 +291,19 @@ class ProductProduct(models.Model):
 
     @api.depends_context('partner_id')
     def _compute_product_code(self):
+        read_access = self.env['ir.model.access'].check('product.supplierinfo', 'read', False)
         for product in self:
             product.code = product.default_code
-            if self.env['ir.model.access'].check('product.supplierinfo', 'read', False):
+            if read_access:
                 for supplier_info in product.seller_ids:
                     if supplier_info.partner_id.id == product._context.get('partner_id'):
+                        if supplier_info.product_id and supplier_info.product_id != product:
+                            # Supplier info specific for another variant.
+                            continue
                         product.code = supplier_info.product_code or product.default_code
-                        break
+                        if product == supplier_info.product_id:
+                            # Supplier info specific for this variant.
+                            break
 
     @api.depends_context('partner_id')
     def _compute_partner_ref(self):
@@ -376,25 +389,32 @@ class ProductProduct(models.Model):
         return res
 
     def unlink(self):
-        unlink_products = self.env['product.product']
-        unlink_templates = self.env['product.template']
-        for product in self:
+        unlink_products_ids = set()
+        unlink_templates_ids = set()
+
+        # Check if products still exists, in case they've been unlinked by unlinking their template
+        existing_products = self.exists()
+        product_ids_by_template_id = {template.id: set(ids) for template, ids in self._read_group(
+            domain=[('product_tmpl_id', 'in', existing_products.product_tmpl_id.ids)],
+            groupby=['product_tmpl_id'],
+            aggregates=['id:array_agg'],
+        )}
+        for product in existing_products:
             # If there is an image set on the variant and no image set on the
             # template, move the image to the template.
             if product.image_variant_1920 and not product.product_tmpl_id.image_1920:
                 product.product_tmpl_id.image_1920 = product.image_variant_1920
-            # Check if product still exists, in case it has been unlinked by unlinking its template
-            if not product.exists():
-                continue
             # Check if the product is last product of this template...
-            other_products = self.search([('product_tmpl_id', '=', product.product_tmpl_id.id), ('id', '!=', product.id)])
+            has_other_products = product_ids_by_template_id.get(product.product_tmpl_id.id, set()) - {product.id}
             # ... and do not delete product template if it's configured to be created "on demand"
-            if not other_products and not product.product_tmpl_id.has_dynamic_attributes():
-                unlink_templates |= product.product_tmpl_id
-            unlink_products |= product
+            if not has_other_products and not product.product_tmpl_id.has_dynamic_attributes():
+                unlink_templates_ids.add(product.product_tmpl_id.id)
+            unlink_products_ids.add(product.id)
+        unlink_products = self.env['product.product'].browse(unlink_products_ids)
         res = super(ProductProduct, unlink_products).unlink()
         # delete templates after calling super, as deleting template could lead to deleting
         # products due to ondelete='cascade'
+        unlink_templates = self.env['product.template'].browse(unlink_templates_ids)
         unlink_templates.unlink()
         # `_get_variant_id_for_combination` depends on existing variants
         self.env.registry.clear_cache()
@@ -532,16 +552,16 @@ class ProductProduct(models.Model):
     @api.model
     def _search_display_name(self, operator, value):
         is_positive = operator not in expression.NEGATIVE_TERM_OPERATORS
-        combine = expression.OR if is_positive else expression.AND
-        domains = [
-            [('name', operator, value)],
-            [('default_code', operator, value)],
-        ]
+        template_domains = [[('name', operator, value)]]
+        product_domains = [[('default_code', operator, value)]]
+
         if operator in ('=', 'in') or (operator.endswith('like') and is_positive):
             barcode_values = [value] if operator != 'in' else value
-            domains.append([('barcode', 'in', barcode_values)])
+            product_domains.append([('barcode', 'in', barcode_values)])
         if operator == '=' and isinstance(value, str) and (m := re.search(r'(\[(.*?)\])', value)):
-            domains.append([('default_code', '=', m.group(2))])
+            product_domains.append([('default_code', '=', m.group(2))])
+
+        supplier_domain = []
         if partner_id := self.env.context.get('partner_id'):
             supplier_domain = [
                 ('partner_id', '=', partner_id),
@@ -549,8 +569,40 @@ class ProductProduct(models.Model):
                 ('product_code', operator, value),
                 ('product_name', operator, value),
             ]
-            domains.append([('product_tmpl_id.seller_ids', 'any', supplier_domain)])
-        return combine(domains)
+
+        # AND clauses properly hit indexes so no need for custom sql in this case.
+        if operator in expression.NEGATIVE_TERM_OPERATORS:
+            domains = template_domains + product_domains
+            if supplier_domain:
+                domains.append([('product_tmpl_id.seller_ids', 'any', supplier_domain)])
+            return expression.AND(domains)
+
+        # Disable active_test to simplify subqueries
+        self_no_active_test = self.with_context(active_test=False)
+        queries = [
+            self_no_active_test._search([
+                ('product_tmpl_id', 'in', self_no_active_test.env['product.template']._search(expression.OR(template_domains)))
+            ]),
+            self_no_active_test._search(expression.OR(product_domains)),
+        ]
+        if supplier_domain:
+            queries.append(
+                self_no_active_test._search([
+                    (
+                        'product_tmpl_id',
+                        'in',
+                        self_no_active_test.env['product.supplierinfo']._search(supplier_domain).subselect('product_tmpl_id'),
+                    )
+                ])
+            )
+        query = SQL(
+            """(%s)""",
+            SQL("UNION ALL").join(
+                [SQL("(%s)", query.select()) for query in queries]
+            )
+        )
+
+        return [('id', 'in', query)]
 
     @api.model
     def name_search(self, name='', args=None, operator='ilike', limit=100):
@@ -573,7 +625,8 @@ class ProductProduct(models.Model):
                 products = self.search_fetch(expression.AND([domain, [('default_code', operator, name)]]), ['display_name'], limit=limit)
                 limit_rest = limit and limit - len(products)
                 if limit_rest is None or limit_rest > 0:
-                    products |= self.search_fetch(expression.AND([domain, [('id', 'not in', products.ids)], [('name', operator, name)]]), ['display_name'], limit=limit_rest)
+                    products_query = self._search(expression.AND([domain, [('default_code', operator, name)]]), limit=limit)
+                    products |= self.search_fetch(expression.AND([domain, [('id', 'not in', products_query)], [('name', operator, name)]]), ['display_name'], limit=limit_rest)
             else:
                 domain_neg = [
                     ('name', operator, name),
@@ -656,7 +709,7 @@ class ProductProduct(models.Model):
     #=== BUSINESS METHODS ===#
 
     def _prepare_sellers(self, params=False):
-        sellers = self.seller_ids.filtered(lambda s: s.partner_id.active and (not s.product_id or s.product_id == self))
+        sellers = self.seller_ids._get_filtered_supplier(self.env.company, self, params)
         return sellers.sorted(lambda s: (s.sequence, -s.min_qty, s.price, s.id))
 
     def _get_filtered_sellers(self, partner_id=False, quantity=0.0, date=None, uom_id=False, params=False):
@@ -666,7 +719,6 @@ class ProductProduct(models.Model):
         precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
 
         sellers_filtered = self._prepare_sellers(params)
-        sellers_filtered = sellers_filtered.filtered(lambda s: not s.company_id or s.company_id.id == self.env.company.id)
         sellers = self.env['product.supplierinfo']
         for seller in sellers_filtered:
             # Set quantity in UoM of seller
@@ -689,16 +741,27 @@ class ProductProduct(models.Model):
 
     def _select_seller(self, partner_id=False, quantity=0.0, date=None, uom_id=False, ordered_by='price_discounted', params=False):
         # Always sort by discounted price but another field can take the primacy through the `ordered_by` param.
-        sort_key = itemgetter('price_discounted', 'sequence', 'id')
+        sort_key = ('price_discounted', 'sequence', 'id')
         if ordered_by != 'price_discounted':
-            sort_key = itemgetter(ordered_by, 'price_discounted', 'sequence', 'id')
+            sort_key = (ordered_by, 'price_discounted', 'sequence', 'id')
 
+        def sort_function(record):
+            vals = {
+                'price_discounted': record.currency_id._convert(
+                    record.price_discounted,
+                    record.env.company.currency_id,
+                    record.env.company,
+                    date or fields.Date.context_today(self),
+                    round=False,
+                ),
+            }
+            return [vals.get(key, record[key]) for key in sort_key]
         sellers = self._get_filtered_sellers(partner_id=partner_id, quantity=quantity, date=date, uom_id=uom_id, params=params)
         res = self.env['product.supplierinfo']
         for seller in sellers:
             if not res or res.partner_id == seller.partner_id:
                 res |= seller
-        return res and res.sorted(sort_key)[:1]
+        return res and res.sorted(sort_function)[:1]
 
     def _get_product_price_context(self, combination):
         self.ensure_one()

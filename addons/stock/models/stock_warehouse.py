@@ -375,7 +375,7 @@ class Warehouse(models.Model):
 
         for picking_type, values in data.items():
             if self[picking_type]:
-                self[picking_type].sudo().sequence_id.write(sequence_data[picking_type])
+                self[picking_type].sudo().sequence_id.write({'company_id': self.company_id.id})
                 self[picking_type].write(values)
             else:
                 data[picking_type].update(create_data[picking_type])
@@ -412,7 +412,7 @@ class Warehouse(models.Model):
         """ return a route record set from an xml_id or its name. """
         data_route = route = self.env.ref(xml_id, raise_if_not_found=False)
         company = self.company_id[:1] or self.env.company
-        if not route or (route.company_id and route.company_id != company):
+        if not route or (route.sudo().company_id and route.sudo().company_id != company):
             route = self.env['stock.route'].with_context(active_test=False).search([
                 ('name', 'like', route_name), ('company_id', 'in', [False, company.id])
             ], order='company_id', limit=1)
@@ -420,7 +420,7 @@ class Warehouse(models.Model):
             if raise_if_not_found:
                 raise UserError(_('Can\'t find any generic route %s.', route_name))
             elif data_route and create:
-                route = data_route.copy({'name': data_route.name, 'company_id': company.id, 'rule_ids': False})
+                route = data_route.copy({'name': route_name, 'company_id': company.id, 'rule_ids': False})
         return route
 
     def _get_global_route_rules_values(self):
@@ -583,8 +583,8 @@ class Warehouse(models.Model):
                     'active': self.reception_steps != 'one_step' and self.delivery_steps != 'ship_only'
                 },
                 'route_create_values': {
-                    'product_selectable': True,
-                    'product_categ_selectable': True,
+                    'product_selectable': False,
+                    'product_categ_selectable': False,
                     'active': self.delivery_steps != 'ship_only' and self.reception_steps != 'one_step',
                     'company_id': self.company_id.id,
                     'sequence': 20,
@@ -686,6 +686,26 @@ class Warehouse(models.Model):
             },
         }
         return sub_locations
+
+    @api.model
+    def _get_warehouse_id_from_context(self):
+        """
+        Helper method used to extract a single id from the context.
+
+        The `warehouse_id` dummy field of the `product.template` model is meant to
+        to be used in the `product_template_search_form_view_stock` search view in
+        order to add a `warehouse` context key. That key can therefore be any of
+        the following types: Int, String, List(Int?, String?).
+        """
+        context_warehouse = self.env.context.get('warehouse_id', False)
+        if context_warehouse:
+            if isinstance(context_warehouse, int):
+                return context_warehouse
+            elif isinstance(context_warehouse, list):
+                relevant_context = list(filter(lambda key: isinstance(key, int), context_warehouse))
+                if relevant_context:
+                    return relevant_context[0]
+        return False
 
     def _valid_barcode(self, barcode, company_id):
         location = self.env['stock.location'].with_context(active_test=False).search([
